@@ -33,6 +33,10 @@ public sealed class GraphEditorHierarchyStateContractsTests
         Assert.Equal(
             typeof(GraphEditorHierarchyStateSnapshot),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetHierarchyStateSnapshot))!.ReturnType);
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetNavigatorOutlineSnapshot));
+        Assert.Equal(
+            typeof(GraphEditorNavigatorOutlineSnapshot),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetNavigatorOutlineSnapshot))!.ReturnType);
 
         Assert.NotNull(typeof(GraphEditorHierarchyStateSnapshot).GetProperty(nameof(GraphEditorHierarchyStateSnapshot.ScopeNavigation)));
         Assert.NotNull(typeof(GraphEditorHierarchyStateSnapshot).GetProperty(nameof(GraphEditorHierarchyStateSnapshot.ParentCompositeNodeId)));
@@ -63,6 +67,22 @@ public sealed class GraphEditorHierarchyStateContractsTests
 
         Assert.NotNull(typeof(GraphEditorGroupMoveConstraintsSnapshot).GetProperty(nameof(GraphEditorGroupMoveConstraintsSnapshot.CanMoveFrameIndependently)));
         Assert.NotNull(typeof(GraphEditorGroupMoveConstraintsSnapshot).GetProperty(nameof(GraphEditorGroupMoveConstraintsSnapshot.CanMoveFrameWithMembers)));
+
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineSnapshot.ScopeNavigation)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineSnapshot.Items)));
+
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.Id)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.Kind)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.SourceId)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.ParentItemId)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.Title)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.Subtitle)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.Depth)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.IsSelected)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.IsPrimarySelection)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.IsVisibleInActiveScope)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.IsCollapsed)));
+        Assert.NotNull(typeof(GraphEditorNavigatorOutlineItemSnapshot).GetProperty(nameof(GraphEditorNavigatorOutlineItemSnapshot.ChildScopeId)));
     }
 
     [Fact]
@@ -174,6 +194,73 @@ public sealed class GraphEditorHierarchyStateContractsTests
 
         Assert.Equal(originalPositions[ChildSourceNodeId], currentPositions[ChildSourceNodeId]);
         Assert.Equal(originalPositions[ChildTargetNodeId], currentPositions[ChildTargetNodeId]);
+    }
+
+    [Fact]
+    public void SessionQueries_GetNavigatorOutlineSnapshot_ProjectsActiveScopeGroupSelectionAndBoundaryConnections()
+    {
+        var session = CreateSession(CreateScopedDocument());
+
+        Assert.True(session.Commands.TryEnterCompositeChildGraph(CompositeNodeId, updateStatus: false));
+        session.Commands.SetSelection([ChildSourceNodeId, ChildTargetNodeId], ChildTargetNodeId, updateStatus: false);
+
+        var groupId = session.Commands.TryCreateNodeGroupFromSelection("Child Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+        Assert.True(session.Commands.TrySetNodeGroupCollapsed(groupId, isCollapsed: true));
+
+        var outline = session.Queries.GetNavigatorOutlineSnapshot();
+        var scopeItem = Assert.Single(outline.Items, item => item.Kind == GraphEditorNavigatorOutlineItemKind.Scope);
+        var groupItem = Assert.Single(outline.Items, item => item.SourceId == groupId);
+        var sourceNodeItem = Assert.Single(outline.Items, item => item.SourceId == ChildSourceNodeId);
+        var targetNodeItem = Assert.Single(outline.Items, item => item.SourceId == ChildTargetNodeId);
+        var externalNodeItem = Assert.Single(outline.Items, item => item.SourceId == ChildExternalNodeId);
+        var internalConnectionItem = Assert.Single(outline.Items, item => item.SourceId == ChildInternalConnectionId);
+        var boundaryConnectionItem = Assert.Single(outline.Items, item => item.SourceId == ChildBoundaryConnectionId);
+
+        Assert.Equal(ChildGraphId, outline.ScopeNavigation.CurrentScopeId);
+        Assert.Equal("scope:" + ChildGraphId, scopeItem.Id);
+        Assert.Equal("Composite Node", scopeItem.Title);
+        Assert.Equal(scopeItem.Id, groupItem.ParentItemId);
+        Assert.True(groupItem.IsSelected);
+        Assert.True(groupItem.IsPrimarySelection);
+        Assert.True(groupItem.IsCollapsed);
+
+        Assert.Equal(groupItem.Id, sourceNodeItem.ParentItemId);
+        Assert.Equal(groupItem.Id, targetNodeItem.ParentItemId);
+        Assert.Equal(scopeItem.Id, externalNodeItem.ParentItemId);
+        Assert.True(sourceNodeItem.IsSelected);
+        Assert.False(sourceNodeItem.IsPrimarySelection);
+        Assert.True(targetNodeItem.IsSelected);
+        Assert.True(targetNodeItem.IsPrimarySelection);
+        Assert.False(sourceNodeItem.IsVisibleInActiveScope);
+        Assert.False(targetNodeItem.IsVisibleInActiveScope);
+        Assert.True(externalNodeItem.IsVisibleInActiveScope);
+
+        Assert.False(internalConnectionItem.IsVisibleInActiveScope);
+        Assert.True(internalConnectionItem.IsCollapsed);
+        Assert.True(boundaryConnectionItem.IsVisibleInActiveScope);
+        Assert.False(boundaryConnectionItem.IsCollapsed);
+        Assert.Equal("Child Source -> Child External", boundaryConnectionItem.Subtitle);
+    }
+
+    [Fact]
+    public void SessionQueries_GetNavigatorOutlineSnapshot_ReprojectsAfterScopeNavigationWithoutOwningState()
+    {
+        var session = CreateSession(CreateScopedDocument());
+
+        var rootOutline = session.Queries.GetNavigatorOutlineSnapshot();
+        var compositeItem = Assert.Single(rootOutline.Items, item => item.SourceId == CompositeNodeId);
+        Assert.Equal(ChildGraphId, compositeItem.ChildScopeId);
+        Assert.Equal("graph-root", rootOutline.ScopeNavigation.CurrentScopeId);
+        Assert.DoesNotContain(rootOutline.Items, item => item.SourceId == ChildSourceNodeId);
+
+        Assert.True(session.Commands.TryEnterCompositeChildGraph(CompositeNodeId, updateStatus: false));
+
+        var childOutline = session.Queries.GetNavigatorOutlineSnapshot();
+
+        Assert.Equal(ChildGraphId, childOutline.ScopeNavigation.CurrentScopeId);
+        Assert.DoesNotContain(childOutline.Items, item => item.SourceId == CompositeNodeId);
+        Assert.Contains(childOutline.Items, item => item.SourceId == ChildSourceNodeId);
     }
 
     private static IGraphEditorSession CreateSession(GraphDocument document)

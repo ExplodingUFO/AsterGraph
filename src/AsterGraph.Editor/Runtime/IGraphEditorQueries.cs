@@ -155,6 +155,13 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets a source-backed navigator/outline projection for the active scope.
+    /// </summary>
+    /// <returns>Stable outline items projected from graph, hierarchy, scope, and selection snapshots.</returns>
+    GraphEditorNavigatorOutlineSnapshot GetNavigatorOutlineSnapshot()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Gets host-facing composite node snapshots for the current root graph.
     /// </summary>
     /// <returns>A stable read-only composite snapshot collection.</returns>
