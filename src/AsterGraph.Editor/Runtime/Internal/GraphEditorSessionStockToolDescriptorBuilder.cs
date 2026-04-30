@@ -308,7 +308,9 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
             descriptor.DefaultShortcut,
             descriptor.Source,
             descriptor.IsEnabled,
-            descriptor.DisabledReason);
+            descriptor.DisabledReason,
+            descriptor.RecoveryHint,
+            descriptor.RecoveryCommandId);
 
     private static GraphEditorCommandDescriptorSnapshot GetCommandDescriptor(
         IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commands,

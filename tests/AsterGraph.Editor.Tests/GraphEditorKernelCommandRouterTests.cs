@@ -135,6 +135,34 @@ public sealed class GraphEditorKernelCommandRouterTests
     }
 
     [Fact]
+    public void GraphEditorKernel_GroupRouteAndLayoutAffordances_ExposeDisabledRecoveryMetadata()
+    {
+        var kernel = CreateKernel();
+
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.False(descriptors["groups.collapse"].IsEnabled);
+        Assert.Equal("Create a group before toggling group collapse.", descriptors["groups.collapse"].DisabledReason);
+        Assert.Equal("Create a group first.", descriptors["groups.collapse"].RecoveryHint);
+        Assert.Equal("groups.create", descriptors["groups.collapse"].RecoveryCommandId);
+
+        Assert.False(descriptors["connections.route-vertex.insert"].IsEnabled);
+        Assert.Equal("Create a connection before editing route vertices.", descriptors["connections.route-vertex.insert"].DisabledReason);
+        Assert.Equal("Create a connection first.", descriptors["connections.route-vertex.insert"].RecoveryHint);
+        Assert.Equal("connections.connect", descriptors["connections.route-vertex.insert"].RecoveryCommandId);
+
+        Assert.False(descriptors["layout.align-center"].IsEnabled);
+        Assert.Equal("Select at least two nodes before aligning.", descriptors["layout.align-center"].DisabledReason);
+        Assert.Equal("Select at least two nodes first.", descriptors["layout.align-center"].RecoveryHint);
+        Assert.Equal("nodes.add", descriptors["layout.align-center"].RecoveryCommandId);
+
+        Assert.False(descriptors["layout.distribute-horizontal"].IsEnabled);
+        Assert.Equal("Select at least three nodes before distributing.", descriptors["layout.distribute-horizontal"].DisabledReason);
+        Assert.Equal("Select at least three nodes first.", descriptors["layout.distribute-horizontal"].RecoveryHint);
+        Assert.Equal("nodes.add", descriptors["layout.distribute-horizontal"].RecoveryCommandId);
+    }
+
+    [Fact]
     public void GraphEditorKernel_DisconnectConnection_CommandUsesDisconnectPermissionInsteadOfDeletePermission()
     {
         var behavior = GraphEditorBehaviorOptions.Default with

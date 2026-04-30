@@ -103,6 +103,23 @@ public sealed class GraphEditorToolProviderContractTests
         Assert.Empty(session.Queries.CreateDocumentSnapshot().Connections);
     }
 
+    [Fact]
+    public void HostedActionFactory_CreateToolActions_PreservesDisabledRecoveryMetadata()
+    {
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions());
+        session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+
+        var tools = session.Queries.GetToolDescriptors(
+            GraphEditorToolContextSnapshot.ForSelection([SourceNodeId], SourceNodeId));
+        var actions = AsterGraphHostedActionFactory.CreateToolActions(session, tools);
+        var alignCenter = Assert.Single(actions, action => action.Id == "selection-align-center");
+
+        Assert.False(alignCenter.CanExecute);
+        Assert.Equal("Select at least two nodes before aligning.", alignCenter.DisabledReason);
+        Assert.Equal("Select at least two nodes first.", alignCenter.RecoveryHint);
+        Assert.Equal("nodes.add", alignCenter.RecoveryCommandId);
+    }
+
     private static AsterGraphEditorOptions CreateOptions()
         => new()
         {

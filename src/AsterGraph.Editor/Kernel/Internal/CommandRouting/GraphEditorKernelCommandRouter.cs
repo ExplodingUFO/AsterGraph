@@ -190,7 +190,12 @@ internal sealed class GraphEditorKernelCommandRouter
     {
         var hasViewport = _host.ViewportWidth > 0 && _host.ViewportHeight > 0;
         var hasNodes = _host.Document.Nodes.Count > 0;
+        var hasGroups = _host.Document.Groups?.Count > 0;
+        var hasConnections = _host.Document.Connections.Count > 0;
         var hasSelection = _host.SelectedNodeCount > 0;
+        var canEditConnections = _host.BehaviorOptions.Commands.Connections.AllowCreate
+            || _host.BehaviorOptions.Commands.Connections.AllowDelete
+            || _host.BehaviorOptions.Commands.Connections.AllowDisconnect;
         return
         [
             GraphEditorCommandDescriptorCatalog.Create(
@@ -351,65 +356,114 @@ internal sealed class GraphEditorKernelCommandRouter
             GraphEditorCommandDescriptorCatalog.Create(
                 "groups.collapse",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+                hasGroups && _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                GetEntityDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                    hasGroups,
+                    "Group collapse is disabled by host permissions.",
+                    "Create a group before toggling group collapse."),
+                GetEntityRecoveryHint(_host.BehaviorOptions.Commands.Nodes.AllowMove, hasGroups, "Create a group first."),
+                GetEntityRecoveryCommandId(_host.BehaviorOptions.Commands.Nodes.AllowMove, hasGroups, "groups.create")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "groups.move",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+                hasGroups && _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                GetEntityDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                    hasGroups,
+                    "Group movement is disabled by host permissions.",
+                    "Create a group before moving groups."),
+                GetEntityRecoveryHint(_host.BehaviorOptions.Commands.Nodes.AllowMove, hasGroups, "Create a group first."),
+                GetEntityRecoveryCommandId(_host.BehaviorOptions.Commands.Nodes.AllowMove, hasGroups, "groups.create")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "groups.resize",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+                hasGroups && _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                GetEntityDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                    hasGroups,
+                    "Group resizing is disabled by host permissions.",
+                    "Create a group before resizing groups."),
+                GetEntityRecoveryHint(_host.BehaviorOptions.Commands.Nodes.AllowMove, hasGroups, "Create a group first."),
+                GetEntityRecoveryCommandId(_host.BehaviorOptions.Commands.Nodes.AllowMove, hasGroups, "groups.create")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "groups.membership.set",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+                hasGroups && _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                GetEntityDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                    hasGroups,
+                    "Group membership editing is disabled by host permissions.",
+                    "Create a group before editing group membership."),
+                GetEntityRecoveryHint(_host.BehaviorOptions.Commands.Nodes.AllowMove, hasGroups, "Create a group first."),
+                GetEntityRecoveryCommandId(_host.BehaviorOptions.Commands.Nodes.AllowMove, hasGroups, "groups.create")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "groups.promote",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+                hasGroups && _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                GetEntityDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                    hasGroups,
+                    "Group promotion is disabled by host permissions.",
+                    "Create a group before promoting it to a composite."),
+                GetEntityRecoveryHint(_host.BehaviorOptions.Commands.Nodes.AllowMove, hasGroups, "Create a group first."),
+                GetEntityRecoveryCommandId(_host.BehaviorOptions.Commands.Nodes.AllowMove, hasGroups, "groups.create")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-left",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanAlignSelection,
                 GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning."),
-                _host.CanAlignSelection ? null : "Select at least two nodes first.",
-                _host.CanAlignSelection ? null : "nodes.add"),
+                GetSelectionCountRecoveryHint(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Select at least two nodes first."),
+                GetSelectionCountRecoveryCommandId(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "nodes.add")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-center",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanAlignSelection,
-                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning."),
+                GetSelectionCountRecoveryHint(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Select at least two nodes first."),
+                GetSelectionCountRecoveryCommandId(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "nodes.add")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-right",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanAlignSelection,
-                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning."),
+                GetSelectionCountRecoveryHint(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Select at least two nodes first."),
+                GetSelectionCountRecoveryCommandId(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "nodes.add")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-top",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanAlignSelection,
-                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning."),
+                GetSelectionCountRecoveryHint(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Select at least two nodes first."),
+                GetSelectionCountRecoveryCommandId(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "nodes.add")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-middle",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanAlignSelection,
-                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning."),
+                GetSelectionCountRecoveryHint(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Select at least two nodes first."),
+                GetSelectionCountRecoveryCommandId(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "nodes.add")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-bottom",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanAlignSelection,
-                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning."),
+                GetSelectionCountRecoveryHint(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Select at least two nodes first."),
+                GetSelectionCountRecoveryCommandId(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "nodes.add")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.distribute-horizontal",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanDistributeSelection,
-                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowDistribute, _host.SelectedNodeCount, 3, "Layout distribution is disabled by host permissions.", "Select at least three nodes before distributing.")),
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowDistribute, _host.SelectedNodeCount, 3, "Layout distribution is disabled by host permissions.", "Select at least three nodes before distributing."),
+                GetSelectionCountRecoveryHint(_host.BehaviorOptions.Commands.Layout.AllowDistribute, _host.SelectedNodeCount, 3, "Select at least three nodes first."),
+                GetSelectionCountRecoveryCommandId(_host.BehaviorOptions.Commands.Layout.AllowDistribute, _host.SelectedNodeCount, 3, "nodes.add")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.distribute-vertical",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanDistributeSelection,
-                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowDistribute, _host.SelectedNodeCount, 3, "Layout distribution is disabled by host permissions.", "Select at least three nodes before distributing.")),
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowDistribute, _host.SelectedNodeCount, 3, "Layout distribution is disabled by host permissions.", "Select at least three nodes before distributing."),
+                GetSelectionCountRecoveryHint(_host.BehaviorOptions.Commands.Layout.AllowDistribute, _host.SelectedNodeCount, 3, "Select at least three nodes first."),
+                GetSelectionCountRecoveryCommandId(_host.BehaviorOptions.Commands.Layout.AllowDistribute, _host.SelectedNodeCount, 3, "nodes.add")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "composites.wrap-selection",
                 GraphEditorCommandSourceKind.Kernel,
@@ -468,38 +522,44 @@ internal sealed class GraphEditorKernelCommandRouter
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.label.set",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Connections.Count > 0
-                && (_host.BehaviorOptions.Commands.Connections.AllowCreate
-                    || _host.BehaviorOptions.Commands.Connections.AllowDelete
-                    || _host.BehaviorOptions.Commands.Connections.AllowDisconnect)),
+                hasConnections && canEditConnections),
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.note.set",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Connections.Count > 0
-                && (_host.BehaviorOptions.Commands.Connections.AllowCreate
-                    || _host.BehaviorOptions.Commands.Connections.AllowDelete
-                    || _host.BehaviorOptions.Commands.Connections.AllowDisconnect)),
+                hasConnections && canEditConnections),
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.route-vertex.insert",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Connections.Count > 0
-                && (_host.BehaviorOptions.Commands.Connections.AllowCreate
-                    || _host.BehaviorOptions.Commands.Connections.AllowDelete
-                    || _host.BehaviorOptions.Commands.Connections.AllowDisconnect)),
+                hasConnections && canEditConnections,
+                GetEntityDisabledReason(
+                    canEditConnections,
+                    hasConnections,
+                    "Connection route editing is disabled by host permissions.",
+                    "Create a connection before editing route vertices."),
+                GetEntityRecoveryHint(canEditConnections, hasConnections, "Create a connection first."),
+                GetEntityRecoveryCommandId(canEditConnections, hasConnections, "connections.connect")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.route-vertex.move",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Connections.Count > 0
-                && (_host.BehaviorOptions.Commands.Connections.AllowCreate
-                    || _host.BehaviorOptions.Commands.Connections.AllowDelete
-                    || _host.BehaviorOptions.Commands.Connections.AllowDisconnect)),
+                hasConnections && canEditConnections,
+                GetEntityDisabledReason(
+                    canEditConnections,
+                    hasConnections,
+                    "Connection route editing is disabled by host permissions.",
+                    "Create a connection before editing route vertices."),
+                GetEntityRecoveryHint(canEditConnections, hasConnections, "Create a connection first."),
+                GetEntityRecoveryCommandId(canEditConnections, hasConnections, "connections.connect")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.route-vertex.remove",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Connections.Count > 0
-                && (_host.BehaviorOptions.Commands.Connections.AllowCreate
-                    || _host.BehaviorOptions.Commands.Connections.AllowDelete
-                    || _host.BehaviorOptions.Commands.Connections.AllowDisconnect)),
+                hasConnections && canEditConnections,
+                GetEntityDisabledReason(
+                    canEditConnections,
+                    hasConnections,
+                    "Connection route editing is disabled by host permissions.",
+                    "Create a connection before editing route vertices."),
+                GetEntityRecoveryHint(canEditConnections, hasConnections, "Create a connection first."),
+                GetEntityRecoveryCommandId(canEditConnections, hasConnections, "connections.connect")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.reconnect",
                 GraphEditorCommandSourceKind.Kernel,
@@ -631,6 +691,46 @@ internal sealed class GraphEditorKernelCommandRouter
 
         return selectedCount >= requiredCount ? null : selectionReason;
     }
+
+    private static string? GetSelectionCountRecoveryHint(
+        bool isPermitted,
+        int selectedCount,
+        int requiredCount,
+        string recoveryHint)
+        => isPermitted && selectedCount < requiredCount ? recoveryHint : null;
+
+    private static string? GetSelectionCountRecoveryCommandId(
+        bool isPermitted,
+        int selectedCount,
+        int requiredCount,
+        string recoveryCommandId)
+        => isPermitted && selectedCount < requiredCount ? recoveryCommandId : null;
+
+    private static string? GetEntityDisabledReason(
+        bool isPermitted,
+        bool exists,
+        string permissionReason,
+        string missingReason)
+    {
+        if (!isPermitted)
+        {
+            return permissionReason;
+        }
+
+        return exists ? null : missingReason;
+    }
+
+    private static string? GetEntityRecoveryHint(
+        bool isPermitted,
+        bool exists,
+        string recoveryHint)
+        => isPermitted && !exists ? recoveryHint : null;
+
+    private static string? GetEntityRecoveryCommandId(
+        bool isPermitted,
+        bool exists,
+        string recoveryCommandId)
+        => isPermitted && !exists ? recoveryCommandId : null;
 
     private static string? GetViewportDisabledReason(
         bool hasNodes,

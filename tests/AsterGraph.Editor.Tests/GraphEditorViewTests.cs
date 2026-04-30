@@ -942,7 +942,9 @@ public sealed class GraphEditorViewTests
         Assert.Equal("Align Left", Assert.IsType<string>(alignLeftButton.Content));
         Assert.True(alignLeftButton.IsEnabled);
         Assert.False(distributeHorizontalButton.IsEnabled);
-        Assert.Equal("Select at least three nodes before distributing.", ToolTip.GetTip(distributeHorizontalButton));
+        var distributeTooltip = Assert.IsType<string>(ToolTip.GetTip(distributeHorizontalButton));
+        Assert.Contains("Select at least three nodes before distributing.", distributeTooltip, StringComparison.Ordinal);
+        Assert.Contains("Select at least three nodes first.", distributeTooltip, StringComparison.Ordinal);
         Assert.Equal("Snap Selection To Grid", AutomationProperties.GetName(snapGridButton));
 
         snapGridButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
@@ -1152,12 +1154,16 @@ public sealed class GraphEditorViewTests
         Assert.True(
             paletteButtons.ContainsKey("PART_CommandPaletteAction_connection-clear-note"),
             $"Palette actions: {string.Join(", ", paletteButtons.Keys.OrderBy(static key => key, StringComparer.Ordinal))}");
+        Assert.True(
+            paletteButtons.ContainsKey("PART_CommandPaletteAction_selection-distribute-horizontal"),
+            $"Palette actions: {string.Join(", ", paletteButtons.Keys.OrderBy(static key => key, StringComparer.Ordinal))}");
 
         var createGroup = paletteButtons["PART_CommandPaletteAction_selection-create-group"];
         var snapGrid = paletteButtons["PART_CommandPaletteAction_selection-snap-grid"];
         var toggleExpansion = paletteButtons["PART_CommandPaletteAction_node-toggle-surface-expansion"];
         var disconnect = paletteButtons["PART_CommandPaletteAction_connection-disconnect"];
         var clearNote = paletteButtons["PART_CommandPaletteAction_connection-clear-note"];
+        var distributeHorizontal = paletteButtons["PART_CommandPaletteAction_selection-distribute-horizontal"];
 
         Assert.Equal("Create Group", Assert.IsType<string>(createGroup.Content));
         Assert.Equal("Snap Selection To Grid", Assert.IsType<string>(snapGrid.Content));
@@ -1169,6 +1175,9 @@ public sealed class GraphEditorViewTests
         Assert.Equal("Expand Node Card", AutomationProperties.GetName(toggleExpansion));
         Assert.Equal("Disconnect Connection", AutomationProperties.GetName(disconnect));
         Assert.Equal("Clear Connection Note", AutomationProperties.GetName(clearNote));
+        var distributeTooltip = Assert.IsType<string>(ToolTip.GetTip(distributeHorizontal));
+        Assert.Contains("Select at least three nodes before distributing.", distributeTooltip, StringComparison.Ordinal);
+        Assert.Contains("Select at least three nodes first.", distributeTooltip, StringComparison.Ordinal);
 
         toggleExpansion.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 

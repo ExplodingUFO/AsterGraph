@@ -36,7 +36,9 @@ public static class AsterGraphHostedActionFactory
                     effectiveShortcut,
                     action.CommandSource,
                     action.CanExecute,
-                    action.DisabledReason);
+                    action.DisabledReason,
+                    action.RecoveryHint,
+                    action.RecoveryCommandId);
                 return new AsterGraphHostedActionDescriptor(descriptor, action.TryExecute, action.CommandId);
             })
             .ToList();
@@ -109,7 +111,9 @@ public static class AsterGraphHostedActionFactory
                         tool.DefaultShortcut,
                         tool.Source,
                         tool.CanExecute,
-                        tool.DisabledReason),
+                        tool.DisabledReason,
+                        tool.Command.RecoveryHint,
+                        tool.Command.RecoveryCommandId),
                     tool.Invocation);
             })
             .ToList();

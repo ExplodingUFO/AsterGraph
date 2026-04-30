@@ -258,7 +258,8 @@ public partial class GraphEditorView
                             ("worldX", midpoint.X.ToString(CultureInfo.InvariantCulture)),
                             ("worldY", midpoint.Y.ToString(CultureInfo.InvariantCulture)),
                             ("updateStatus", bool.TrueString));
-                    }));
+                    },
+                    CreateActionTooltip(insertRouteDescriptor)));
             }
 
             container.Children.Add(segmentBar);
@@ -307,7 +308,8 @@ public partial class GraphEditorView
                 $"PART_ConnectionToolApplyRouteVertex_{connectionId}_{capturedVertexIndex}",
                 "Apply Bend",
                 moveRouteDescriptor?.CanExecute ?? true,
-                () => TryApplyRouteVertexPosition(connectionId, capturedVertexIndex, xEditor.Text, yEditor.Text)));
+                () => TryApplyRouteVertexPosition(connectionId, capturedVertexIndex, xEditor.Text, yEditor.Text),
+                CreateActionTooltip(moveRouteDescriptor)));
             vertexActions.Children.Add(CreateToolActionButton(
                 $"PART_ConnectionToolRemoveRouteVertex_{connectionId}_{capturedVertexIndex}",
                 "Remove Bend",
@@ -316,7 +318,8 @@ public partial class GraphEditorView
                     "connections.route-vertex.remove",
                     ("connectionId", connectionId),
                     ("vertexIndex", capturedVertexIndex.ToString(CultureInfo.InvariantCulture)),
-                    ("updateStatus", bool.TrueString))));
+                    ("updateStatus", bool.TrueString)),
+                CreateActionTooltip(removeRouteDescriptor)));
 
             container.Children.Add(new Border
             {
@@ -344,7 +347,7 @@ public partial class GraphEditorView
     }
 
     private Button CreateHostedToolButton(string name, AsterGraphHostedActionDescriptor action)
-        => CreateToolActionButton(name, action.Title, action.CanExecute, action.TryExecute, action.DisabledReason);
+        => CreateToolActionButton(name, action.Title, action.CanExecute, action.TryExecute, CreateActionTooltip(action));
 
     private Button CreateToolActionButton(string name, string content, bool isEnabled, Func<bool> execute, string? disabledReason = null)
     {
@@ -367,6 +370,24 @@ public partial class GraphEditorView
             args.Handled = true;
         };
         return button;
+    }
+
+    private static string? CreateActionTooltip(AsterGraphHostedActionDescriptor action)
+        => CreateActionTooltip(action.DisabledReason, action.RecoveryHint);
+
+    private static string? CreateActionTooltip(GraphEditorCommandDescriptorSnapshot? descriptor)
+        => descriptor is null ? null : CreateActionTooltip(descriptor.DisabledReason, descriptor.RecoveryHint);
+
+    private static string? CreateActionTooltip(string? disabledReason, string? recoveryHint)
+    {
+        if (string.IsNullOrWhiteSpace(recoveryHint))
+        {
+            return disabledReason;
+        }
+
+        return string.IsNullOrWhiteSpace(disabledReason)
+            ? recoveryHint
+            : $"{disabledReason}\n{recoveryHint}";
     }
 
     private bool TryApplyRouteVertexPosition(string connectionId, int vertexIndex, string? rawX, string? rawY)
