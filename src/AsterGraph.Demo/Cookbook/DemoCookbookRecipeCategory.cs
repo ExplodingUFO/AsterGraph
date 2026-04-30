@@ -5,6 +5,7 @@ public enum DemoCookbookRecipeCategory
     StarterHost,
     Authoring,
     PerformanceViewport,
+    GroupsSubgraphs,
     PluginTrust,
     DiagnosticsSupport,
     ReviewHelp,

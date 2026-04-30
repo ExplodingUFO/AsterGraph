@@ -86,6 +86,38 @@ public sealed class SerializationCompatibilityTests
     }
 
     [Fact]
+    public void GraphDocumentSerializer_WritesAndReadsCollapsedGroupBoundaryPayload()
+    {
+        var document = CreateGroupBoundaryDocument();
+
+        var json = GraphDocumentSerializer.Serialize(document);
+        var restored = GraphDocumentSerializer.Deserialize(json);
+
+        Assert.Contains("\"IsCollapsed\": true", json);
+        Assert.Contains("\"Groups\"", json);
+        Assert.Contains("\"GraphScopes\"", json);
+        Assert.Contains("\"boundary-output-001\"", json);
+        Assert.DoesNotContain("ProjectsMemberNodes", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("IsContainer", json, StringComparison.Ordinal);
+
+        var rootScope = Assert.Single(restored.GraphScopes, scope => scope.Id == "graph-root");
+        var rootGroup = Assert.Single(rootScope.Groups!);
+        Assert.True(rootGroup.IsCollapsed);
+        Assert.True(rootGroup.IsContainer);
+        Assert.False(rootGroup.ProjectsMemberNodes);
+        Assert.Equal(["node-grouped-source", "node-grouped-transform"], rootGroup.NodeIds);
+        Assert.Equal("group-analytics", rootScope.Nodes[0].Surface?.GroupId);
+        Assert.Equal(2, rootScope.Connections.Count);
+
+        var childScope = Assert.Single(restored.GraphScopes, scope => scope.Id == "graph-subgraph-analytics");
+        var childGroup = Assert.Single(childScope.Groups!);
+        Assert.False(childGroup.IsCollapsed);
+        Assert.True(childGroup.ProjectsMemberNodes);
+        Assert.Equal(["node-child-input", "node-child-output"], childGroup.NodeIds);
+        Assert.Single(childScope.Connections);
+    }
+
+    [Fact]
     public void GraphDocumentSerializer_WritesAndReadsParameterTargetKind()
     {
         var document = new GraphDocument(
@@ -801,6 +833,82 @@ public sealed class SerializationCompatibilityTests
                     ]),
             ]);
 
+    private static GraphDocument CreateGroupBoundaryDocument()
+        => GraphDocument.CreateScoped(
+            "Collapsed Group Boundary Graph",
+            "Exercise collapsed group state, subgraph groups, and boundary edges.",
+            "graph-root",
+            [
+                new GraphScope(
+                    "graph-root",
+                    [
+                        CreateNode("node-grouped-source", groupId: "group-analytics"),
+                        CreateNode("node-grouped-transform", groupId: "group-analytics"),
+                        CreateNode(
+                            "node-composite-analytics",
+                            composite: new GraphCompositeNode(
+                                "graph-subgraph-analytics",
+                                [],
+                                [
+                                    new GraphCompositeBoundaryPort(
+                                        "boundary-output-001",
+                                        "Analytics Output",
+                                        PortDirection.Output,
+                                        "float",
+                                        "#6AD5C4",
+                                        "node-child-output",
+                                        "output-001",
+                                        new PortTypeId("float")),
+                                ])),
+                    ],
+                    [
+                        CreateConnection(
+                            "connection-group-internal",
+                            "node-grouped-source",
+                            "output-001",
+                            "node-grouped-transform",
+                            "input-001"),
+                        CreateConnection(
+                            "connection-group-boundary",
+                            "node-grouped-transform",
+                            "output-001",
+                            "node-composite-analytics",
+                            "boundary-output-001"),
+                    ],
+                    [
+                        new GraphNodeGroup(
+                            "group-analytics",
+                            "Collapsed Analytics Group",
+                            new GraphPoint(40d, 48d),
+                            new GraphSize(560d, 320d),
+                            ["node-grouped-source", "node-grouped-transform"],
+                            true,
+                            new GraphPadding(16d, 20d, 16d, 24d)),
+                    ]),
+                new GraphScope(
+                    "graph-subgraph-analytics",
+                    [
+                        CreateNode("node-child-input", groupId: "group-child-analysis"),
+                        CreateNode("node-child-output", groupId: "group-child-analysis"),
+                    ],
+                    [
+                        CreateConnection(
+                            "connection-child-analysis",
+                            "node-child-input",
+                            "output-001",
+                            "node-child-output",
+                            "input-001"),
+                    ],
+                    [
+                        new GraphNodeGroup(
+                            "group-child-analysis",
+                            "Child Analysis Group",
+                            new GraphPoint(24d, 32d),
+                            new GraphSize(480d, 260d),
+                            ["node-child-input", "node-child-output"]),
+                    ]),
+            ]);
+
     private static GraphSelectionFragment CreateFragment()
         => new(
             [CreateNode()],
@@ -810,7 +918,8 @@ public sealed class SerializationCompatibilityTests
 
     private static GraphNode CreateNode(
         string nodeId = "node-001",
-        GraphCompositeNode? composite = null)
+        GraphCompositeNode? composite = null,
+        string? groupId = null)
         => new(
             nodeId,
             "Test Node",
@@ -832,7 +941,7 @@ public sealed class SerializationCompatibilityTests
             "#6AD5C4",
             new NodeDefinitionId("tests.node"),
             null,
-            new GraphNodeSurfaceState(GraphNodeExpansionState.Expanded),
+            new GraphNodeSurfaceState(GraphNodeExpansionState.Expanded, groupId),
             composite);
 
     private static GraphConnection CreateConnection(

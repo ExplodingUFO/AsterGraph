@@ -145,6 +145,23 @@ public sealed class DemoCookbookDocsTests
         }
     }
 
+    [Fact]
+    public void DemoCookbookDocs_SurfaceGroupSubgraphProofRoute()
+    {
+        var english = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chinese = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+        var advancedEditing = ReadRepoFile("docs/en/advanced-editing.md");
+
+        foreach (var contents in new[] { english, chinese, advancedEditing })
+        {
+            Assert.Contains("groups-subgraphs-route", contents, StringComparison.Ordinal);
+            Assert.Contains("GROUP_SERIALIZATION_COOKBOOK_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("WritesAndReadsCollapsedGroupBoundaryPayload", contents, StringComparison.Ordinal);
+            Assert.Contains("SessionQueries_GetHierarchyStateSnapshot_ExposesCollapsedGroupMembershipBoundaryEdgesAndMoveConstraints", contents, StringComparison.Ordinal);
+            Assert.Contains("CollapsedGroup_ProjectsContainerChromeBoundaryEdgesAndHiddenMembers", contents, StringComparison.Ordinal);
+        }
+    }
+
     private static void AssertRecipeIndexed(string contents, DemoCookbookRecipe recipe)
     {
         Assert.Contains(recipe.Id, contents, StringComparison.Ordinal);

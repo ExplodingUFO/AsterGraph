@@ -7,7 +7,7 @@
 | Module | Canonical seam | Stock Avalonia projection | Demo proof markers |
 | --- | --- | --- | --- |
 | `Node Surface Authoring` | `GetNodeSurfaceSnapshots()`, `GetNodeParameterSnapshots(nodeId)`, `TrySetNodeSize(...)`, `TrySetNodeParameterValue(...)`, and `GetSelectedNodeParameterSnapshots()` | tiered node cards, node-side parameter editors, threshold-driven authoring chrome | `TIERED_NODE_SURFACE_OK`, `NON_OBSCURING_EDITING_OK`, `VISUAL_SEMANTICS_OK` |
-| `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`, `GetNodeGroups()`, `GetNodeGroupSnapshots()`, `TrySetNodeGroupCollapsed(...)`, `TrySetNodeGroupPosition(...)`, `TrySetNodeGroupSize(...)`, `TrySetNodeGroupMemberships(...)` | fixed group frames, content-area membership, group collapse state, and frame drag/resize chrome | `FIXED_GROUP_FRAME_OK`, `HIERARCHY_SEMANTICS_OK` |
+| `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`, `GetNodeGroups()`, `GetNodeGroupSnapshots()`, `TrySetNodeGroupCollapsed(...)`, `TrySetNodeGroupPosition(...)`, `TrySetNodeGroupSize(...)`, `TrySetNodeGroupMemberships(...)` | fixed group frames, content-area membership, group collapse state, boundary-edge projection, and frame drag/resize chrome | `FIXED_GROUP_FRAME_OK`, `HIERARCHY_SEMANTICS_OK`, `GROUP_SERIALIZATION_COOKBOOK_OK` |
 | `Composite Scope Authoring` | `TryWrapSelectionToComposite(...)`, `TryPromoteNodeGroupToComposite(...)`, `TryExposeCompositePort(...)`, `TryUnexposeCompositePort(...)`, `TryEnterCompositeChildGraph(...)`, `TryReturnToParentGraphScope(...)`, `GetScopeNavigationSnapshot()`, `GetCompositeNodeSnapshots()` | breadcrumb navigation, composite authoring actions, and scope-return controls | `COMPOSITE_SCOPE_OK` |
 | `Edge Semantics` | `TrySetConnectionNoteText(...)`, `TryReconnectConnection(...)`, disconnect commands, and the pending-connection snapshot | edge note editing, disconnect affordances, and reconnect workflows | `EDGE_NOTE_OK`, `DISCONNECT_FLOW_OK` |
 | `Edge Geometry Tooling` | `GetConnectionGeometrySnapshots()`, `TryInsertConnectionRouteVertex(...)`, `TryMoveConnectionRouteVertex(...)`, `TryRemoveConnectionRouteVertex(...)` | route-vertex authoring tools and routed edge rendering | `EDGE_GEOMETRY_OK` |
@@ -24,6 +24,8 @@
 - `docs/en/demo-guide.md` maps the proof markers to the same module names used here.
 - `docs/en/host-integration.md` keeps the route-to-seam matrix aligned with these modules so hosts do not need retained-only explanations.
 - [Authoring Surface Recipe](./authoring-surface-recipe.md) is the copyable hosted-Avalonia recipe when a host wants one handoff from definitions and metadata through node-side editors, validation, commands, and proof without changing the session route.
+- [Demo Cookbook](./demo-cookbook.md) includes `groups-subgraphs-route`, which ties collapsed group serialization, composite child scopes, hierarchy projection, and boundary-edge proof back to focused tests instead of adding generated demo code.
+- Group/subgraph proof anchors: `WritesAndReadsCollapsedGroupBoundaryPayload`, `SessionQueries_GetHierarchyStateSnapshot_ExposesCollapsedGroupMembershipBoundaryEdgesAndMoveConstraints`, and `CollapsedGroup_ProjectsContainerChromeBoundaryEdgesAndHiddenMembers`.
 
 ## What This Does Not Mean
 

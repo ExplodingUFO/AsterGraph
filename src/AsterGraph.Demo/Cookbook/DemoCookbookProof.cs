@@ -220,6 +220,7 @@ public static class DemoCookbookProof
                 string.Equals(recipe.RouteStatus, "Supported SDK route", StringComparison.Ordinal),
             DemoCookbookRecipeCategory.PluginTrust
                 or DemoCookbookRecipeCategory.PerformanceViewport
+                or DemoCookbookRecipeCategory.GroupsSubgraphs
                 or DemoCookbookRecipeCategory.DiagnosticsSupport
                 or DemoCookbookRecipeCategory.ReviewHelp =>
                 string.Equals(recipe.RouteStatus, "Proof/demo route", StringComparison.Ordinal),

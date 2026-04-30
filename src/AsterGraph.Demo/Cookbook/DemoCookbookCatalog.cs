@@ -4,10 +4,11 @@ public static partial class DemoCookbookCatalog
 {
     public static IReadOnlyList<DemoCookbookRecipeCategory> RequiredCategories { get; } =
     [
-                DemoCookbookRecipeCategory.StarterHost,
-                DemoCookbookRecipeCategory.Authoring,
-                DemoCookbookRecipeCategory.PerformanceViewport,
-                DemoCookbookRecipeCategory.PluginTrust,
+        DemoCookbookRecipeCategory.StarterHost,
+        DemoCookbookRecipeCategory.Authoring,
+        DemoCookbookRecipeCategory.PerformanceViewport,
+        DemoCookbookRecipeCategory.GroupsSubgraphs,
+        DemoCookbookRecipeCategory.PluginTrust,
         DemoCookbookRecipeCategory.DiagnosticsSupport,
         DemoCookbookRecipeCategory.ReviewHelp,
     ];

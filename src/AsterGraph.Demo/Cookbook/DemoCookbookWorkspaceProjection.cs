@@ -130,6 +130,11 @@ public static class DemoCookbookWorkspaceProjection
                 "Uses public authoring, command, node, port, and parameter extension seams.",
                 "This recipe is display guidance; no generated workflow feature is enabled.",
                 ["Retained/migration cookbook depth remains deferred."]),
+            DemoCookbookRecipeCategory.GroupsSubgraphs => new DemoCookbookRoutePosture(
+                "Proof/demo route",
+                "Demonstrates persisted groups, composite scopes, collapsed projection, and boundary-edge evidence.",
+                "Group/subgraph proof is display guidance; no generated workflow feature is enabled.",
+                ["Nested group mutation and specialized boundary-edge styling remain deferred."]),
             DemoCookbookRecipeCategory.PluginTrust => new DemoCookbookRoutePosture(
                 "Proof/demo route",
                 "Demonstrates trusted in-process plugin decisions and evidence without sandbox claims.",
@@ -245,6 +250,7 @@ public static class DemoCookbookWorkspaceProjection
         {
             DemoCookbookRecipeCategory.StarterHost => "Starter Host",
             DemoCookbookRecipeCategory.Authoring => "Authoring",
+            DemoCookbookRecipeCategory.GroupsSubgraphs => "Groups And Subgraphs",
             DemoCookbookRecipeCategory.PluginTrust => "Plugin Trust",
             DemoCookbookRecipeCategory.DiagnosticsSupport => "Diagnostics Support",
             DemoCookbookRecipeCategory.ReviewHelp => "Review Help",

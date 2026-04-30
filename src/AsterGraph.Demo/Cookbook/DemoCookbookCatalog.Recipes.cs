@@ -208,6 +208,75 @@ public static partial class DemoCookbookCatalog
                 "Demo cookbook projection is a graph-above-code teaching surface only; ScaleSmoke and ConsumerSample remain the proof sources."),
             "Performance proof reports projection and budget evidence; it does not add a background graph index, second renderer, or runtime execution mode."),
         new DemoCookbookRecipe(
+            "groups-subgraphs-route",
+            DemoCookbookRecipeCategory.GroupsSubgraphs,
+            "Groups and subgraphs route",
+            "Trace persisted group state, composite child scopes, collapsed projection, and boundary-edge proof.",
+            [
+                new DemoCookbookAnchor(
+                    "Collapsed group serialization snapshot",
+                    "tests/AsterGraph.Serialization.Tests/SerializationCompatibilityTests.cs",
+                    "WritesAndReadsCollapsedGroupBoundaryPayload"),
+                new DemoCookbookAnchor(
+                    "Hierarchy projection contract",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorHierarchyStateContractsTests.cs",
+                    "SessionQueries_GetHierarchyStateSnapshot_ExposesCollapsedGroupMembershipBoundaryEdgesAndMoveConstraints"),
+                new DemoCookbookAnchor(
+                    "Collapsed canvas proof",
+                    "tests/AsterGraph.Editor.Tests/NodeCanvasStandaloneTests.cs",
+                    "CollapsedGroup_ProjectsContainerChromeBoundaryEdgesAndHiddenMembers"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Cookbook groups workspace projection",
+                    "src/AsterGraph.Demo/Cookbook/DemoCookbookWorkspaceProjection.cs",
+                    "GroupsSubgraphs"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Advanced editing hierarchy semantics",
+                    "docs/en/advanced-editing.md",
+                    "Hierarchy Semantics"),
+                new DemoCookbookAnchor(
+                    "Cookbook groups route docs",
+                    "docs/en/demo-cookbook.md",
+                    "groups-subgraphs-route"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Collapsed groups keep member nodes hidden while boundary connections remain represented.",
+                    "SessionQueries_GetHierarchyStateSnapshot_ExposesCollapsedGroupMembershipBoundaryEdgesAndMoveConstraints"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.NodeMetadata,
+                    "Group membership, collapse state, and composite child scope metadata roundtrip through the current schema.",
+                    "WritesAndReadsCollapsedGroupBoundaryPayload"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "The cookbook marker ties group/subgraph claims to serialization and canvas proof.",
+                    "GROUP_SERIALIZATION_COOKBOOK_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Collapsed group projection keeps hidden member nodes out of direct canvas selection.",
+                    "CollapsedGroup_ProjectsContainerChromeBoundaryEdgesAndHiddenMembers"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Boundary-edge behavior remains explicit when one endpoint is hidden by a collapsed group.",
+                    "SessionQueries_GetHierarchyStateSnapshot_ExposesCollapsedGroupMembershipBoundaryEdgesAndMoveConstraints"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Serialized snapshots expose persisted groups and composite scopes without persisting projection-only flags.",
+                    "WritesAndReadsCollapsedGroupBoundaryPayload"),
+            ],
+            ["GROUP_SERIALIZATION_COOKBOOK_OK"],
+            new DemoCookbookRouteClarity(
+                "Groups route: persisted GraphNodeGroup and GraphScope snapshots plus IGraphEditorSession.Queries.GetHierarchyStateSnapshot().",
+                "Supported seams live in `AsterGraph.Core` serialization and `AsterGraph.Editor` hierarchy query contracts.",
+                "Demo cookbook projection is proof/navigation only; it does not add generated demo code or a workflow engine."),
+            "Group/subgraph proof is limited to persisted snapshots, hierarchy queries, and stock Avalonia projection; nested group mutation and specialized boundary-edge styling remain deferred."),
+        new DemoCookbookRecipe(
             "plugin-trust-route",
             DemoCookbookRecipeCategory.PluginTrust,
             "Plugin trust route",
