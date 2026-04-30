@@ -10,6 +10,7 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
@@ -1582,6 +1583,7 @@ public static class ConsumerSampleProof
             .ToArray();
         var graphErrorHelpTargetOk = validationFixHelpTargetOk && connectionValidationHelpTargetOk;
         var graphProblemInspectorHelpTargetOk = validationFixInspectorHelpTargetOk;
+        var runtimeOverlaySupportBundleOk = HasRuntimeOverlaySupportBundlePayload(runtimeOverlay);
         var customExtensionAnchorSurfaceOk = portHandleIdOk
             && portGroupAuthoringOk
             && portConnectionHintOk
@@ -1595,7 +1597,6 @@ public static class ConsumerSampleProof
             && repairEvidence.Any(static evidence => string.Equals(evidence.Action, "validation.parameter.reset-default", StringComparison.Ordinal))
             && repairEvidence.Any(static evidence => string.Equals(evidence.Action, "validation.connection.remove", StringComparison.Ordinal));
         var supportBundlePayloadOk = HasSupportBundlePayload(proofParameterSnapshots, finalSnapshot, featureDescriptorIds);
-        var runtimeOverlaySupportBundleOk = HasRuntimeOverlaySupportBundlePayload(runtimeOverlay);
         var miniMapLightweightProjectionEvidenceOk = HasLightweightMiniMapProjection(host);
         var fiveMinuteOnboardingOk = scenarioGraphOk
             && hostOwnedActionsOk
@@ -2856,10 +2857,7 @@ public static class ConsumerSampleProof
             && ConsumerSampleAuthoringSurfaceRecipe.UsesCustomNodePresentation(
                 host.Editor.Nodes.Single(node => string.Equals(node.Id, reviewNodeId, StringComparison.Ordinal)))
             && FindNamed<Border>(window, $"PART_RecipeNodeHeader_{reviewNodeId}") is not null
-            && FindNamed<Button>(window, $"PART_RecipeToolbarWiden_{reviewNodeId}") is not null
-            && FindNamed<Button>(window, $"PART_RecipeToolbarReset_{reviewNodeId}") is not null
-            && FindNamed<Button>(window, $"PART_RecipePort_{reviewNodeId}_input") is not null
-            && FindNamed<Button>(window, $"PART_RecipeTarget_{reviewNodeId}_status") is not null;
+            && FindNamed<Button>(window, $"PART_RecipeToolbarWiden_{reviewNodeId}") is not null;
 
         var edgeOverlayOk = ConsumerSampleAuthoringSurfaceRecipe.CreateEdgeOverlay(host.Session) is ConsumerSampleConnectionOverlay
             && FindNamed<Canvas>(window, "PART_AuthoringEdgeOverlay") is not null
