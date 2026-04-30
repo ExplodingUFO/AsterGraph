@@ -22,6 +22,16 @@ Demo cookbook 是面向 AsterGraph 评估者的“代码 + 演示”索引。它
 - `diagnostics-support-route`: Support bundles are local handoff evidence, not telemetry, remote sync, or support-scope expansion.
 - `review-help-route`: Review/help evidence stays bounded to existing validation and support-bundle proof; it is not a new workflow engine.
 
+## Scenario depth 锚点
+
+`DEMO_COOKBOOK_SCENARIO_DEPTH_OK` 证明 cookbook 的 scenario points 覆盖专业深度，同时 Demo 仍然只是 sample/proof surface：
+
+- `GraphOperations`: graph 创建、command、overlay 或 review 路线都回链到现有代码 / Demo 锚点。
+- `NodeMetadata`: metadata 与 trust evidence 只锚定到 recipe 代码或 proof marker。
+- `ValidationRuntimeOverlay`: validation、runtime overlay、support bundle 或 repair/help evidence 都有表达，但不启用 workflow engine。
+- `SupportEvidence`: 每条路线的支持声明都绑定到本地 proof 或 docs evidence。
+- `HostCodeExample`: 可复制的宿主示例仍锚定到 starter 或 consumer sample 代码。
+
 ## 怎么用
 
 1. 如果还没有跑过 SDK，先看 [Quick Start](./quick-start.md)。

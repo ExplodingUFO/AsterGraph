@@ -22,6 +22,7 @@ public sealed class DemoCookbookProofClosureTests
         Assert.True(result.DetailReadabilityOk);
         Assert.True(result.InteractionStatesOk);
         Assert.True(result.ProfessionalInteractionOk);
+        Assert.True(result.ScenarioDepthOk);
         Assert.True(result.OwnershipBoundaryOk);
         Assert.Equal(DemoCookbookCatalog.Recipes.Count, result.RecipeCount);
         Assert.Equal(DemoCookbookCatalog.RequiredCategories.Count, result.RequiredCategoryCount);
@@ -52,6 +53,7 @@ public sealed class DemoCookbookProofClosureTests
         Assert.Contains("DEMO_COOKBOOK_DETAIL_READABILITY_OK", DemoCookbookProof.PublicSuccessMarkerIds);
         Assert.Contains("DEMO_COOKBOOK_INTERACTION_STATES_OK", DemoCookbookProof.PublicSuccessMarkerIds);
         Assert.Contains("DEMO_COOKBOOK_PROFESSIONAL_INTERACTION_OK", DemoCookbookProof.PublicSuccessMarkerIds);
+        Assert.Contains("DEMO_COOKBOOK_SCENARIO_DEPTH_OK", DemoCookbookProof.PublicSuccessMarkerIds);
         Assert.Contains("DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK", DemoCookbookProof.PublicSuccessMarkerIds);
     }
 

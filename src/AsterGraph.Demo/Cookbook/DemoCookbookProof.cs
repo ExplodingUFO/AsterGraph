@@ -11,6 +11,7 @@ public sealed record DemoCookbookProofResult(
     bool DetailReadabilityOk,
     bool InteractionStatesOk,
     bool ProfessionalInteractionOk,
+    bool ScenarioDepthOk,
     bool OwnershipBoundaryOk,
     int RecipeCount,
     int RequiredCategoryCount)
@@ -26,6 +27,7 @@ public sealed record DemoCookbookProofResult(
         && DetailReadabilityOk
         && InteractionStatesOk
         && ProfessionalInteractionOk
+        && ScenarioDepthOk
         && OwnershipBoundaryOk;
 }
 
@@ -43,6 +45,7 @@ public static class DemoCookbookProof
         "DEMO_COOKBOOK_DETAIL_READABILITY_OK",
         "DEMO_COOKBOOK_INTERACTION_STATES_OK",
         "DEMO_COOKBOOK_PROFESSIONAL_INTERACTION_OK",
+        "DEMO_COOKBOOK_SCENARIO_DEPTH_OK",
         "DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK",
     ];
 
@@ -108,6 +111,19 @@ public static class DemoCookbookProof
                 snapshot.SelectedRecipe.GraphAnchors.Count > 0
                 && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.RouteStatus)
                 && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.UnavailableActionDescription));
+        var projectedScenarioKinds = workspaceSnapshots
+            .SelectMany(snapshot => snapshot.SelectedRecipe.ScenarioPoints)
+            .Select(point => point.Kind)
+            .Distinct()
+            .ToArray();
+        var scenarioDepthOk = DemoCookbookCatalog.RequiredScenarioKinds.All(requiredKind =>
+                projectedScenarioKinds.Contains(requiredKind))
+            && workspaceSnapshots.All(snapshot =>
+                snapshot.SelectedRecipe.ScenarioPoints.Count >= 3
+                && snapshot.SelectedRecipe.ScenarioPoints.All(point =>
+                    !string.IsNullOrWhiteSpace(point.Label)
+                    && !string.IsNullOrWhiteSpace(point.Evidence)
+                    && HasScenarioEvidence(snapshot.SelectedRecipe, point)));
         var ownershipBoundaryOk = workspaceSnapshots.Length == DemoCookbookCatalog.Recipes.Count
             && PublicSuccessMarkerIds.All(marker => marker.StartsWith("DEMO_COOKBOOK_", StringComparison.Ordinal));
 
@@ -122,6 +138,7 @@ public static class DemoCookbookProof
             detailReadabilityOk,
             interactionStatesOk,
             professionalInteractionOk,
+            scenarioDepthOk,
             ownershipBoundaryOk,
             DemoCookbookCatalog.Recipes.Count,
             DemoCookbookCatalog.RequiredCategories.Count);
@@ -143,6 +160,7 @@ public static class DemoCookbookProof
             $"DEMO_COOKBOOK_DETAIL_READABILITY_OK:{result.DetailReadabilityOk}",
             $"DEMO_COOKBOOK_INTERACTION_STATES_OK:{result.InteractionStatesOk}",
             $"DEMO_COOKBOOK_PROFESSIONAL_INTERACTION_OK:{result.ProfessionalInteractionOk}",
+            $"DEMO_COOKBOOK_SCENARIO_DEPTH_OK:{result.ScenarioDepthOk}",
             $"DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK:{result.OwnershipBoundaryOk}",
             $"DEMO_COOKBOOK_RECIPE_COUNT:{result.RecipeCount}",
             $"DEMO_COOKBOOK_REQUIRED_CATEGORY_COUNT:{result.RequiredCategoryCount}",
@@ -153,6 +171,15 @@ public static class DemoCookbookProof
         => !string.IsNullOrWhiteSpace(anchor.Label)
            && !string.IsNullOrWhiteSpace(anchor.Path)
            && !string.IsNullOrWhiteSpace(anchor.Evidence);
+
+    private static bool HasScenarioEvidence(
+        DemoCookbookWorkspaceRecipeContent recipe,
+        DemoCookbookWorkspaceScenarioPoint point)
+        => recipe.GraphAnchors
+               .Concat(recipe.CodeExamples)
+               .Concat(recipe.DocumentationLinks)
+               .Any(anchor => string.Equals(anchor.Evidence, point.Evidence, StringComparison.Ordinal))
+           || recipe.ProofMarkers.Any(marker => string.Equals(marker, point.Evidence, StringComparison.Ordinal));
 
     private static bool ContainsUnsupportedPromise(string text)
         => text.Contains("enabled fallback", StringComparison.OrdinalIgnoreCase)

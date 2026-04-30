@@ -56,6 +56,24 @@ public sealed class DemoCookbookDocsTests
         }
     }
 
+    [Fact]
+    public void DemoCookbookDocs_AnchorScenarioDepthProof()
+    {
+        var english = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chinese = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+
+        foreach (var contents in new[] { english, chinese })
+        {
+            Assert.Contains("DEMO_COOKBOOK_SCENARIO_DEPTH_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("sample/proof surface", contents, StringComparison.Ordinal);
+
+            foreach (var scenarioKind in DemoCookbookCatalog.RequiredScenarioKinds)
+            {
+                Assert.Contains(scenarioKind.ToString(), contents, StringComparison.Ordinal);
+            }
+        }
+    }
+
     private static void AssertRecipeIndexed(string contents, DemoCookbookRecipe recipe)
     {
         Assert.Contains(recipe.Id, contents, StringComparison.Ordinal);

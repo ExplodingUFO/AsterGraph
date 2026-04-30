@@ -22,6 +22,16 @@ Use it when you want to move from "I can see the Demo" to "I know which code and
 - `diagnostics-support-route`: Support bundles are local handoff evidence, not telemetry, remote sync, or support-scope expansion.
 - `review-help-route`: Review/help evidence stays bounded to existing validation and support-bundle proof; it is not a new workflow engine.
 
+## Scenario Depth Anchors
+
+`DEMO_COOKBOOK_SCENARIO_DEPTH_OK` proves the cookbook's scenario points cover the required professional depth while keeping Demo bounded as a sample/proof surface:
+
+- `GraphOperations`: graph creation, command, overlay, or review paths are tied back to existing code/demo anchors.
+- `NodeMetadata`: metadata and trust evidence stay anchored to recipe code or proof markers.
+- `ValidationRuntimeOverlay`: validation, runtime overlay, support bundle, or repair/help evidence is represented without enabling a workflow engine.
+- `SupportEvidence`: each route keeps support claims tied to local proof or docs evidence.
+- `HostCodeExample`: host-copy examples remain anchored to starter or consumer sample code.
+
 ## How To Use It
 
 1. Start with [Quick Start](./quick-start.md) if you have not run the SDK before.
