@@ -71,14 +71,16 @@ public sealed class DemoCookbookNavigationPolishTests
             line => line.Contains("筛选结果", StringComparison.Ordinal)
                     && line.EndsWith("0", StringComparison.Ordinal));
         Assert.Same(selected, viewModel.SelectedCookbookRecipe);
-        Assert.Contains("selected", FindCookbookRecipeButton(window, selected.Id).Classes);
+        Assert.Empty(viewModel.CookbookWorkspace.NavigationGroups);
+        Assert.Empty(FindCookbookRecipeButtons(window, selected.Id));
         Assert.Same(graphEditorView, graphHost.Content);
     }
 
-    private static Button FindCookbookRecipeButton(MainWindow window, string recipeId)
+    private static Button[] FindCookbookRecipeButtons(MainWindow window, string recipeId)
         => window.GetVisualDescendants()
             .OfType<Button>()
-            .Single(button =>
+            .Where(button =>
                 button.CommandParameter is DemoCookbookWorkspaceNavigationItem item
-                && string.Equals(item.RecipeId, recipeId, StringComparison.Ordinal));
+                && string.Equals(item.RecipeId, recipeId, StringComparison.Ordinal))
+            .ToArray();
 }

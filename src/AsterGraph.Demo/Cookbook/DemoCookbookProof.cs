@@ -10,6 +10,7 @@ public sealed record DemoCookbookProofResult(
     bool NavigationFeedbackOk,
     bool DetailReadabilityOk,
     bool InteractionStatesOk,
+    bool ProfessionalInteractionOk,
     bool OwnershipBoundaryOk,
     int RecipeCount,
     int RequiredCategoryCount)
@@ -24,6 +25,7 @@ public sealed record DemoCookbookProofResult(
         && NavigationFeedbackOk
         && DetailReadabilityOk
         && InteractionStatesOk
+        && ProfessionalInteractionOk
         && OwnershipBoundaryOk;
 }
 
@@ -40,6 +42,7 @@ public static class DemoCookbookProof
         "DEMO_COOKBOOK_NAVIGATION_FEEDBACK_OK",
         "DEMO_COOKBOOK_DETAIL_READABILITY_OK",
         "DEMO_COOKBOOK_INTERACTION_STATES_OK",
+        "DEMO_COOKBOOK_PROFESSIONAL_INTERACTION_OK",
         "DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK",
     ];
 
@@ -88,6 +91,23 @@ public static class DemoCookbookProof
             && snapshot.SelectedRecipe.DeferredGaps.All(gap => !string.IsNullOrWhiteSpace(gap))
             && !ContainsUnsupportedPromise(snapshot.SelectedRecipe.UnavailableActionDescription)
             && snapshot.SelectedRecipe.DeferredGaps.All(gap => !ContainsUnsupportedPromise(gap)));
+        var pluginRecipe = DemoCookbookCatalog.Recipes.Single(recipe => recipe.Id == "plugin-trust-route");
+        var diagnosticsRecipes = DemoCookbookCatalog.Recipes
+            .Where(recipe => recipe.Category == DemoCookbookRecipeCategory.DiagnosticsSupport)
+            .ToArray();
+        var filteredSnapshot = DemoCookbookWorkspaceProjection.Create(pluginRecipe.Id, diagnosticsRecipes);
+        var emptyFilteredSnapshot = DemoCookbookWorkspaceProjection.Create(pluginRecipe.Id, []);
+        var professionalInteractionOk =
+            filteredSnapshot.NavigationGroups.Count == 1
+            && filteredSnapshot.NavigationGroups[0].Category == DemoCookbookRecipeCategory.DiagnosticsSupport
+            && filteredSnapshot.NavigationGroups[0].Recipes.All(recipe => !recipe.IsSelected)
+            && filteredSnapshot.SelectedRecipe.RecipeId == pluginRecipe.Id
+            && emptyFilteredSnapshot.NavigationGroups.Count == 0
+            && emptyFilteredSnapshot.SelectedRecipe.RecipeId == pluginRecipe.Id
+            && workspaceSnapshots.All(snapshot =>
+                snapshot.SelectedRecipe.GraphAnchors.Count > 0
+                && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.RouteStatus)
+                && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.UnavailableActionDescription));
         var ownershipBoundaryOk = workspaceSnapshots.Length == DemoCookbookCatalog.Recipes.Count
             && PublicSuccessMarkerIds.All(marker => marker.StartsWith("DEMO_COOKBOOK_", StringComparison.Ordinal));
 
@@ -101,6 +121,7 @@ public static class DemoCookbookProof
             navigationFeedbackOk,
             detailReadabilityOk,
             interactionStatesOk,
+            professionalInteractionOk,
             ownershipBoundaryOk,
             DemoCookbookCatalog.Recipes.Count,
             DemoCookbookCatalog.RequiredCategories.Count);
@@ -121,6 +142,7 @@ public static class DemoCookbookProof
             $"DEMO_COOKBOOK_NAVIGATION_FEEDBACK_OK:{result.NavigationFeedbackOk}",
             $"DEMO_COOKBOOK_DETAIL_READABILITY_OK:{result.DetailReadabilityOk}",
             $"DEMO_COOKBOOK_INTERACTION_STATES_OK:{result.InteractionStatesOk}",
+            $"DEMO_COOKBOOK_PROFESSIONAL_INTERACTION_OK:{result.ProfessionalInteractionOk}",
             $"DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK:{result.OwnershipBoundaryOk}",
             $"DEMO_COOKBOOK_RECIPE_COUNT:{result.RecipeCount}",
             $"DEMO_COOKBOOK_REQUIRED_CATEGORY_COUNT:{result.RequiredCategoryCount}",

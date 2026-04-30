@@ -19,12 +19,12 @@ public partial class MainWindowViewModel
     public IReadOnlyList<CookbookCategoryFilter> CookbookCategoryFilters => _cookbookCategoryFilters;
 
     public DemoCookbookWorkspaceSnapshot CookbookWorkspace
-        => DemoCookbookWorkspaceProjection.Create(SelectedCookbookRecipe?.Id);
+        => DemoCookbookWorkspaceProjection.Create(SelectedCookbookRecipe?.Id, FilteredCookbookRecipes);
 
     public string CookbookSummary
         => T(
-            "Cookbook 把目录、搜索、筛选和选中配方投影到宿主抽屉，中心图工作区保持可见。",
-            "The cookbook projects catalog navigation, search, filtering, and the selected recipe into the host drawer while the graph workspace stays visible.");
+            "Cookbook 左侧工作区是主导航；宿主抽屉保留为次要摘要，中心图工作区保持可见。",
+            "The cookbook left workspace is the primary navigation; the host drawer remains a secondary summary while the graph workspace stays visible.");
 
     public IReadOnlyList<string> CookbookLandingLines =>
     [

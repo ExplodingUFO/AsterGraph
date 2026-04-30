@@ -68,6 +68,23 @@ public sealed class DemoCookbookWorkspaceProjectionTests
     }
 
     [Fact]
+    public void WorkspaceProjection_LeftNavigationCanUseFilteredRecipeSetWithoutChangingSelection()
+    {
+        var selectedRecipe = DemoCookbookCatalog.Recipes.Single(recipe => recipe.Id == "plugin-trust-route");
+        var filteredRecipes = DemoCookbookCatalog.Recipes
+            .Where(recipe => recipe.Category == DemoCookbookRecipeCategory.DiagnosticsSupport)
+            .ToArray();
+
+        var snapshot = DemoCookbookWorkspaceProjection.Create(selectedRecipe.Id, filteredRecipes);
+
+        var group = Assert.Single(snapshot.NavigationGroups);
+        Assert.Equal(DemoCookbookRecipeCategory.DiagnosticsSupport, group.Category);
+        Assert.Equal(filteredRecipes.Select(recipe => recipe.Id), group.Recipes.Select(recipe => recipe.RecipeId));
+        Assert.DoesNotContain(group.Recipes, recipe => recipe.IsSelected);
+        Assert.Equal(selectedRecipe.Id, snapshot.SelectedRecipe.RecipeId);
+    }
+
+    [Fact]
     public void WorkspaceProjection_RejectsUnknownRecipeId()
     {
         Assert.Throws<InvalidOperationException>(() => DemoCookbookWorkspaceProjection.Create("missing-recipe"));

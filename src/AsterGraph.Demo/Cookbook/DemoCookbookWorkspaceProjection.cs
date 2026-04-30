@@ -37,7 +37,9 @@ public sealed record DemoCookbookWorkspaceAnchor(
 
 public static class DemoCookbookWorkspaceProjection
 {
-    public static DemoCookbookWorkspaceSnapshot Create(string? selectedRecipeId = null)
+    public static DemoCookbookWorkspaceSnapshot Create(
+        string? selectedRecipeId = null,
+        IReadOnlyList<DemoCookbookRecipe>? navigationRecipes = null)
     {
         var recipes = DemoCookbookCatalog.Recipes;
         if (recipes.Count == 0)
@@ -50,7 +52,7 @@ public static class DemoCookbookWorkspaceProjection
             : recipes.Single(recipe => string.Equals(recipe.Id, selectedRecipeId, StringComparison.Ordinal));
 
         return new DemoCookbookWorkspaceSnapshot(
-            CreateNavigationGroups(recipes, selectedRecipe.Id),
+            CreateNavigationGroups(navigationRecipes ?? recipes, selectedRecipe.Id),
             CreateRecipeContent(selectedRecipe));
     }
 
@@ -58,6 +60,7 @@ public static class DemoCookbookWorkspaceProjection
         IReadOnlyList<DemoCookbookRecipe> recipes,
         string selectedRecipeId)
         => DemoCookbookCatalog.RequiredCategories
+            .Where(category => recipes.Any(recipe => recipe.Category == category))
             .Select(category => new DemoCookbookWorkspaceNavigationGroup(
                 category,
                 FormatCategory(category),

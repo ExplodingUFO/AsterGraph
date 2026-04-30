@@ -56,6 +56,35 @@ public sealed class DemoCookbookNavigationTests
     }
 
     [Fact]
+    public void MainWindowViewModel_CookbookWorkspaceNavigationUsesFilteredGroups()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.CookbookSearchText = "allowlist";
+
+        var searchGroup = Assert.Single(viewModel.CookbookWorkspace.NavigationGroups);
+        Assert.Equal(DemoCookbookRecipeCategory.PluginTrust, searchGroup.Category);
+        var searchItem = Assert.Single(searchGroup.Recipes);
+        Assert.Equal("plugin-trust-route", searchItem.RecipeId);
+        Assert.True(searchItem.IsSelected);
+
+        viewModel.SelectedCookbookCategoryFilter = viewModel.CookbookCategoryFilters.Single(filter =>
+            filter.Category == DemoCookbookRecipeCategory.DiagnosticsSupport);
+
+        Assert.Empty(viewModel.FilteredCookbookRecipes);
+        Assert.Empty(viewModel.CookbookWorkspace.NavigationGroups);
+        Assert.Equal("plugin-trust-route", viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
+
+        viewModel.CookbookSearchText = "support";
+
+        var categoryGroup = Assert.Single(viewModel.CookbookWorkspace.NavigationGroups);
+        Assert.Equal(DemoCookbookRecipeCategory.DiagnosticsSupport, categoryGroup.Category);
+        var categoryItem = Assert.Single(categoryGroup.Recipes);
+        Assert.Equal("diagnostics-support-route", categoryItem.RecipeId);
+        Assert.True(categoryItem.IsSelected);
+    }
+
+    [Fact]
     public void MainWindowViewModel_OpenSelectedCookbookRecipeLandsOnRelatedDemoPanel()
     {
         var viewModel = new MainWindowViewModel();
