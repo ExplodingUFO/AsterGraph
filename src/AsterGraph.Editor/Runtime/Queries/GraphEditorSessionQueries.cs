@@ -88,6 +88,49 @@ public sealed partial class GraphEditorSession
             emptyReason);
     }
 
+    public GraphEditorSnapGuideSnapshot GetSnapGuideSnapshot(GraphEditorSnapGuideQuery? query = null)
+    {
+        query ??= new GraphEditorSnapGuideQuery();
+        if (query.GridSize <= 0d)
+        {
+            return new GraphEditorSnapGuideSnapshot(false, query.GridSize, query.SelectionOnly, [], "Grid size must be positive.");
+        }
+
+        var document = _host.CreateActiveScopeDocumentSnapshot();
+        var selection = GetSelectionSnapshot();
+        var selectedNodeIds = selection.SelectedNodeIds.ToHashSet(StringComparer.Ordinal);
+        var nodes = query.SelectionOnly
+            ? document.Nodes.Where(node => selectedNodeIds.Contains(node.Id)).ToList()
+            : document.Nodes.ToList();
+        if (nodes.Count == 0)
+        {
+            return new GraphEditorSnapGuideSnapshot(
+                false,
+                query.GridSize,
+                query.SelectionOnly,
+                [],
+                query.SelectionOnly
+                    ? "Select one or more nodes before projecting snap guides."
+                    : "Add one or more nodes before projecting snap guides.");
+        }
+
+        var items = nodes
+            .OrderBy(node => node.Id, StringComparer.Ordinal)
+            .Select(node =>
+            {
+                var snapped = SnapToGrid(node.Position, query.GridSize);
+                return new GraphEditorSnapGuideItemSnapshot(
+                    node.Id,
+                    node.Position,
+                    snapped,
+                    snapped - node.Position,
+                    query.GridSize);
+            })
+            .ToList();
+
+        return new GraphEditorSnapGuideSnapshot(true, query.GridSize, query.SelectionOnly, items, null);
+    }
+
     public GraphEditorViewportSnapshot GetViewportSnapshot()
         => _host.GetViewportSnapshot();
 
@@ -715,6 +758,11 @@ public sealed partial class GraphEditorSession
                && position.Y <= bottom
                && nodeBottom >= top;
     }
+
+    private static GraphPoint SnapToGrid(GraphPoint position, double gridSize)
+        => new(
+            Math.Round(position.X / gridSize, MidpointRounding.AwayFromZero) * gridSize,
+            Math.Round(position.Y / gridSize, MidpointRounding.AwayFromZero) * gridSize);
 
     private static GraphPoint NormalizeTransformDelta(GraphPoint delta, bool constrainToPrimaryAxis)
     {

@@ -30,6 +30,9 @@ public interface IGraphEditorQueries
     GraphEditorSelectionTransformSnapshot GetSelectionTransformSnapshot(GraphEditorSelectionTransformQuery? query = null)
         => throw new NotSupportedException();
 
+    GraphEditorSnapGuideSnapshot GetSnapGuideSnapshot(GraphEditorSnapGuideQuery? query = null)
+        => throw new NotSupportedException();
+
     /// <summary>
     /// 获取当前视口快照。
     /// </summary>
