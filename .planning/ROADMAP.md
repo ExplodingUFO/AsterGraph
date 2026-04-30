@@ -2,7 +2,7 @@
 
 ## Current Milestone
 
-**v0.76.0-beta Professional Canvas Engine And Authoring Workbench** — active locally 2026-04-30.
+**v0.76.0-beta Professional Canvas Engine And Authoring Workbench** — completed locally 2026-05-01.
 
 **Goal:** take a larger step from library-grade proof into a professional desktop canvas engine and authoring workbench with virtualized scene/indexing, advanced routing, groups/subgraphs, layout services, designer-grade UX, extension contracts, and release proof.
 
@@ -26,7 +26,7 @@
 - [x] **Phase 454: Groups, Subgraphs, And Collapsible Containers** — support group/container creation, nested selection, collapse/expand projection, boundary edges, and serialization snapshots.
 - [x] **Phase 455: Layout Services And Alignment Tools** — expose layout, align, distribute, snap, and incremental relayout services through host contracts and workbench commands.
 - [x] **Phase 456: Designer Workbench Authoring UX** — integrate navigator/outline, inspector, route-aware affordances, group/layout workflows, recovery states, and cookbook scenarios.
-- [ ] **Phase 457: Extension Contracts, Documentation, And Release Proof** — close supported contracts, docs, examples, proof markers, full verification, beads, Dolt, and Git handoff.
+- [x] **Phase 457: Extension Contracts, Documentation, And Release Proof** — close supported contracts, docs, examples, proof markers, full verification, beads, Dolt, and Git handoff.
 
 ## v0.76 Requirement Proof Map
 
@@ -166,8 +166,11 @@
 3. Full required verification passes, including performance-sensitive gates touched by the milestone.
 4. Beads, Dolt, Git branch, and workspace are clean and pushed.
 
+**Status:** Complete. See `.planning/phases/457-extension-contracts-documentation-and-release-proof/`.
+
 ## Completed Milestones
 
+- **v0.76.0-beta Professional Canvas Engine And Authoring Workbench** — completed locally 2026-05-01.
 - **v0.75.0-beta Cross-Platform High-Performance Desktop Node Graph Library** — completed locally 2026-04-30.
 - **v0.74.0-beta Cookbook Scenario Depth And Component Polish** — completed locally 2026-04-30.
 - **v0.73.0-beta CI Reliability And Release Gate Recovery** — completed 2026-04-30; GitHub Actions run `25159303518` passed all jobs.
@@ -175,7 +178,7 @@
 
 ## Next Step
 
-Start Phase 457 after Phase 456.
+Start the next milestone with `$gsd-new-milestone` when ready.
 
 ---
-*Roadmap updated: 2026-04-30 after completing Phase 456*
+*Roadmap updated: 2026-05-01 after completing v0.76*

@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: 456
+Phase: 457
 Plan: `.planning/ROADMAP.md`
-Status: v0.76 active; Phases 451-456 complete; ready to execute Phase 457
-Last activity: 2026-04-30 — Completed Phase 456 designer workbench authoring UX
+Status: v0.76 complete; ready to plan the next milestone
+Last activity: 2026-05-01 — Completed Phase 457 extension contracts, documentation, release proof, and milestone handoff
 
 ## Project Reference
 
@@ -16,7 +16,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-30)
 
 ## Active Beads
 
-- Active epic: `avalonia-node-map-y7i` — v0.76 Professional Canvas Engine And Authoring Workbench
+- Completed epic: `avalonia-node-map-y7i` — v0.76 Professional Canvas Engine And Authoring Workbench
 - Complete: `avalonia-node-map-y7i.1` — Phase 451: Canvas engine architecture and scale audit
 - Complete: `avalonia-node-map-y7i.2` — Phase 452: Virtualized scene index and viewport pipeline
 - Complete: `avalonia-node-map-y7i.3` — Phase 453: Professional edge routing and connection geometry
@@ -26,7 +26,10 @@ See: `.planning/PROJECT.md` (updated 2026-04-30)
   - Complete: `avalonia-node-map-y7i.6.1` — Navigator and outline projection
   - Complete: `avalonia-node-map-y7i.6.2` — Route group layout recovery affordances
   - Complete: `avalonia-node-map-y7i.6.3` — Designer cookbook proof and docs
-- Ready after Phase 456: `avalonia-node-map-y7i.7` — Phase 457: Extension contracts documentation and release proof
+- Complete: `avalonia-node-map-y7i.7` — Phase 457: Extension contracts documentation and release proof
+  - Complete: `avalonia-node-map-y7i.7.1` — Contract docs and requirement mapping audit
+  - Complete: `avalonia-node-map-y7i.7.2` — Release proof and verification gate
+  - Complete: `avalonia-node-map-y7i.7.3` — Milestone clean closeout
 
 ## Notes
 
@@ -38,7 +41,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-30)
 - Keep performance and graph-size claims tied to measured verification.
 - Use beads as the task split/status/handoff spine.
 - Use isolated worktrees for parallel implementation when phases split into independent beads.
-- Phase 452 and 453 can run in parallel after Phase 451. Phase 455 can start after 452 and 454. Phase 456 waits for 454 and 455. Phase 457 closes the milestone.
+- Phase 452 and 453 ran in parallel after Phase 451. Phase 455 started after 452 and 454. Phase 456 waited for 454 and 455. Phase 457 closed the milestone.
+- Public API baseline drift found during Phase 457 was source-backed to the Phase 456 navigator/outline query surface and was resolved by updating `eng/public-api-baseline.txt` plus public API inventory classification.
 
 ---
-*Last updated: 2026-04-30 after completing Phase 456*
+*Last updated: 2026-05-01 after completing v0.76*
