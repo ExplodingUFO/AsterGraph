@@ -49,6 +49,7 @@ internal interface IGraphEditorSessionHost
     bool TryExportSceneAsSvg(string? path);
     bool TryExportSceneAsImage(GraphEditorSceneImageExportFormat format, string? path, GraphEditorSceneImageExportOptions? options);
     bool TryImportFragmentTemplate(string path);
+    bool TryApplyFragmentTemplatePreset(string path);
     bool TryDeleteFragmentTemplate(string path);
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
     bool TryApplyLayoutPlan(GraphLayoutPlan plan, bool updateStatus);

@@ -41,8 +41,8 @@ internal sealed partial class GraphEditorKernel
         GraphPoint IGraphEditorKernelClipboardHost.GetNextPasteOrigin()
             => _owner.GetNextPasteOrigin();
 
-        string IGraphEditorKernelClipboardHost.CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey)
-            => _owner.CreateNodeId(definitionId, fallbackKey);
+        string IGraphEditorKernelClipboardHost.CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey, IEnumerable<string> reservedIds)
+            => _owner.CreateNodeId(definitionId, fallbackKey, reservedIds);
 
         string IGraphEditorKernelClipboardHost.CreateConnectionId()
             => _owner.CreateConnectionId();

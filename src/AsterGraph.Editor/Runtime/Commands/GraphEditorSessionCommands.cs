@@ -30,6 +30,7 @@ public sealed partial class GraphEditorSession
         "fragments.import",
         "fragments.clear-workspace",
         "fragments.export-template",
+        "fragments.apply-template-preset",
         "nodes.move",
         "nodes.resize",
         "nodes.surface.expand",
@@ -335,6 +336,19 @@ public sealed partial class GraphEditorSession
         }
 
         return imported;
+    }
+
+    public bool TryApplyFragmentTemplatePreset(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        var applied = _host.TryApplyFragmentTemplatePreset(path);
+        if (applied)
+        {
+            PublishCommandExecuted("fragments.apply-template-preset");
+        }
+
+        return applied;
     }
 
     public bool TryDeleteFragmentTemplate(string path)

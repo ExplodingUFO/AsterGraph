@@ -67,6 +67,7 @@ internal static class GraphEditorCommandDescriptorCatalog
             ["fragments.import"] = new("Import Fragment", "fragments", "import", null),
             ["fragments.clear-workspace"] = new("Clear Saved Fragment", "fragments", "delete", null),
             ["fragments.export-template"] = new("Export Selection As Template", "fragments", "template", null),
+            ["fragments.apply-template-preset"] = new("Apply Template Preset", "fragments", "template", null),
             ["layout.align-left"] = new("Align Left", "layout", "align-left", null),
             ["layout.align-center"] = new("Align Center", "layout", "align-center", null),
             ["layout.align-right"] = new("Align Right", "layout", "align-right", null),

@@ -442,6 +442,9 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public bool TryImportFragmentTemplate(string path)
         => _fragmentStorageCoordinator.TryImportFragmentTemplate(path);
 
+    public bool TryApplyFragmentTemplatePreset(string path)
+        => _fragmentStorageCoordinator.TryApplyFragmentTemplatePreset(path);
+
     public bool TryDeleteFragmentTemplate(string path)
         => _fragmentStorageCoordinator.TryDeleteFragmentTemplate(path);
 
@@ -2200,6 +2203,11 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         => CreateNodeId(
             (definitionId?.Value ?? fallbackKey)
             .Replace(".", "-", StringComparison.Ordinal));
+
+    private string CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey, IEnumerable<string> reservedIds)
+        => CreateUniqueId(
+            GetAllNodes().Select(node => node.Id).Concat(reservedIds),
+            $"{(definitionId?.Value ?? fallbackKey).Replace(".", "-", StringComparison.Ordinal)}-");
 
     private string CreateNodeId(string templateKey)
         => CreateUniqueId(GetAllNodes().Select(node => node.Id), $"{templateKey}-");

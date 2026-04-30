@@ -183,6 +183,14 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to apply one saved fragment template as a reusable authoring preset.
+    /// </summary>
+    /// <param name="path">Saved template path.</param>
+    /// <returns><see langword="true"/> when the preset is loaded and pasted into the active graph.</returns>
+    bool TryApplyFragmentTemplatePreset(string path)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to delete one saved fragment template by path.
     /// </summary>
     /// <param name="path">Saved template path.</param>

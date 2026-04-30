@@ -164,6 +164,18 @@ internal sealed class GraphEditorKernelFragmentStorageCoordinator
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
+        return TryLoadAndPasteFragmentTemplate(path, "Imported");
+    }
+
+    public bool TryApplyFragmentTemplatePreset(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        return TryLoadAndPasteFragmentTemplate(path, "Applied");
+    }
+
+    private bool TryLoadAndPasteFragmentTemplate(string path, string actionPrefix)
+    {
         if (!CanImportFragmentTemplate)
         {
             _host.SetStatus("Template import is disabled by host permissions.");

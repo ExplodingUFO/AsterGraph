@@ -29,7 +29,7 @@ internal interface IGraphEditorKernelClipboardHost
 
     GraphPoint GetNextPasteOrigin();
 
-    string CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey);
+    string CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey, IEnumerable<string> reservedIds);
 
     string CreateConnectionId();
 
@@ -148,7 +148,7 @@ internal sealed class GraphEditorKernelClipboardCoordinator
 
         foreach (var copiedNode in fragment.Nodes)
         {
-            var newId = _host.CreateNodeId(copiedNode.DefinitionId, copiedNode.Id);
+            var newId = _host.CreateNodeId(copiedNode.DefinitionId, copiedNode.Id, nodeIdMap.Values);
             nodeIdMap[copiedNode.Id] = newId;
 
             var relativePosition = copiedNode.Position - fragment.Origin;

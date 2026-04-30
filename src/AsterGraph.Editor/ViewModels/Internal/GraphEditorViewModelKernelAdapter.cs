@@ -127,6 +127,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public bool TryImportFragmentTemplate(string path)
         => _kernel.TryImportFragmentTemplate(path);
 
+    public bool TryApplyFragmentTemplatePreset(string path)
+        => _kernel.TryApplyFragmentTemplatePreset(path);
+
     public bool TryDeleteFragmentTemplate(string path)
         => _kernel.TryDeleteFragmentTemplate(path);
 

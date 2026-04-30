@@ -141,6 +141,9 @@ internal sealed partial class GraphEditorKernel
         string IGraphEditorKernelCommandRouterHost.TryExportSelectionAsTemplate(string? name)
             => _owner.TryExportSelectionAsTemplate(name);
 
+        bool IGraphEditorKernelCommandRouterHost.TryApplyFragmentTemplatePreset(string path)
+            => _owner.TryApplyFragmentTemplatePreset(path);
+
         bool IGraphEditorKernelCommandRouterHost.TryExportSceneAsSvg(string? path)
             => _owner.TryExportSceneAsSvg(path);
 

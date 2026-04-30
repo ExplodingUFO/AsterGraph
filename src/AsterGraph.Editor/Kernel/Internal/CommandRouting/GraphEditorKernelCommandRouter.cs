@@ -96,6 +96,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     string TryExportSelectionAsTemplate(string? name);
 
+    bool TryApplyFragmentTemplatePreset(string path);
+
     bool TryExportSceneAsSvg(string? path);
 
     bool TryExportSceneAsImage(GraphEditorSceneImageExportFormat format, string? path, GraphEditorSceneImageExportOptions? options);
@@ -334,6 +336,20 @@ internal sealed class GraphEditorKernelCommandRouter
                         : hasSelection
                             ? null
                             : "Select one or more nodes before exporting a template."),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "fragments.apply-template-preset",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Fragments.EnableFragmentLibrary
+                && _host.BehaviorOptions.Commands.Fragments.AllowTemplateManagement
+                && _host.BehaviorOptions.Commands.Fragments.AllowImport
+                && _host.BehaviorOptions.Commands.Nodes.AllowCreate,
+                !_host.BehaviorOptions.Fragments.EnableFragmentLibrary
+                    ? "Fragment template library is disabled."
+                    : !_host.BehaviorOptions.Commands.Fragments.AllowTemplateManagement
+                      || !_host.BehaviorOptions.Commands.Fragments.AllowImport
+                      || !_host.BehaviorOptions.Commands.Nodes.AllowCreate
+                        ? "Template preset application is disabled by host permissions."
+                        : null),
             GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.move",
                 GraphEditorCommandSourceKind.Kernel,
@@ -866,6 +882,7 @@ internal sealed class GraphEditorKernelCommandRouter
                 or "clipboard.copy"
                 or "fragments.export-selection"
                 or "fragments.export-template"
+                or "fragments.apply-template-preset"
                 or "nodes.insert-into-connection"
                 or "nodes.parameters.set"
                 or "groups.create"
@@ -1029,6 +1046,11 @@ internal sealed class GraphEditorKernelCommandRouter
                     ? rawName
                     : null;
                 return !string.IsNullOrWhiteSpace(_host.TryExportSelectionAsTemplate(name));
+
+            case "fragments.apply-template-preset":
+                return command.TryGetArgument("path", out var presetPath)
+                    && !string.IsNullOrWhiteSpace(presetPath)
+                    && _host.TryApplyFragmentTemplatePreset(presetPath);
 
             case "nodes.move":
                 var positions = command.GetArguments("position")

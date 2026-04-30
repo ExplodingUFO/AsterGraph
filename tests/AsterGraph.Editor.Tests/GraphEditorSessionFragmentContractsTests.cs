@@ -14,6 +14,9 @@ public sealed class GraphEditorSessionFragmentContractsTests
 {
     private static readonly NodeDefinitionId DefinitionId = new("tests.session.fragments");
     private const string FirstNodeId = "tests.session.fragments.node-001";
+    private const string PresetSourceNodeId = "tests.session.fragments.source-001";
+    private const string PresetTargetNodeId = "tests.session.fragments.target-001";
+    private const string PresetGroupId = "group-001";
 
     [Fact]
     public void RuntimeContracts_ExposeFragmentStorageAndTemplateLibrarySurface()
@@ -54,6 +57,10 @@ public sealed class GraphEditorSessionFragmentContractsTests
         Assert.Equal(
             typeof(bool),
             commandsType.GetMethod(nameof(IGraphEditorCommands.TryImportFragmentTemplate), [typeof(string)])!.ReturnType);
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryApplyFragmentTemplatePreset), typeof(string));
+        Assert.Equal(
+            typeof(bool),
+            commandsType.GetMethod(nameof(IGraphEditorCommands.TryApplyFragmentTemplatePreset), [typeof(string)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TryDeleteFragmentTemplate), typeof(string));
         Assert.Equal(
             typeof(bool),
@@ -128,6 +135,61 @@ public sealed class GraphEditorSessionFragmentContractsTests
         Assert.Contains("fragments.clear-workspace", commandIds);
     }
 
+    [Fact]
+    public void SessionCommands_ApplyFragmentTemplatePreset_IsOneUndoableRemappedFragmentPaste()
+    {
+        var session = CreatePresetSession();
+        var commandIds = new List<string>();
+        session.Events.CommandExecuted += (_, args) => commandIds.Add(args.CommandId);
+        session.Commands.SetSelection([PresetSourceNodeId, PresetTargetNodeId], PresetSourceNodeId, updateStatus: false);
+        var templatePath = session.Commands.TryExportSelectionAsTemplate("Reusable Preset");
+
+        Assert.True(session.Commands.TryApplyFragmentTemplatePreset(templatePath));
+
+        var appliedDocument = session.Queries.CreateDocumentSnapshot();
+        var appliedSelection = session.Queries.GetSelectionSnapshot();
+        var pastedNodeIds = appliedSelection.SelectedNodeIds.ToHashSet(StringComparer.Ordinal);
+        var pastedNodes = appliedDocument.Nodes.Where(node => pastedNodeIds.Contains(node.Id)).ToList();
+        var originalConnection = Assert.Single(appliedDocument.Connections, connection => connection.Id == "connection-001");
+        var pastedConnection = Assert.Single(appliedDocument.Connections, connection => connection.Id != originalConnection.Id);
+        var pastedGroup = Assert.Single(appliedDocument.Groups ?? [], group => group.Id != PresetGroupId);
+
+        Assert.Equal(4, appliedDocument.Nodes.Count);
+        Assert.Equal(2, appliedDocument.Connections.Count);
+        Assert.Equal(2, appliedDocument.Groups?.Count);
+        Assert.Equal(2, pastedNodes.Count);
+        Assert.DoesNotContain(PresetSourceNodeId, pastedNodeIds);
+        Assert.DoesNotContain(PresetTargetNodeId, pastedNodeIds);
+        Assert.Equal(pastedNodeIds.Order(StringComparer.Ordinal), pastedGroup.NodeIds.Order(StringComparer.Ordinal));
+        Assert.All(pastedNodes, node => Assert.Equal(pastedGroup.Id, node.Surface?.GroupId));
+        Assert.Contains(pastedNodeIds, nodeId => string.Equals(nodeId, pastedConnection.SourceNodeId, StringComparison.Ordinal));
+        Assert.Contains(pastedNodeIds, nodeId => string.Equals(nodeId, pastedConnection.TargetNodeId, StringComparison.Ordinal));
+        Assert.True(session.Queries.GetCapabilitySnapshot().CanUndo);
+
+        session.Commands.Undo();
+
+        var undoDocument = session.Queries.CreateDocumentSnapshot();
+        Assert.Equal(2, undoDocument.Nodes.Count);
+        Assert.Single(undoDocument.Connections);
+        Assert.Single(undoDocument.Groups ?? []);
+        Assert.DoesNotContain(undoDocument.Nodes, node => pastedNodeIds.Contains(node.Id));
+        Assert.Contains("fragments.apply-template-preset", commandIds);
+    }
+
+    [Fact]
+    public void SessionCommands_ApplyFragmentTemplatePreset_RoutesThroughCommandInvocation()
+    {
+        var session = CreatePresetSession();
+        session.Commands.SetSelection([PresetSourceNodeId, PresetTargetNodeId], PresetSourceNodeId, updateStatus: false);
+        var templatePath = session.Commands.TryExportSelectionAsTemplate("Routed Preset");
+
+        Assert.True(session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(
+            "fragments.apply-template-preset",
+            [new GraphEditorCommandArgumentSnapshot("path", templatePath)])));
+
+        Assert.Equal(4, session.Queries.CreateDocumentSnapshot().Nodes.Count);
+    }
+
     private static IGraphEditorSession CreateSession()
     {
         Directory.CreateDirectory(SessionHarness.RootPath);
@@ -156,6 +218,63 @@ public sealed class GraphEditorSessionFragmentContractsTests
             StorageRootPath = SessionHarness.RootPath,
         });
     }
+
+    private static IGraphEditorSession CreatePresetSession()
+    {
+        Directory.CreateDirectory(SessionHarness.RootPath);
+        return AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument(
+                "Reusable Preset Graph",
+                "Covers reusable preset application through fragment templates.",
+                [
+                    CreatePresetSourceNode(),
+                    CreatePresetTargetNode(),
+                ],
+                [
+                    new GraphConnection("connection-001", PresetSourceNodeId, "out", PresetTargetNodeId, "in", "Source to target", "#6AD5C4"),
+                ],
+                [
+                    new GraphNodeGroup(PresetGroupId, "Preset Group", new GraphPoint(90, 140), new GraphSize(620, 260), [PresetSourceNodeId, PresetTargetNodeId]),
+                ]),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            StorageRootPath = Path.Combine(
+                Path.GetTempPath(),
+                "astergraph-session-preset-application",
+                Guid.NewGuid().ToString("N")),
+        });
+    }
+
+    private static GraphNode CreatePresetSourceNode()
+        => new(
+            PresetSourceNodeId,
+            "Preset Source",
+            "Tests",
+            "GraphEditorSession",
+            "Source node for reusable preset tests.",
+            new GraphPoint(120, 180),
+            new GraphSize(240, 160),
+            [],
+            [new GraphPort("out", "Out", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+            "#6AD5C4",
+            DefinitionId,
+            Surface: new GraphNodeSurfaceState(GroupId: PresetGroupId));
+
+    private static GraphNode CreatePresetTargetNode()
+        => new(
+            PresetTargetNodeId,
+            "Preset Target",
+            "Tests",
+            "GraphEditorSession",
+            "Target node for reusable preset tests.",
+            new GraphPoint(440, 180),
+            new GraphSize(240, 160),
+            [new GraphPort("in", "In", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+            [],
+            "#F3B36B",
+            DefinitionId,
+            Surface: new GraphNodeSurfaceState(GroupId: PresetGroupId));
 
     private static INodeCatalog CreateCatalog()
     {
