@@ -24,7 +24,7 @@
 - [x] **Phase 459: Unified Command Registry And Keybinding Surface** — exposed command discovery, keybinding metadata, menu/tool projection, disabled recovery states, and execution through canonical session boundaries.
 - [x] **Phase 460: Semantic Editing Operations And Clipboard Model** — supported source-backed copy/paste payloads, groups/connections, delete-with-repair, insert-into-route, reconnect, and semantic command routing.
 - [x] **Phase 461: Template Palette And Reusable Authoring Presets** — added host-provided node/fragment templates, searchable palette projection, and undoable reusable preset application.
-- [ ] **Phase 462: Advanced Selection Transform And Spatial Editing** — deepen marquee/lasso projection, keyboard nudging, constrained move/resize, snap guides, and multi-item transform evidence.
+- [x] **Phase 462: Advanced Selection Transform And Spatial Editing** — added source-backed selection transform snapshots, rectangle projection, constrained selection move, and snap guide projection.
 - [ ] **Phase 463: Viewport Navigation Search And Focus Workflows** — add search, jump, breadcrumb, bookmark, minimap-aware focus, and measured large-graph navigation evidence.
 - [ ] **Phase 464: Professional Cookbook Authoring Flows** — demonstrate command, editing, template, selection, and navigation workflows as code plus live proof.
 - [ ] **Phase 465: v0.77 Contracts Documentation And Release Proof** — close supported contracts, docs, examples, public API baseline, CI-sensitive tests, beads, Dolt, and Git handoff.
@@ -169,7 +169,7 @@
 
 ## Next Step
 
-Start Phase 462 and Phase 463 next. They are independent after Phase 459/461 and can be split into project-local `.worktrees/` branches in parallel; Phase 464 remains blocked until Phases 462 and 463 close.
+Continue Phase 463. Phase 464 remains blocked until Phase 463 search/focus workflows close.
 
 ---
-*Roadmap updated: 2026-05-01 after completing Phase 461*
+*Roadmap updated: 2026-05-01 after completing Phase 462*
