@@ -2,7 +2,7 @@
 
 `AsterGraph.Avalonia` is the default Avalonia UI package for AsterGraph.
 
-It belongs to the supported published package set with `AsterGraph.Abstractions`, `AsterGraph.Core`, and `AsterGraph.Editor`, and it targets `net8.0` and `net9.0`.
+It belongs to the supported published package set with `AsterGraph.Abstractions`, `AsterGraph.Core`, and `AsterGraph.Editor`, and it targets `net8.0`, `net9.0`, and `net10.0`.
 
 ## Reference This Package When
 

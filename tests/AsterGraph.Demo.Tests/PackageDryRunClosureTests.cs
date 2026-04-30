@@ -31,7 +31,7 @@ public sealed class PackageDryRunClosureTests
             Assert.NotNull(propertyGroup);
             Assert.Equal(packageId, propertyGroup!.Element("PackageId")?.Value);
             Assert.Equal("true", propertyGroup.Element("IsPackable")?.Value);
-            Assert.Equal("net8.0;net9.0", propertyGroup.Element("TargetFrameworks")?.Value);
+            Assert.Equal("net8.0;net9.0;net10.0", propertyGroup.Element("TargetFrameworks")?.Value);
             Assert.False(string.IsNullOrWhiteSpace(propertyGroup.Element("Description")?.Value));
             Assert.Equal("README.md", propertyGroup.Element("PackageReadmeFile")?.Value);
             Assert.Contains(

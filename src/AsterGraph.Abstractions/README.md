@@ -11,7 +11,7 @@ Supported package set:
 - `AsterGraph.Editor`
 - `AsterGraph.Avalonia`
 
-All four publishable packages target `net8.0` and `net9.0`.
+All four publishable packages target `net8.0`, `net9.0`, and `net10.0`.
 
 Direct package reference:
 

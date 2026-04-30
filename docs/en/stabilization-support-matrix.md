@@ -7,7 +7,7 @@ This page freezes the consumer-facing support boundary on the path toward `v1.0.
 | Area | Stabilized rule | Notes |
 | --- | --- | --- |
 | Published SDK packages | `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, `AsterGraph.Avalonia` | These are the only supported published SDK packages. Sample and proof tools stay out of the package boundary. |
-| Target frameworks | `net8.0` and `net9.0` | These are the supported published targets for the SDK surface. |
+| Target frameworks | `net8.0`, `net9.0`, and `net10.0` | These are the supported published targets for the SDK surface. |
 | Canonical runtime route | `CreateSession(...)` + `IGraphEditorSession` | This remains the supported runtime/custom-UI route. |
 | Hosted route | `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | This remains the supported hosted-Avalonia route. |
 | Hosted adapter | Avalonia | This is the supported hosted adapter path today. |

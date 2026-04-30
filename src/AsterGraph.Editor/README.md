@@ -4,7 +4,7 @@
 
 The canonical route stays session-first/runtime-first. Treat retained MVVM entry points as compatibility bridges only.
 
-It belongs to the supported published package set with `AsterGraph.Abstractions`, `AsterGraph.Core`, and `AsterGraph.Avalonia`, and it targets `net8.0` and `net9.0`.
+It belongs to the supported published package set with `AsterGraph.Abstractions`, `AsterGraph.Core`, and `AsterGraph.Avalonia`, and it targets `net8.0`, `net9.0`, and `net10.0`.
 
 ## Reference This Package When
 

@@ -7,7 +7,7 @@
 | 维度 | 稳定化规则 | 说明 |
 | --- | --- | --- |
 | 公开 SDK 包 | `AsterGraph.Abstractions`、`AsterGraph.Core`、`AsterGraph.Editor`、`AsterGraph.Avalonia` | 这是当前唯一受支持的公开 SDK 包边界；sample 和 proof tool 不算公开包面。 |
-| 目标框架 | `net8.0`、`net9.0` | 这是当前公开 SDK 的受支持目标框架。 |
+| 目标框架 | `net8.0`、`net9.0`、`net10.0` | 这是当前公开 SDK 的受支持目标框架。 |
 | canonical runtime 路线 | `CreateSession(...)` + `IGraphEditorSession` | 这是受支持的 runtime/custom-UI 路线。 |
 | hosted 路线 | `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | 这是当前受支持的 hosted Avalonia 路线。 |
 | hosted adapter | Avalonia | 当前真正受支持的 hosted adapter 只有 Avalonia。 |

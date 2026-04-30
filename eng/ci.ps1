@@ -3,7 +3,7 @@ param(
   [ValidateSet('restore', 'build', 'test', 'maintenance', 'contract', 'release', 'hygiene', 'all')]
   [string]$Lane = 'all',
 
-  [ValidateSet('all', 'net8.0', 'net9.0')]
+  [ValidateSet('all', 'net8.0', 'net9.0', 'net10.0')]
   [string]$Framework = 'all',
 
   [ValidateSet('Debug', 'Release')]
@@ -25,6 +25,7 @@ $publicRepoHygieneProofPath = Join-Path $proofArtifactsRoot 'public-repo-hygiene
 $hostSampleProjectProofPath = Join-Path $proofArtifactsRoot 'hostsample-project.txt'
 $consumerSampleProofPath = Join-Path $proofArtifactsRoot 'consumer-sample.txt'
 $hostSamplePackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-packed.txt'
+$hostSampleNet10ProjectProofPath = Join-Path $proofArtifactsRoot 'hostsample-net10-project.txt'
 $hostSampleNet10PackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-net10-packed.txt'
 $helloWorldWpfProofPath = Join-Path $proofArtifactsRoot 'hello-world-wpf-proof.txt'
 $wpfAdapterCapabilityMatrixProofPath = Join-Path $proofArtifactsRoot 'wpf-adapter-capability-matrix.txt'
@@ -96,6 +97,7 @@ $frameworkBuildProjects = @{
     'tests/AsterGraph.TestPlugins/AsterGraph.TestPlugins.csproj',
     'src/AsterGraph.Demo/AsterGraph.Demo.csproj'
   )
+  'net10.0' = @()
 }
 
 $frameworkTestProjects = @{
@@ -110,6 +112,7 @@ $frameworkTestProjects = @{
     'tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj',
     $pluginToolTestsProject
   )
+  'net10.0' = @()
 }
 
 $maintenanceTestFilter = @(
@@ -342,7 +345,7 @@ function Initialize-RepoToolingEnvironment {
 
 function Get-Frameworks {
   if ($Framework -eq 'all') {
-    return @('net8.0', 'net9.0')
+    return @('net8.0', 'net9.0', 'net10.0')
   }
 
   return @($Framework)
@@ -534,6 +537,10 @@ function Invoke-TestAndTooling {
         '-v',
         'minimal'
       ) + $singleProcessBuildArguments + $buildStabilityProperties)
+    }
+
+    if ($targetFramework -eq 'net10.0') {
+      Invoke-HostSample -TargetFramework net10.0
     }
   }
 
@@ -779,26 +786,28 @@ function Invoke-HostSample {
     [string]$TargetFramework = 'net8.0'
   )
 
-  if ($TargetFramework -eq 'net10.0' -and -not $UsePackedPackages) {
-    throw '.NET 10 HostSample proof requires packed-package consumption.'
-  }
-
   $propertyArguments = @()
   $restoreProperties = @{}
-  $modeLabel = if ($TargetFramework -eq 'net10.0') { 'packed packages (.NET 10)' } else { 'project references' }
+  $modeLabel = if ($TargetFramework -eq 'net10.0') { '.NET 10 project references' } else { 'project references' }
 
   if ($UsePackedPackages) {
     if ($TargetFramework -eq 'net8.0') {
       $modeLabel = 'packed packages'
     }
+    elseif ($TargetFramework -eq 'net10.0') {
+      $modeLabel = 'packed packages (.NET 10)'
+    }
 
     $restoreProperties = @{ UsePackedAsterGraphPackages = 'true' }
     $propertyArguments += '/p:UsePackedAsterGraphPackages=true'
-    if ($TargetFramework -eq 'net10.0') {
-      $restoreProperties.EnableNet10ConsumerProof = 'true'
-      $propertyArguments += '/p:EnableNet10ConsumerProof=true'
-    }
+  }
 
+  if ($TargetFramework -eq 'net10.0') {
+    $restoreProperties.EnableNet10ConsumerProof = 'true'
+    $propertyArguments += '/p:EnableNet10ConsumerProof=true'
+  }
+
+  if ($UsePackedPackages -or $TargetFramework -eq 'net10.0') {
     Invoke-RestoreProjects -Projects @($hostSampleProject) -Properties $restoreProperties
   }
 
@@ -806,7 +815,9 @@ function Invoke-HostSample {
   Write-Host "### Run HostSample ($modeLabel)" -ForegroundColor Yellow
 
   $capturePath = switch ($TargetFramework) {
-    'net10.0' { $hostSampleNet10PackedProofPath }
+    'net10.0' {
+      if ($UsePackedPackages) { $hostSampleNet10PackedProofPath } else { $hostSampleNet10ProjectProofPath }
+    }
     default {
       if ($UsePackedPackages) { $hostSamplePackedProofPath } else { $hostSampleProjectProofPath }
     }
@@ -840,6 +851,9 @@ function Invoke-HostSample {
 
   if ($TargetFramework -eq 'net10.0') {
     Add-Content -LiteralPath $capturePath -Value 'HOST_SAMPLE_NET10_OK:True'
+    if (-not $UsePackedPackages) {
+      Add-Content -LiteralPath $capturePath -Value 'HOST_SAMPLE_NET10_PROJECT_OK:True'
+    }
   }
 }
 
@@ -1213,7 +1227,7 @@ function Invoke-ReleaseValidation {
     Write-Warning "Release lane validates the full release surface. Ignoring -Framework $Framework and using all."
   }
 
-  $releaseFrameworks = @('net8.0', 'net9.0')
+  $releaseFrameworks = @('net8.0', 'net9.0', 'net10.0')
   Reset-Directory -Path $proofArtifactsRoot
 
   Invoke-RestoreProjects -Projects (Get-DefaultRestoreProjects -Frameworks $releaseFrameworks)

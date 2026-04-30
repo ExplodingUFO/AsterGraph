@@ -60,7 +60,7 @@ dotnet run --project tools/AsterGraph.PluginTool -- validate ./MyGraphPlugin/bin
 - 与当前包版本配对的对外 SemVer prerelease 标签：`v0.11.0-beta`
 - 历史仓库里程碑标签系列：`v1.x` 风格的公开前检查点（公开前的旧检查点，不是 NuGet 包版本）
 - GitHub prerelease/Release 条目必须使用与 NuGet 包相同的 SemVer；本地规划里程碑不是公开发布标识
-- 公开发布包目标框架：`net8.0`、`net9.0`
+- 公开发布包目标框架：`net8.0`、`net9.0`、`net10.0`
 - release lane 还会用打包后的 `HostSample` 额外证明下游 `.NET 10` 消费兼容性
 - 后续对外 prerelease tag 应与当前包版本的 SemVer 对齐，比如 `v0.11.0-beta`
 - 包版本与历史仓库 tag 的关系说明：[Versioning](./docs/zh-CN/versioning.md)

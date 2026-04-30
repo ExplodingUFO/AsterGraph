@@ -22,7 +22,7 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("# Stabilization Support Matrix", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("Published SDK packages", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("`AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, `AsterGraph.Avalonia`", supportMatrix, StringComparison.Ordinal);
-        Assert.Contains("`net8.0` and `net9.0`", supportMatrix, StringComparison.Ordinal);
+        Assert.Contains("`net8.0`, `net9.0`, and `net10.0`", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("`CreateSession(...)` + `IGraphEditorSession`", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("`Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("Avalonia", supportMatrix, StringComparison.Ordinal);
@@ -44,7 +44,7 @@ public sealed class StabilizationSupportDocsTests
             AssertDoesNotContainStaleAlphaForms(contents);
         }
 
-        Assert.Contains("published packages target `net8.0` and `net9.0`", readme, StringComparison.Ordinal);
+        Assert.Contains("published packages target `net8.0`, `net9.0`, and `net10.0`", readme, StringComparison.Ordinal);
         Assert.Contains("Treat `WPF` only as adapter-2 portability validation", quickStart, StringComparison.Ordinal);
         Assert.Contains("active adapter validation target: `WPF` as adapter 2", projectStatus, StringComparison.Ordinal);
         Assert.Contains("The stabilization support matrix freezes the consumer-facing boundary", versioning, StringComparison.Ordinal);
@@ -65,7 +65,7 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("# 稳定化支持矩阵", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("公开 SDK 包", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("`AsterGraph.Abstractions`、`AsterGraph.Core`、`AsterGraph.Editor`、`AsterGraph.Avalonia`", supportMatrix, StringComparison.Ordinal);
-        Assert.Contains("`net8.0`、`net9.0`", supportMatrix, StringComparison.Ordinal);
+        Assert.Contains("`net8.0`、`net9.0`、`net10.0`", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("`CreateSession(...)` + `IGraphEditorSession`", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("`Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("当前真正受支持的 hosted adapter 只有 Avalonia", supportMatrix, StringComparison.Ordinal);
@@ -87,7 +87,7 @@ public sealed class StabilizationSupportDocsTests
             AssertDoesNotContainStaleAlphaForms(contents);
         }
 
-        Assert.Contains("公开发布包目标框架：`net8.0`、`net9.0`", readme, StringComparison.Ordinal);
+        Assert.Contains("公开发布包目标框架：`net8.0`、`net9.0`、`net10.0`", readme, StringComparison.Ordinal);
         Assert.Contains("WPF 仅是 adapter-2 portability validation", quickStart, StringComparison.Ordinal);
         Assert.Contains("`WPF` 作为 adapter 2", projectStatus, StringComparison.Ordinal);
         Assert.Contains("稳定化支持矩阵", versioning, StringComparison.Ordinal);

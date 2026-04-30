@@ -22,7 +22,7 @@ When a host asks "which version of AsterGraph should I install?", this package v
 The stabilization support matrix freezes the consumer-facing boundary that leads into `v1.0.0`:
 
 - four published SDK packages only
-- `net8.0` and `net9.0` as the supported published frameworks
+- `net8.0`, `net9.0`, and `net10.0` as the supported published frameworks
 - Avalonia as the supported hosted adapter
 - `WPF` as validation-only and partial-fallback per the adapter matrix; do not read it as a parity or alignment promise
 - retained MVVM as migration-only

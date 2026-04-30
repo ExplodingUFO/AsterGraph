@@ -60,7 +60,7 @@ For the shortest hosted composition code, use `AsterGraphHostBuilder.Create().Us
 - matching public prerelease tag for this package line: `v0.11.0-beta`
 - historical legacy repository milestone tag series: `v1.x`-style pre-launch checkpoints (historical pre-launch checkpoints, not the NuGet version)
 - GitHub prerelease/Release entries must use the same SemVer as the NuGet packages; local planning milestones are not public release identifiers
-- published packages target `net8.0` and `net9.0`
+- published packages target `net8.0`, `net9.0`, and `net10.0`
 - packed `HostSample` also proves downstream `.NET 10` consumption during the release gate
 - public prerelease tags must match the package version exactly for this package line, for example `v0.11.0-beta`
 - package version versus historical repository-tag guidance: [Versioning](./docs/en/versioning.md)
