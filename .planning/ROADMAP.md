@@ -22,7 +22,7 @@
 
 - [x] **Phase 458: Command Platform Architecture And Input Audit** — mapped command descriptors, input routing, menu/tool surfaces, undo boundaries, and host extension seams before implementation.
 - [x] **Phase 459: Unified Command Registry And Keybinding Surface** — exposed command discovery, keybinding metadata, menu/tool projection, disabled recovery states, and execution through canonical session boundaries.
-- [ ] **Phase 460: Semantic Editing Operations And Clipboard Model** — support copy, paste, duplicate, delete-with-repair, insert-into-route, reconnect, and semantic batch editing.
+- [x] **Phase 460: Semantic Editing Operations And Clipboard Model** — supported source-backed copy/paste payloads, groups/connections, delete-with-repair, insert-into-route, reconnect, and semantic command routing.
 - [ ] **Phase 461: Template Palette And Reusable Authoring Presets** — add host-provided node/group/fragment templates and searchable palette projection.
 - [ ] **Phase 462: Advanced Selection Transform And Spatial Editing** — deepen marquee/lasso projection, keyboard nudging, constrained move/resize, snap guides, and multi-item transform evidence.
 - [ ] **Phase 463: Viewport Navigation Search And Focus Workflows** — add search, jump, breadcrumb, bookmark, minimap-aware focus, and measured large-graph navigation evidence.
@@ -169,7 +169,7 @@
 
 ## Next Step
 
-Start Phase 460. Phases 461-463 are also unblocked after Phase 459 and can be split for parallel execution after Phase 460 command semantics are anchored.
+Start Phase 461. Phases 462 and 463 remain unblocked and can be split into project-local worktrees in parallel once their bead boundaries are clear.
 
 ---
-*Roadmap updated: 2026-05-01 after completing Phase 459*
+*Roadmap updated: 2026-05-01 after completing Phase 460*
