@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: 459 ready
+Phase: 460 ready
 Plan: `.planning/ROADMAP.md`
-Status: Phase 458 complete; command/input architecture audited; ready to plan Phase 459
-Last activity: 2026-05-01 — Completed Phase 458 Command Platform Architecture And Input Audit
+Status: Phase 459 complete; command registry, shortcut conflicts, and registry-backed Avalonia command surfaces are implemented
+Last activity: 2026-05-01 — Completed Phase 459 Unified Command Registry And Keybinding Surface
 
 ## Project Reference
 
@@ -18,8 +18,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 
 - Active epic: `avalonia-node-map-48w` — v0.77 Semantic Authoring And Command Platform
 - Completed: `avalonia-node-map-48w.1` — Phase 458: Command Platform Architecture And Input Audit
-- Ready: `avalonia-node-map-48w.2` — Phase 459: Unified Command Registry And Keybinding Surface
-- Blocked by Phase 459:
+- Completed: `avalonia-node-map-48w.2` — Phase 459: Unified Command Registry And Keybinding Surface
+- Ready after Phase 459:
   - `avalonia-node-map-48w.3` — Phase 460: Semantic Editing Operations And Clipboard Model
   - `avalonia-node-map-48w.4` — Phase 461: Template Palette And Reusable Authoring Presets
   - `avalonia-node-map-48w.5` — Phase 462: Advanced Selection Transform And Spatial Editing
@@ -38,7 +38,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 - Use beads as the task split/status/handoff spine.
 - Use isolated project-local `.worktrees/` worktrees for parallel implementation when phases split into independent beads.
 - Phase 458 established that v0.77 should harden the existing descriptor/session command spine instead of adding a second command runtime.
-- After 459, Phases 460-463 can run in parallel. Phase 464 waits for 460-463. Phase 465 closes the milestone.
+- Phase 459 added runtime command registry entries, workbench placement metadata, hosted shortcut conflict detection, and registry-backed stock Avalonia command surfaces.
+- Phases 460-463 can now run, with Phase 460 recommended first to anchor semantic editing commands. Phase 464 waits for 460-463. Phase 465 closes the milestone.
 
 ---
-*Last updated: 2026-05-01 after completing Phase 458*
+*Last updated: 2026-05-01 after completing Phase 459*
