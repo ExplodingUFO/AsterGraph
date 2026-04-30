@@ -197,6 +197,13 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets stock runtime command placement metadata backed by the shared session command route.
+    /// </summary>
+    /// <returns>Runtime command registry entries keyed by stable session command ids.</returns>
+    IReadOnlyList<GraphEditorCommandRegistryEntrySnapshot> GetCommandRegistry()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Gets stable contextual tool descriptors backed by the shared command route.
     /// </summary>
     /// <param name="context">The requested tool context.</param>

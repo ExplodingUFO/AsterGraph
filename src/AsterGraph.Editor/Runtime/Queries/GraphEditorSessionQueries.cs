@@ -117,6 +117,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("query.node-template-snapshots", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.edge-template-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.compatible-node-definitions", "query", supportsDefinitionMetadata),
+                new GraphEditorFeatureDescriptorSnapshot("query.command-registry", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.tool-descriptors", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.shared-selection-definition", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.selected-node-parameter-snapshots", "query", supportsDefinitionMetadata),
@@ -284,6 +285,9 @@ public sealed partial class GraphEditorSession
         descriptors.AddRange(CollectPluginCommandDescriptors(descriptors.Select(descriptor => descriptor.Id).ToArray()));
         return descriptors;
     }
+
+    public IReadOnlyList<GraphEditorCommandRegistryEntrySnapshot> GetCommandRegistry()
+        => GraphEditorCommandRegistry.Create(GetCommandDescriptors());
 
     public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots()
         => _host.GetNodeSurfaceSnapshots();
