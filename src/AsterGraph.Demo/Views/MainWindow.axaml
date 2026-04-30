@@ -29,6 +29,19 @@
     </ResourceDictionary>
   </Window.Resources>
 
+  <Window.Styles>
+    <Style Selector="Button.cookbook-workspace-recipe">
+      <Setter Property="Background" Value="#101923" />
+      <Setter Property="BorderBrush" Value="#365063" />
+      <Setter Property="Foreground" Value="#F4FFFC" />
+    </Style>
+    <Style Selector="Button.cookbook-workspace-recipe.selected">
+      <Setter Property="Background" Value="#183744" />
+      <Setter Property="BorderBrush" Value="#7FE7D7" />
+      <Setter Property="Foreground" Value="#FFFFFF" />
+    </Style>
+  </Window.Styles>
+
   <DockPanel Margin="24"
              LastChildFill="True">
     <Border DockPanel.Dock="Top"
@@ -1184,13 +1197,12 @@
                                 <Button Margin="0,0,0,6"
                                         Padding="10,8"
                                         HorizontalAlignment="Stretch"
-                                        Background="#101923"
-                                        BorderBrush="#365063"
                                         BorderThickness="1"
                                         CornerRadius="8"
+                                        Classes="cookbook-workspace-recipe"
+                                        Classes.selected="{Binding IsSelected}"
                                         Command="{Binding $parent[Window].DataContext.SelectCookbookWorkspaceRecipeCommand}"
-                                        CommandParameter="{Binding}"
-                                        Foreground="#F4FFFC">
+                                        CommandParameter="{Binding}">
                                   <TextBlock TextWrapping="Wrap"
                                              FontSize="13"
                                              FontWeight="SemiBold"
@@ -1302,6 +1314,7 @@
             <Border x:Name="PART_CookbookWorkspaceRecipeContentPanel"
                       Grid.Row="2"
                       Padding="12"
+                      MaxHeight="260"
                       Background="#14202B"
                       BorderBrush="#365063"
                       BorderThickness="1"

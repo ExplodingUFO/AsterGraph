@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Demo.Cookbook;
 using AsterGraph.Demo.ViewModels;
@@ -133,6 +134,8 @@ public sealed class DemoCookbookNavigationTests
         Assert.True(navigationPanel.IsVisible);
         Assert.True(contentPanel.IsVisible);
         Assert.Equal(304, navigationPanel.Width);
+        Assert.Equal(320, editorFrame.MinHeight);
+        Assert.Equal(260, contentPanel.MaxHeight);
         Assert.Equal(1, Grid.GetColumn(contentShell));
         Assert.Equal(1, Grid.GetRow(editorFrame));
         Assert.Equal(2, Grid.GetRow(contentPanel));
@@ -157,6 +160,37 @@ public sealed class DemoCookbookNavigationTests
         Assert.Same(viewModel.FilteredCookbookRecipes, recipeList.ItemsSource);
         Assert.Same(viewModel.SelectedCookbookRecipe, recipeList.SelectedItem);
         Assert.Same(graphEditorView, graphHost.Content);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_CookbookWorkspaceNavigationShowsSelectedRecipeState()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+        window.UpdateLayout();
+        viewModel.OpenHostMenuGroupCommand.Execute("cookbook");
+        window.UpdateLayout();
+
+        var initialRecipeId = viewModel.SelectedCookbookRecipe.Id;
+        var initialButton = FindCookbookRecipeButton(window, initialRecipeId);
+        Assert.Contains("selected", initialButton.Classes);
+
+        var nextItem = viewModel.CookbookWorkspace.NavigationGroups
+            .SelectMany(group => group.Recipes)
+            .First(recipe => recipe.RecipeId != initialRecipeId);
+
+        viewModel.SelectCookbookWorkspaceRecipeCommand.Execute(nextItem);
+        window.UpdateLayout();
+
+        var currentButton = FindCookbookRecipeButton(window, nextItem.RecipeId);
+        var previousButton = FindCookbookRecipeButton(window, initialRecipeId);
+        Assert.Contains("selected", currentButton.Classes);
+        Assert.DoesNotContain("selected", previousButton.Classes);
     }
 
     [Fact]
@@ -208,4 +242,11 @@ public sealed class DemoCookbookNavigationTests
         viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "support");
         Assert.Equal([recipe.SupportBoundary], viewModel.SelectedCookbookWorkspaceDetailLines);
     }
+
+    private static Button FindCookbookRecipeButton(MainWindow window, string recipeId)
+        => window.GetVisualDescendants()
+            .OfType<Button>()
+            .Single(button =>
+                button.CommandParameter is DemoCookbookWorkspaceNavigationItem item
+                && string.Equals(item.RecipeId, recipeId, StringComparison.Ordinal));
 }
