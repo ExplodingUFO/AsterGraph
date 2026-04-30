@@ -26,7 +26,7 @@
 - [x] **Phase 461: Template Palette And Reusable Authoring Presets** — added host-provided node/fragment templates, searchable palette projection, and undoable reusable preset application.
 - [x] **Phase 462: Advanced Selection Transform And Spatial Editing** — added source-backed selection transform snapshots, rectangle projection, constrained selection move, and snap guide projection.
 - [x] **Phase 463: Viewport Navigation Search And Focus Workflows** — add search, jump, breadcrumb, bookmark, minimap-aware focus, and measured large-graph navigation evidence.
-- [ ] **Phase 464: Professional Cookbook Authoring Flows** — demonstrate command, editing, template, selection, and navigation workflows as code plus live proof.
+- [x] **Phase 464: Professional Cookbook Authoring Flows** — demonstrate command, editing, template, selection, and navigation workflows as code plus live proof.
 - [ ] **Phase 465: v0.77 Contracts Documentation And Release Proof** — close supported contracts, docs, examples, public API baseline, CI-sensitive tests, beads, Dolt, and Git handoff.
 
 ## Phase Details
@@ -169,7 +169,7 @@
 
 ## Next Step
 
-Continue Phase 464. Phase 463 search/focus workflows are closed and Phase 464 cookbook flows are now unblocked.
+Continue Phase 465. Phase 464 cookbook flows are closed and v0.77 contract/release proof is now unblocked.
 
 ---
-*Roadmap updated: 2026-05-01 after completing Phase 463*
+*Roadmap updated: 2026-05-01 after completing Phase 464*

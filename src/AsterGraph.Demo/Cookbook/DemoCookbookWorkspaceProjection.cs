@@ -56,16 +56,7 @@ public sealed record DemoCookbookWorkspaceInteractionFacet(
     string FocusLabel,
     string FocusTarget);
 
-public sealed record DemoCookbookWorkspaceWorkflowStep(
-    string Key,
-    DemoCookbookWorkflowKind Kind,
-    string Title,
-    string CommandId,
-    string CodeTarget,
-    string DemoTarget,
-    string ProofMarker);
-
-public static class DemoCookbookWorkspaceProjection
+public static partial class DemoCookbookWorkspaceProjection
 {
     public static DemoCookbookWorkspaceSnapshot Create(
         string? selectedRecipeId = null,
@@ -179,8 +170,7 @@ public static class DemoCookbookWorkspaceProjection
             .Select(anchor => new DemoCookbookWorkspaceAnchor(anchor.Label, anchor.Path, anchor.Evidence))
             .ToArray();
 
-    private static IReadOnlyList<DemoCookbookWorkspaceScenarioPoint> ConvertScenarioPoints(
-        DemoCookbookRecipe recipe)
+    private static IReadOnlyList<DemoCookbookWorkspaceScenarioPoint> ConvertScenarioPoints(DemoCookbookRecipe recipe)
         => recipe.ScenarioPoints
             .Select((point, index) => new DemoCookbookWorkspaceScenarioPoint(
                 CreateScenarioPointKey(recipe.Id, index),
@@ -219,19 +209,6 @@ public static class DemoCookbookWorkspaceProjection
                 facet.Evidence,
                 FormatInteractionFocusLabel(facet.Kind),
                 ResolveEvidenceTarget(recipe, facet.Evidence, "interaction")))
-            .ToArray();
-
-    private static IReadOnlyList<DemoCookbookWorkspaceWorkflowStep> ConvertWorkflowSteps(
-        DemoCookbookRecipe recipe)
-        => recipe.WorkflowSteps
-            .Select((step, index) => new DemoCookbookWorkspaceWorkflowStep(
-                recipe.Id + ":workflow-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                step.Kind,
-                step.Title,
-                step.CommandId,
-                ResolveEvidenceTarget(recipe, step.CodeEvidence, "workflow code"),
-                ResolveEvidenceTarget(recipe, step.DemoEvidence, "workflow demo"),
-                step.ProofMarker))
             .ToArray();
 
     private static string CreateInteractionFacetKey(string recipeId, int index)
