@@ -171,8 +171,17 @@ internal sealed partial class GraphEditorKernel
         bool IGraphEditorKernelCommandRouterHost.TrySetSelectedNodeParameterValue(string parameterKey, object? value)
             => _owner.TrySetSelectedNodeParameterValue(parameterKey, value);
 
-        bool IGraphEditorKernelCommandRouterHost.TryApplySelectionLayout(GraphEditorSelectionLayoutOperation operation, bool updateStatus)
+        bool IGraphEditorKernelCommandRouterHost.TryApplyLayoutPlan(GraphLayoutPlan plan, bool updateStatus)
+            => _owner.TryApplyLayoutPlan(plan, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TryApplySelectionLayout(GraphSelectionLayoutOperation operation, bool updateStatus)
             => _owner.TryApplySelectionLayout(operation, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TrySnapSelectedNodesToGrid(double gridSize, bool updateStatus)
+            => _owner.TrySnapSelectedNodesToGrid(gridSize, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TrySnapAllNodesToGrid(double gridSize, bool updateStatus)
+            => _owner.TrySnapAllNodesToGrid(gridSize, updateStatus);
 
         void IGraphEditorKernelCommandRouterHost.StartConnection(string sourceNodeId, string sourcePortId)
             => _owner.StartConnection(sourceNodeId, sourcePortId);

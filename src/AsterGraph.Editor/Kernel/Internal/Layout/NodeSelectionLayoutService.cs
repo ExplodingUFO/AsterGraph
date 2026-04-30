@@ -1,26 +1,27 @@
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.Kernel.Internal.Layout;
 
 internal static class NodeSelectionLayoutService
 {
     public static IReadOnlyList<NodePositionSnapshot> Apply(
-        GraphEditorSelectionLayoutOperation operation,
+        GraphSelectionLayoutOperation operation,
         IReadOnlyList<NodeSelectionLayoutInput> nodes)
     {
         ArgumentNullException.ThrowIfNull(nodes);
 
         return operation switch
         {
-            GraphEditorSelectionLayoutOperation.AlignLeft => AlignLeft(nodes),
-            GraphEditorSelectionLayoutOperation.AlignCenter => AlignCenter(nodes),
-            GraphEditorSelectionLayoutOperation.AlignRight => AlignRight(nodes),
-            GraphEditorSelectionLayoutOperation.AlignTop => AlignTop(nodes),
-            GraphEditorSelectionLayoutOperation.AlignMiddle => AlignMiddle(nodes),
-            GraphEditorSelectionLayoutOperation.AlignBottom => AlignBottom(nodes),
-            GraphEditorSelectionLayoutOperation.DistributeHorizontally => DistributeHorizontally(nodes),
-            GraphEditorSelectionLayoutOperation.DistributeVertically => DistributeVertically(nodes),
+            GraphSelectionLayoutOperation.AlignLeft => AlignLeft(nodes),
+            GraphSelectionLayoutOperation.AlignCenter => AlignCenter(nodes),
+            GraphSelectionLayoutOperation.AlignRight => AlignRight(nodes),
+            GraphSelectionLayoutOperation.AlignTop => AlignTop(nodes),
+            GraphSelectionLayoutOperation.AlignMiddle => AlignMiddle(nodes),
+            GraphSelectionLayoutOperation.AlignBottom => AlignBottom(nodes),
+            GraphSelectionLayoutOperation.DistributeHorizontally => DistributeHorizontally(nodes),
+            GraphSelectionLayoutOperation.DistributeVertically => DistributeVertically(nodes),
             _ => SnapshotPositions(nodes),
         };
     }
@@ -173,16 +174,4 @@ internal static class NodeSelectionLayoutService
         => nodes
             .Select(node => new NodePositionSnapshot(node.NodeId, node.Position))
             .ToList();
-}
-
-internal enum GraphEditorSelectionLayoutOperation
-{
-    AlignLeft,
-    AlignCenter,
-    AlignRight,
-    AlignTop,
-    AlignMiddle,
-    AlignBottom,
-    DistributeHorizontally,
-    DistributeVertically,
 }

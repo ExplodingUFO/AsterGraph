@@ -199,6 +199,41 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Creates a layout plan through the configured host layout provider without mutating the document.
+    /// </summary>
+    /// <param name="request">Requested layout scope and spacing.</param>
+    /// <returns>The preview plan returned by the configured provider.</returns>
+    GraphLayoutPlan PreviewLayoutPlan(GraphLayoutRequest request)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Applies one previously previewed layout plan as a single undoable layout mutation.
+    /// </summary>
+    /// <param name="plan">Layout plan to apply.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the plan is valid and was accepted.</returns>
+    bool TryApplyLayoutPlan(GraphLayoutPlan plan, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Creates and applies a layout plan through the configured host layout provider.
+    /// </summary>
+    /// <param name="request">Requested layout scope and spacing.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when a provider plan is available and accepted.</returns>
+    bool TryApplyLayoutRequest(GraphLayoutRequest request, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    bool TryApplySelectionLayout(GraphSelectionLayoutOperation operation, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    bool TrySnapSelectedNodesToGrid(double gridSize = 20, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    bool TrySnapAllNodesToGrid(double gridSize = 20, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to update one node's persisted card width through the runtime mutation path.
     /// </summary>
     /// <param name="nodeId">Stable node identifier.</param>

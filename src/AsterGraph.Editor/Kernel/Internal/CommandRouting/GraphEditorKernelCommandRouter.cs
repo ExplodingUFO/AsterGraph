@@ -116,7 +116,13 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
 
-    bool TryApplySelectionLayout(GraphEditorSelectionLayoutOperation operation, bool updateStatus);
+    bool TryApplyLayoutPlan(GraphLayoutPlan plan, bool updateStatus);
+
+    bool TryApplySelectionLayout(GraphSelectionLayoutOperation operation, bool updateStatus);
+
+    bool TrySnapSelectedNodesToGrid(double gridSize, bool updateStatus);
+
+    bool TrySnapAllNodesToGrid(double gridSize, bool updateStatus);
 
     void StartConnection(string sourceNodeId, string sourcePortId);
 
@@ -281,6 +287,29 @@ internal sealed class GraphEditorKernelCommandRouter
                 "nodes.move",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "layout.apply-plan",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Nodes.AllowMove && hasNodes,
+                _host.BehaviorOptions.Commands.Nodes.AllowMove
+                    ? hasNodes ? null : "Add one or more nodes before applying a layout plan."
+                    : "Layout application is disabled by host permissions."),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "layout.snap-selection",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Nodes.AllowMove && hasSelection,
+                GetSelectionDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                    hasSelection,
+                    "Node snapping is disabled by host permissions.",
+                    "Select one or more nodes before snapping.")),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "layout.snap-all",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Nodes.AllowMove && hasNodes,
+                _host.BehaviorOptions.Commands.Nodes.AllowMove
+                    ? hasNodes ? null : "Add one or more nodes before snapping."
+                    : "Node snapping is disabled by host permissions."),
             GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.resize",
                 GraphEditorCommandSourceKind.Kernel,
@@ -826,6 +855,33 @@ internal sealed class GraphEditorKernelCommandRouter
                 _host.SetNodePositions(positions.Select(position => position!).ToList(), ResolveOptionalUpdateStatus(command, "updateStatus"));
                 return true;
 
+            case "layout.apply-plan":
+                var planPositions = command.GetArguments("position")
+                    .Select(ParseGraphLayoutNodePosition)
+                    .ToList();
+                if (planPositions.Count == 0 || planPositions.Any(position => position is null))
+                {
+                    return false;
+                }
+
+                return _host.TryApplyLayoutPlan(
+                    new GraphLayoutPlan(
+                        true,
+                        new GraphLayoutRequest(),
+                        planPositions.Select(position => position!).ToList(),
+                        ResetManualRoutes: ResolveOptionalResetManualRoutes(command)),
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
+            case "layout.snap-selection":
+                return _host.TrySnapSelectedNodesToGrid(
+                    ResolveOptionalGridSize(command),
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
+            case "layout.snap-all":
+                return _host.TrySnapAllNodesToGrid(
+                    ResolveOptionalGridSize(command),
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
             case "nodes.resize":
                 if (!TryGetRequiredArgument(command, "nodeId", out var resizeNodeId)
                     || !TryGetDoubleArgument(command, "width", out var nodeWidth)
@@ -1342,33 +1398,33 @@ internal sealed class GraphEditorKernelCommandRouter
 
     private static bool TryResolveSelectionLayoutOperation(
         string commandId,
-        out GraphEditorSelectionLayoutOperation operation)
+        out GraphSelectionLayoutOperation operation)
     {
         switch (commandId)
         {
             case "layout.align-left":
-                operation = GraphEditorSelectionLayoutOperation.AlignLeft;
+                operation = GraphSelectionLayoutOperation.AlignLeft;
                 return true;
             case "layout.align-center":
-                operation = GraphEditorSelectionLayoutOperation.AlignCenter;
+                operation = GraphSelectionLayoutOperation.AlignCenter;
                 return true;
             case "layout.align-right":
-                operation = GraphEditorSelectionLayoutOperation.AlignRight;
+                operation = GraphSelectionLayoutOperation.AlignRight;
                 return true;
             case "layout.align-top":
-                operation = GraphEditorSelectionLayoutOperation.AlignTop;
+                operation = GraphSelectionLayoutOperation.AlignTop;
                 return true;
             case "layout.align-middle":
-                operation = GraphEditorSelectionLayoutOperation.AlignMiddle;
+                operation = GraphSelectionLayoutOperation.AlignMiddle;
                 return true;
             case "layout.align-bottom":
-                operation = GraphEditorSelectionLayoutOperation.AlignBottom;
+                operation = GraphSelectionLayoutOperation.AlignBottom;
                 return true;
             case "layout.distribute-horizontal":
-                operation = GraphEditorSelectionLayoutOperation.DistributeHorizontally;
+                operation = GraphSelectionLayoutOperation.DistributeHorizontally;
                 return true;
             case "layout.distribute-vertical":
-                operation = GraphEditorSelectionLayoutOperation.DistributeVertically;
+                operation = GraphSelectionLayoutOperation.DistributeVertically;
                 return true;
             default:
                 operation = default;
@@ -1394,6 +1450,37 @@ internal sealed class GraphEditorKernelCommandRouter
 
         return new NodePositionSnapshot(parts[0], new GraphPoint(x, y));
     }
+
+    private static GraphLayoutNodePosition? ParseGraphLayoutNodePosition(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        var parts = value.Split('|', StringSplitOptions.TrimEntries);
+        if (parts.Length is not (3 or 4)
+            || string.IsNullOrWhiteSpace(parts[0])
+            || !double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var x)
+            || !double.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var y)
+            || (parts.Length == 4 && !bool.TryParse(parts[3], out _)))
+        {
+            return null;
+        }
+
+        var isPinned = parts.Length == 4 && bool.Parse(parts[3]);
+        return new GraphLayoutNodePosition(parts[0], new GraphPoint(x, y), isPinned);
+    }
+
+    private static bool ResolveOptionalResetManualRoutes(GraphEditorCommandInvocationSnapshot command)
+        => command.TryGetArgument("resetManualRoutes", out var resetValue)
+            && bool.TryParse(resetValue, out var parsedReset)
+            && parsedReset;
+
+    private static double ResolveOptionalGridSize(GraphEditorCommandInvocationSnapshot command)
+        => TryGetDoubleArgument(command, "gridSize", out var gridSize)
+            ? gridSize
+            : 20d;
 
     private static GraphEditorNodeGroupMembershipChange? ParseGroupMembershipChange(string value)
     {

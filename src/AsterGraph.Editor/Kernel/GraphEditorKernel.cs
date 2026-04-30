@@ -448,6 +448,77 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
         => _nodeMutationCoordinator.SetNodePositions(positions, updateStatus);
 
+    public bool TryApplyLayoutPlan(GraphLayoutPlan plan, bool updateStatus)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Layout application is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        if (!plan.IsAvailable)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = string.IsNullOrWhiteSpace(plan.EmptyReason)
+                    ? "No layout plan is available."
+                    : plan.EmptyReason;
+            }
+
+            return false;
+        }
+
+        if (plan.NodePositions.Count == 0 && !plan.ResetManualRoutes)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Layout plan did not include any changes.";
+            }
+
+            return false;
+        }
+
+        var activeScope = CreateActiveScopeDocumentSnapshot();
+        var positions = plan.NodePositions
+            .Select(position => new NodePositionSnapshot(position.NodeId, position.Position))
+            .ToList();
+        var positionMutation = _documentMutator.SetNodePositions(activeScope, positions);
+        var nextDocument = positionMutation.Document;
+        var resetConnectionIds = plan.ResetManualRoutes
+            ? GetRoutedConnectionIds(nextDocument)
+            : [];
+        if (resetConnectionIds.Count > 0)
+        {
+            nextDocument = ResetManualRoutes(nextDocument, resetConnectionIds);
+        }
+
+        if (positionMutation.ChangedNodeIds.Count == 0 && resetConnectionIds.Count == 0)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Layout plan did not change the graph.";
+            }
+
+            return true;
+        }
+
+        ApplyActiveScopeDocument(nextDocument);
+        CurrentStatusMessage = $"Applied layout plan to {positionMutation.ChangedNodeIds.Count} node{(positionMutation.ChangedNodeIds.Count == 1 ? string.Empty : "s")}.";
+        MarkDirty(
+            CurrentStatusMessage,
+            GraphEditorDocumentChangeKind.LayoutChanged,
+            positionMutation.ChangedNodeIds,
+            resetConnectionIds,
+            preserveStatus: !updateStatus);
+        return true;
+    }
+
     public bool TrySetNodeWidth(string nodeId, double width, bool updateStatus)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
@@ -1855,9 +1926,9 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             .ToList();
     }
 
-    private bool TryApplySelectionLayout(GraphEditorSelectionLayoutOperation operation, bool updateStatus)
+    public bool TryApplySelectionLayout(GraphSelectionLayoutOperation operation, bool updateStatus)
     {
-        var minimumCount = operation is GraphEditorSelectionLayoutOperation.DistributeHorizontally or GraphEditorSelectionLayoutOperation.DistributeVertically
+        var minimumCount = operation is GraphSelectionLayoutOperation.DistributeHorizontally or GraphSelectionLayoutOperation.DistributeVertically
             ? 3
             : 2;
         var permitted = minimumCount == 2
@@ -1913,6 +1984,147 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         return true;
     }
 
+    public bool TrySnapSelectedNodesToGrid(double gridSize, bool updateStatus)
+    {
+        if (_selectedNodeIds.Count == 0)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Select one or more nodes before snapping.";
+            }
+
+            return false;
+        }
+
+        return TrySnapNodesToGrid(_selectedNodeIds, gridSize, updateStatus, "Snapped selected nodes to grid.");
+    }
+
+    public bool TrySnapAllNodesToGrid(double gridSize, bool updateStatus)
+        => TrySnapNodesToGrid(
+            CreateActiveScopeDocumentSnapshot().Nodes.Select(node => node.Id).ToList(),
+            gridSize,
+            updateStatus,
+            "Snapped all nodes to grid.");
+
+    private bool TrySnapNodesToGrid(
+        IReadOnlyList<string> nodeIds,
+        double gridSize,
+        bool updateStatus,
+        string statusMessage)
+    {
+        ArgumentNullException.ThrowIfNull(nodeIds);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Node snapping is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        if (gridSize <= 0d || double.IsNaN(gridSize) || double.IsInfinity(gridSize))
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Snap grid size must be positive.";
+            }
+
+            return false;
+        }
+
+        var nodeIdSet = nodeIds.ToHashSet(StringComparer.Ordinal);
+        if (nodeIdSet.Count == 0)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No nodes were available to snap.";
+            }
+
+            return false;
+        }
+
+        var activeScope = CreateActiveScopeDocumentSnapshot();
+        var positions = activeScope.Nodes
+            .Where(node => nodeIdSet.Contains(node.Id))
+            .Select(node => new NodePositionSnapshot(
+                node.Id,
+                new GraphPoint(Snap(node.Position.X, gridSize), Snap(node.Position.Y, gridSize))))
+            .ToList();
+        if (positions.Count == 0)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching nodes were found to snap.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodePositions(activeScope, positions);
+        if (mutation.ChangedNodeIds.Count == 0)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = statusMessage;
+            }
+
+            return true;
+        }
+
+        ApplyActiveScopeDocument(mutation.Document);
+        CurrentStatusMessage = statusMessage;
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: !updateStatus);
+        return true;
+    }
+
+    private static double Snap(double value, double gridSize)
+        => Math.Round(value / gridSize, MidpointRounding.AwayFromZero) * gridSize;
+
+    private static IReadOnlyList<string> GetRoutedConnectionIds(GraphDocument document)
+        => document.Connections
+            .Where(connection => connection.Presentation?.Route is { IsEmpty: false })
+            .Select(connection => connection.Id)
+            .ToList();
+
+    private static GraphDocument ResetManualRoutes(GraphDocument document, IReadOnlyCollection<string> connectionIds)
+    {
+        var connectionIdSet = connectionIds.ToHashSet(StringComparer.Ordinal);
+        if (connectionIdSet.Count == 0)
+        {
+            return document;
+        }
+
+        return document with
+        {
+            Connections = document.Connections
+                .Select(connection =>
+                {
+                    if (!connectionIdSet.Contains(connection.Id))
+                    {
+                        return connection;
+                    }
+
+                    return connection with
+                    {
+                        Presentation = CreateLayoutEdgePresentation(connection.Presentation?.NoteText),
+                    };
+                })
+                .ToList(),
+        };
+    }
+
+    private static GraphEdgePresentation? CreateLayoutEdgePresentation(string? noteText)
+    {
+        var normalizedNoteText = string.IsNullOrWhiteSpace(noteText)
+            ? null
+            : noteText.Trim();
+        return normalizedNoteText is null
+            ? null
+            : new GraphEdgePresentation(normalizedNoteText);
+    }
+
     private bool HasSharedSelectionDefinitionWithParameters()
         => TryGetSharedSelectionDefinition(out var definition, out _) && definition is { Parameters.Count: > 0 };
 
@@ -1956,17 +2168,17 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private GraphNode? FindNode(string nodeId)
         => GetActiveGraphScope().Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));
 
-    private static string GetLayoutStatusMessage(GraphEditorSelectionLayoutOperation operation)
+    private static string GetLayoutStatusMessage(GraphSelectionLayoutOperation operation)
         => operation switch
         {
-            GraphEditorSelectionLayoutOperation.AlignLeft => "Aligned selection left.",
-            GraphEditorSelectionLayoutOperation.AlignCenter => "Aligned selection center.",
-            GraphEditorSelectionLayoutOperation.AlignRight => "Aligned selection right.",
-            GraphEditorSelectionLayoutOperation.AlignTop => "Aligned selection top.",
-            GraphEditorSelectionLayoutOperation.AlignMiddle => "Aligned selection middle.",
-            GraphEditorSelectionLayoutOperation.AlignBottom => "Aligned selection bottom.",
-            GraphEditorSelectionLayoutOperation.DistributeHorizontally => "Distributed selection horizontally.",
-            GraphEditorSelectionLayoutOperation.DistributeVertically => "Distributed selection vertically.",
+            GraphSelectionLayoutOperation.AlignLeft => "Aligned selection left.",
+            GraphSelectionLayoutOperation.AlignCenter => "Aligned selection center.",
+            GraphSelectionLayoutOperation.AlignRight => "Aligned selection right.",
+            GraphSelectionLayoutOperation.AlignTop => "Aligned selection top.",
+            GraphSelectionLayoutOperation.AlignMiddle => "Aligned selection middle.",
+            GraphSelectionLayoutOperation.AlignBottom => "Aligned selection bottom.",
+            GraphSelectionLayoutOperation.DistributeHorizontally => "Distributed selection horizontally.",
+            GraphSelectionLayoutOperation.DistributeVertically => "Distributed selection vertically.",
             _ => "Updated selection layout.",
         };
 

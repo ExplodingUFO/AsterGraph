@@ -34,6 +34,9 @@ public sealed partial class GraphEditorSession
         "nodes.delete-by-id",
         "nodes.duplicate",
         "nodes.parameters.set",
+        "layout.apply-plan",
+        "layout.snap-selection",
+        "layout.snap-all",
         "groups.create",
         "groups.collapse",
         "groups.move",
@@ -346,6 +349,63 @@ public sealed partial class GraphEditorSession
     {
         ArgumentNullException.ThrowIfNull(positions);
         Execute("nodes.move", () => _host.SetNodePositions(positions, updateStatus));
+    }
+
+    public GraphLayoutPlan PreviewLayoutPlan(GraphLayoutRequest request)
+        => CreateLayoutPlan(request);
+
+    public bool TryApplyLayoutPlan(GraphLayoutPlan plan, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+
+        var applied = _host.TryApplyLayoutPlan(plan, updateStatus);
+        if (applied)
+        {
+            PublishCommandExecuted("layout.apply-plan");
+        }
+
+        return applied;
+    }
+
+    public bool TryApplyLayoutRequest(GraphLayoutRequest request, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var plan = CreateLayoutPlan(request);
+        return TryApplyLayoutPlan(plan, updateStatus);
+    }
+
+    public bool TryApplySelectionLayout(GraphSelectionLayoutOperation operation, bool updateStatus = true)
+    {
+        var applied = _host.TryApplySelectionLayout(operation, updateStatus);
+        if (applied)
+        {
+            PublishCommandExecuted(GetSelectionLayoutCommandId(operation));
+        }
+
+        return applied;
+    }
+
+    public bool TrySnapSelectedNodesToGrid(double gridSize = 20, bool updateStatus = true)
+    {
+        var snapped = _host.TrySnapSelectedNodesToGrid(gridSize, updateStatus);
+        if (snapped)
+        {
+            PublishCommandExecuted("layout.snap-selection");
+        }
+
+        return snapped;
+    }
+
+    public bool TrySnapAllNodesToGrid(double gridSize = 20, bool updateStatus = true)
+    {
+        var snapped = _host.TrySnapAllNodesToGrid(gridSize, updateStatus);
+        if (snapped)
+        {
+            PublishCommandExecuted("layout.snap-all");
+        }
+
+        return snapped;
     }
 
     public bool TrySetNodeWidth(string nodeId, double width, bool updateStatus = true)
@@ -813,6 +873,20 @@ public sealed partial class GraphEditorSession
         PublishCommandExecuted(commandId);
         return result;
     }
+
+    private static string GetSelectionLayoutCommandId(GraphSelectionLayoutOperation operation)
+        => operation switch
+        {
+            GraphSelectionLayoutOperation.AlignLeft => "layout.align-left",
+            GraphSelectionLayoutOperation.AlignCenter => "layout.align-center",
+            GraphSelectionLayoutOperation.AlignRight => "layout.align-right",
+            GraphSelectionLayoutOperation.AlignTop => "layout.align-top",
+            GraphSelectionLayoutOperation.AlignMiddle => "layout.align-middle",
+            GraphSelectionLayoutOperation.AlignBottom => "layout.align-bottom",
+            GraphSelectionLayoutOperation.DistributeHorizontally => "layout.distribute-horizontal",
+            GraphSelectionLayoutOperation.DistributeVertically => "layout.distribute-vertical",
+            _ => "layout.selection.apply",
+        };
 
     private bool TryApplyParameterDefaultRepair(GraphEditorValidationRepairActionSnapshot repair)
     {

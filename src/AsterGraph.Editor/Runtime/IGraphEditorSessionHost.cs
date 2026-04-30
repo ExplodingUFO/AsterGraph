@@ -51,6 +51,10 @@ internal interface IGraphEditorSessionHost
     bool TryImportFragmentTemplate(string path);
     bool TryDeleteFragmentTemplate(string path);
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
+    bool TryApplyLayoutPlan(GraphLayoutPlan plan, bool updateStatus);
+    bool TryApplySelectionLayout(GraphSelectionLayoutOperation operation, bool updateStatus);
+    bool TrySnapSelectedNodesToGrid(double gridSize, bool updateStatus);
+    bool TrySnapAllNodesToGrid(double gridSize, bool updateStatus);
     bool TrySetNodeWidth(string nodeId, double width, bool updateStatus);
     bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus);
     bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState);

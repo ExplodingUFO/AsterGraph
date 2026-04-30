@@ -408,6 +408,14 @@ F:AsterGraph.Editor.Runtime.GraphLayoutOrientation.TopToBottom:AsterGraph.Editor
 F:AsterGraph.Editor.Runtime.GraphLayoutRequestMode.All:AsterGraph.Editor.Runtime.GraphLayoutRequestMode
 F:AsterGraph.Editor.Runtime.GraphLayoutRequestMode.CurrentScope:AsterGraph.Editor.Runtime.GraphLayoutRequestMode
 F:AsterGraph.Editor.Runtime.GraphLayoutRequestMode.Selection:AsterGraph.Editor.Runtime.GraphLayoutRequestMode
+F:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation.AlignBottom:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation
+F:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation.AlignCenter:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation
+F:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation.AlignLeft:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation
+F:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation.AlignMiddle:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation
+F:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation.AlignRight:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation
+F:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation.AlignTop:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation
+F:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation.DistributeHorizontally:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation
+F:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation.DistributeVertically:AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation
 F:AsterGraph.Editor.Scene.GraphEditorInputModifiers.Alt:AsterGraph.Editor.Scene.GraphEditorInputModifiers
 F:AsterGraph.Editor.Scene.GraphEditorInputModifiers.Control:AsterGraph.Editor.Scene.GraphEditorInputModifiers
 F:AsterGraph.Editor.Scene.GraphEditorInputModifiers.Meta:AsterGraph.Editor.Scene.GraphEditorInputModifiers
@@ -1522,6 +1530,7 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.GetValidationSnapshot():AsterGrap
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetViewportSnapshot():AsterGraph.Editor.Runtime.GraphEditorViewportSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.LoadWorkspace():System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.PanBy(System.Double,System.Double):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorSession.PreviewLayoutPlan(AsterGraph.Editor.Runtime.GraphLayoutRequest):AsterGraph.Editor.Runtime.GraphLayoutPlan
 M:AsterGraph.Editor.Runtime.GraphEditorSession.Redo():System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.ResetView(System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.SaveWorkspace():System.Void
@@ -1529,6 +1538,9 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.SetConnectionSelection(System.Col
 M:AsterGraph.Editor.Runtime.GraphEditorSession.SetNodePositions(System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Models.NodePositionSnapshot>,System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.SetSelection(System.Collections.Generic.IReadOnlyList<System.String>,System.String,System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.StartConnection(System.String,System.String):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorSession.TryApplyLayoutPlan(AsterGraph.Editor.Runtime.GraphLayoutPlan,System.Boolean):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSession.TryApplyLayoutRequest(AsterGraph.Editor.Runtime.GraphLayoutRequest,System.Boolean):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSession.TryApplySelectionLayout(AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryApplyValidationRepair(AsterGraph.Editor.Runtime.GraphEditorValidationRepairActionSnapshot):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryClearWorkspaceFragment(System.String):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryCopySelectionAsync(System.Threading.CancellationToken):System.Threading.Tasks.Task<System.Boolean>
@@ -1570,6 +1582,8 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySetNodeWidth(System.String,Sys
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySetSelectedNodeParameterValue(System.String,System.Object):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySetSelectedNodeParameterValues(System.Collections.Generic.IReadOnlyDictionary<System.String,System.Object>):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySliceConnections(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphPoint):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySnapAllNodesToGrid(System.Double,System.Boolean):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySnapSelectedNodesToGrid(System.Double,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryUnexposeCompositePort(System.String,System.String,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryWrapSelectionToComposite(System.String,System.Boolean):System.String
 M:AsterGraph.Editor.Runtime.GraphEditorSession.Undo():System.Void
@@ -1656,6 +1670,7 @@ M:AsterGraph.Editor.Runtime.IGraphEditorCommands.FocusCurrentScope(System.Boolea
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.FocusSelection(System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.LoadWorkspace():System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.PanBy(System.Double,System.Double):System.Void
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.PreviewLayoutPlan(AsterGraph.Editor.Runtime.GraphLayoutRequest):AsterGraph.Editor.Runtime.GraphLayoutPlan
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.Redo():System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.ResetView(System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.SaveWorkspace():System.Void
@@ -1663,6 +1678,9 @@ M:AsterGraph.Editor.Runtime.IGraphEditorCommands.SetConnectionSelection(System.C
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.SetNodePositions(System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Models.NodePositionSnapshot>,System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.SetSelection(System.Collections.Generic.IReadOnlyList<System.String>,System.String,System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.StartConnection(System.String,System.String):System.Void
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryApplyLayoutPlan(AsterGraph.Editor.Runtime.GraphLayoutPlan,System.Boolean):System.Boolean
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryApplyLayoutRequest(AsterGraph.Editor.Runtime.GraphLayoutRequest,System.Boolean):System.Boolean
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryApplySelectionLayout(AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryApplyValidationRepair(AsterGraph.Editor.Runtime.GraphEditorValidationRepairActionSnapshot):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryClearWorkspaceFragment(System.String):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryCopySelectionAsync(System.Threading.CancellationToken):System.Threading.Tasks.Task<System.Boolean>
@@ -1704,6 +1722,8 @@ M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySetNodeWidth(System.String,S
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySetSelectedNodeParameterValue(System.String,System.Object):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySetSelectedNodeParameterValues(System.Collections.Generic.IReadOnlyDictionary<System.String,System.Object>):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySliceConnections(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphPoint):System.Boolean
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySnapAllNodesToGrid(System.Double,System.Boolean):System.Boolean
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySnapSelectedNodesToGrid(System.Double,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryUnexposeCompositePort(System.String,System.String,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryWrapSelectionToComposite(System.String,System.Boolean):System.String
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.Undo():System.Void
@@ -3700,6 +3720,7 @@ T:enum AsterGraph.Editor.Runtime.GraphEditorToolContextKind
 T:enum AsterGraph.Editor.Runtime.GraphEditorValidationIssueSeverity
 T:enum AsterGraph.Editor.Runtime.GraphLayoutOrientation
 T:enum AsterGraph.Editor.Runtime.GraphLayoutRequestMode
+T:enum AsterGraph.Editor.Runtime.GraphSelectionLayoutOperation
 T:enum AsterGraph.Editor.Scene.GraphEditorInputModifiers
 T:enum AsterGraph.Editor.Scene.GraphEditorPointerPressRouteKind
 T:enum AsterGraph.Editor.Scene.GraphEditorSceneResizeHandleKind

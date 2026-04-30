@@ -4,6 +4,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
 using Xunit;
 
@@ -73,6 +74,137 @@ public sealed class GraphEditorLayoutProviderSeamTests
             descriptor => descriptor.Id == "integration.layout-provider" && descriptor.IsAvailable);
     }
 
+    [Fact]
+    public void Commands_ApplyLayoutPlanMutatesThroughOneUndoableOperation()
+    {
+        var session = CreateSession(null);
+        var before = session.Queries.CreateDocumentSnapshot();
+        var plan = new GraphLayoutPlan(
+            true,
+            new GraphLayoutRequest { Mode = GraphLayoutRequestMode.All },
+            [
+                new GraphLayoutNodePosition("source-001", new GraphPoint(96, 64)),
+                new GraphLayoutNodePosition("target-001", new GraphPoint(384, 64)),
+            ],
+            ResetManualRoutes: true);
+
+        Assert.True(session.Commands.TryApplyLayoutPlan(plan));
+
+        var applied = session.Queries.CreateDocumentSnapshot();
+        Assert.Equal(new GraphPoint(96, 64), applied.Nodes.Single(node => node.Id == "source-001").Position);
+        Assert.Equal(new GraphPoint(384, 64), applied.Nodes.Single(node => node.Id == "target-001").Position);
+        Assert.Null(Assert.Single(applied.Connections).Presentation?.Route);
+        Assert.True(session.Queries.GetCapabilitySnapshot().CanUndo);
+
+        session.Commands.Undo();
+
+        var undone = session.Queries.CreateDocumentSnapshot();
+        Assert.Equal(before.Nodes.Select(node => node.Position), undone.Nodes.Select(node => node.Position));
+        Assert.NotNull(Assert.Single(undone.Connections).Presentation?.Route);
+    }
+
+    [Fact]
+    public void Commands_ApplyLayoutRequestPreviewsThenAppliesProviderPlan()
+    {
+        var provider = new TestLayoutProvider(request => new GraphLayoutPlan(
+            true,
+            request,
+            [
+                new GraphLayoutNodePosition("target-001", new GraphPoint(512, 192)),
+            ]));
+        var session = CreateSession(provider);
+        var request = new GraphLayoutRequest
+        {
+            Mode = GraphLayoutRequestMode.Selection,
+            SelectedNodeIds = ["target-001"],
+        };
+
+        Assert.True(session.Commands.TryApplyLayoutRequest(request));
+
+        var document = session.Queries.CreateDocumentSnapshot();
+        Assert.Equal(new GraphPoint(512, 192), document.Nodes.Single(node => node.Id == "target-001").Position);
+    }
+
+    [Fact]
+    public void Commands_SelectionAlignAndDistributeRemainSupported()
+    {
+        var session = CreateSession(null);
+        session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(
+            "nodes.move",
+            [
+                new GraphEditorCommandArgumentSnapshot("position", "source-001|120|120"),
+                new GraphEditorCommandArgumentSnapshot("position", "target-001|430|200"),
+            ]));
+        session.Commands.AddNode(TargetDefinitionId, new GraphPoint(760, 280));
+        var thirdNodeId = session.Queries.CreateDocumentSnapshot()
+            .Nodes
+            .Single(node => node.Id is not "source-001" and not "target-001")
+            .Id;
+        session.Commands.SetSelection(["source-001", "target-001", thirdNodeId], "source-001", updateStatus: false);
+
+        Assert.True(session.Commands.TryApplySelectionLayout(GraphSelectionLayoutOperation.AlignTop));
+
+        var aligned = session.Queries.CreateDocumentSnapshot().Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        Assert.Equal(120, aligned["source-001"].Position.Y);
+        Assert.Equal(120, aligned["target-001"].Position.Y);
+        Assert.Equal(120, aligned[thirdNodeId].Position.Y);
+
+        Assert.True(session.Commands.TryApplySelectionLayout(GraphSelectionLayoutOperation.DistributeHorizontally));
+
+        var distributed = session.Queries.CreateDocumentSnapshot().Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        var centers = new[]
+        {
+            distributed["source-001"].Position.X + distributed["source-001"].Size.Width / 2,
+            distributed["target-001"].Position.X + distributed["target-001"].Size.Width / 2,
+            distributed[thirdNodeId].Position.X + distributed[thirdNodeId].Size.Width / 2,
+        }.Order().ToArray();
+        Assert.Equal(centers[1] - centers[0], centers[2] - centers[1], precision: 6);
+    }
+
+    [Fact]
+    public void Commands_SnapSelectionAndAllNodesToGridDeterministically()
+    {
+        var session = CreateSession(null);
+        session.Commands.SetNodePositions(
+            [
+                new NodePositionSnapshot("source-001", new GraphPoint(13, 37)),
+                new NodePositionSnapshot("target-001", new GraphPoint(51, 69)),
+            ],
+            updateStatus: false);
+        session.Commands.SetSelection(["source-001"], "source-001", updateStatus: false);
+
+        Assert.True(session.Commands.TrySnapSelectedNodesToGrid(20));
+
+        var selectedSnap = session.Queries.CreateDocumentSnapshot().Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        Assert.Equal(new GraphPoint(20, 40), selectedSnap["source-001"].Position);
+        Assert.Equal(new GraphPoint(51, 69), selectedSnap["target-001"].Position);
+
+        Assert.True(session.Commands.TrySnapAllNodesToGrid(20));
+
+        var allSnap = session.Queries.CreateDocumentSnapshot().Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        Assert.Equal(new GraphPoint(20, 40), allSnap["source-001"].Position);
+        Assert.Equal(new GraphPoint(60, 60), allSnap["target-001"].Position);
+    }
+
+    [Fact]
+    public void Commands_RouteLayoutApplyPlanThroughStableCommandSurface()
+    {
+        var session = CreateSession(null);
+
+        Assert.True(session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(
+            "layout.apply-plan",
+            [
+                new GraphEditorCommandArgumentSnapshot("position", "source-001|160|96"),
+                new GraphEditorCommandArgumentSnapshot("position", "target-001|480|96"),
+                new GraphEditorCommandArgumentSnapshot("resetManualRoutes", "true"),
+            ])));
+
+        var document = session.Queries.CreateDocumentSnapshot();
+        Assert.Equal(new GraphPoint(160, 96), document.Nodes.Single(node => node.Id == "source-001").Position);
+        Assert.Equal(new GraphPoint(480, 96), document.Nodes.Single(node => node.Id == "target-001").Position);
+        Assert.Null(Assert.Single(document.Connections).Presentation?.Route);
+    }
+
     private static IGraphEditorSession CreateSession(IGraphLayoutProvider? layoutProvider)
     {
         var catalog = new NodeCatalog();
@@ -123,7 +255,15 @@ public sealed class GraphEditorLayoutProviderSeamTests
                         TargetDefinitionId),
                 ],
                 [
-                    new GraphConnection("connection-001", "source-001", "out", "target-001", "in", "Source To Target", "#6AD5C4"),
+                    new GraphConnection(
+                        "connection-001",
+                        "source-001",
+                        "out",
+                        "target-001",
+                        "in",
+                        "Source To Target",
+                        "#6AD5C4",
+                        Presentation: new GraphEdgePresentation(Route: new GraphConnectionRoute([new GraphPoint(300, 180)]))),
                 ]),
             NodeCatalog = catalog,
             CompatibilityService = new DefaultPortCompatibilityService(),

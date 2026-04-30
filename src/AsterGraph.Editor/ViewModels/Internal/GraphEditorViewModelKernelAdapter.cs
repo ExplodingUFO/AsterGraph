@@ -133,6 +133,18 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
         => _kernel.SetNodePositions(positions, updateStatus);
 
+    public bool TryApplyLayoutPlan(GraphLayoutPlan plan, bool updateStatus)
+        => _kernel.TryApplyLayoutPlan(plan, updateStatus);
+
+    public bool TryApplySelectionLayout(GraphSelectionLayoutOperation operation, bool updateStatus)
+        => _kernel.TryApplySelectionLayout(operation, updateStatus);
+
+    public bool TrySnapSelectedNodesToGrid(double gridSize, bool updateStatus)
+        => _kernel.TrySnapSelectedNodesToGrid(gridSize, updateStatus);
+
+    public bool TrySnapAllNodesToGrid(double gridSize, bool updateStatus)
+        => _kernel.TrySnapAllNodesToGrid(gridSize, updateStatus);
+
     public bool TrySetNodeWidth(string nodeId, double width, bool updateStatus)
         => _kernel.TrySetNodeWidth(nodeId, width, updateStatus);
 
