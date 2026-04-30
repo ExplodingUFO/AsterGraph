@@ -812,7 +812,7 @@ public sealed class GraphEditorViewTests
         Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
 
         Assert.NotNull(FindOptionalDescendant<Button>(view, "PART_NodeToolDuplicateButton"));
-        Assert.Equal(4, commandContributor.DescriptorQueryCount);
+        Assert.Equal(5, commandContributor.DescriptorQueryCount);
     }
 
     [AvaloniaFact]

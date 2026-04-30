@@ -22,12 +22,10 @@ internal static class GraphEditorCommandRegistry
             ["selection.delete-reconnect"] =
             [
                 ContextMenu("selection", "selection-delete-reconnect", 5),
-                Tool("selection", "selection-delete-reconnect", 5),
             ],
             ["selection.detach-connections"] =
             [
                 ContextMenu("selection", "selection-detach-connections", 6),
-                Tool("selection", "selection-detach-connections", 6),
             ],
             ["fragments.export-selection"] =
             [
@@ -176,7 +174,6 @@ internal static class GraphEditorCommandRegistry
             ["nodes.insert-into-connection"] =
             [
                 ContextMenu("connection", "connection-insert-node", 5),
-                Tool("connection", "connection-insert-node", 5),
             ],
             ["connections.disconnect-incoming"] =
             [
@@ -232,11 +229,6 @@ internal static class GraphEditorCommandRegistry
             ["connections.delete-selected"] =
             [
                 ContextMenu("connection", "connection-delete-selected", 30),
-                Tool("connection", "connection-delete-selected", 30),
-            ],
-            ["connections.slice"] =
-            [
-                Tool("connection", "connection-slice", 40),
             ],
         };
 
