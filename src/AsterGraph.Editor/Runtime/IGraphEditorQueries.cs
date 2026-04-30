@@ -175,6 +175,9 @@ public interface IGraphEditorQueries
     GraphEditorNavigatorOutlineSnapshot GetNavigatorOutlineSnapshot()
         => throw new NotSupportedException();
 
+    GraphEditorGraphItemSearchSnapshot SearchGraphItems(GraphEditorGraphItemSearchQuery? query = null)
+        => throw new NotSupportedException();
+
     /// <summary>
     /// Gets host-facing composite node snapshots for the current root graph.
     /// </summary>

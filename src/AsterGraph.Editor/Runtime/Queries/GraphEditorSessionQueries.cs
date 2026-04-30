@@ -418,6 +418,49 @@ public sealed partial class GraphEditorSession
             GetHierarchyStateSnapshot(),
             GetSelectionSnapshot());
 
+    public GraphEditorGraphItemSearchSnapshot SearchGraphItems(GraphEditorGraphItemSearchQuery? query = null)
+    {
+        query ??= new GraphEditorGraphItemSearchQuery();
+        var searchText = NormalizeSearchText(query.SearchText);
+        var scopeId = string.IsNullOrWhiteSpace(query.ScopeId) ? null : query.ScopeId.Trim();
+        var limit = Math.Max(1, query.Limit);
+        var document = CreateDocumentSnapshot();
+        var results = new List<GraphEditorGraphItemSearchResultSnapshot>();
+
+        foreach (var scope in document.GraphScopes)
+        {
+            if (scopeId is not null && !string.Equals(scope.Id, scopeId, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            results.Add(CreateScopeSearchResult(scope));
+            results.AddRange(scope.Nodes.Select(node => CreateNodeSearchResult(scope.Id, node)));
+            results.AddRange((scope.Groups ?? []).Select(group => CreateGroupSearchResult(scope.Id, group)));
+            results.AddRange(scope.Connections.Select(connection => CreateConnectionSearchResult(scope.Id, connection)));
+        }
+
+        results.AddRange(GetValidationSnapshot().Issues.Select(CreateIssueSearchResult));
+
+        var filtered = results
+            .Where(result => query.Kind is null || result.Kind == query.Kind)
+            .Where(result => scopeId is null || string.Equals(result.ScopeId, scopeId, StringComparison.Ordinal))
+            .Where(result => string.IsNullOrEmpty(searchText) || MatchesGraphItemSearch(result, searchText))
+            .OrderBy(result => result.Kind)
+            .ThenBy(result => result.ScopeId, StringComparer.Ordinal)
+            .ThenBy(result => result.Title, StringComparer.Ordinal)
+            .ThenBy(result => result.Id, StringComparer.Ordinal)
+            .Take(limit)
+            .ToList();
+
+        var emptyReason = filtered.Count == 0
+            ? string.IsNullOrEmpty(searchText)
+                ? "No graph items are available."
+                : "No graph items matched the search text."
+            : null;
+        return new GraphEditorGraphItemSearchSnapshot(searchText, query.Kind, scopeId, limit, filtered, emptyReason);
+    }
+
     public IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots()
         => _host.GetCompositeNodeSnapshots();
 
@@ -708,6 +751,72 @@ public sealed partial class GraphEditorSession
     private static string NormalizeSearchText(string? searchText)
         => string.IsNullOrWhiteSpace(searchText) ? string.Empty : searchText.Trim();
 
+    private static GraphEditorGraphItemSearchResultSnapshot CreateScopeSearchResult(GraphScope scope)
+        => new(
+            $"scope:{scope.Id}",
+            GraphEditorGraphItemSearchResultKind.Scope,
+            scope.Id,
+            scope.Id,
+            scope.Id,
+            $"{scope.Nodes.Count} node(s), {scope.Connections.Count} connection(s)");
+
+    private static GraphEditorGraphItemSearchResultSnapshot CreateNodeSearchResult(string scopeId, GraphNode node)
+        => new(
+            $"node:{scopeId}:{node.Id}",
+            GraphEditorGraphItemSearchResultKind.Node,
+            scopeId,
+            node.Id,
+            node.Title,
+            $"{node.Category} · {node.Subtitle} · {node.Id}",
+            NodeId: node.Id);
+
+    private static GraphEditorGraphItemSearchResultSnapshot CreateGroupSearchResult(string scopeId, GraphNodeGroup group)
+        => new(
+            $"group:{scopeId}:{group.Id}",
+            GraphEditorGraphItemSearchResultKind.Group,
+            scopeId,
+            group.Id,
+            group.Title,
+            $"{group.NodeIds.Count} node(s) · {group.Id}",
+            GroupId: group.Id);
+
+    private static GraphEditorGraphItemSearchResultSnapshot CreateConnectionSearchResult(string scopeId, GraphConnection connection)
+        => new(
+            $"connection:{scopeId}:{connection.Id}",
+            GraphEditorGraphItemSearchResultKind.Connection,
+            scopeId,
+            connection.Id,
+            string.IsNullOrWhiteSpace(connection.Label) ? connection.Id : connection.Label,
+            $"{connection.SourceNodeId}.{connection.SourcePortId} -> {connection.TargetNodeId}.{connection.TargetPortId}",
+            ConnectionId: connection.Id);
+
+    private static GraphEditorGraphItemSearchResultSnapshot CreateIssueSearchResult(GraphEditorValidationIssueSnapshot issue)
+    {
+        var sourceId = issue.ConnectionId ?? issue.NodeId ?? issue.ScopeId;
+        return new(
+            $"issue:{issue.ScopeId}:{issue.Code}:{sourceId}",
+            GraphEditorGraphItemSearchResultKind.Issue,
+            issue.ScopeId,
+            sourceId,
+            issue.Code,
+            issue.Message,
+            NodeId: issue.NodeId,
+            ConnectionId: issue.ConnectionId,
+            IssueCode: issue.Code);
+    }
+
+    private static bool MatchesGraphItemSearch(GraphEditorGraphItemSearchResultSnapshot result, string searchText)
+        => Contains(result.Id, searchText)
+           || Contains(result.ScopeId, searchText)
+           || Contains(result.SourceId, searchText)
+           || Contains(result.Title, searchText)
+           || Contains(result.Subtitle, searchText)
+           || Contains(result.NodeId, searchText)
+           || Contains(result.GroupId, searchText)
+           || Contains(result.ConnectionId, searchText)
+           || Contains(result.IssueCode, searchText)
+           || Contains(result.Kind.ToString(), searchText);
+
     private static (GraphPoint? Position, GraphSize? Size) CreateBounds(IReadOnlyList<GraphNode> nodes)
     {
         if (nodes.Count == 0)
@@ -787,8 +896,9 @@ public sealed partial class GraphEditorSession
            || Contains(item.SourceKind.ToString(), searchText)
            || Contains(item.Kind.ToString(), searchText);
 
-    private static bool Contains(string value, string searchText)
-        => value.Contains(searchText, StringComparison.OrdinalIgnoreCase);
+    private static bool Contains(string? value, string searchText)
+        => !string.IsNullOrWhiteSpace(value)
+           && value.Contains(searchText, StringComparison.OrdinalIgnoreCase);
 
 #pragma warning disable CS0618
     private static CompatiblePortTarget? CreateCompatibilityShimTarget(
