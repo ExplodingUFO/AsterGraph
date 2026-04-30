@@ -23,7 +23,7 @@
 - [x] **Phase 458: Command Platform Architecture And Input Audit** — mapped command descriptors, input routing, menu/tool surfaces, undo boundaries, and host extension seams before implementation.
 - [x] **Phase 459: Unified Command Registry And Keybinding Surface** — exposed command discovery, keybinding metadata, menu/tool projection, disabled recovery states, and execution through canonical session boundaries.
 - [x] **Phase 460: Semantic Editing Operations And Clipboard Model** — supported source-backed copy/paste payloads, groups/connections, delete-with-repair, insert-into-route, reconnect, and semantic command routing.
-- [ ] **Phase 461: Template Palette And Reusable Authoring Presets** — add host-provided node/group/fragment templates and searchable palette projection.
+- [x] **Phase 461: Template Palette And Reusable Authoring Presets** — added host-provided node/fragment templates, searchable palette projection, and undoable reusable preset application.
 - [ ] **Phase 462: Advanced Selection Transform And Spatial Editing** — deepen marquee/lasso projection, keyboard nudging, constrained move/resize, snap guides, and multi-item transform evidence.
 - [ ] **Phase 463: Viewport Navigation Search And Focus Workflows** — add search, jump, breadcrumb, bookmark, minimap-aware focus, and measured large-graph navigation evidence.
 - [ ] **Phase 464: Professional Cookbook Authoring Flows** — demonstrate command, editing, template, selection, and navigation workflows as code plus live proof.
@@ -169,7 +169,7 @@
 
 ## Next Step
 
-Start Phase 461. Phases 462 and 463 remain unblocked and can be split into project-local worktrees in parallel once their bead boundaries are clear.
+Start Phase 462 and Phase 463 next. They are independent after Phase 459/461 and can be split into project-local `.worktrees/` branches in parallel; Phase 464 remains blocked until Phases 462 and 463 close.
 
 ---
-*Roadmap updated: 2026-05-01 after completing Phase 460*
+*Roadmap updated: 2026-05-01 after completing Phase 461*
