@@ -180,6 +180,21 @@ public sealed class DemoCookbookDocsTests
         }
     }
 
+    [Fact]
+    public void DemoCookbookDocs_SurfaceDesignerWorkbenchProofRoute()
+    {
+        var english = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chinese = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+
+        foreach (var contents in new[] { english, chinese })
+        {
+            Assert.Contains("DEMO_COOKBOOK_DESIGNER_WORKBENCH_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("GetNavigatorOutlineSnapshot", contents, StringComparison.Ordinal);
+            Assert.Contains("RecoveryHint", contents, StringComparison.Ordinal);
+            Assert.Contains("DESIGNER_WORKBENCH_AUTHORING_OK", contents, StringComparison.Ordinal);
+        }
+    }
+
     private static void AssertRecipeIndexed(string contents, DemoCookbookRecipe recipe)
     {
         Assert.Contains(recipe.Id, contents, StringComparison.Ordinal);

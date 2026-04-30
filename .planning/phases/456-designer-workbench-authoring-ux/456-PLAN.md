@@ -76,7 +76,7 @@ Candidate files:
 Verification:
 
 - `dotnet test tests\AsterGraph.Demo.Tests\AsterGraph.Demo.Tests.csproj --filter "FullyQualifiedName~DemoCookbook" -m:1 --logger "console;verbosity=minimal"`
-- `rg -n "xyflow|react flow|reactflow" docs src .planning` must return no matches.
+- Prohibited external-inspiration-name scan across `docs`, `src`, and `.planning` must return no matches.
 
 ## Worktree Rules
 

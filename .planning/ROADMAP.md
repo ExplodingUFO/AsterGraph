@@ -25,7 +25,7 @@
 - [x] **Phase 453: Professional Edge Routing And Connection Geometry** — support route styles, anchors, preview geometry, reconnect feedback, and bounded crossing/obstacle evidence.
 - [x] **Phase 454: Groups, Subgraphs, And Collapsible Containers** — support group/container creation, nested selection, collapse/expand projection, boundary edges, and serialization snapshots.
 - [x] **Phase 455: Layout Services And Alignment Tools** — expose layout, align, distribute, snap, and incremental relayout services through host contracts and workbench commands.
-- [ ] **Phase 456: Designer Workbench Authoring UX** — integrate navigator/outline, inspector, route-aware affordances, group/layout workflows, recovery states, and cookbook scenarios.
+- [x] **Phase 456: Designer Workbench Authoring UX** — integrate navigator/outline, inspector, route-aware affordances, group/layout workflows, recovery states, and cookbook scenarios.
 - [ ] **Phase 457: Extension Contracts, Documentation, And Release Proof** — close supported contracts, docs, examples, proof markers, full verification, beads, Dolt, and Git handoff.
 
 ## Phase Details
@@ -136,6 +136,8 @@
 3. UI behavior is tested at the view-model/proof level.
 4. Demo remains a sample/proof surface, not a package contract boundary.
 
+**Status:** Complete. See `.planning/phases/456-designer-workbench-authoring-ux/`.
+
 ### Phase 457: Extension Contracts, Documentation, And Release Proof
 
 **Bead:** `avalonia-node-map-y7i.7`
@@ -161,7 +163,7 @@
 
 ## Next Step
 
-Execute Phase 456 child beads `avalonia-node-map-y7i.6.1` and `avalonia-node-map-y7i.6.2`, then close cookbook proof through `avalonia-node-map-y7i.6.3`.
+Start Phase 457 after Phase 456.
 
 ---
-*Roadmap updated: 2026-04-30 after planning Phase 456*
+*Roadmap updated: 2026-04-30 after completing Phase 456*

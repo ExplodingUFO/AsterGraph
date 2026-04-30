@@ -87,6 +87,14 @@ public static partial class DemoCookbookCatalog
                     "ConsumerSample host command projection",
                     "tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleHost.cs",
                     "GetCommandDescriptors"),
+                new DemoCookbookAnchor(
+                    "Navigator outline query",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetNavigatorOutlineSnapshot"),
+                new DemoCookbookAnchor(
+                    "Authoring recovery metadata projection",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphHostedActionFactory.cs",
+                    "RecoveryHint"),
             ],
             [
                 new DemoCookbookAnchor(
@@ -97,12 +105,20 @@ public static partial class DemoCookbookCatalog
                     "Demo tour proof lines",
                     "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.Showcase.cs",
                     "scenario tour"),
+                new DemoCookbookAnchor(
+                    "Designer workbench projection proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorHierarchyStateContractsTests.cs",
+                    "SessionQueries_GetNavigatorOutlineSnapshot_ProjectsActiveScopeGroupSelectionAndBoundaryConnections"),
             ],
             [
                 new DemoCookbookAnchor(
                     "Authoring surface recipe",
                     "docs/en/authoring-surface-recipe.md",
                     "AUTHORING_SURFACE_OK:True"),
+                new DemoCookbookAnchor(
+                    "Designer workbench cookbook proof",
+                    "docs/en/demo-cookbook.md",
+                    "DEMO_COOKBOOK_DESIGNER_WORKBENCH_OK"),
             ],
             [
                 new DemoCookbookScenarioPoint(
@@ -117,6 +133,10 @@ public static partial class DemoCookbookCatalog
                     DemoCookbookScenarioKind.SupportEvidence,
                     "The authoring recipe is backed by an explicit proof marker.",
                     "AUTHORING_SURFACE_OK"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "Navigator outline projection keeps graph, group, scope, and selection state source-backed.",
+                    "GetNavigatorOutlineSnapshot"),
             ],
             [
                 new DemoCookbookInteractionFacet(
@@ -131,13 +151,17 @@ public static partial class DemoCookbookCatalog
                     DemoCookbookInteractionKind.Inspection,
                     "Parameter and command metadata remain tied to ConsumerSample surfaces.",
                     "GetCommandDescriptors"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Disabled authoring actions carry recovery hints through hosted workbench metadata.",
+                    "RecoveryHint"),
             ],
-            ["AUTHORING_SURFACE_OK"],
+            ["AUTHORING_SURFACE_OK", "DESIGNER_WORKBENCH_AUTHORING_OK"],
             new DemoCookbookRouteClarity(
-                "Hosted Avalonia authoring route: AsterGraphHostBuilder.UsePresentation(...) with IGraphEditorSession.Queries.GetCommandDescriptors().",
-                "Supported seams live in `AsterGraph.Avalonia` hosting and `AsterGraph.Editor` session/query/command contracts.",
+                "Hosted Avalonia authoring route: AsterGraphHostBuilder.UsePresentation(...) with IGraphEditorSession.Queries.GetCommandDescriptors() and GetNavigatorOutlineSnapshot().",
+                "Supported seams live in `AsterGraph.Avalonia` hosting and `AsterGraph.Editor` session/query/command/navigation contracts.",
                 "ConsumerSample is the copyable recipe; Demo presenters are visual proof only and do not define package contracts."),
-            "Authoring samples reuse public seams and do not create a second editor/runtime model."),
+            "Authoring samples reuse public seams, source-backed outline projection, and command recovery metadata without creating a second editor/runtime model."),
         new DemoCookbookRecipe(
             "performance-viewport-route",
             DemoCookbookRecipeCategory.PerformanceViewport,
