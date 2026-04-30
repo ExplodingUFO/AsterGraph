@@ -26,6 +26,7 @@ public sealed record DemoCookbookWorkspaceRecipeContent(
     IReadOnlyList<DemoCookbookWorkspaceAnchor> GraphAnchors,
     IReadOnlyList<DemoCookbookWorkspaceAnchor> CodeExamples,
     IReadOnlyList<DemoCookbookWorkspaceAnchor> DocumentationLinks,
+    IReadOnlyList<DemoCookbookWorkspaceScenarioPoint> ScenarioPoints,
     IReadOnlyList<string> ProofMarkers,
     IReadOnlyList<string> DeferredGaps,
     string SupportBoundary);
@@ -33,6 +34,11 @@ public sealed record DemoCookbookWorkspaceRecipeContent(
 public sealed record DemoCookbookWorkspaceAnchor(
     string Label,
     string Path,
+    string Evidence);
+
+public sealed record DemoCookbookWorkspaceScenarioPoint(
+    DemoCookbookScenarioKind Kind,
+    string Label,
     string Evidence);
 
 public static class DemoCookbookWorkspaceProjection
@@ -89,6 +95,7 @@ public static class DemoCookbookWorkspaceProjection
             ConvertAnchors(recipe.DemoAnchors),
             ConvertAnchors(recipe.CodeAnchors),
             ConvertAnchors(recipe.DocumentationAnchors),
+            ConvertScenarioPoints(recipe.ScenarioPoints),
             recipe.ProofMarkers.ToArray(),
             posture.DeferredGaps,
             recipe.SupportBoundary);
@@ -138,6 +145,12 @@ public static class DemoCookbookWorkspaceProjection
     private static IReadOnlyList<DemoCookbookWorkspaceAnchor> ConvertAnchors(IReadOnlyList<DemoCookbookAnchor> anchors)
         => anchors
             .Select(anchor => new DemoCookbookWorkspaceAnchor(anchor.Label, anchor.Path, anchor.Evidence))
+            .ToArray();
+
+    private static IReadOnlyList<DemoCookbookWorkspaceScenarioPoint> ConvertScenarioPoints(
+        IReadOnlyList<DemoCookbookScenarioPoint> scenarioPoints)
+        => scenarioPoints
+            .Select(point => new DemoCookbookWorkspaceScenarioPoint(point.Kind, point.Label, point.Evidence))
             .ToArray();
 
     private static string FormatCategory(DemoCookbookRecipeCategory category)

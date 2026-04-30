@@ -204,6 +204,7 @@ public partial class MainWindowViewModel
            || ContainsAny(recipe.CodeAnchors, searchText)
            || ContainsAny(recipe.DemoAnchors, searchText)
            || ContainsAny(recipe.DocumentationAnchors, searchText)
+           || ContainsAny(recipe.ScenarioPoints, searchText)
            || recipe.ProofMarkers.Any(marker => Contains(marker, searchText))
            || Contains(recipe.SupportBoundary, searchText);
 
@@ -215,6 +216,12 @@ public partial class MainWindowViewModel
             Contains(anchor.Label, searchText)
             || Contains(anchor.Path, searchText)
             || Contains(anchor.Evidence, searchText));
+
+    private static bool ContainsAny(IReadOnlyList<DemoCookbookScenarioPoint> scenarioPoints, string searchText)
+        => scenarioPoints.Any(point =>
+            Contains(point.Kind.ToString(), searchText)
+            || Contains(point.Label, searchText)
+            || Contains(point.Evidence, searchText));
 
     private static IEnumerable<string> FormatCookbookAnchors(string prefix, IReadOnlyList<DemoCookbookAnchor> anchors)
         => anchors.Select(anchor => prefix + anchor.Path + " — " + anchor.Evidence);

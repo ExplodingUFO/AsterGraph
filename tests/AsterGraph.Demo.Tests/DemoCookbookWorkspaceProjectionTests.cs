@@ -47,6 +47,7 @@ public sealed class DemoCookbookWorkspaceProjectionTests
             AssertEquivalentAnchors(recipe.DemoAnchors, content.GraphAnchors);
             AssertEquivalentAnchors(recipe.CodeAnchors, content.CodeExamples);
             AssertEquivalentAnchors(recipe.DocumentationAnchors, content.DocumentationLinks);
+            AssertEquivalentScenarioPoints(recipe.ScenarioPoints, content.ScenarioPoints);
             Assert.Equal(recipe.ProofMarkers, content.ProofMarkers);
             Assert.NotEmpty(content.DeferredGaps);
             Assert.Equal(recipe.SupportBoundary, content.SupportBoundary);
@@ -100,6 +101,20 @@ public sealed class DemoCookbookWorkspaceProjectionTests
         {
             Assert.Equal(expected[index].Label, actual[index].Label);
             Assert.Equal(expected[index].Path, actual[index].Path);
+            Assert.Equal(expected[index].Evidence, actual[index].Evidence);
+        }
+    }
+
+    private static void AssertEquivalentScenarioPoints(
+        IReadOnlyList<DemoCookbookScenarioPoint> expected,
+        IReadOnlyList<DemoCookbookWorkspaceScenarioPoint> actual)
+    {
+        Assert.Equal(expected.Count, actual.Count);
+
+        for (var index = 0; index < expected.Count; index++)
+        {
+            Assert.Equal(expected[index].Kind, actual[index].Kind);
+            Assert.Equal(expected[index].Label, actual[index].Label);
             Assert.Equal(expected[index].Evidence, actual[index].Evidence);
         }
     }

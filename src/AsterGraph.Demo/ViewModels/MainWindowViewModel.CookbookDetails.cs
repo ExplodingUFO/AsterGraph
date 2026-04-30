@@ -36,6 +36,7 @@ public partial class MainWindowViewModel
                 .Select(marker => T("证明标记：", "Proof marker: ") + marker)
                 .ToArray(),
             "docs" => FormatCookbookDetailAnchors(SelectedCookbookRecipe.DocumentationAnchors).ToArray(),
+            "scenario" => FormatCookbookScenarioPoints(CookbookWorkspace.SelectedRecipe.ScenarioPoints).ToArray(),
             "support" =>
             [
                 T("支持边界：", "Support boundary: ") + SelectedCookbookRecipe.Title,
@@ -54,6 +55,7 @@ public partial class MainWindowViewModel
             new CookbookDetailMode("code", T("代码", "Code")),
             new CookbookDetailMode("proof", T("证明", "Proof")),
             new CookbookDetailMode("docs", T("文档", "Docs")),
+            new CookbookDetailMode("scenario", T("场景", "Scenario")),
             new CookbookDetailMode("support", T("边界", "Support")),
         ];
 
@@ -67,4 +69,21 @@ public partial class MainWindowViewModel
     private IEnumerable<string> FormatCookbookDetailAnchors(IReadOnlyList<Cookbook.DemoCookbookAnchor> anchors)
         => anchors.Select(anchor => T("路径：", "Path: ") + anchor.Path + Environment.NewLine
                                     + T("证据：", "Evidence: ") + anchor.Evidence);
+
+    private IEnumerable<string> FormatCookbookScenarioPoints(
+        IReadOnlyList<Cookbook.DemoCookbookWorkspaceScenarioPoint> scenarioPoints)
+        => scenarioPoints.Select(point => FormatCookbookScenarioKind(point.Kind)
+                                           + point.Label + Environment.NewLine
+                                           + T("证据：", "Evidence: ") + point.Evidence);
+
+    private string FormatCookbookScenarioKind(Cookbook.DemoCookbookScenarioKind kind)
+        => kind switch
+        {
+            Cookbook.DemoCookbookScenarioKind.GraphOperations => T("图操作：", "Graph operations: "),
+            Cookbook.DemoCookbookScenarioKind.NodeMetadata => T("节点元数据：", "Node metadata: "),
+            Cookbook.DemoCookbookScenarioKind.ValidationRuntimeOverlay => T("验证/运行时覆盖：", "Validation/runtime overlay: "),
+            Cookbook.DemoCookbookScenarioKind.SupportEvidence => T("支持证据：", "Support evidence: "),
+            Cookbook.DemoCookbookScenarioKind.HostCodeExample => T("宿主代码示例：", "Host code example: "),
+            _ => kind + ": ",
+        };
 }

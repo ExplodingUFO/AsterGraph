@@ -32,6 +32,20 @@ public sealed class DemoCookbookNavigationPolishTests
         Assert.Contains(selected.Title, viewModel.CookbookFilterFeedback, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void CookbookNavigationSearchIncludesScenarioDepth()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.CookbookSearchText = "RuntimeCommandTimelineEntry";
+
+        var recipe = Assert.Single(viewModel.FilteredCookbookRecipes);
+        Assert.Equal("diagnostics-support-route", recipe.Id);
+        Assert.Equal(recipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
+        Assert.Contains(viewModel.CookbookWorkspace.SelectedRecipe.ScenarioPoints, point =>
+            string.Equals(point.Evidence, "RuntimeCommandTimelineEntry", StringComparison.Ordinal));
+    }
+
     [AvaloniaFact]
     public void MainWindow_CookbookEmptyFilterKeepsGraphAndShowsNavigationFeedback()
     {
