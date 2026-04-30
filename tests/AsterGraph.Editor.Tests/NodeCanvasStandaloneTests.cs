@@ -39,6 +39,7 @@ public sealed class NodeCanvasStandaloneTests
     private const string TargetNodeId = "tests.canvas.target-001";
     private const string AdaptiveNodeId = "tests.canvas.adaptive-001";
     private const string OutputNodeId = "tests.canvas.output-001";
+    private const string ExternalNodeId = "tests.canvas.external-001";
     private const string SourcePortId = "out";
     private const string TargetPortId = "in";
     private const string AdaptiveOutputPortId = "result";
@@ -1997,6 +1998,74 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void CollapsedGroup_ProjectsContainerChromeBoundaryEdgesAndHiddenMembers()
+    {
+        var editor = CreateCollapsedGroupProjectionEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Loaded);
+
+            var group = Assert.Single(editor.GetNodeGroupSnapshots());
+            Assert.True(group.IsContainer);
+            Assert.False(group.ProjectsMemberNodes);
+
+            var groupSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group",
+                    StringComparison.Ordinal));
+            var renderedMemberSurfaces = canvas.GetVisualDescendants()
+                .OfType<Control>()
+                .Where(control => string.Equals(AutomationProperties.GetName(control), "Canvas Source node", StringComparison.Ordinal)
+                                  || string.Equals(AutomationProperties.GetName(control), "Canvas Target node", StringComparison.Ordinal))
+                .ToList();
+            var externalSurface = canvas.GetVisualDescendants()
+                .OfType<Control>()
+                .Single(control => string.Equals(AutomationProperties.GetName(control), "Canvas External node", StringComparison.Ordinal));
+            var connectionLayer = Assert.IsType<Canvas>(canvas.FindControl<Canvas>("ConnectionLayer"));
+            Assert.Single(connectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            var chip = Assert.Single(connectionLayer.Children.OfType<Border>());
+
+            Assert.Empty(renderedMemberSurfaces);
+            Assert.True(externalSurface.IsVisible);
+            Assert.Equal(NodeCanvasGroupChromeMetrics.HeaderHeight, groupSurface.Height);
+            Assert.Equal("FLOAT", Assert.IsType<TextBlock>(chip.Child).Text);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void MarqueeSelection_IgnoresNodesHiddenByCollapsedGroups()
+    {
+        var editor = CreateCollapsedGroupProjectionEditor();
+        editor.ClearSelection(updateStatus: false);
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var start = WorldToScreenPoint(canvas, 60d, 60d);
+            var end = WorldToScreenPoint(canvas, 720d, 360d);
+
+            InvokeCanvasPointerPressed(canvas, CreatePointerPressedArgs(canvas, pointer, start, KeyModifiers.None));
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, end, KeyModifiers.None));
+            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, end, KeyModifiers.None));
+
+            Assert.Empty(editor.SelectedNodes);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void GroupBodyPress_DoesNotStartDrag()
     {
         var editor = CreateEditor();
@@ -3083,6 +3152,139 @@ public sealed class NodeCanvasStandaloneTests
                         ]),
                 ],
                 []),
+            catalog,
+            new DefaultPortCompatibilityService(),
+            styleOptions: GraphEditorStyleOptions.Default);
+    }
+
+    private static GraphEditorViewModel CreateCollapsedGroupProjectionEditor()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                SourceDefinitionId,
+                "Canvas Source",
+                "Tests",
+                "Standalone canvas source node.",
+                [],
+                [
+                    new PortDefinition(
+                        SourcePortId,
+                        "Result",
+                        new PortTypeId("float"),
+                        "#6AD5C4"),
+                ]));
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                TargetDefinitionId,
+                "Canvas Target",
+                "Tests",
+                "Standalone canvas target node.",
+                [
+                    new PortDefinition(
+                        TargetPortId,
+                        "Input",
+                        new PortTypeId("float"),
+                        "#F3B36B"),
+                ],
+                []));
+
+        const string groupId = "tests.canvas.group-001";
+        return new GraphEditorViewModel(
+            new GraphDocument(
+                "Collapsed Group Projection Graph",
+                "Regression coverage for collapsed group projection in the Avalonia canvas.",
+                [
+                    new GraphNode(
+                        SourceNodeId,
+                        "Canvas Source",
+                        "Tests",
+                        "Standalone Canvas",
+                        "Collapsed member source.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [
+                            new GraphPort(
+                                SourcePortId,
+                                "Result",
+                                PortDirection.Output,
+                                "float",
+                                "#6AD5C4",
+                                new PortTypeId("float")),
+                        ],
+                        "#6AD5C4",
+                        SourceDefinitionId,
+                        Surface: new GraphNodeSurfaceState(GroupId: groupId)),
+                    new GraphNode(
+                        TargetNodeId,
+                        "Canvas Target",
+                        "Tests",
+                        "Standalone Canvas",
+                        "Collapsed member target.",
+                        new GraphPoint(420, 160),
+                        new GraphSize(240, 160),
+                        [
+                            new GraphPort(
+                                TargetPortId,
+                                "Input",
+                                PortDirection.Input,
+                                "float",
+                                "#F3B36B",
+                                new PortTypeId("float")),
+                        ],
+                        [],
+                        "#F3B36B",
+                        TargetDefinitionId,
+                        Surface: new GraphNodeSurfaceState(GroupId: groupId)),
+                    new GraphNode(
+                        ExternalNodeId,
+                        "Canvas External",
+                        "Tests",
+                        "Standalone Canvas",
+                        "External target for collapsed boundary edges.",
+                        new GraphPoint(760, 160),
+                        new GraphSize(240, 160),
+                        [
+                            new GraphPort(
+                                TargetPortId,
+                                "Input",
+                                PortDirection.Input,
+                                "float",
+                                "#F3B36B",
+                                new PortTypeId("float")),
+                        ],
+                        [],
+                        "#F3B36B",
+                        TargetDefinitionId),
+                ],
+                [
+                    new GraphConnection(
+                        "tests.canvas.internal-001",
+                        SourceNodeId,
+                        SourcePortId,
+                        TargetNodeId,
+                        TargetPortId,
+                        "Internal Flow",
+                        "#6AD5C4"),
+                    new GraphConnection(
+                        "tests.canvas.boundary-001",
+                        SourceNodeId,
+                        SourcePortId,
+                        ExternalNodeId,
+                        TargetPortId,
+                        "Boundary Flow",
+                        "#6AD5C4"),
+                ],
+                [
+                    new GraphNodeGroup(
+                        groupId,
+                        "Canvas Cluster",
+                        new GraphPoint(80, 80),
+                        new GraphSize(640, 260),
+                        [SourceNodeId, TargetNodeId],
+                        IsCollapsed: true),
+                ]),
             catalog,
             new DefaultPortCompatibilityService(),
             styleOptions: GraphEditorStyleOptions.Default);

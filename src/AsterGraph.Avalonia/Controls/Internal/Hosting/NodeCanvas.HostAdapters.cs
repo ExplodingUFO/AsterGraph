@@ -213,7 +213,7 @@ public partial class NodeCanvas
             => _owner.ViewModel?.ScreenToWorld(point) ?? point;
 
         public IReadOnlyList<NodeViewModel> GetNodesInRectangle(GraphPoint firstCorner, GraphPoint secondCorner)
-            => _owner.ViewModel?.GetNodesInRectangle(firstCorner, secondCorner) ?? [];
+            => _owner.GetVisibleNodesInRectangle(firstCorner, secondCorner);
 
         public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
 

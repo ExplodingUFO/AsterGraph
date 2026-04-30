@@ -21,6 +21,7 @@ internal readonly record struct NodeCanvasConnectionSceneContext(
     Control CoordinateRoot,
     IReadOnlyDictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> NodeVisuals,
     IReadOnlyDictionary<string, GraphEditorConnectionGeometrySnapshot> ConnectionGeometries,
+    GraphEditorHierarchyStateSnapshot HierarchyState,
     Point? PointerScreenPosition,
     Func<ConnectionViewModel, ConnectionStyleOptions> ResolveConnectionStyle,
     Func<NodeCanvasContextMenuSnapshot> CreateContextMenuSnapshot,
@@ -46,6 +47,13 @@ internal sealed class NodeCanvasConnectionSceneRenderer
 
         foreach (var connection in context.ViewModel.Connections)
         {
+            var hierarchyConnection = context.HierarchyState.Connections
+                .FirstOrDefault(snapshot => string.Equals(snapshot.ConnectionId, connection.Id, StringComparison.Ordinal));
+            if (hierarchyConnection is not null && !hierarchyConnection.IsVisibleInActiveScope)
+            {
+                continue;
+            }
+
             if (!context.ConnectionGeometries.TryGetValue(connection.Id, out var geometry))
             {
                 continue;
@@ -71,10 +79,20 @@ internal sealed class NodeCanvasConnectionSceneRenderer
 
             DrawConnection(
                 context,
-                GetPortAnchor(context, sourceNode, sourcePort),
+                GetConnectionEndpointAnchor(
+                    context,
+                    sourceNode,
+                    sourcePort,
+                    geometry.Target.Position,
+                    hierarchyConnection?.SourceCollapsedByGroupId),
                 geometry.Route,
                 geometry.RouteStyle,
-                GetConnectionTargetAnchor(context, targetNode, connection.Target),
+                GetConnectionTargetEndpointAnchor(
+                    context,
+                    targetNode,
+                    connection.Target,
+                    geometry.Source.Position,
+                    hierarchyConnection?.TargetCollapsedByGroupId),
                 connection,
                 sourcePort);
         }
@@ -153,6 +171,24 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         return node.GetPortAnchor(port);
     }
 
+    private GraphPoint GetConnectionEndpointAnchor(
+        NodeCanvasConnectionSceneContext context,
+        NodeViewModel node,
+        PortViewModel port,
+        GraphPoint projectedEndpoint,
+        string? collapsedByGroupId)
+        => ResolveCollapsedGroupBoundaryAnchor(context, collapsedByGroupId, projectedEndpoint)
+           ?? GetPortAnchor(context, node, port);
+
+    private GraphPoint GetConnectionTargetEndpointAnchor(
+        NodeCanvasConnectionSceneContext context,
+        NodeViewModel node,
+        GraphConnectionTargetRef target,
+        GraphPoint projectedEndpoint,
+        string? collapsedByGroupId)
+        => ResolveCollapsedGroupBoundaryAnchor(context, collapsedByGroupId, projectedEndpoint)
+           ?? GetConnectionTargetAnchor(context, node, target);
+
     public GraphPoint GetConnectionTargetAnchor(NodeCanvasConnectionSceneContext context, NodeViewModel node, GraphConnectionTargetRef target)
     {
         if (target.Kind == GraphConnectionTargetKind.Port)
@@ -198,6 +234,46 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             port.Direction,
             port.Index,
             port.Total);
+
+    private static GraphPoint? ResolveCollapsedGroupBoundaryAnchor(
+        NodeCanvasConnectionSceneContext context,
+        string? groupId,
+        GraphPoint projectedEndpoint)
+    {
+        if (string.IsNullOrWhiteSpace(groupId))
+        {
+            return null;
+        }
+
+        var group = context.HierarchyState.NodeGroups
+            .FirstOrDefault(candidate => string.Equals(candidate.Id, groupId, StringComparison.Ordinal));
+        if (group is null)
+        {
+            return null;
+        }
+
+        var left = group.Position.X;
+        var top = group.Position.Y;
+        var width = NodeCanvasGroupChromeMetrics.ResolveRenderedWidth(group);
+        var height = NodeCanvasGroupChromeMetrics.ResolveRenderedHeight(group);
+        var right = left + width;
+        var bottom = top + height;
+        var centerX = left + (width / 2d);
+        var centerY = top + (height / 2d);
+        var deltaX = projectedEndpoint.X - centerX;
+        var deltaY = projectedEndpoint.Y - centerY;
+
+        if (Math.Abs(deltaX) * height > Math.Abs(deltaY) * width)
+        {
+            var x = deltaX >= 0d ? right : left;
+            var y = centerY + (deltaY * (width / 2d) / Math.Max(Math.Abs(deltaX), 0.001d));
+            return new GraphPoint(x, Math.Clamp(y, top, bottom));
+        }
+
+        var boundaryY = deltaY >= 0d ? bottom : top;
+        var boundaryX = centerX + (deltaX * (height / 2d) / Math.Max(Math.Abs(deltaY), 0.001d));
+        return new GraphPoint(Math.Clamp(boundaryX, left, right), boundaryY);
+    }
 
     private static bool ShouldPreferPreviewAnchor(Control root, GraphSize previewSize)
         => Math.Abs(root.Bounds.Width - previewSize.Width) > 0.5d

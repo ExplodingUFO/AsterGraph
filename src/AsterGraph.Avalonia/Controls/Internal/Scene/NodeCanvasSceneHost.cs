@@ -114,7 +114,13 @@ internal sealed class NodeCanvasSceneHost
         }
 
         RefreshVisibleSceneProjection();
-        foreach (var group in _host.ViewModel.GetNodeGroupSnapshots())
+        var hierarchy = _host.ViewModel.Session.Queries.GetHierarchyStateSnapshot();
+        var visibleNodeIds = hierarchy.Nodes
+            .Where(node => node.IsVisibleInActiveScope)
+            .Select(node => node.NodeId)
+            .ToHashSet(StringComparer.Ordinal);
+
+        foreach (var group in hierarchy.NodeGroups)
         {
             var visual = CreateGroupVisual(group);
             _host.GroupVisuals[group.Id] = visual;
@@ -122,7 +128,7 @@ internal sealed class NodeCanvasSceneHost
             UpdateGroupVisual(group);
         }
 
-        foreach (var node in _host.ViewModel.Nodes)
+        foreach (var node in _host.ViewModel.Nodes.Where(node => visibleNodeIds.Contains(node.Id)))
         {
             var visual = CreateNodeVisual(node);
             _host.NodeVisuals[node] = visual;
@@ -537,12 +543,24 @@ internal sealed class NodeCanvasSceneHost
             _host.ViewModel?.Session.Queries.GetConnectionGeometrySnapshots()
                 .ToDictionary(snapshot => snapshot.ConnectionId, StringComparer.Ordinal)
                 ?? new Dictionary<string, GraphEditorConnectionGeometrySnapshot>(StringComparer.Ordinal),
+            _host.ViewModel?.Session.Queries.GetHierarchyStateSnapshot()
+                ?? CreateEmptyHierarchyState(),
             _host.InteractionSession.PointerScreenPosition,
             GetConnectionStyle,
             _host.ContextMenuCoordinator.CreateContextMenuSnapshot,
             _host.ContextMenuCoordinator.ResolveWorldPosition,
             _host.ContextMenuCoordinator.OpenContextMenu,
             ResolveNodePreviewSize);
+
+    private static GraphEditorHierarchyStateSnapshot CreateEmptyHierarchyState()
+        => new(
+            new GraphEditorScopeNavigationSnapshot(GraphDocument.DefaultRootGraphId, null, false, []),
+            null,
+            [],
+            [],
+            [],
+            [],
+            new GraphEditorGroupMoveConstraintsSnapshot(false, false));
 
     private void RefreshVisibleSceneProjection()
     {

@@ -448,6 +448,7 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             nodeVisuals,
             editor.Session.Queries.GetConnectionGeometrySnapshots()
                 .ToDictionary(snapshot => snapshot.ConnectionId, StringComparer.Ordinal),
+            editor.Session.Queries.GetHierarchyStateSnapshot(),
             pointerScreenPosition,
             connection => GraphEditorStyleOptions.Default.Connection,
             () => new NodeCanvasContextMenuSnapshot(

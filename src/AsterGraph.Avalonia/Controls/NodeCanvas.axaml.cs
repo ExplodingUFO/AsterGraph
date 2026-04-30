@@ -585,6 +585,23 @@ public partial class NodeCanvas : UserControl
     private NodeCanvasDragSession CreateDragSession(IReadOnlyList<NodeViewModel> nodes)
         => _overlayCoordinator.CreateDragSession(nodes);
 
+    private IReadOnlyList<NodeViewModel> GetVisibleNodesInRectangle(GraphPoint firstCorner, GraphPoint secondCorner)
+    {
+        if (ViewModel is null)
+        {
+            return [];
+        }
+
+        var visibleNodeIds = ViewModel.Session.Queries.GetHierarchyStateSnapshot().Nodes
+            .Where(node => node.IsVisibleInActiveScope)
+            .Select(node => node.NodeId)
+            .ToHashSet(StringComparer.Ordinal);
+
+        return ViewModel.GetNodesInRectangle(firstCorner, secondCorner)
+            .Where(node => visibleNodeIds.Contains(node.Id))
+            .ToList();
+    }
+
     private void ShowGuideAdorners(double? worldX, double? worldY)
         => _overlayCoordinator.ShowGuideAdorners(worldX, worldY);
 
