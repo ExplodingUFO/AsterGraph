@@ -537,6 +537,15 @@ public partial class GraphEditorView
         {
             "selection-create-group" => "PART_SelectionToolCreateGroupButton",
             "selection-wrap-composite" => "PART_SelectionToolWrapCompositeButton",
+            "selection-align-left" => "PART_SelectionToolAlignLeftButton",
+            "selection-align-center" => "PART_SelectionToolAlignCenterButton",
+            "selection-align-right" => "PART_SelectionToolAlignRightButton",
+            "selection-align-top" => "PART_SelectionToolAlignTopButton",
+            "selection-align-middle" => "PART_SelectionToolAlignMiddleButton",
+            "selection-align-bottom" => "PART_SelectionToolAlignBottomButton",
+            "selection-distribute-horizontal" => "PART_SelectionToolDistributeHorizontalButton",
+            "selection-distribute-vertical" => "PART_SelectionToolDistributeVerticalButton",
+            "selection-snap-grid" => "PART_SelectionToolSnapGridButton",
             _ => $"PART_SelectionTool_{action.Id}",
         };
 

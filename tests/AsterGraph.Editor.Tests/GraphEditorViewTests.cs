@@ -23,6 +23,7 @@ using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
@@ -918,6 +919,43 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void AuthoringToolsChrome_ProjectsStockSelectionLayoutActions()
+    {
+        var editor = CreateSelectionEditor();
+        editor.Session.Commands.SetNodePositions(
+            [
+                new NodePositionSnapshot("tests.view.source-001", new GraphPoint(121, 163)),
+                new NodePositionSnapshot("tests.view.target-001", new GraphPoint(523, 187)),
+            ],
+            updateStatus: false);
+        editor.Session.Commands.SetSelection(["tests.view.source-001", "tests.view.target-001"], "tests.view.target-001", updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var alignLeftButton = FindRequiredDescendant<Button>(view, "PART_SelectionToolAlignLeftButton");
+        var distributeHorizontalButton = FindRequiredDescendant<Button>(view, "PART_SelectionToolDistributeHorizontalButton");
+        var snapGridButton = FindRequiredDescendant<Button>(view, "PART_SelectionToolSnapGridButton");
+
+        Assert.Equal("Align Left", Assert.IsType<string>(alignLeftButton.Content));
+        Assert.True(alignLeftButton.IsEnabled);
+        Assert.False(distributeHorizontalButton.IsEnabled);
+        Assert.Equal("Select at least three nodes before distributing.", ToolTip.GetTip(distributeHorizontalButton));
+        Assert.Equal("Snap Selection To Grid", AutomationProperties.GetName(snapGridButton));
+
+        snapGridButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        var nodes = editor.Session.Queries.CreateDocumentSnapshot()
+            .Nodes
+            .ToDictionary(node => node.Id, StringComparer.Ordinal);
+        Assert.Equal(new GraphPoint(120, 160), nodes["tests.view.source-001"].Position);
+        Assert.Equal(new GraphPoint(520, 180), nodes["tests.view.target-001"].Position);
+    }
+
+    [AvaloniaFact]
     public void CompositeWorkflowChrome_ProjectsBreadcrumbsAndScopeNavigation()
     {
         var editor = CreateScopedEditor();
@@ -1103,6 +1141,9 @@ public sealed class GraphEditorViewTests
             paletteButtons.ContainsKey("PART_CommandPaletteAction_selection-create-group"),
             $"Palette actions: {string.Join(", ", paletteButtons.Keys.OrderBy(static key => key, StringComparer.Ordinal))}");
         Assert.True(
+            paletteButtons.ContainsKey("PART_CommandPaletteAction_selection-snap-grid"),
+            $"Palette actions: {string.Join(", ", paletteButtons.Keys.OrderBy(static key => key, StringComparer.Ordinal))}");
+        Assert.True(
             paletteButtons.ContainsKey("PART_CommandPaletteAction_node-toggle-surface-expansion"),
             $"Palette actions: {string.Join(", ", paletteButtons.Keys.OrderBy(static key => key, StringComparer.Ordinal))}");
         Assert.True(
@@ -1113,15 +1154,18 @@ public sealed class GraphEditorViewTests
             $"Palette actions: {string.Join(", ", paletteButtons.Keys.OrderBy(static key => key, StringComparer.Ordinal))}");
 
         var createGroup = paletteButtons["PART_CommandPaletteAction_selection-create-group"];
+        var snapGrid = paletteButtons["PART_CommandPaletteAction_selection-snap-grid"];
         var toggleExpansion = paletteButtons["PART_CommandPaletteAction_node-toggle-surface-expansion"];
         var disconnect = paletteButtons["PART_CommandPaletteAction_connection-disconnect"];
         var clearNote = paletteButtons["PART_CommandPaletteAction_connection-clear-note"];
 
         Assert.Equal("Create Group", Assert.IsType<string>(createGroup.Content));
+        Assert.Equal("Snap Selection To Grid", Assert.IsType<string>(snapGrid.Content));
         Assert.Equal("Expand Node Card", Assert.IsType<string>(toggleExpansion.Content));
         Assert.Equal("Disconnect Connection", Assert.IsType<string>(disconnect.Content));
         Assert.Equal("Clear Connection Note", Assert.IsType<string>(clearNote.Content));
         Assert.Equal("Create Group", AutomationProperties.GetName(createGroup));
+        Assert.Equal("Snap Selection To Grid", AutomationProperties.GetName(snapGrid));
         Assert.Equal("Expand Node Card", AutomationProperties.GetName(toggleExpansion));
         Assert.Equal("Disconnect Connection", AutomationProperties.GetName(disconnect));
         Assert.Equal("Clear Connection Note", AutomationProperties.GetName(clearNote));

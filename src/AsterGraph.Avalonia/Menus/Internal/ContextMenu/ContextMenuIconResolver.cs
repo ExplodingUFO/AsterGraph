@@ -72,6 +72,7 @@ internal static class ContextMenuIconResolver
             "distribute" => "#",
             "distribute-horizontal" => "H",
             "distribute-vertical" => "V",
+            "snap" => ".",
             "info" => "i",
             _ => null,
         };

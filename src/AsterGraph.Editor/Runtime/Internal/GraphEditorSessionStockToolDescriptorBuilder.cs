@@ -52,6 +52,15 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
 
         var createGroup = GetCommandDescriptor(commands, "groups.create");
         var wrapComposite = GetCommandDescriptor(commands, "composites.wrap-selection");
+        var alignLeft = GetCommandDescriptor(commands, "layout.align-left");
+        var alignCenter = GetCommandDescriptor(commands, "layout.align-center");
+        var alignRight = GetCommandDescriptor(commands, "layout.align-right");
+        var alignTop = GetCommandDescriptor(commands, "layout.align-top");
+        var alignMiddle = GetCommandDescriptor(commands, "layout.align-middle");
+        var alignBottom = GetCommandDescriptor(commands, "layout.align-bottom");
+        var distributeHorizontal = GetCommandDescriptor(commands, "layout.distribute-horizontal");
+        var distributeVertical = GetCommandDescriptor(commands, "layout.distribute-vertical");
+        var snapSelection = GetCommandDescriptor(commands, "layout.snap-selection");
 
         return
         [
@@ -67,6 +76,60 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
                 wrapComposite,
                 CreateCommand("composites.wrap-selection"),
                 order: 10),
+            new GraphEditorToolDescriptorSnapshot(
+                "selection-align-left",
+                GraphEditorToolContextKind.Selection,
+                alignLeft,
+                CreateCommand("layout.align-left"),
+                order: 20),
+            new GraphEditorToolDescriptorSnapshot(
+                "selection-align-center",
+                GraphEditorToolContextKind.Selection,
+                alignCenter,
+                CreateCommand("layout.align-center"),
+                order: 30),
+            new GraphEditorToolDescriptorSnapshot(
+                "selection-align-right",
+                GraphEditorToolContextKind.Selection,
+                alignRight,
+                CreateCommand("layout.align-right"),
+                order: 40),
+            new GraphEditorToolDescriptorSnapshot(
+                "selection-align-top",
+                GraphEditorToolContextKind.Selection,
+                alignTop,
+                CreateCommand("layout.align-top"),
+                order: 50),
+            new GraphEditorToolDescriptorSnapshot(
+                "selection-align-middle",
+                GraphEditorToolContextKind.Selection,
+                alignMiddle,
+                CreateCommand("layout.align-middle"),
+                order: 60),
+            new GraphEditorToolDescriptorSnapshot(
+                "selection-align-bottom",
+                GraphEditorToolContextKind.Selection,
+                alignBottom,
+                CreateCommand("layout.align-bottom"),
+                order: 70),
+            new GraphEditorToolDescriptorSnapshot(
+                "selection-distribute-horizontal",
+                GraphEditorToolContextKind.Selection,
+                distributeHorizontal,
+                CreateCommand("layout.distribute-horizontal"),
+                order: 80),
+            new GraphEditorToolDescriptorSnapshot(
+                "selection-distribute-vertical",
+                GraphEditorToolContextKind.Selection,
+                distributeVertical,
+                CreateCommand("layout.distribute-vertical"),
+                order: 90),
+            new GraphEditorToolDescriptorSnapshot(
+                "selection-snap-grid",
+                GraphEditorToolContextKind.Selection,
+                snapSelection,
+                CreateCommand("layout.snap-selection", ("gridSize", "20")),
+                order: 100),
         ];
     }
 

@@ -62,6 +62,7 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
         var addNode = GetCommandDescriptor(commands, "nodes.add");
         var fitView = GetCommandDescriptor(commands, "viewport.fit");
         var resetView = GetCommandDescriptor(commands, "viewport.reset");
+        var snapAll = GetCommandDescriptor(commands, "layout.snap-all");
         var save = GetCommandDescriptor(commands, "workspace.save");
         var load = GetCommandDescriptor(commands, "workspace.load");
         var importFragment = GetCommandDescriptor(commands, "fragments.import");
@@ -97,6 +98,7 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
             GraphEditorMenuItemDescriptorSnapshot.Separator("canvas-sep-1"),
             new("canvas-fit-view", Localize("editor.menu.canvas.fitView", "Fit View"), CreateCommand("viewport.fit"), iconKey: "fit", isEnabled: fitView.IsEnabled, disabledReason: fitView.DisabledReason),
             new("canvas-reset-view", Localize("editor.menu.canvas.resetView", "Reset View"), CreateCommand("viewport.reset"), iconKey: "reset", isEnabled: resetView.IsEnabled, disabledReason: resetView.DisabledReason),
+            new("canvas-snap-all-grid", Localize("editor.menu.canvas.snapAllGrid", "Snap All Nodes To Grid"), CreateCommand("layout.snap-all", ("gridSize", "20")), iconKey: "snap", isEnabled: snapAll.IsEnabled, disabledReason: snapAll.DisabledReason),
             GraphEditorMenuItemDescriptorSnapshot.Separator("canvas-sep-2"),
         };
 
@@ -131,6 +133,7 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
         var alignBottom = GetCommandDescriptor(commands, "layout.align-bottom");
         var distributeHorizontal = GetCommandDescriptor(commands, "layout.distribute-horizontal");
         var distributeVertical = GetCommandDescriptor(commands, "layout.distribute-vertical");
+        var snapSelection = GetCommandDescriptor(commands, "layout.snap-selection");
 
         return
         [
@@ -187,6 +190,13 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
                     new GraphEditorMenuItemDescriptorSnapshot("selection-distribute-horizontal", Localize("editor.menu.selection.distribute.horizontal", "Horizontally"), CreateCommand("layout.distribute-horizontal"), iconKey: "distribute-horizontal", isEnabled: distributeHorizontal.IsEnabled, disabledReason: distributeHorizontal.DisabledReason),
                     new GraphEditorMenuItemDescriptorSnapshot("selection-distribute-vertical", Localize("editor.menu.selection.distribute.vertical", "Vertically"), CreateCommand("layout.distribute-vertical"), iconKey: "distribute-vertical", isEnabled: distributeVertical.IsEnabled, disabledReason: distributeVertical.DisabledReason),
                 ]),
+            new GraphEditorMenuItemDescriptorSnapshot(
+                "selection-snap-grid",
+                Localize("editor.menu.selection.snapGrid", "Snap Selection To Grid"),
+                CreateCommand("layout.snap-selection", ("gridSize", "20")),
+                iconKey: "snap",
+                isEnabled: snapSelection.IsEnabled,
+                disabledReason: snapSelection.DisabledReason),
         ];
     }
 
