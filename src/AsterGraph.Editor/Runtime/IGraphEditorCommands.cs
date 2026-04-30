@@ -614,6 +614,21 @@ public interface IGraphEditorCommands
     bool TryFocusValidationIssue(GraphEditorValidationIssueSnapshot issue, bool updateStatus = true)
         => throw new NotSupportedException();
 
+    bool TryFocusGraphNode(string nodeId, string? scopeId = null, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    bool TryFocusGraphItemSearchResult(GraphEditorGraphItemSearchResultSnapshot result, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    bool TryAddViewportBookmark(string bookmarkId, string title)
+        => throw new NotSupportedException();
+
+    bool TryRemoveViewportBookmark(string bookmarkId)
+        => throw new NotSupportedException();
+
+    bool TryActivateViewportBookmark(string bookmarkId, bool updateStatus = true)
+        => throw new NotSupportedException();
+
     /// <summary>
     /// Applies a validation repair action previously projected from the current graph state.
     /// </summary>

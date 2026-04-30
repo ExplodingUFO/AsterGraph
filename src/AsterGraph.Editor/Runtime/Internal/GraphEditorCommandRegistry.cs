@@ -100,6 +100,30 @@ internal static class GraphEditorCommandRegistry
             [
                 Workbench("workbench.header", "viewport.focus-selection", 60),
             ],
+            ["viewport.focus-node"] =
+            [
+                Workbench(CommandPaletteSurfaceId, "viewport.focus-node", 10),
+            ],
+            ["viewport.focus-issue"] =
+            [
+                Workbench(CommandPaletteSurfaceId, "viewport.focus-issue", 20),
+            ],
+            ["viewport.focus-search-result"] =
+            [
+                Workbench(CommandPaletteSurfaceId, "viewport.focus-search-result", 30),
+            ],
+            ["viewport.bookmark.add"] =
+            [
+                Workbench(CommandPaletteSurfaceId, "viewport.bookmark.add", 40),
+            ],
+            ["viewport.bookmark.remove"] =
+            [
+                Workbench(CommandPaletteSurfaceId, "viewport.bookmark.remove", 50),
+            ],
+            ["viewport.bookmark.activate"] =
+            [
+                Workbench(CommandPaletteSurfaceId, "viewport.bookmark.activate", 60),
+            ],
             ["viewport.reset"] =
             [
                 Workbench("workbench.header", "viewport.reset", 70),

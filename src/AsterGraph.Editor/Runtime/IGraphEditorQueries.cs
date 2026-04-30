@@ -178,6 +178,9 @@ public interface IGraphEditorQueries
     GraphEditorGraphItemSearchSnapshot SearchGraphItems(GraphEditorGraphItemSearchQuery? query = null)
         => throw new NotSupportedException();
 
+    GraphEditorViewportBookmarkCollectionSnapshot GetViewportBookmarks()
+        => throw new NotSupportedException();
+
     /// <summary>
     /// Gets host-facing composite node snapshots for the current root graph.
     /// </summary>

@@ -399,12 +399,51 @@ public sealed partial class GraphEditorSession
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
     {
         var descriptors = _host.GetCommandDescriptors().ToList();
+        descriptors.AddRange(CollectNavigationCommandDescriptors());
         descriptors.AddRange(CollectPluginCommandDescriptors(descriptors.Select(descriptor => descriptor.Id).ToArray()));
         return descriptors;
     }
 
     public IReadOnlyList<GraphEditorCommandRegistryEntrySnapshot> GetCommandRegistry()
         => GraphEditorCommandRegistry.Create(GetCommandDescriptors());
+
+    private IReadOnlyList<GraphEditorCommandDescriptorSnapshot> CollectNavigationCommandDescriptors()
+    {
+        var hasGraphItems = SearchGraphItems().Results.Count > 0;
+        var hasBookmarks = _viewportBookmarks.Count > 0;
+        var hasValidationIssues = GetValidationSnapshot().Issues.Count > 0;
+        return
+        [
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.focus-node",
+                GraphEditorCommandSourceKind.Host,
+                true),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.focus-issue",
+                GraphEditorCommandSourceKind.Host,
+                hasValidationIssues,
+                hasValidationIssues ? null : "No validation issue is available to focus."),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.focus-search-result",
+                GraphEditorCommandSourceKind.Host,
+                hasGraphItems,
+                hasGraphItems ? null : "No graph search result is available to focus."),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.bookmark.add",
+                GraphEditorCommandSourceKind.Host,
+                true),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.bookmark.remove",
+                GraphEditorCommandSourceKind.Host,
+                hasBookmarks,
+                hasBookmarks ? null : "No viewport bookmark is available to remove."),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.bookmark.activate",
+                GraphEditorCommandSourceKind.Host,
+                hasBookmarks,
+                hasBookmarks ? null : "No viewport bookmark is available to activate."),
+        ];
+    }
 
     public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots()
         => _host.GetNodeSurfaceSnapshots();
@@ -459,6 +498,19 @@ public sealed partial class GraphEditorSession
                 : "No graph items matched the search text."
             : null;
         return new GraphEditorGraphItemSearchSnapshot(searchText, query.Kind, scopeId, limit, filtered, emptyReason);
+    }
+
+    public GraphEditorViewportBookmarkCollectionSnapshot GetViewportBookmarks()
+    {
+        var navigation = _host.GetScopeNavigationSnapshot();
+        var bookmarks = _viewportBookmarks
+            .OrderBy(bookmark => bookmark.Title, StringComparer.Ordinal)
+            .ThenBy(bookmark => bookmark.Id, StringComparer.Ordinal)
+            .ToList();
+        return new GraphEditorViewportBookmarkCollectionSnapshot(
+            navigation.CurrentScopeId,
+            bookmarks,
+            bookmarks.Count == 0 ? "No viewport bookmarks are available." : null);
     }
 
     public IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots()

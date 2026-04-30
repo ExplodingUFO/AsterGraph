@@ -898,6 +898,11 @@ public sealed partial class GraphEditorSession
     {
         ArgumentNullException.ThrowIfNull(command);
 
+        if (TryExecuteNavigationCommand(command))
+        {
+            return true;
+        }
+
         var executed = KernelCommandIds.Contains(command.CommandId)
             ? _host.TryExecuteCommand(command)
             : TryExecutePluginCommand(command);
