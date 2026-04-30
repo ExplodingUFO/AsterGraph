@@ -107,6 +107,30 @@ public sealed class GraphEditorCommandRegistryTests
             "Ctrl+S",
             null);
         AssertPlacement(
+            registry["workspace.save"],
+            GraphEditorCommandSurfaceKind.Workbench,
+            "workbench.header",
+            "workspace.save",
+            null);
+        AssertPlacement(
+            registry["composites.wrap-selection"],
+            GraphEditorCommandSurfaceKind.Workbench,
+            "workbench.composite-workflow",
+            "composites.wrap-selection",
+            null);
+        AssertPlacement(
+            registry["workspace.save"],
+            GraphEditorCommandSurfaceKind.Workbench,
+            "workbench.command-palette",
+            "workspace.save",
+            null);
+        AssertPlacement(
+            registry["workspace.save"],
+            GraphEditorCommandSurfaceKind.Workbench,
+            "workbench.shortcut-help",
+            "workspace.save",
+            null);
+        AssertPlacement(
             registry["selection.delete"],
             GraphEditorCommandSurfaceKind.KeyboardShortcut,
             "runtime.keyboard-shortcuts",

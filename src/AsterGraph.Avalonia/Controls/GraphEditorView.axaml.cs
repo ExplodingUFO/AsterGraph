@@ -33,19 +33,10 @@ public partial class GraphEditorView : UserControl
 {
     private const string CommandPaletteActionId = "shell.command-palette";
     private const int CommandPaletteRecentActionLimit = 5;
-
-    private static readonly IReadOnlyList<string> HeaderCommandIds =
-    [
-        "workspace.save",
-        "workspace.load",
-        "history.undo",
-        "history.redo",
-        "viewport.fit",
-        "viewport.fit-selection",
-        "viewport.focus-selection",
-        "viewport.reset",
-        "selection.delete",
-    ];
+    private const string HeaderCommandSurfaceId = "workbench.header";
+    private const string CommandPaletteSurfaceId = "workbench.command-palette";
+    private const string ShortcutHelpSurfaceId = "workbench.shortcut-help";
+    private const string CompositeWorkflowSurfaceId = "workbench.composite-workflow";
 
     /// <summary>
     /// 编辑器视图模型依赖属性。
@@ -183,6 +174,8 @@ public partial class GraphEditorView : UserControl
     private IReadOnlyList<GraphEditorNodeTemplateSnapshot> _stencilTemplateSnapshots = [];
     private IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> _commandDescriptorsById =
         new Dictionary<string, GraphEditorCommandDescriptorSnapshot>(StringComparer.Ordinal);
+    private IReadOnlyDictionary<string, GraphEditorCommandRegistryEntrySnapshot> _commandRegistryById =
+        new Dictionary<string, GraphEditorCommandRegistryEntrySnapshot>(StringComparer.Ordinal);
     private GraphEditorCommandDescriptorSnapshot? _stencilAddNodeDescriptor;
     private const int StencilRecentTemplateLimit = 5;
     private const string StencilSourceFilterAll = "All";
@@ -691,12 +684,18 @@ public partial class GraphEditorView : UserControl
             _commandSurfaceProjection = null;
             _stencilTemplateSnapshots = [];
             _commandDescriptorsById = new Dictionary<string, GraphEditorCommandDescriptorSnapshot>(StringComparer.Ordinal);
+            _commandRegistryById = new Dictionary<string, GraphEditorCommandRegistryEntrySnapshot>(StringComparer.Ordinal);
             _stencilAddNodeDescriptor = null;
             _authoringToolSurfaceState = null;
             return;
         }
 
         var commandDescriptors = Editor.Session.Queries.GetCommandDescriptors();
+        var commandRegistry = Editor.Session.Queries.GetCommandRegistry();
+        _commandRegistryById = commandRegistry
+            .GroupBy(entry => entry.CommandId, StringComparer.Ordinal)
+            .Select(group => group.Last())
+            .ToDictionary(entry => entry.CommandId, StringComparer.Ordinal);
         _commandDescriptorsById = commandDescriptors
             .GroupBy(descriptor => descriptor.Id, StringComparer.Ordinal)
             .Select(group => group.Last())
@@ -710,7 +709,7 @@ public partial class GraphEditorView : UserControl
         var composites = Editor.Session.Queries.GetCompositeNodeSnapshots()
             .ToDictionary(snapshot => snapshot.NodeId, StringComparer.Ordinal);
         _commandSurfaceProjection = CreateCommandSurfaceProjection(
-            commandDescriptors,
+            commandRegistry,
             _commandDescriptorsById,
             selection,
             composites,
@@ -796,7 +795,7 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        foreach (var action in projection.Select(HeaderCommandIds))
+        foreach (var action in projection.Select(GetWorkbenchCommandIds(HeaderCommandSurfaceId)))
         {
             _headerToolbar.Children.Add(CreateActionButton(action, $"PART_HeaderCommand_{action.Id}"));
         }
@@ -1369,7 +1368,7 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        foreach (var action in projection.Select(["composites.wrap-selection", "scopes.enter", "scopes.exit"]))
+        foreach (var action in projection.Select(GetWorkbenchCommandIds(CompositeWorkflowSurfaceId)))
         {
             _compositeWorkflowToolbar.Children.Add(CreateActionButton(action, $"PART_CompositeWorkflowAction_{action.Id}"));
         }
@@ -1407,7 +1406,10 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        foreach (var action in projection.WithShortcuts())
+        var shortcutActionIds = GetWorkbenchCommandIds(ShortcutHelpSurfaceId)
+            .Append(CommandPaletteActionId)
+            .ToHashSet(StringComparer.Ordinal);
+        foreach (var action in projection.WithShortcuts().Where(action => shortcutActionIds.Contains(action.Id)))
         {
             _shortcutHelpList.Children.Add(CreateShortcutHelpItem($"{action.DefaultShortcut}：{action.Title}"));
         }
@@ -1426,8 +1428,10 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
+        var paletteActionIds = GetWorkbenchCommandIds(CommandPaletteSurfaceId).ToHashSet(StringComparer.Ordinal);
         var actions = projection.Actions
             .Where(action => !string.Equals(action.Id, CommandPaletteActionId, StringComparison.Ordinal))
+            .Where(action => paletteActionIds.Contains(action.Id) || !_commandRegistryById.ContainsKey(action.Id))
             .Where(MatchesCommandPaletteFilter)
             .ToList();
         if (actions.Count == 0)
@@ -1510,27 +1514,58 @@ public partial class GraphEditorView : UserControl
             });
 
     private AsterGraphHostedActionProjection CreateCommandSurfaceProjection(
-        IReadOnlyList<GraphEditorCommandDescriptorSnapshot> commandDescriptors,
+        IReadOnlyList<GraphEditorCommandRegistryEntrySnapshot> commandRegistry,
         IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commandDescriptorMap,
         GraphEditorSelectionSnapshot selection,
         IReadOnlyDictionary<string, GraphEditorCompositeNodeSnapshot> composites,
         GraphEditorAuthoringToolSurfaceState? authoringToolSurfaceState)
     {
         ArgumentNullException.ThrowIfNull(Editor);
-        ArgumentNullException.ThrowIfNull(commandDescriptors);
+        ArgumentNullException.ThrowIfNull(commandRegistry);
         ArgumentNullException.ThrowIfNull(commandDescriptorMap);
         ArgumentNullException.ThrowIfNull(selection);
         ArgumentNullException.ThrowIfNull(composites);
 
+        var commandPaletteDescriptors = commandRegistry
+            .Where(entry => entry.Placements.Any(placement =>
+                placement.SurfaceKind == GraphEditorCommandSurfaceKind.Workbench
+                && string.Equals(placement.SurfaceId, CommandPaletteSurfaceId, StringComparison.Ordinal)))
+            .OrderBy(entry => entry.Group, StringComparer.Ordinal)
+            .ThenBy(entry => entry.Title, StringComparer.Ordinal)
+            .Select(entry => entry.Descriptor)
+            .ToList();
+
         var actions = AsterGraphHostedActionFactory.ApplyCommandShortcutPolicy(
             [
                 CreateCommandPaletteAction(),
-                .. AsterGraphHostedActionFactory.CreateCommandActions(commandDescriptors, Editor.Session),
+                .. AsterGraphHostedActionFactory.CreateCommandActions(commandPaletteDescriptors, Editor.Session),
                 .. AsterGraphCompositeWorkflowActionFactory.CreateWorkflowActions(Editor.Session, commandDescriptorMap, selection, composites),
                 .. authoringToolSurfaceState?.CommandSurfaceActions ?? [],
             ],
             CommandShortcutPolicy);
         return AsterGraphHostedActionFactory.CreateProjection(actions);
+    }
+
+    private IReadOnlyList<string> GetWorkbenchCommandIds(string surfaceId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(surfaceId);
+
+        return _commandRegistryById.Values
+            .SelectMany(entry => entry.Placements
+                .Where(placement =>
+                    placement.SurfaceKind == GraphEditorCommandSurfaceKind.Workbench
+                    && string.Equals(placement.SurfaceId, surfaceId, StringComparison.Ordinal))
+                .Select(placement => new
+                {
+                    entry.CommandId,
+                    placement.Order,
+                    placement.PlacementId,
+                }))
+            .OrderBy(item => item.Order)
+            .ThenBy(item => item.PlacementId, StringComparer.Ordinal)
+            .Select(item => item.CommandId)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
     }
 
     private AsterGraphHostedActionDescriptor CreateCommandPaletteAction()

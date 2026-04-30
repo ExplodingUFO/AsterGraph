@@ -132,10 +132,23 @@ public sealed class GraphEditorViewTests
         var fitSelectionButton = FindRequiredDescendant<Button>(view, "PART_HeaderCommand_viewport.fit-selection");
         var deleteButton = FindRequiredDescendant<Button>(view, "PART_HeaderCommand_selection.delete");
         var paletteToggle = FindRequiredControl<Button>(view, "PART_OpenCommandPaletteButton");
+        var registryHeaderIds = editor.Session.Queries.GetCommandRegistry()
+            .SelectMany(entry => entry.Placements
+                .Where(placement =>
+                    placement.SurfaceKind == GraphEditorCommandSurfaceKind.Workbench
+                    && string.Equals(placement.SurfaceId, "workbench.header", StringComparison.Ordinal))
+                .Select(_ => entry.CommandId))
+            .ToHashSet(StringComparer.Ordinal);
+        var headerActionIds = FindRequiredControl<WrapPanel>(view, "PART_HeaderToolbar")
+            .Children
+            .OfType<Button>()
+            .Select(button => button.Name!["PART_HeaderCommand_".Length..])
+            .ToHashSet(StringComparer.Ordinal);
 
         Assert.Equal("Save Workspace", Assert.IsType<string>(saveButton.Content));
         Assert.Equal("Undo", Assert.IsType<string>(undoButton.Content));
         Assert.Equal("Fit Selection", Assert.IsType<string>(fitSelectionButton.Content));
+        Assert.True(registryHeaderIds.SetEquals(headerActionIds));
         Assert.Equal("Save Workspace", AutomationProperties.GetName(saveButton));
         Assert.Equal("Undo", AutomationProperties.GetName(undoButton));
         Assert.Equal("Ctrl+S", ToolTip.GetTip(saveButton));

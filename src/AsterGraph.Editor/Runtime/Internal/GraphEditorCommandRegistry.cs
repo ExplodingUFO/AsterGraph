@@ -4,6 +4,8 @@ internal static class GraphEditorCommandRegistry
 {
     private const string CommandRouteSurfaceId = "runtime.session.commands";
     private const string ShortcutSurfaceId = "runtime.keyboard-shortcuts";
+    private const string CommandPaletteSurfaceId = "workbench.command-palette";
+    private const string ShortcutHelpSurfaceId = "workbench.shortcut-help";
 
     private static readonly IReadOnlyDictionary<string, IReadOnlyList<GraphEditorCommandPlacementSnapshot>> StockPlacementsByCommandId =
         new Dictionary<string, IReadOnlyList<GraphEditorCommandPlacementSnapshot>>(StringComparer.Ordinal)
@@ -14,6 +16,7 @@ internal static class GraphEditorCommandRegistry
             ],
             ["selection.delete"] =
             [
+                Workbench("workbench.header", "selection.delete", 80),
                 ContextMenu("selection", "selection-delete", 0),
             ],
             ["fragments.export-selection"] =
@@ -27,6 +30,7 @@ internal static class GraphEditorCommandRegistry
             ],
             ["composites.wrap-selection"] =
             [
+                Workbench("workbench.composite-workflow", "composites.wrap-selection", 0),
                 ContextMenu("selection", "selection-wrap-composite", 30),
                 Tool("selection", "selection-wrap-composite", 10),
             ],
@@ -77,10 +81,20 @@ internal static class GraphEditorCommandRegistry
             ],
             ["viewport.fit"] =
             [
+                Workbench("workbench.header", "viewport.fit", 40),
                 ContextMenu("canvas", "canvas-fit-view", 20),
+            ],
+            ["viewport.fit-selection"] =
+            [
+                Workbench("workbench.header", "viewport.fit-selection", 50),
+            ],
+            ["viewport.focus-selection"] =
+            [
+                Workbench("workbench.header", "viewport.focus-selection", 60),
             ],
             ["viewport.reset"] =
             [
+                Workbench("workbench.header", "viewport.reset", 70),
                 ContextMenu("canvas", "canvas-reset-view", 30),
             ],
             ["layout.snap-all"] =
@@ -89,14 +103,17 @@ internal static class GraphEditorCommandRegistry
             ],
             ["scopes.exit"] =
             [
+                Workbench("workbench.composite-workflow", "scopes.exit", 20),
                 ContextMenu("canvas", "canvas-return-parent-scope", 50),
             ],
             ["workspace.save"] =
             [
+                Workbench("workbench.header", "workspace.save", 0),
                 ContextMenu("canvas", "canvas-save", 60),
             ],
             ["workspace.load"] =
             [
+                Workbench("workbench.header", "workspace.load", 10),
                 ContextMenu("canvas", "canvas-load", 70),
             ],
             ["fragments.import"] =
@@ -106,6 +123,14 @@ internal static class GraphEditorCommandRegistry
             ["connections.cancel"] =
             [
                 ContextMenu("canvas", "canvas-cancel-pending", 90),
+            ],
+            ["history.undo"] =
+            [
+                Workbench("workbench.header", "history.undo", 20),
+            ],
+            ["history.redo"] =
+            [
+                Workbench("workbench.header", "history.redo", 30),
             ],
             ["nodes.inspect"] =
             [
@@ -124,6 +149,7 @@ internal static class GraphEditorCommandRegistry
             ],
             ["scopes.enter"] =
             [
+                Workbench("workbench.composite-workflow", "scopes.enter", 10),
                 ContextMenu("node", "node-enter-composite-scope", 25),
                 Tool("node", "node-enter-composite-scope", 80),
             ],
@@ -215,6 +241,10 @@ internal static class GraphEditorCommandRegistry
                 GraphEditorCommandSurfaceKind.CommandRoute,
                 CommandRouteSurfaceId,
                 descriptor.Id),
+            new(
+                GraphEditorCommandSurfaceKind.Workbench,
+                CommandPaletteSurfaceId,
+                descriptor.Id),
         };
 
         if (!string.IsNullOrWhiteSpace(descriptor.DefaultShortcut))
@@ -223,6 +253,10 @@ internal static class GraphEditorCommandRegistry
                 GraphEditorCommandSurfaceKind.KeyboardShortcut,
                 ShortcutSurfaceId,
                 descriptor.DefaultShortcut));
+            placements.Add(new GraphEditorCommandPlacementSnapshot(
+                GraphEditorCommandSurfaceKind.Workbench,
+                ShortcutHelpSurfaceId,
+                descriptor.Id));
         }
 
         if (StockPlacementsByCommandId.TryGetValue(descriptor.Id, out var stockPlacements))
@@ -253,4 +287,11 @@ internal static class GraphEditorCommandRegistry
             placementId,
             order,
             contextKind);
+
+    private static GraphEditorCommandPlacementSnapshot Workbench(string surfaceId, string placementId, int order)
+        => new(
+            GraphEditorCommandSurfaceKind.Workbench,
+            surfaceId,
+            placementId,
+            order);
 }

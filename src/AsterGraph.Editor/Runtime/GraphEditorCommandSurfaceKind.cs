@@ -9,4 +9,5 @@ public enum GraphEditorCommandSurfaceKind
     ContextMenu,
     Tool,
     KeyboardShortcut,
+    Workbench,
 }
