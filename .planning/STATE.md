@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: Not started
+Phase: 459 ready
 Plan: `.planning/ROADMAP.md`
-Status: v0.77 active; requirements and roadmap defined; ready to plan Phase 458
-Last activity: 2026-05-01 — Started v0.77 Semantic Authoring And Command Platform
+Status: Phase 458 complete; command/input architecture audited; ready to plan Phase 459
+Last activity: 2026-05-01 — Completed Phase 458 Command Platform Architecture And Input Audit
 
 ## Project Reference
 
@@ -17,8 +17,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 ## Active Beads
 
 - Active epic: `avalonia-node-map-48w` — v0.77 Semantic Authoring And Command Platform
-- Ready: `avalonia-node-map-48w.1` — Phase 458: Command Platform Architecture And Input Audit
-- Blocked by Phase 458: `avalonia-node-map-48w.2` — Phase 459: Unified Command Registry And Keybinding Surface
+- Completed: `avalonia-node-map-48w.1` — Phase 458: Command Platform Architecture And Input Audit
+- Ready: `avalonia-node-map-48w.2` — Phase 459: Unified Command Registry And Keybinding Surface
 - Blocked by Phase 459:
   - `avalonia-node-map-48w.3` — Phase 460: Semantic Editing Operations And Clipboard Model
   - `avalonia-node-map-48w.4` — Phase 461: Template Palette And Reusable Authoring Presets
@@ -37,7 +37,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 - Performance and large-graph navigation claims must remain tied to measured tests or proof output.
 - Use beads as the task split/status/handoff spine.
 - Use isolated project-local `.worktrees/` worktrees for parallel implementation when phases split into independent beads.
-- Phase 458 gates 459. After 459, Phases 460-463 can run in parallel. Phase 464 waits for 460-463. Phase 465 closes the milestone.
+- Phase 458 established that v0.77 should harden the existing descriptor/session command spine instead of adding a second command runtime.
+- After 459, Phases 460-463 can run in parallel. Phase 464 waits for 460-463. Phase 465 closes the milestone.
 
 ---
-*Last updated: 2026-05-01 after starting v0.77*
+*Last updated: 2026-05-01 after completing Phase 458*

@@ -20,7 +20,7 @@
 
 ## Phases
 
-- [ ] **Phase 458: Command Platform Architecture And Input Audit** — map command descriptors, input routing, menu/tool surfaces, undo boundaries, and host extension seams before implementation.
+- [x] **Phase 458: Command Platform Architecture And Input Audit** — mapped command descriptors, input routing, menu/tool surfaces, undo boundaries, and host extension seams before implementation.
 - [ ] **Phase 459: Unified Command Registry And Keybinding Surface** — expose command discovery, keybinding metadata, menu/tool projection, disabled recovery states, and execution through canonical session boundaries.
 - [ ] **Phase 460: Semantic Editing Operations And Clipboard Model** — support copy, paste, duplicate, delete-with-repair, insert-into-route, reconnect, and semantic batch editing.
 - [ ] **Phase 461: Template Palette And Reusable Authoring Presets** — add host-provided node/group/fragment templates and searchable palette projection.
@@ -169,7 +169,7 @@
 
 ## Next Step
 
-Start Phase 458.
+Start Phase 459.
 
 ---
-*Roadmap updated: 2026-05-01 after starting v0.77*
+*Roadmap updated: 2026-05-01 after completing Phase 458*
