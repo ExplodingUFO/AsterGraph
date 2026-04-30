@@ -6,6 +6,7 @@ using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
+using AsterGraph.Demo.Cookbook;
 using AsterGraph.Demo.Definitions;
 using AsterGraph.Demo.ViewModels;
 using AsterGraph.Editor.Catalog;
@@ -55,6 +56,7 @@ public sealed record DemoProofResult(
     bool ApiSurfaceBaselineOk,
     bool ApiCanonicalRoutesOk,
     bool ApiPackageBoundaryOk,
+    bool CookbookProofOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
@@ -107,7 +109,8 @@ public sealed record DemoProofResult(
         && V065MilestoneProofOk
         && ApiSurfaceBaselineOk
         && ApiCanonicalRoutesOk
-        && ApiPackageBoundaryOk;
+        && ApiPackageBoundaryOk
+        && CookbookProofOk;
 
     public IReadOnlyList<string> ProofLines => DemoProofContract.CreateProofLines(this);
 
@@ -288,6 +291,7 @@ public static class DemoProof
         var apiSurfaceBaselineOk = RunApiSurfaceBaselineProof(shell);
         var apiCanonicalRoutesOk = RunApiCanonicalRoutesProof(shell);
         var apiPackageBoundaryOk = RunApiPackageBoundaryProof(shell);
+        var cookbookProofOk = DemoCookbookProof.Run().IsOk;
 
         return new DemoProofResult(
             trustTransparencyOk,
@@ -329,6 +333,7 @@ public static class DemoProof
             apiSurfaceBaselineOk,
             apiCanonicalRoutesOk,
             apiPackageBoundaryOk,
+            cookbookProofOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,

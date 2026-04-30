@@ -17,6 +17,11 @@ public sealed class DemoCookbookProofClosureTests
         Assert.True(result.IsOk);
         Assert.True(result.WorkspaceLayoutOk);
         Assert.True(result.RouteCoverageOk);
+        Assert.True(result.VisualHierarchyOk);
+        Assert.True(result.NavigationFeedbackOk);
+        Assert.True(result.DetailReadabilityOk);
+        Assert.True(result.InteractionStatesOk);
+        Assert.True(result.OwnershipBoundaryOk);
         Assert.Equal(DemoCookbookCatalog.Recipes.Count, result.RecipeCount);
         Assert.Equal(DemoCookbookCatalog.RequiredCategories.Count, result.RequiredCategoryCount);
 
@@ -36,6 +41,29 @@ public sealed class DemoCookbookProofClosureTests
         Assert.All(
             DemoCookbookProof.PublicSuccessMarkerIds,
             markerId => Assert.StartsWith("DEMO_COOKBOOK_", markerId, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void DemoCookbookProof_PublicMarkersCoverPolishedCookbookClosure()
+    {
+        Assert.Contains("DEMO_COOKBOOK_VISUAL_HIERARCHY_OK", DemoCookbookProof.PublicSuccessMarkerIds);
+        Assert.Contains("DEMO_COOKBOOK_NAVIGATION_FEEDBACK_OK", DemoCookbookProof.PublicSuccessMarkerIds);
+        Assert.Contains("DEMO_COOKBOOK_DETAIL_READABILITY_OK", DemoCookbookProof.PublicSuccessMarkerIds);
+        Assert.Contains("DEMO_COOKBOOK_INTERACTION_STATES_OK", DemoCookbookProof.PublicSuccessMarkerIds);
+        Assert.Contains("DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK", DemoCookbookProof.PublicSuccessMarkerIds);
+    }
+
+    [Fact]
+    public void DemoProof_IncludesCookbookClosureMarkers()
+    {
+        var result = DemoProof.Run();
+
+        Assert.True(result.CookbookProofOk);
+        Assert.Contains(result.ProofLines, line => string.Equals(line, "DEMO_COOKBOOK_OK:True", StringComparison.Ordinal));
+        foreach (var markerId in DemoCookbookProof.PublicSuccessMarkerIds)
+        {
+            Assert.Contains(result.ProofLines, line => string.Equals(line, $"{markerId}:True", StringComparison.Ordinal));
+        }
     }
 
     [Fact]

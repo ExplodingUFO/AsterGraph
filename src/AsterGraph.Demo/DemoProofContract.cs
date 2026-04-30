@@ -1,4 +1,5 @@
 using System.Globalization;
+using AsterGraph.Demo.Cookbook;
 
 namespace AsterGraph.Demo;
 
@@ -104,6 +105,8 @@ public static class DemoProofContract
             $"API_SURFACE_BASELINE_OK:{result.ApiSurfaceBaselineOk}",
             $"API_CANONICAL_ROUTES_OK:{result.ApiCanonicalRoutesOk}",
             $"API_PACKAGE_BOUNDARY_OK:{result.ApiPackageBoundaryOk}",
+            $"DEMO_COOKBOOK_OK:{result.CookbookProofOk}",
+            .. DemoCookbookProof.CreateProofLines(),
         ];
     }
 

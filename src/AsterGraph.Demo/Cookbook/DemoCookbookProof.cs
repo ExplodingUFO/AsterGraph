@@ -6,6 +6,11 @@ public sealed record DemoCookbookProofResult(
     bool SupportBoundaryOk,
     bool WorkspaceLayoutOk,
     bool RouteCoverageOk,
+    bool VisualHierarchyOk,
+    bool NavigationFeedbackOk,
+    bool DetailReadabilityOk,
+    bool InteractionStatesOk,
+    bool OwnershipBoundaryOk,
     int RecipeCount,
     int RequiredCategoryCount)
 {
@@ -14,7 +19,12 @@ public sealed record DemoCookbookProofResult(
         && RequiredCategoriesOk
         && SupportBoundaryOk
         && WorkspaceLayoutOk
-        && RouteCoverageOk;
+        && RouteCoverageOk
+        && VisualHierarchyOk
+        && NavigationFeedbackOk
+        && DetailReadabilityOk
+        && InteractionStatesOk
+        && OwnershipBoundaryOk;
 }
 
 public static class DemoCookbookProof
@@ -26,6 +36,11 @@ public static class DemoCookbookProof
         "DEMO_COOKBOOK_SUPPORT_BOUNDARY_OK",
         "DEMO_COOKBOOK_WORKSPACE_LAYOUT_OK",
         "DEMO_COOKBOOK_ROUTE_COVERAGE_OK",
+        "DEMO_COOKBOOK_VISUAL_HIERARCHY_OK",
+        "DEMO_COOKBOOK_NAVIGATION_FEEDBACK_OK",
+        "DEMO_COOKBOOK_DETAIL_READABILITY_OK",
+        "DEMO_COOKBOOK_INTERACTION_STATES_OK",
+        "DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK",
     ];
 
     public static DemoCookbookProofResult Run()
@@ -53,6 +68,28 @@ public static class DemoCookbookProof
             && snapshot.SelectedRecipe.DeferredGaps.Count > 0)
             && workspaceSnapshots.Any(snapshot => string.Equals(snapshot.SelectedRecipe.RouteStatus, "Supported SDK route", StringComparison.Ordinal))
             && workspaceSnapshots.Any(snapshot => string.Equals(snapshot.SelectedRecipe.RouteStatus, "Proof/demo route", StringComparison.Ordinal));
+        var visualHierarchyOk = workspaceSnapshots.All(snapshot =>
+            snapshot.NavigationGroups.All(group => !string.IsNullOrWhiteSpace(group.DisplayName))
+            && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.Title)
+            && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.Summary)
+            && snapshot.SelectedRecipe.GraphAnchors.All(HasReadableAnchor)
+            && snapshot.SelectedRecipe.CodeExamples.All(HasReadableAnchor));
+        var navigationFeedbackOk = workspaceSnapshots.All(snapshot =>
+            snapshot.NavigationGroups.SelectMany(group => group.Recipes).Count(item => item.IsSelected) == 1
+            && snapshot.NavigationGroups.All(group => group.Recipes.All(item =>
+                !string.IsNullOrWhiteSpace(item.RecipeId)
+                && !string.IsNullOrWhiteSpace(item.Title))));
+        var detailReadabilityOk = workspaceSnapshots.All(snapshot =>
+            snapshot.SelectedRecipe.DocumentationLinks.All(HasReadableAnchor)
+            && snapshot.SelectedRecipe.ProofMarkers.All(marker => !string.IsNullOrWhiteSpace(marker))
+            && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.SupportBoundary));
+        var interactionStatesOk = workspaceSnapshots.All(snapshot =>
+            !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.UnavailableActionDescription)
+            && snapshot.SelectedRecipe.DeferredGaps.All(gap => !string.IsNullOrWhiteSpace(gap))
+            && !ContainsUnsupportedPromise(snapshot.SelectedRecipe.UnavailableActionDescription)
+            && snapshot.SelectedRecipe.DeferredGaps.All(gap => !ContainsUnsupportedPromise(gap)));
+        var ownershipBoundaryOk = workspaceSnapshots.Length == DemoCookbookCatalog.Recipes.Count
+            && PublicSuccessMarkerIds.All(marker => marker.StartsWith("DEMO_COOKBOOK_", StringComparison.Ordinal));
 
         return new DemoCookbookProofResult(
             contractOk,
@@ -60,6 +97,11 @@ public static class DemoCookbookProof
             supportBoundaryOk,
             workspaceLayoutOk,
             routeCoverageOk,
+            visualHierarchyOk,
+            navigationFeedbackOk,
+            detailReadabilityOk,
+            interactionStatesOk,
+            ownershipBoundaryOk,
             DemoCookbookCatalog.Recipes.Count,
             DemoCookbookCatalog.RequiredCategories.Count);
     }
@@ -75,8 +117,24 @@ public static class DemoCookbookProof
             $"DEMO_COOKBOOK_SUPPORT_BOUNDARY_OK:{result.SupportBoundaryOk}",
             $"DEMO_COOKBOOK_WORKSPACE_LAYOUT_OK:{result.WorkspaceLayoutOk}",
             $"DEMO_COOKBOOK_ROUTE_COVERAGE_OK:{result.RouteCoverageOk}",
+            $"DEMO_COOKBOOK_VISUAL_HIERARCHY_OK:{result.VisualHierarchyOk}",
+            $"DEMO_COOKBOOK_NAVIGATION_FEEDBACK_OK:{result.NavigationFeedbackOk}",
+            $"DEMO_COOKBOOK_DETAIL_READABILITY_OK:{result.DetailReadabilityOk}",
+            $"DEMO_COOKBOOK_INTERACTION_STATES_OK:{result.InteractionStatesOk}",
+            $"DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK:{result.OwnershipBoundaryOk}",
             $"DEMO_COOKBOOK_RECIPE_COUNT:{result.RecipeCount}",
             $"DEMO_COOKBOOK_REQUIRED_CATEGORY_COUNT:{result.RequiredCategoryCount}",
         ];
     }
+
+    private static bool HasReadableAnchor(DemoCookbookWorkspaceAnchor anchor)
+        => !string.IsNullOrWhiteSpace(anchor.Label)
+           && !string.IsNullOrWhiteSpace(anchor.Path)
+           && !string.IsNullOrWhiteSpace(anchor.Evidence);
+
+    private static bool ContainsUnsupportedPromise(string text)
+        => text.Contains("enabled fallback", StringComparison.OrdinalIgnoreCase)
+           || text.Contains("marketplace is enabled", StringComparison.OrdinalIgnoreCase)
+           || text.Contains("sandbox is active", StringComparison.OrdinalIgnoreCase)
+           || text.Contains("telemetry is active", StringComparison.OrdinalIgnoreCase);
 }
