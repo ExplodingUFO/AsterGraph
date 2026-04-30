@@ -435,6 +435,8 @@ public sealed class ReleaseClosureContractTests
             Assert.Contains("ADOPTION_API_STABILIZATION_HANDOFF_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("ADOPTION_API_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("V061_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_SURFACE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         }
     }
 

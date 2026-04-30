@@ -30,6 +30,11 @@ public sealed class AuthoringSurfaceRecipeDocsTests
             Assert.Contains("TrySetNodeSize(...)", contents, StringComparison.Ordinal);
             Assert.Contains("GetConnectionGeometrySnapshots()", contents, StringComparison.Ordinal);
             Assert.Contains("GraphNodeVisual.ConnectionTargetAnchors", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_SURFACE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("IGraphRuntimeOverlayProvider", contents, StringComparison.Ordinal);
+            Assert.Contains("GetRuntimeOverlaySnapshot()", contents, StringComparison.Ordinal);
+            Assert.Contains("OverlayLayer", contents, StringComparison.Ordinal);
+            Assert.Contains("IGraphEdgeVisualPresenter", contents, StringComparison.Ordinal);
         }
 
         Assert.Contains("[Authoring Surface Recipe](./authoring-surface-recipe.md)", consumerSampleEn, StringComparison.Ordinal);
@@ -62,6 +67,7 @@ public sealed class AuthoringSurfaceRecipeDocsTests
             Assert.Contains("PORT_GROUP_AUTHORING_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("PORT_CONNECTION_HINT_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("PORT_AUTHORING_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_SURFACE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("AUTHORING_SURFACE_OK:True", contents, StringComparison.Ordinal);
         }
 
@@ -74,6 +80,30 @@ public sealed class AuthoringSurfaceRecipeDocsTests
             Assert.Contains("AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("AUTHORING_SURFACE_OK:True", contents, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void CustomNodeHostRecipeDocs_PublishSupportedExtensionSurfaceWithoutInternalLayerDependency()
+    {
+        var customNodeRecipeEn = ReadRepoFile("docs/en/custom-node-host-recipe.md");
+        var customNodeRecipeZh = ReadRepoFile("docs/zh-CN/custom-node-host-recipe.md");
+
+        foreach (var contents in new[] { customNodeRecipeEn, customNodeRecipeZh })
+        {
+            Assert.Contains("IGraphNodeVisualPresenter", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphNodeVisual.PortAnchors", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphNodeVisual.ConnectionTargetAnchors", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphConnectionTargetRef", contents, StringComparison.Ordinal);
+            Assert.Contains("GetConnectionGeometrySnapshots()", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_NODE_PRESENTER_LIFECYCLE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_ANCHOR_SURFACE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_EDGE_OVERLAY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_RUNTIME_INSPECTOR_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_SURFACE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("OverlayLayer", contents, StringComparison.Ordinal);
+            Assert.Contains("IGraphEdgeVisualPresenter", contents, StringComparison.Ordinal);
         }
     }
 

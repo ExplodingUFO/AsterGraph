@@ -273,6 +273,12 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.ProjectionPerformanceEvidenceOk);
         Assert.True(result.LargeGraphUxHandoffOk);
         Assert.True(result.V059MilestoneProofOk);
+        Assert.True(result.CustomExtensionNodePresenterLifecycleOk);
+        Assert.True(result.CustomExtensionAnchorSurfaceOk);
+        Assert.True(result.CustomExtensionEdgeOverlayOk);
+        Assert.True(result.CustomExtensionRuntimeInspectorOk);
+        Assert.True(result.CustomExtensionScopeBoundaryOk);
+        Assert.True(result.CustomExtensionSurfaceOk);
         Assert.True(result.SelectedParameterProjectionCount > 0);
         Assert.True(result.TotalParameterProjectionCount > result.SelectedParameterProjectionCount);
         Assert.True(result.StartupMs >= 0);
@@ -286,6 +292,12 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.CommandPaletteMs >= 0);
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CUSTOM_EXTENSION_NODE_PRESENTER_LIFECYCLE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CUSTOM_EXTENSION_ANCHOR_SURFACE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CUSTOM_EXTENSION_EDGE_OVERLAY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CUSTOM_EXTENSION_RUNTIME_INSPECTOR_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CUSTOM_EXTENSION_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CUSTOM_EXTENSION_SURFACE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "INSPECTOR_METADATA_POLISH_OK:True");
         Assert.Contains(result.ProofLines, line => line == "INSPECTOR_MIXED_VALUE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "INSPECTOR_VALIDATION_FIX_OK:True");

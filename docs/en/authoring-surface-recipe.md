@@ -8,6 +8,16 @@ Use this recipe when you want one copyable host-owned path for custom node, port
 
 This recipe stays on `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` and reuses the same `IGraphEditorSession` owner. It does not add adapter-specific runtime forks.
 
+## Supported extension surface
+
+The supported customization surface is one cohesive route:
+
+- custom node lifecycle: `IGraphNodeVisualPresenter.Create(...)` creates the root and anchor maps; `Update(...)` refreshes the same visual from `GraphNodeVisualContext`
+- handles and targets: `GraphNodeVisual.PortAnchors` maps port ids to controls; `GraphNodeVisual.ConnectionTargetAnchors` maps typed `GraphConnectionTargetRef` endpoints such as parameter targets
+- custom edge path: stock edge styling remains the renderer contract; host-owned labels, badges, or diagnostics use `GetConnectionGeometrySnapshots()` and stay outside `NodeCanvas` internals
+- runtime decoration to inspector: `IGraphRuntimeOverlayProvider` feeds `GetRuntimeOverlaySnapshot()`, while inspector and node-side editors keep using parameter snapshots and `INodeParameterEditorRegistry`
+- boundary: do not depend on `OverlayLayer`, do not add `IGraphEdgeVisualPresenter`, and do not introduce an execution engine
+
 ## PRES-01: Multi-handle custom nodes
 
 Use `NodeDefinition` plus multiple input and output ports to declare the handle surface, then project it through `IGraphNodeVisualPresenter`.
@@ -70,7 +80,7 @@ Use one hosted handoff from definitions to proof instead of stitching together s
 3. Project node-side state from `GetNodeParameterSnapshots(nodeId)` so `NodeParameterEditorHost` and `INodeParameterEditorRegistry` reuse the same metadata and validation contract on the custom node surface.
 4. Write values back through `TrySetSelectedNodeParameterValue(...)` or `TrySetNodeParameterValue(...)`; keep validation on the shared session command path instead of adding a second editor model.
 5. Project host commands from `GetCommandDescriptors()` so toolbars, menus, shortcuts, and palette actions stay on the same shared command route.
-6. Close the handoff with `AsterGraph.ConsumerSample.Avalonia -- --proof` and expect `PORT_HANDLE_ID_OK:True`, `PORT_GROUP_AUTHORING_OK:True`, `PORT_CONNECTION_HINT_OK:True`, `PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`, and `AUTHORING_SURFACE_OK:True`.
+6. Close the handoff with `AsterGraph.ConsumerSample.Avalonia -- --proof` and expect `PORT_HANDLE_ID_OK:True`, `PORT_GROUP_AUTHORING_OK:True`, `PORT_CONNECTION_HINT_OK:True`, `PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`, `CUSTOM_EXTENSION_SURFACE_OK:True`, and `AUTHORING_SURFACE_OK:True`.
 
 ## Copy path
 
@@ -79,6 +89,7 @@ Use one hosted handoff from definitions to proof instead of stitching together s
 3. Replace node visuals through `IGraphNodeVisualPresenter`.
 4. Replace editor bodies through `INodeParameterEditorRegistry`.
 5. Render any host-owned edge overlay from `GetConnectionGeometrySnapshots()`.
+6. Keep runtime decorations on `IGraphRuntimeOverlayProvider` and inspector snapshots; do not move graph execution into the editor.
 
 ## Related docs
 

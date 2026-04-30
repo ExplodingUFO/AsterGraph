@@ -176,7 +176,12 @@ public sealed record ConsumerSampleProofResult(
     int TotalParameterProjectionCount = 0,
     bool GraphErrorHelpTargetOk = true,
     bool GraphProblemInspectorHelpTargetOk = true,
-    bool RepairHelpReviewLoopOk = true)
+    bool RepairHelpReviewLoopOk = true,
+    bool CustomExtensionNodePresenterLifecycleOk = true,
+    bool CustomExtensionAnchorSurfaceOk = true,
+    bool CustomExtensionEdgeOverlayOk = true,
+    bool CustomExtensionRuntimeInspectorOk = true,
+    bool CustomExtensionScopeBoundaryOk = true)
 {
     public bool AuthoringSurfaceOk
         => ParameterProjectionOk
@@ -210,6 +215,13 @@ public sealed record ConsumerSampleProofResult(
         && ToolbarContributionScopeBoundaryOk
         && NodeSideAuthoringOk
         && CommandSurfaceOk;
+
+    public bool CustomExtensionSurfaceOk
+        => CustomExtensionNodePresenterLifecycleOk
+        && CustomExtensionAnchorSurfaceOk
+        && CustomExtensionEdgeOverlayOk
+        && CustomExtensionRuntimeInspectorOk
+        && CustomExtensionScopeBoundaryOk;
 
     public bool CapabilityBreadthOk
         => StencilSurfaceOk
@@ -875,7 +887,8 @@ public sealed record ConsumerSampleProofResult(
         && V064MilestoneProofOk
         && GraphErrorHelpTargetOk
         && GraphProblemInspectorHelpTargetOk
-        && RepairHelpReviewLoopOk;
+        && RepairHelpReviewLoopOk
+        && CustomExtensionSurfaceOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -896,6 +909,12 @@ public sealed record ConsumerSampleProofResult(
         $"CONSUMER_SAMPLE_PLUGIN_OK:{PluginContributionOk}",
         $"AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:{ParameterProjectionOk}",
         $"AUTHORING_SURFACE_METADATA_PROJECTION_OK:{MetadataProjectionOk}",
+        $"CUSTOM_EXTENSION_NODE_PRESENTER_LIFECYCLE_OK:{CustomExtensionNodePresenterLifecycleOk}",
+        $"CUSTOM_EXTENSION_ANCHOR_SURFACE_OK:{CustomExtensionAnchorSurfaceOk}",
+        $"CUSTOM_EXTENSION_EDGE_OVERLAY_OK:{CustomExtensionEdgeOverlayOk}",
+        $"CUSTOM_EXTENSION_RUNTIME_INSPECTOR_OK:{CustomExtensionRuntimeInspectorOk}",
+        $"CUSTOM_EXTENSION_SCOPE_BOUNDARY_OK:{CustomExtensionScopeBoundaryOk}",
+        $"CUSTOM_EXTENSION_SURFACE_OK:{CustomExtensionSurfaceOk}",
         $"INSPECTOR_METADATA_POLISH_OK:{InspectorMetadataPolishOk}",
         $"INSPECTOR_MIXED_VALUE_OK:{InspectorMixedValueOk}",
         $"INSPECTOR_VALIDATION_FIX_OK:{InspectorValidationFixOk}",
@@ -1271,6 +1290,9 @@ public static class ConsumerSampleProof
         double nodeToolProjectionMs;
         double edgeToolProjectionMs;
         double commandPaletteMs;
+        bool customExtensionNodePresenterLifecycleOk;
+        bool customExtensionEdgeOverlayOk;
+        bool customExtensionScopeBoundaryOk;
 
         try
         {
@@ -1285,6 +1307,11 @@ public static class ConsumerSampleProof
             pluginScanMs = MeasureMilliseconds(() => host.PluginCandidates.ToArray());
             metadataProjectionOk = HasMetadataProjection(selectedParameterSnapshots);
             nodeSideAuthoringOk = HasNodeSideAuthoring(window, host, host.GetFirstReviewNodeId());
+            (
+                customExtensionNodePresenterLifecycleOk,
+                customExtensionEdgeOverlayOk,
+                customExtensionScopeBoundaryOk) =
+                HasCustomExtensionPresentationSurface(window, host, host.GetFirstReviewNodeId());
 
             var commandBaseline = host.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
             host.Session.Commands.AddNode(ConsumerSampleHost.ReviewDefinitionId, new GraphPoint(880, 220));
@@ -1555,6 +1582,14 @@ public static class ConsumerSampleProof
             .ToArray();
         var graphErrorHelpTargetOk = validationFixHelpTargetOk && connectionValidationHelpTargetOk;
         var graphProblemInspectorHelpTargetOk = validationFixInspectorHelpTargetOk;
+        var customExtensionAnchorSurfaceOk = portHandleIdOk
+            && portGroupAuthoringOk
+            && portConnectionHintOk
+            && portAuthoringScopeBoundaryOk;
+        var customExtensionRuntimeInspectorOk = runtimeOverlaySnapshotOk
+            && runtimeOverlaySupportBundleOk
+            && inspectorProjectionMs >= 0
+            && graphProblemInspectorHelpTargetOk;
         var repairHelpReviewLoopOk = graphErrorHelpTargetOk
             && graphProblemInspectorHelpTargetOk
             && repairEvidence.Any(static evidence => string.Equals(evidence.Action, "validation.parameter.reset-default", StringComparison.Ordinal))
@@ -1696,6 +1731,11 @@ public static class ConsumerSampleProof
             GraphErrorHelpTargetOk: graphErrorHelpTargetOk,
             GraphProblemInspectorHelpTargetOk: graphProblemInspectorHelpTargetOk,
             RepairHelpReviewLoopOk: repairHelpReviewLoopOk,
+            CustomExtensionNodePresenterLifecycleOk: customExtensionNodePresenterLifecycleOk,
+            CustomExtensionAnchorSurfaceOk: customExtensionAnchorSurfaceOk,
+            CustomExtensionEdgeOverlayOk: customExtensionEdgeOverlayOk,
+            CustomExtensionRuntimeInspectorOk: customExtensionRuntimeInspectorOk,
+            CustomExtensionScopeBoundaryOk: customExtensionScopeBoundaryOk,
             ReadinessStatus: CreateReadinessStatus(validationSnapshot),
             ValidationSummary: validationSummary,
             ValidationFeedback: validationFeedback,
@@ -2803,6 +2843,41 @@ public static class ConsumerSampleProof
             && widenedWidth > initialWidth
             && statusTemplateOk
             && ownerTemplateOk;
+    }
+
+    private static (bool NodePresenterLifecycleOk, bool EdgeOverlayOk, bool ScopeBoundaryOk) HasCustomExtensionPresentationSurface(
+        Window window,
+        ConsumerSampleHost host,
+        string reviewNodeId)
+    {
+        var presentation = ConsumerSampleAuthoringSurfaceRecipe.CreatePresentationOptions();
+        var nodePresenterLifecycleOk = presentation.NodeVisualPresenter is ConsumerSampleNodeVisualPresenter
+            && presentation.NodeParameterEditorRegistry is not null
+            && ConsumerSampleAuthoringSurfaceRecipe.UsesCustomNodePresentation(
+                host.Editor.Nodes.Single(node => string.Equals(node.Id, reviewNodeId, StringComparison.Ordinal)))
+            && FindNamed<Border>(window, $"PART_RecipeNodeHeader_{reviewNodeId}") is not null
+            && FindNamed<Button>(window, $"PART_RecipeToolbarWiden_{reviewNodeId}") is not null
+            && FindNamed<Button>(window, $"PART_RecipeToolbarReset_{reviewNodeId}") is not null
+            && FindNamed<Button>(window, $"PART_RecipePort_{reviewNodeId}_input") is not null
+            && FindNamed<Button>(window, $"PART_RecipeTarget_{reviewNodeId}_status") is not null;
+
+        var edgeOverlayOk = ConsumerSampleAuthoringSurfaceRecipe.CreateEdgeOverlay(host.Session) is ConsumerSampleConnectionOverlay
+            && FindNamed<Canvas>(window, "PART_AuthoringEdgeOverlay") is not null
+            && FindNamed<Border>(window, "PART_AuthoringEdgeBadge_consumer-sample-connection-001") is not null
+            && host.Session.Queries.GetConnectionGeometrySnapshots().Any(snapshot =>
+                string.Equals(snapshot.ConnectionId, "consumer-sample-connection-001", StringComparison.Ordinal));
+
+        var presentationOptionProperties = typeof(AsterGraphPresentationOptions)
+            .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .Select(static property => property.Name)
+            .ToArray();
+        var scopeBoundaryOk = presentationOptionProperties.Contains(nameof(AsterGraphPresentationOptions.NodeVisualPresenter), StringComparer.Ordinal)
+            && presentationOptionProperties.Contains(nameof(AsterGraphPresentationOptions.NodeParameterEditorRegistry), StringComparer.Ordinal)
+            && typeof(NodeCanvas).GetProperty("OverlayLayer", BindingFlags.Instance | BindingFlags.Public) is null
+            && Type.GetType("AsterGraph.Avalonia.Presentation.IGraphEdgeVisualPresenter, AsterGraph.Avalonia") is null
+            && Type.GetType("AsterGraph.Editor.Runtime.IGraphExecutionEngine, AsterGraph.Editor") is null;
+
+        return (nodePresenterLifecycleOk, edgeOverlayOk, scopeBoundaryOk);
     }
 
     private static (bool SurfaceOk, bool GroupingOk, bool SearchOk, bool RecentsFavoritesOk, bool SourceFilterOk, bool StatePersistenceOk) HasStencilSurface(Window window, ConsumerSampleHost host)

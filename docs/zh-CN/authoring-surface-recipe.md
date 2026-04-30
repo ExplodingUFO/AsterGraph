@@ -8,6 +8,16 @@
 
 这条 recipe 继续停留在 `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` 上，并且复用同一个 `IGraphEditorSession` owner。它不会引入 adapter-specific runtime forks。
 
+## 受支持的扩展 surface
+
+受支持的自定义 surface 是一条连贯路线：
+
+- 自定义节点生命周期：`IGraphNodeVisualPresenter.Create(...)` 创建 root 和 anchor maps；`Update(...)` 从 `GraphNodeVisualContext` 刷新同一棵视觉树。
+- handles 与 targets：`GraphNodeVisual.PortAnchors` 把 port id 映射到 control；`GraphNodeVisual.ConnectionTargetAnchors` 把 typed `GraphConnectionTargetRef` endpoint（例如参数目标）映射到 control。
+- 自定义边路线：stock edge styling 仍是 renderer contract；宿主自管 label、badge 或 diagnostics 使用 `GetConnectionGeometrySnapshots()`，并保持在 `NodeCanvas` internals 之外。
+- runtime decoration 到 inspector：`IGraphRuntimeOverlayProvider` 供给 `GetRuntimeOverlaySnapshot()`；inspector 与节点旁路 editor 继续使用 parameter snapshots 和 `INodeParameterEditorRegistry`。
+- 边界：不要依赖 `OverlayLayer`，不要新增 `IGraphEdgeVisualPresenter`，也不要引入 execution engine。
+
 ## PRES-01：多 Handle 节点
 
 先用 `NodeDefinition` 把多输入、多输出、默认宽高这些事实声明出来，再通过 `IGraphNodeVisualPresenter` 投成宿主自定义节点可视树。
@@ -70,7 +80,7 @@
 3. 然后用 `GetNodeParameterSnapshots(nodeId)` 投影节点旁路状态，让 `NodeParameterEditorHost` 和 `INodeParameterEditorRegistry` 在自定义节点表面上继续复用同一份 metadata 和 validation 合同。
 4. 写回时继续走 `TrySetSelectedNodeParameterValue(...)` 或 `TrySetNodeParameterValue(...)`，把 validation 保留在共享 session command 路线上，不再引入第二套 editor model。
 5. 宿主命令继续从 `GetCommandDescriptors()` 投影，这样 toolbar、menu、shortcut 和 palette action 都停留在同一条共享 command route 上。
-6. 最后用 `AsterGraph.ConsumerSample.Avalonia -- --proof` 收口，并期待看到 `PORT_HANDLE_ID_OK:True`、`PORT_GROUP_AUTHORING_OK:True`、`PORT_CONNECTION_HINT_OK:True`、`PORT_AUTHORING_SCOPE_BOUNDARY_OK:True` 和 `AUTHORING_SURFACE_OK:True`。
+6. 最后用 `AsterGraph.ConsumerSample.Avalonia -- --proof` 收口，并期待看到 `PORT_HANDLE_ID_OK:True`、`PORT_GROUP_AUTHORING_OK:True`、`PORT_CONNECTION_HINT_OK:True`、`PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`、`CUSTOM_EXTENSION_SURFACE_OK:True` 和 `AUTHORING_SURFACE_OK:True`。
 
 ## 复制顺序
 
@@ -79,6 +89,7 @@
 3. 通过 `IGraphNodeVisualPresenter` 替换节点可视树。
 4. 通过 `INodeParameterEditorRegistry` 替换 editor body。
 5. 通过 `GetConnectionGeometrySnapshots()` 渲染宿主自管 edge overlay。
+6. runtime decoration 保持在 `IGraphRuntimeOverlayProvider` 和 inspector snapshots 上；不要把图执行搬进 editor。
 
 ## 相关文档
 

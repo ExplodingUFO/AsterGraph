@@ -149,7 +149,14 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 });
 ```
 
-## 5. PortAnchors and Edge Geometry
+Lifecycle boundary:
+
+- `Create(...)` builds the root control, anchor dictionaries, and optional presenter state.
+- `Update(...)` refreshes text, parameter rows, toolbar state, and anchor dictionaries from the latest `GraphNodeVisualContext`.
+- A custom presenter should delegate to `DefaultGraphNodeVisualPresenter` for nodes it does not own.
+- Presenter state stays host-owned; persisted graph changes still go through `IGraphEditorSession.Commands`.
+
+## 5. PortAnchors, TargetAnchors, and Edge Geometry
 
 `GraphNodeVisual.PortAnchors` is the anchor map the stock canvas uses for committed connections.
 
@@ -160,6 +167,8 @@ Rules:
 - The canvas reads anchor positions from these controls to draw edge endpoints
 - Custom presenters must populate this dictionary during `Create` and keep it in sync during `Update`
 
+`GraphNodeVisual.ConnectionTargetAnchors` is the matching typed anchor map for parameter endpoints and other non-port connection targets. Use `GraphConnectionTargetRef` keys and call `context.ActivateConnectionTarget(...)` from the target control when the user starts a connection from that endpoint.
+
 For custom edge presentation, query geometry from the session:
 
 ```csharp
@@ -167,6 +176,8 @@ var geometries = session.Queries.GetConnectionGeometrySnapshots();
 ```
 
 Each snapshot contains source/target anchor positions and route vertices. Hosts can render host-owned edge overlays from this data without changing the runtime route.
+
+The supported custom edge path is stock edge styling plus an optional host-owned overlay from geometry snapshots. There is no public `IGraphEdgeVisualPresenter`, and `NodeCanvas` internal layers such as `OverlayLayer` are intentionally not part of this recipe.
 
 ## 6. Proof Validation
 
@@ -179,6 +190,12 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 Expect:
 
 - `AUTHORING_SURFACE_OK:True`
+- `CUSTOM_EXTENSION_SURFACE_OK:True`
+- `CUSTOM_EXTENSION_NODE_PRESENTER_LIFECYCLE_OK:True`
+- `CUSTOM_EXTENSION_ANCHOR_SURFACE_OK:True`
+- `CUSTOM_EXTENSION_EDGE_OVERLAY_OK:True`
+- `CUSTOM_EXTENSION_RUNTIME_INSPECTOR_OK:True`
+- `CUSTOM_EXTENSION_SCOPE_BOUNDARY_OK:True`
 - `AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True`
 - `AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
@@ -189,8 +206,10 @@ Expect:
 2. Register the provider in the catalog or through a plugin
 3. Implement `IGraphNodeVisualPresenter` for custom visuals
 4. Populate `GraphNodeVisual.PortAnchors` with port-id-to-control mappings
-5. Wire the presenter into `AsterGraphPresentationOptions.NodeVisualPresenter`
-6. Validate with `ConsumerSample.Avalonia -- --proof` and expect `AUTHORING_SURFACE_OK:True`
+5. Populate `GraphNodeVisual.ConnectionTargetAnchors` for typed parameter endpoints when needed
+6. Render custom edge badges or labels from `GetConnectionGeometrySnapshots()` if stock styling is not enough
+7. Wire the presenter into `AsterGraphPresentationOptions.NodeVisualPresenter`
+8. Validate with `ConsumerSample.Avalonia -- --proof` and expect `AUTHORING_SURFACE_OK:True` plus `CUSTOM_EXTENSION_SURFACE_OK:True`
 
 ## Related Docs
 

@@ -129,6 +129,22 @@ public sealed class DemoCookbookDocsTests
         Assert.Contains("CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True", hostRecipeLadder, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void DemoCookbookDocs_SurfaceCustomExtensionProofMarkers()
+    {
+        var english = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chinese = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+
+        foreach (var contents in new[] { english, chinese })
+        {
+            Assert.Contains("ConsumerSampleNodeVisualPresenter.cs", contents, StringComparison.Ordinal);
+            Assert.Contains("ConsumerSampleConnectionOverlay.cs", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_SURFACE_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("custom node presenter lifecycle", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("geometry-snapshot edge overlays", contents, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     private static void AssertRecipeIndexed(string contents, DemoCookbookRecipe recipe)
     {
         Assert.Contains(recipe.Id, contents, StringComparison.Ordinal);

@@ -149,7 +149,14 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 });
 ```
 
-## 5. PortAnchors 与边几何
+生命周期边界：
+
+- `Create(...)` 创建 root control、anchor dictionaries 和可选 presenter state。
+- `Update(...)` 从最新 `GraphNodeVisualContext` 刷新文本、参数行、工具栏状态和 anchor dictionaries。
+- 自定义 presenter 对不归自己管理的节点应委托给 `DefaultGraphNodeVisualPresenter`。
+- presenter state 归宿主管；持久化图变化仍然走 `IGraphEditorSession.Commands`。
+
+## 5. PortAnchors、TargetAnchors 与边几何
 
 `GraphNodeVisual.PortAnchors` 是默认画布用于已提交连线的锚点映射。
 
@@ -160,6 +167,8 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - 画布从这些控件的位置读取锚点坐标来绘制边端点
 - 自定义展示器必须在 `Create` 时填充该字典，并在 `Update` 时保持同步
 
+`GraphNodeVisual.ConnectionTargetAnchors` 是参数端点和其他非端口连接目标的 typed anchor map。使用 `GraphConnectionTargetRef` 作为 key，并在目标控件上调用 `context.ActivateConnectionTarget(...)` 来启动该 endpoint 的连接。
+
 如需自定义边展示，从 session 查询几何数据：
 
 ```csharp
@@ -167,6 +176,8 @@ var geometries = session.Queries.GetConnectionGeometrySnapshots();
 ```
 
 每个 snapshot 包含源/目标锚点位置和 route vertices。宿主可据此渲染宿主自有的边覆盖层，而无需改动 runtime 路线。
+
+受支持的自定义边路径是 stock edge styling 加可选的、基于 geometry snapshots 的宿主自管 overlay。这里没有 public `IGraphEdgeVisualPresenter`；`NodeCanvas` 的内部层（包括 `OverlayLayer`）也不是这条 recipe 的一部分。
 
 ## 6. Proof 验证
 
@@ -179,6 +190,12 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 期待：
 
 - `AUTHORING_SURFACE_OK:True`
+- `CUSTOM_EXTENSION_SURFACE_OK:True`
+- `CUSTOM_EXTENSION_NODE_PRESENTER_LIFECYCLE_OK:True`
+- `CUSTOM_EXTENSION_ANCHOR_SURFACE_OK:True`
+- `CUSTOM_EXTENSION_EDGE_OVERLAY_OK:True`
+- `CUSTOM_EXTENSION_RUNTIME_INSPECTOR_OK:True`
+- `CUSTOM_EXTENSION_SCOPE_BOUNDARY_OK:True`
 - `AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True`
 - `AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
@@ -189,8 +206,10 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 2. 在 catalog 里注册 provider，或通过插件注册
 3. 实现 `IGraphNodeVisualPresenter` 做自定义视觉树
 4. 在 `GraphNodeVisual.PortAnchors` 里填入 port-id 到 control 的映射
-5. 把 presenter 接入 `AsterGraphPresentationOptions.NodeVisualPresenter`
-6. 用 `ConsumerSample.Avalonia -- --proof` 验证，期待 `AUTHORING_SURFACE_OK:True`
+5. 需要 typed parameter endpoints 时，在 `GraphNodeVisual.ConnectionTargetAnchors` 里填入目标锚点
+6. 当 stock styling 不够时，用 `GetConnectionGeometrySnapshots()` 渲染自定义 edge badge 或 label
+7. 把 presenter 接入 `AsterGraphPresentationOptions.NodeVisualPresenter`
+8. 用 `ConsumerSample.Avalonia -- --proof` 验证，期待 `AUTHORING_SURFACE_OK:True` 和 `CUSTOM_EXTENSION_SURFACE_OK:True`
 
 ## 相关文档
 
