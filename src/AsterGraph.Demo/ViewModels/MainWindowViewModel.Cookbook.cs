@@ -64,23 +64,6 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private CookbookCategoryFilter selectedCookbookCategoryFilter = null!;
 
-    private DemoCookbookRecipe selectedCookbookRecipe = null!;
-
-    public DemoCookbookRecipe SelectedCookbookRecipe
-    {
-        get => selectedCookbookRecipe;
-        set
-        {
-            if (value is null || ReferenceEquals(selectedCookbookRecipe, value))
-            {
-                return;
-            }
-
-            SetProperty(ref selectedCookbookRecipe, value);
-            RefreshCookbookProjection();
-        }
-    }
-
     [ObservableProperty]
     private string lastCookbookNavigationStatus = string.Empty;
 
@@ -132,9 +115,13 @@ public partial class MainWindowViewModel
         RebuildCookbookDetailModes(SelectedCookbookDetailMode?.Key);
         if (string.IsNullOrWhiteSpace(LastCookbookNavigationStatus)
             || LastCookbookNavigationStatus.StartsWith("请选择", StringComparison.Ordinal)
-            || LastCookbookNavigationStatus.StartsWith("Select", StringComparison.Ordinal))
+            || LastCookbookNavigationStatus.StartsWith("Select", StringComparison.Ordinal)
+            || LastCookbookNavigationStatus.StartsWith("已选择", StringComparison.Ordinal)
+            || LastCookbookNavigationStatus.StartsWith("Selected cookbook", StringComparison.Ordinal))
         {
-            LastCookbookNavigationStatus = T("请选择一个 cookbook 配方。", "Select a cookbook recipe.");
+            LastCookbookNavigationStatus = selectedCookbookRecipe is null
+                ? T("请选择一个 cookbook 配方。", "Select a cookbook recipe.")
+                : FormatCookbookSelectionStatus(selectedCookbookRecipe);
         }
 
         RefreshFilteredCookbookRecipes();
@@ -175,6 +162,14 @@ public partial class MainWindowViewModel
         if (_filteredCookbookRecipes.Count > 0 && !_filteredCookbookRecipes.Contains(SelectedCookbookRecipe))
         {
             SelectedCookbookRecipe = _filteredCookbookRecipes[0];
+        }
+        else if (_filteredCookbookRecipes.Count > 0)
+        {
+            LastCookbookNavigationStatus = FormatCookbookSelectionStatus(SelectedCookbookRecipe);
+        }
+        else if (_filteredCookbookRecipes.Count == 0)
+        {
+            LastCookbookNavigationStatus = T("没有匹配配方，当前配方仍保持可见。", "No matching recipes; the current recipe remains visible.");
         }
 
         RefreshCookbookProjection();

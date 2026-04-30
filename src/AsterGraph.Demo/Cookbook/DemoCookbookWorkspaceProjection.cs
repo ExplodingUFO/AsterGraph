@@ -22,6 +22,7 @@ public sealed record DemoCookbookWorkspaceRecipeContent(
     DemoCookbookRecipeCategory Category,
     string RouteStatus,
     string RouteStatusDescription,
+    string UnavailableActionDescription,
     IReadOnlyList<DemoCookbookWorkspaceAnchor> GraphAnchors,
     IReadOnlyList<DemoCookbookWorkspaceAnchor> CodeExamples,
     IReadOnlyList<DemoCookbookWorkspaceAnchor> DocumentationLinks,
@@ -81,6 +82,7 @@ public static class DemoCookbookWorkspaceProjection
             recipe.Category,
             posture.Status,
             posture.Description,
+            posture.UnavailableActionDescription,
             ConvertAnchors(recipe.DemoAnchors),
             ConvertAnchors(recipe.CodeAnchors),
             ConvertAnchors(recipe.DocumentationAnchors),
@@ -95,32 +97,39 @@ public static class DemoCookbookWorkspaceProjection
             DemoCookbookRecipeCategory.StarterHost => new DemoCookbookRoutePosture(
                 "Supported SDK route",
                 "Uses the shipped Avalonia host path and canonical startup/onboarding route.",
+                "This recipe is display guidance; no runtime code execution is enabled.",
                 ["WPF cookbook parity remains deferred."]),
             DemoCookbookRecipeCategory.Authoring => new DemoCookbookRoutePosture(
                 "Supported SDK route",
                 "Uses public authoring, command, node, port, and parameter extension seams.",
+                "This recipe is display guidance; no generated workflow feature is enabled.",
                 ["Retained/migration cookbook depth remains deferred."]),
             DemoCookbookRecipeCategory.PluginTrust => new DemoCookbookRoutePosture(
                 "Proof/demo route",
                 "Demonstrates trusted in-process plugin decisions and evidence without sandbox claims.",
+                "Deferred plugin gaps are informational; no sandbox or marketplace feature is enabled.",
                 ["Marketplace, remote distribution, unload lifecycle, and sandboxing remain deferred."]),
             DemoCookbookRecipeCategory.DiagnosticsSupport => new DemoCookbookRoutePosture(
                 "Proof/demo route",
                 "Demonstrates local diagnostics and support-bundle handoff evidence.",
+                "Support evidence stays local; no telemetry or remote sync feature is enabled.",
                 ["Remote telemetry, remote sync, and stronger support-scope claims remain deferred."]),
             DemoCookbookRecipeCategory.ReviewHelp => new DemoCookbookRoutePosture(
                 "Proof/demo route",
                 "Demonstrates validation, repair/help, and review-loop evidence without adding a workflow engine.",
+                "Review/help gaps are informational; no macro or scheduling feature is enabled.",
                 ["Workflow execution scheduling and macro systems remain deferred."]),
             _ => new DemoCookbookRoutePosture(
                 "Proof/demo route",
                 "Demonstrates existing cookbook evidence for this route.",
+                "Additional route depth is not enabled without adopter evidence.",
                 ["Additional route depth requires adopter evidence."]),
         };
 
     private sealed record DemoCookbookRoutePosture(
         string Status,
         string Description,
+        string UnavailableActionDescription,
         IReadOnlyList<string> DeferredGaps);
 
     private static IReadOnlyList<DemoCookbookWorkspaceAnchor> ConvertAnchors(IReadOnlyList<DemoCookbookAnchor> anchors)

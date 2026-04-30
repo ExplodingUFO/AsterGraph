@@ -23,6 +23,7 @@ public partial class MainWindowViewModel
             [
                 T("路线状态：", "Route status: ") + selected.RouteStatus,
                 T("路线说明：", "Route note: ") + selected.RouteStatusDescription,
+                T("不可用操作：", "Unavailable action: ") + selected.UnavailableActionDescription,
                 .. selected.DeferredGaps.Select(gap => T("延后缺口：", "Deferred gap: ") + gap),
             ];
         }

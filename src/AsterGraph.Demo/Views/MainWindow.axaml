@@ -1188,33 +1188,39 @@
               <Border x:Name="PART_CookbookWorkspaceNavigationFeedback"
                       Grid.Row="3"
                       Padding="10"
+                      MaxHeight="132"
                       Background="#101923"
                       BorderBrush="#314859"
                       BorderThickness="1"
-                      CornerRadius="8">
-                <StackPanel Spacing="6">
-                  <ItemsControl x:Name="PART_CookbookWorkspaceNavigationFeedbackLines"
-                                ItemsSource="{Binding CookbookLandingLines}"
-                                ItemTemplate="{StaticResource CookbookNavigationFeedbackLineTemplate}" />
-                  <Border x:Name="PART_CookbookWorkspaceEmptyFilterFeedback"
-                          Padding="8"
-                          Background="#221A13"
-                          BorderBrush="#8A6240"
-                          BorderThickness="1"
-                          CornerRadius="6"
-                          IsVisible="{Binding HasCookbookEmptyFilterFeedback}">
-                    <TextBlock TextWrapping="Wrap"
-                               Foreground="#F6D8B6"
-                               Text="{Binding CookbookFilterFeedback}" />
-                  </Border>
-                </StackPanel>
+                      CornerRadius="8"
+                      ClipToBounds="True">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                  <StackPanel Spacing="6">
+                    <ItemsControl x:Name="PART_CookbookWorkspaceNavigationFeedbackLines"
+                                  ItemsSource="{Binding CookbookLandingLines}"
+                                  ItemTemplate="{StaticResource CookbookNavigationFeedbackLineTemplate}" />
+                    <Border x:Name="PART_CookbookWorkspaceEmptyFilterFeedback"
+                            Padding="8"
+                            Background="#221A13"
+                            BorderBrush="#8A6240"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            IsVisible="{Binding HasCookbookEmptyFilterFeedback}">
+                      <TextBlock TextWrapping="Wrap"
+                                 Foreground="#F6D8B6"
+                                 Text="{Binding CookbookFilterFeedback}" />
+                    </Border>
+                  </StackPanel>
+                </ScrollViewer>
               </Border>
 
               <ScrollViewer Grid.Row="4"
                             HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="10">
                   <ItemsControl x:Name="PART_CookbookWorkspaceNavigationGroups"
-                                ItemsSource="{Binding CookbookWorkspace.NavigationGroups}">
+                                ItemsSource="{Binding CookbookWorkspace.NavigationGroups}"
+                                IsEnabled="{Binding HasCookbookFilterResults}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate x:DataType="cookbook:DemoCookbookWorkspaceNavigationGroup">
                           <StackPanel Margin="0,0,0,12"
@@ -1375,7 +1381,7 @@
                                   ItemTemplate="{StaticResource CookbookWorkspaceLineTemplate}" />
                     <ItemsControl x:Name="PART_CookbookWorkspaceCoverageLines"
                                   ItemsSource="{Binding SelectedCookbookWorkspaceCoverageLines}"
-                                  ItemTemplate="{StaticResource CookbookWorkspaceLineTemplate}" />
+                                  ItemTemplate="{StaticResource CookbookWorkspaceStateLineTemplate}" />
                     <Border x:Name="PART_CookbookWorkspaceDetailModeStrip"
                             Padding="10,8"
                             Background="#101923"

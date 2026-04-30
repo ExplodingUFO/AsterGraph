@@ -34,4 +34,21 @@
                            Text="{Binding}" />
     </Border>
   </DataTemplate>
+
+  <DataTemplate x:Key="CookbookWorkspaceStateLineTemplate">
+    <Border Margin="0,0,0,6"
+            Padding="10,8"
+            HorizontalAlignment="Stretch"
+            Background="#1A1714"
+            BorderBrush="#8A6240"
+            BorderThickness="1"
+            CornerRadius="6"
+            MaxHeight="88"
+            ClipToBounds="True">
+      <SelectableTextBlock TextWrapping="Wrap"
+                           LineHeight="18"
+                           Foreground="#F6D8B6"
+                           Text="{Binding}" />
+    </Border>
+  </DataTemplate>
 </ResourceDictionary>
