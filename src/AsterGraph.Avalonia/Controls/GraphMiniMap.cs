@@ -325,7 +325,10 @@ public sealed class GraphMiniMap : UserControl
         {
             if (UseLightweightProjection && _projection is not null)
             {
-                return _projection;
+                return _projection with
+                {
+                    Viewport = session.Queries.GetViewportSnapshot(),
+                };
             }
 
             var projection = CreateProjection(session);

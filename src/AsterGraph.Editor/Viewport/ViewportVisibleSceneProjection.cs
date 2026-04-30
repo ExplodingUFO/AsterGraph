@@ -20,12 +20,83 @@ public sealed record ViewportVisibleSceneProjection(
     double OverscanWorldUnits)
 {
     /// <summary>
+    /// Stable document-order IDs of nodes intersecting the visible viewport budget.
+    /// </summary>
+    internal IReadOnlyList<string> VisibleNodeIds { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// Stable document-order IDs of connections attached to visible nodes.
+    /// </summary>
+    internal IReadOnlyList<string> VisibleConnectionIds { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// Stable document-order IDs of groups intersecting the visible viewport budget.
+    /// </summary>
+    internal IReadOnlyList<string> VisibleGroupIds { get; init; } = Array.Empty<string>();
+
+    /// <summary>
     /// Machine-readable marker used by scale and rendering proof tests.
     /// </summary>
     public string ToBudgetMarker(string tier)
         => "VISIBLE_SCENE_PROJECTION:"
            + $"{tier}:nodes={VisibleNodes}/{TotalNodes}:connections={VisibleConnections}/{TotalConnections}:"
            + $"groups={VisibleGroups}/{TotalGroups}:overscan={OverscanWorldUnits:0.##}";
+
+    /// <summary>
+    /// Computes the bounded scene-item invalidation between two visible-scene projections.
+    /// </summary>
+    internal ViewportVisibleSceneInvalidation Diff(ViewportVisibleSceneProjection next)
+    {
+        ArgumentNullException.ThrowIfNull(next);
+
+        return new ViewportVisibleSceneInvalidation(
+            Except(VisibleNodeIds, next.VisibleNodeIds),
+            Except(next.VisibleNodeIds, VisibleNodeIds),
+            Except(VisibleConnectionIds, next.VisibleConnectionIds),
+            Except(next.VisibleConnectionIds, VisibleConnectionIds),
+            Except(VisibleGroupIds, next.VisibleGroupIds),
+            Except(next.VisibleGroupIds, VisibleGroupIds));
+    }
+
+    private static IReadOnlyList<string> Except(IReadOnlyList<string> source, IReadOnlyList<string> excluded)
+    {
+        var excludedSet = excluded.ToHashSet(StringComparer.Ordinal);
+        return source.Where(item => !excludedSet.Contains(item)).ToArray();
+    }
+}
+
+/// <summary>
+/// Scene items that entered or left the visible viewport projection.
+/// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
+internal sealed record ViewportVisibleSceneInvalidation(
+    IReadOnlyList<string> NodesLeavingViewport,
+    IReadOnlyList<string> NodesEnteringViewport,
+    IReadOnlyList<string> ConnectionsLeavingViewport,
+    IReadOnlyList<string> ConnectionsEnteringViewport,
+    IReadOnlyList<string> GroupsLeavingViewport,
+    IReadOnlyList<string> GroupsEnteringViewport)
+{
+    /// <summary>
+    /// Number of scene items whose visibility changed.
+    /// </summary>
+    public int InvalidatedSceneItemCount
+        => NodesLeavingViewport.Count
+           + NodesEnteringViewport.Count
+           + ConnectionsLeavingViewport.Count
+           + ConnectionsEnteringViewport.Count
+           + GroupsLeavingViewport.Count
+           + GroupsEnteringViewport.Count;
+
+    /// <summary>
+    /// Machine-readable marker used by viewport invalidation proof tests.
+    /// </summary>
+    public string ToBudgetMarker()
+        => "VISIBLE_SCENE_INVALIDATION:"
+           + $"nodes={NodesLeavingViewport.Count + NodesEnteringViewport.Count}:"
+           + $"connections={ConnectionsLeavingViewport.Count + ConnectionsEnteringViewport.Count}:"
+           + $"groups={GroupsLeavingViewport.Count + GroupsEnteringViewport.Count}:"
+           + $"total={InvalidatedSceneItemCount}";
 }
 
 /// <summary>
@@ -58,30 +129,42 @@ public static class ViewportVisibleSceneProjector
                 node.Size.Width,
                 node.Size.Height))
             .Select(node => node.Id)
-            .ToHashSet(StringComparer.Ordinal);
+            .ToArray();
+        var visibleNodeIdSet = visibleNodeIds.ToHashSet(StringComparer.Ordinal);
 
-        var visibleGroups = document.Groups is null
-            ? 0
-            : document.Groups.Count(group => Intersects(
-                worldBounds,
-                group.Position.X,
-                group.Position.Y,
-                group.Size.Width,
-                group.Size.Height));
-        var visibleConnections = document.Connections.Count(connection =>
-            visibleNodeIds.Contains(connection.SourceNodeId)
-            || visibleNodeIds.Contains(connection.TargetNodeId));
+        var visibleGroupIds = document.Groups is null
+            ? Array.Empty<string>()
+            : document.Groups
+                .Where(group => Intersects(
+                    worldBounds,
+                    group.Position.X,
+                    group.Position.Y,
+                    group.Size.Width,
+                    group.Size.Height))
+                .Select(group => group.Id)
+                .ToArray();
+        var visibleConnectionIds = document.Connections
+            .Where(connection =>
+                visibleNodeIdSet.Contains(connection.SourceNodeId)
+                || visibleNodeIdSet.Contains(connection.TargetNodeId))
+            .Select(connection => connection.Id)
+            .ToArray();
 
         return new ViewportVisibleSceneProjection(
             document.Nodes.Count,
-            visibleNodeIds.Count,
+            visibleNodeIds.Length,
             document.Connections.Count,
-            visibleConnections,
+            visibleConnectionIds.Length,
             document.Groups?.Count ?? 0,
-            visibleGroups,
+            visibleGroupIds.Length,
             new GraphPoint(worldBounds.Left, worldBounds.Top),
             new GraphPoint(worldBounds.Right, worldBounds.Bottom),
-            Math.Max(0d, overscanWorldUnits));
+            Math.Max(0d, overscanWorldUnits))
+        {
+            VisibleNodeIds = visibleNodeIds,
+            VisibleConnectionIds = visibleConnectionIds,
+            VisibleGroupIds = visibleGroupIds,
+        };
     }
 
     private static VisibleWorldBounds ResolveVisibleWorldBounds(GraphEditorViewportSnapshot viewport, double overscanWorldUnits)

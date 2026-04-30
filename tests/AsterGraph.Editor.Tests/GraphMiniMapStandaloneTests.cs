@@ -58,6 +58,32 @@ public sealed class GraphMiniMapStandaloneTests
         Assert.True(ReadMiniMapLightweightProjection(throughputMiniMap));
     }
 
+    [AvaloniaFact]
+    public void LightweightMiniMap_ReusesNodeProjectionButRefreshesViewportSnapshot()
+    {
+        var editor = CreateEditor();
+        editor.UpdateViewportSize(480, 320);
+        var miniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
+        {
+            Session = editor.Session,
+        });
+        SetMiniMapLightweightProjection(miniMap, true);
+
+        var firstProjection = InvokeStockSurfaceProjection(miniMap, editor.Session);
+        var firstNodes = ReadProjectionProperty(firstProjection, "Nodes");
+        var firstViewport = ReadProjectionProperty<GraphEditorViewportSnapshot>(firstProjection, "Viewport");
+
+        editor.PanBy(96, 48);
+
+        var secondProjection = InvokeStockSurfaceProjection(miniMap, editor.Session);
+        var secondNodes = ReadProjectionProperty(secondProjection, "Nodes");
+        var secondViewport = ReadProjectionProperty<GraphEditorViewportSnapshot>(secondProjection, "Viewport");
+
+        Assert.Same(firstNodes, secondNodes);
+        Assert.Equal(firstViewport.PanX + 96d, secondViewport.PanX);
+        Assert.Equal(firstViewport.PanY + 48d, secondViewport.PanY);
+    }
+
     [Fact]
     public void WorkbenchPerformancePolicy_ExposesMiniMapCadenceBudgetMarker()
     {
@@ -157,6 +183,39 @@ public sealed class GraphMiniMapStandaloneTests
             BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new Xunit.Sdk.XunitException("Could not find GraphMiniMap lightweight projection property.");
         return Assert.IsType<bool>(property.GetValue(miniMap));
+    }
+
+    private static void SetMiniMapLightweightProjection(GraphMiniMap miniMap, bool value)
+    {
+        var property = typeof(GraphMiniMap).GetProperty(
+            "UsesLightweightProjection",
+            BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new Xunit.Sdk.XunitException("Could not find GraphMiniMap lightweight projection property.");
+        property.SetValue(miniMap, value);
+    }
+
+    private static object InvokeStockSurfaceProjection(GraphMiniMap miniMap, IGraphEditorSession session)
+    {
+        var surface = miniMap.Content
+            ?? throw new Xunit.Sdk.XunitException("Expected stock mini map content.");
+        var method = surface.GetType().GetMethod("GetProjection", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new Xunit.Sdk.XunitException("Could not find stock mini map projection method.");
+        return method.Invoke(surface, [session])
+            ?? throw new Xunit.Sdk.XunitException("Expected stock mini map projection.");
+    }
+
+    private static object ReadProjectionProperty(object projection, string propertyName)
+    {
+        var property = projection.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public)
+            ?? throw new Xunit.Sdk.XunitException($"Could not find mini map projection property '{propertyName}'.");
+        return property.GetValue(projection)
+            ?? throw new Xunit.Sdk.XunitException($"Expected mini map projection property '{propertyName}'.");
+    }
+
+    private static T ReadProjectionProperty<T>(object projection, string propertyName)
+    {
+        var value = ReadProjectionProperty(projection, propertyName);
+        return Assert.IsType<T>(value);
     }
 
     [Fact]

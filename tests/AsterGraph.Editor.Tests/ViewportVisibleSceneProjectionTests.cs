@@ -23,10 +23,13 @@ public sealed class ViewportVisibleSceneProjectionTests
 
         Assert.Equal(3, projection.TotalNodes);
         Assert.Equal(2, projection.VisibleNodes);
+        Assert.Equal(["node-a", "node-b"], projection.VisibleNodeIds);
         Assert.Equal(2, projection.TotalConnections);
         Assert.Equal(1, projection.VisibleConnections);
+        Assert.Equal(["connection-visible"], projection.VisibleConnectionIds);
         Assert.Equal(2, projection.TotalGroups);
         Assert.Equal(1, projection.VisibleGroups);
+        Assert.Equal(["group-visible"], projection.VisibleGroupIds);
         Assert.Equal(
             "VISIBLE_SCENE_PROJECTION:baseline:nodes=2/3:connections=1/2:groups=1/2:overscan=0",
             projection.ToBudgetMarker("baseline"));
@@ -50,6 +53,41 @@ public sealed class ViewportVisibleSceneProjectionTests
         Assert.Equal(1, projection.VisibleNodes);
         Assert.Equal(1, projection.VisibleConnections);
         Assert.Equal(25d, projection.OverscanWorldUnits);
+    }
+
+    [Fact]
+    public void Diff_BoundsInvalidationToSceneItemsEnteringOrLeavingTheVisibleSet()
+    {
+        var document = CreateDocument();
+        var first = ViewportVisibleSceneProjector.Project(
+            document,
+            new GraphEditorViewportSnapshot(
+                Zoom: 1d,
+                PanX: 0d,
+                PanY: 0d,
+                ViewportWidth: 640d,
+                ViewportHeight: 420d),
+            overscanWorldUnits: 0d);
+        var second = ViewportVisibleSceneProjector.Project(
+            document,
+            new GraphEditorViewportSnapshot(
+                Zoom: 1d,
+                PanX: -720d,
+                PanY: -560d,
+                ViewportWidth: 640d,
+                ViewportHeight: 420d),
+            overscanWorldUnits: 0d);
+
+        var diff = first.Diff(second);
+
+        Assert.Equal(["node-a", "node-b"], diff.NodesLeavingViewport);
+        Assert.Equal(["node-c"], diff.NodesEnteringViewport);
+        Assert.Equal(["connection-visible"], diff.ConnectionsLeavingViewport);
+        Assert.Equal(["connection-hidden"], diff.ConnectionsEnteringViewport);
+        Assert.Equal(["group-visible"], diff.GroupsLeavingViewport);
+        Assert.Equal(["group-hidden"], diff.GroupsEnteringViewport);
+        Assert.Equal(7, diff.InvalidatedSceneItemCount);
+        Assert.Equal("VISIBLE_SCENE_INVALIDATION:nodes=3:connections=2:groups=2:total=7", diff.ToBudgetMarker());
     }
 
     private static GraphDocument CreateDocument()
