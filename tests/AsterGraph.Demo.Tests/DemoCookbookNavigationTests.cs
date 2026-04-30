@@ -207,42 +207,6 @@ public sealed class DemoCookbookNavigationTests
         Assert.Equal("diagnostics-support-route", viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
     }
 
-    [Fact]
-    public void MainWindowViewModel_CookbookDetailModesSwitchWithoutLosingRecipe()
-    {
-        var viewModel = new MainWindowViewModel();
-        var recipe = viewModel.CookbookRecipes.Single(item => item.Id == "authoring-surface-route");
-        viewModel.SelectedCookbookRecipe = recipe;
-
-        Assert.Equal("code", viewModel.SelectedCookbookDetailMode.Key);
-        Assert.Contains(
-            viewModel.SelectedCookbookWorkspaceGraphLines,
-            line => line.Contains(recipe.DemoAnchors[0].Path, StringComparison.Ordinal));
-        Assert.Contains(
-            viewModel.SelectedCookbookWorkspaceCoverageLines,
-            line => line.Contains(viewModel.CookbookWorkspace.SelectedRecipe.RouteStatus, StringComparison.Ordinal));
-        Assert.Contains(
-            viewModel.SelectedCookbookWorkspaceCoverageLines,
-            line => line.Contains(viewModel.CookbookWorkspace.SelectedRecipe.DeferredGaps[0], StringComparison.Ordinal));
-        Assert.Contains(
-            viewModel.SelectedCookbookWorkspaceDetailLines,
-            line => line.Contains(recipe.CodeAnchors[0].Path, StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "proof");
-        Assert.Equal(recipe.Id, viewModel.SelectedCookbookRecipe.Id);
-        Assert.Contains(
-            viewModel.SelectedCookbookWorkspaceDetailLines,
-            line => line.Contains(recipe.ProofMarkers[0], StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "docs");
-        Assert.Contains(
-            viewModel.SelectedCookbookWorkspaceDetailLines,
-            line => line.Contains(recipe.DocumentationAnchors[0].Path, StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "support");
-        Assert.Equal([recipe.SupportBoundary], viewModel.SelectedCookbookWorkspaceDetailLines);
-    }
-
     private static Button FindCookbookRecipeButton(MainWindow window, string recipeId)
         => window.GetVisualDescendants()
             .OfType<Button>()

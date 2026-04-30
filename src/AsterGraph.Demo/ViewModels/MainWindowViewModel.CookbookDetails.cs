@@ -34,9 +34,13 @@ public partial class MainWindowViewModel
             "proof" => SelectedCookbookRecipe.ProofMarkers
                 .Select(marker => T("证明标记：", "Proof marker: ") + marker)
                 .ToArray(),
-            "docs" => FormatCookbookAnchors(T("文档：", "Docs: "), SelectedCookbookRecipe.DocumentationAnchors).ToArray(),
-            "support" => [SelectedCookbookRecipe.SupportBoundary],
-            _ => FormatCookbookAnchors(T("代码入口：", "Code: "), SelectedCookbookRecipe.CodeAnchors).ToArray(),
+            "docs" => FormatCookbookDetailAnchors(SelectedCookbookRecipe.DocumentationAnchors).ToArray(),
+            "support" =>
+            [
+                T("支持边界：", "Support boundary: ") + SelectedCookbookRecipe.Title,
+                SelectedCookbookRecipe.SupportBoundary,
+            ],
+            _ => FormatCookbookDetailAnchors(SelectedCookbookRecipe.CodeAnchors).ToArray(),
         };
 
     [ObservableProperty]
@@ -58,4 +62,8 @@ public partial class MainWindowViewModel
 
     partial void OnSelectedCookbookDetailModeChanged(CookbookDetailMode value)
         => RefreshCookbookProjection();
+
+    private IEnumerable<string> FormatCookbookDetailAnchors(IReadOnlyList<Cookbook.DemoCookbookAnchor> anchors)
+        => anchors.Select(anchor => T("路径：", "Path: ") + anchor.Path + Environment.NewLine
+                                    + T("证据：", "Evidence: ") + anchor.Evidence);
 }

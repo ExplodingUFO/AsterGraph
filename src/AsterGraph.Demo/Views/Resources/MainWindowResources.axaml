@@ -19,4 +19,19 @@
                Foreground="#B6CBD8"
                Text="{Binding}" />
   </DataTemplate>
+
+  <DataTemplate x:Key="CookbookWorkspaceLineTemplate">
+    <Border Margin="0,0,0,6"
+            Padding="10,8"
+            HorizontalAlignment="Stretch"
+            Background="#101923"
+            BorderBrush="#365063"
+            BorderThickness="1"
+            CornerRadius="6">
+      <SelectableTextBlock TextWrapping="Wrap"
+                           LineHeight="18"
+                           Foreground="#D8EEF3"
+                           Text="{Binding}" />
+    </Border>
+  </DataTemplate>
 </ResourceDictionary>

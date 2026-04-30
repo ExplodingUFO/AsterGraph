@@ -52,6 +52,7 @@ public sealed class DemoCookbookProofClosureTests
             "docs/en/demo-cookbook.md",
             "docs/zh-CN/demo-cookbook.md",
             "tests/AsterGraph.Demo.Tests/DemoCookbookCatalogTests.cs",
+            "tests/AsterGraph.Demo.Tests/DemoCookbookDetailReadabilityTests.cs",
             "tests/AsterGraph.Demo.Tests/DemoCookbookNavigationTests.cs",
             "tests/AsterGraph.Demo.Tests/DemoCookbookNavigationPolishTests.cs",
             "tests/AsterGraph.Demo.Tests/DemoCookbookDocsTests.cs",

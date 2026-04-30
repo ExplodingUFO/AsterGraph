@@ -1372,24 +1372,41 @@
                                Text="{Binding CookbookWorkspace.SelectedRecipe.Summary}" />
                     <ItemsControl x:Name="PART_CookbookWorkspaceGraphLines"
                                   ItemsSource="{Binding SelectedCookbookWorkspaceGraphLines}"
-                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                                  ItemTemplate="{StaticResource CookbookWorkspaceLineTemplate}" />
                     <ItemsControl x:Name="PART_CookbookWorkspaceCoverageLines"
                                   ItemsSource="{Binding SelectedCookbookWorkspaceCoverageLines}"
-                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
-                    <ComboBox x:Name="PART_CookbookWorkspaceDetailModeSelector"
-                              HorizontalAlignment="Left"
-                              MinWidth="160"
-                              ItemsSource="{Binding CookbookDetailModes}"
-                              SelectedItem="{Binding SelectedCookbookDetailMode, Mode=TwoWay}">
-                      <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="vm:CookbookDetailMode">
-                          <TextBlock Text="{Binding DisplayName}" />
-                        </DataTemplate>
-                      </ComboBox.ItemTemplate>
-                    </ComboBox>
+                                  ItemTemplate="{StaticResource CookbookWorkspaceLineTemplate}" />
+                    <Border x:Name="PART_CookbookWorkspaceDetailModeStrip"
+                            Padding="10,8"
+                            Background="#101923"
+                            BorderBrush="#7FE7D7"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                      <Grid ColumnDefinitions="Auto,*"
+                            ColumnSpacing="10">
+                        <TextBlock x:Name="PART_CookbookWorkspaceActiveDetailModeText"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="#7FE7D7"
+                                   Text="{Binding SelectedCookbookDetailMode.DisplayName}" />
+                        <ComboBox x:Name="PART_CookbookWorkspaceDetailModeSelector"
+                                  Grid.Column="1"
+                                  HorizontalAlignment="Stretch"
+                                  MinWidth="180"
+                                  ItemsSource="{Binding CookbookDetailModes}"
+                                  SelectedItem="{Binding SelectedCookbookDetailMode, Mode=TwoWay}">
+                          <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CookbookDetailMode">
+                              <TextBlock Text="{Binding DisplayName}" />
+                            </DataTemplate>
+                          </ComboBox.ItemTemplate>
+                        </ComboBox>
+                      </Grid>
+                    </Border>
                     <ItemsControl x:Name="PART_CookbookWorkspaceDetailLines"
                                   ItemsSource="{Binding SelectedCookbookWorkspaceDetailLines}"
-                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                                  ItemTemplate="{StaticResource CookbookWorkspaceLineTemplate}" />
                   </StackPanel>
                 </ScrollViewer>
               </Border>
