@@ -2,6 +2,12 @@
 
 This project is a minimal native Avalonia desktop host for AsterGraph.
 
+Generate it from the repository template with:
+
+```powershell
+dotnet new astergraph-avalonia -n MyGraphHost
+```
+
 Run it with:
 
 ```powershell
@@ -28,3 +34,5 @@ dotnet run --project tools/AsterGraph.PluginTool -- validate <plugin-path>
 ```
 
 Expect PluginTool validation to report `ASTERGRAPH_PLUGIN_VALIDATE_OK:True` before loading third-party plugin artifacts in a copied host.
+
+For cross-platform packaging proof, keep the generated host aligned with the repository CI lanes: Windows validates `net8.0`, `net9.0`, and `net10.0`; Linux and macOS run the all-framework lane; release validation packs the public packages, runs template smoke, and checks the packed HostSample route including `HOST_SAMPLE_NET10_OK:True`.

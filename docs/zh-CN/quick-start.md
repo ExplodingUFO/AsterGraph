@@ -148,6 +148,8 @@ Navigation proof 继续作为宿主自管层叠在已有 selection、scope 和 v
 
 release lane 的 template smoke 会验证 `astergraph-avalonia` 和 `astergraph-plugin` 能生成可 build 的 `net8.0` 项目，并且生成的插件能通过 `AsterGraph.PluginTool validate`。
 
+cross-platform packaging proof 保留在 CI 中，不放进复制出来的宿主：Windows 验证 `net8.0`、`net9.0` 和 `net10.0`；Linux 和 macOS 跑 all-framework lane；release validation 会 pack 公开包、运行 template smoke，并检查 packed HostSample 路线，包括 `HOST_SAMPLE_NET10_OK:True`。
+
 从 `Starter.Avalonia` 复制组合方式，从 `HelloWorld` 看 runtime-only 形状，从 `HelloWorld.Avalonia` 看最小 hosted UI，从 `ConsumerSample.Avalonia` 复制真实宿主动作/参数/插件/support proof，从 `Demo` 查看完整能力 showcase。
 
 ## 4. 推荐接入路线

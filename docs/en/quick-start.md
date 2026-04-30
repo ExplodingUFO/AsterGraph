@@ -151,6 +151,8 @@ Navigation proof stays host-owned on top of existing selection, scope, and viewp
 
 Template smoke in the release lane validates that `astergraph-avalonia` and `astergraph-plugin` generate buildable `net8.0` projects and that the generated plugin passes `AsterGraph.PluginTool validate`.
 
+Cross-platform packaging proof stays in CI rather than in a copied host: Windows validates `net8.0`, `net9.0`, and `net10.0`; Linux and macOS run the all-framework lane; release validation packs the public packages, runs template smoke, and checks the packed HostSample route including `HOST_SAMPLE_NET10_OK:True`.
+
 Copy from `Starter.Avalonia` for composition, `HelloWorld` for runtime-only shape, `HelloWorld.Avalonia` for the smallest hosted UI, `ConsumerSample.Avalonia` for realistic host-owned actions/parameters/plugins/support proof, and `Demo` only when you need the full capability showcase.
 
 ## 4. Canonical Adoption Routes

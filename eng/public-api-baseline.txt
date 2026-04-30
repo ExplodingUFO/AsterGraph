@@ -228,6 +228,7 @@ C:AsterGraph.Editor.ViewModels.NodeSurfaceInputRowViewModel(AsterGraph.Editor.Vi
 C:AsterGraph.Editor.ViewModels.NodeViewModel(AsterGraph.Core.Models.GraphNode)
 C:AsterGraph.Editor.ViewModels.PortViewModel(AsterGraph.Core.Models.GraphPort,System.Int32,System.Int32)
 C:AsterGraph.Editor.Viewport.ViewportState(System.Double,System.Double,System.Double)
+C:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphPoint,System.Double)
 E:AsterGraph.Editor.Runtime.GraphEditorSession.AutomationCompleted:System.EventHandler<AsterGraph.Editor.Events.GraphEditorAutomationCompletedEventArgs>
 E:AsterGraph.Editor.Runtime.GraphEditorSession.AutomationProgress:System.EventHandler<AsterGraph.Editor.Events.GraphEditorAutomationProgressEventArgs>
 E:AsterGraph.Editor.Runtime.GraphEditorSession.AutomationStarted:System.EventHandler<AsterGraph.Editor.Events.GraphEditorAutomationStartedEventArgs>
@@ -431,6 +432,7 @@ F:AsterGraph.Editor.ViewModels.NodeSurfaceInlineContentKind.None:AsterGraph.Edit
 F:AsterGraph.Editor.ViewModels.NodeSurfaceInlineContentKind.Summary:AsterGraph.Editor.ViewModels.NodeSurfaceInlineContentKind
 F:AsterGraph.Editor.ViewModels.NodeSurfaceInputRowKind.ParameterEndpoint:AsterGraph.Editor.ViewModels.NodeSurfaceInputRowKind
 F:AsterGraph.Editor.ViewModels.NodeSurfaceInputRowKind.Port:AsterGraph.Editor.ViewModels.NodeSurfaceInputRowKind
+F:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjector.DefaultOverscanWorldUnits:System.Double
 M:AsterGraph.Abstractions.Catalog.INodeCatalog.RegisterDefinition(AsterGraph.Abstractions.Definitions.INodeDefinition):System.Void
 M:AsterGraph.Abstractions.Catalog.INodeCatalog.RegisterProvider(AsterGraph.Abstractions.Catalog.INodeDefinitionProvider):System.Void
 M:AsterGraph.Abstractions.Catalog.INodeCatalog.TryGetDefinition(AsterGraph.Abstractions.Identifiers.NodeDefinitionId,out AsterGraph.Abstractions.Definitions.INodeDefinition&):System.Boolean
@@ -692,6 +694,7 @@ M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.Equals(AsterG
 M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.Equals(System.Object):System.Boolean
 M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode):AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy
 M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.GetHashCode():System.Int32
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ToMiniMapBudgetMarker():System.String
 M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ToString():System.String
 M:AsterGraph.Avalonia.Menus.GraphContextMenuPresenter.Open(Avalonia.Controls.Control,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Menus.GraphEditorMenuItemDescriptorSnapshot>,AsterGraph.Editor.Runtime.IGraphEditorCommands,AsterGraph.Abstractions.Styling.ContextMenuStyleOptions):System.Void
 M:AsterGraph.Avalonia.Menus.GraphContextMenuPresenter.Open(Avalonia.Controls.Control,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Menus.MenuItemDescriptor>,AsterGraph.Abstractions.Styling.ContextMenuStyleOptions):System.Void
@@ -1938,6 +1941,14 @@ M:AsterGraph.Editor.Viewport.ViewportState.Equals(AsterGraph.Editor.Viewport.Vie
 M:AsterGraph.Editor.Viewport.ViewportState.Equals(System.Object):System.Boolean
 M:AsterGraph.Editor.Viewport.ViewportState.GetHashCode():System.Int32
 M:AsterGraph.Editor.Viewport.ViewportState.ToString():System.String
+M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.<Clone>$():AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection
+M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.Deconstruct(out System.Int32&,out System.Int32&,out System.Int32&,out System.Int32&,out System.Int32&,out System.Int32&,out AsterGraph.Core.Models.GraphPoint&,out AsterGraph.Core.Models.GraphPoint&,out System.Double&):System.Void
+M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.Equals(AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection):System.Boolean
+M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.Equals(System.Object):System.Boolean
+M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.GetHashCode():System.Int32
+M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.ToBudgetMarker(System.String):System.String
+M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.ToString():System.String
+M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjector.Project(AsterGraph.Core.Models.GraphDocument,AsterGraph.Editor.Runtime.GraphEditorViewportSnapshot,System.Double):AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection
 M:CompiledAvaloniaXaml.!AvaloniaResources.Build:/Themes/AsterGraphTheme.axaml(System.IServiceProvider):Avalonia.Controls.ResourceDictionary
 M:CompiledAvaloniaXaml.!AvaloniaResources.Populate:/Themes/AsterGraphTheme.axaml(System.IServiceProvider,Avalonia.Controls.ResourceDictionary):System.Void
 M:CompiledAvaloniaXaml.!XamlLoader.TryLoad(System.IServiceProvider,System.String):System.Object
@@ -2236,6 +2247,7 @@ P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.RuntimePanelVisible:
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.StencilVisible:System.Boolean:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.StencilWidth:System.Double:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.CommandRefreshBatchMilliseconds:System.Int32:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.MiniMapRefreshCadence:System.String:get
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.Mode:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ProjectAdvancedInspectorByDefault:System.Boolean:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ProjectHoveredToolbars:System.Boolean:get,set
@@ -3392,6 +3404,15 @@ P:AsterGraph.Editor.ViewModels.PortViewModel.TypeId:AsterGraph.Abstractions.Iden
 P:AsterGraph.Editor.Viewport.ViewportState.PanX:System.Double:get,set
 P:AsterGraph.Editor.Viewport.ViewportState.PanY:System.Double:get,set
 P:AsterGraph.Editor.Viewport.ViewportState.Zoom:System.Double:get,set
+P:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.OverscanWorldUnits:System.Double:get,set
+P:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.TotalConnections:System.Int32:get,set
+P:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.TotalGroups:System.Int32:get,set
+P:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.TotalNodes:System.Int32:get,set
+P:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.VisibleConnections:System.Int32:get,set
+P:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.VisibleGroups:System.Int32:get,set
+P:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.VisibleNodes:System.Int32:get,set
+P:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.WorldBottomRight:AsterGraph.Core.Models.GraphPoint:get,set
+P:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.WorldTopLeft:AsterGraph.Core.Models.GraphPoint:get,set
 T:class AsterGraph.Abstractions.Definitions.NodeDefinition
 T:class AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
 T:class AsterGraph.Abstractions.Definitions.NodeParameterDefinition
@@ -3605,6 +3626,7 @@ T:class AsterGraph.Editor.ViewModels.NodeParameterViewModel
 T:class AsterGraph.Editor.ViewModels.NodeSurfaceInputRowViewModel
 T:class AsterGraph.Editor.ViewModels.NodeViewModel
 T:class AsterGraph.Editor.ViewModels.PortViewModel
+T:class AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection
 T:class CompiledAvaloniaXaml.!AvaloniaResources
 T:class CompiledAvaloniaXaml.!XamlLoader
 T:enum AsterGraph.Abstractions.Compatibility.PortCompatibilityKind
@@ -3704,6 +3726,7 @@ T:static class AsterGraph.Editor.Scene.GraphEditorPointerInputRouter
 T:static class AsterGraph.Editor.Scene.GraphEditorSceneResizeHitTester
 T:static class AsterGraph.Editor.Services.GraphEditorStorageDefaults
 T:static class AsterGraph.Editor.Viewport.ViewportMath
+T:static class AsterGraph.Editor.Viewport.ViewportVisibleSceneProjector
 T:struct AsterGraph.Abstractions.Compatibility.PortCompatibilityResult
 T:struct AsterGraph.Core.Models.GraphConnectionTargetRef
 T:struct AsterGraph.Core.Models.GraphPadding

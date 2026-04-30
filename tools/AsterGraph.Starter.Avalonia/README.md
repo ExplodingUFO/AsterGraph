@@ -46,6 +46,8 @@ This starter recipe is only the scaffold. If you are validating a copied hosted 
 
 That proof run is where you should expect `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, the widened `HOST_NATIVE_METRIC:*` lines, and the local support bundle markers `SUPPORT_BUNDLE_OK:True` and `SUPPORT_BUNDLE_PATH:...` for the resolved path.
 
+For cross-platform packaging proof, keep the starter route tied to the repository CI lanes: Windows validates `net8.0`, `net9.0`, and `net10.0`; Linux and macOS run the all-framework lane; release validation packs the public packages, runs template smoke, and checks the packed HostSample route including `HOST_SAMPLE_NET10_OK:True`.
+
 Keep template/starter validation tied to the existing template smoke and PluginTool validation proof. If the copied host adds plugins, run:
 
 ```powershell
