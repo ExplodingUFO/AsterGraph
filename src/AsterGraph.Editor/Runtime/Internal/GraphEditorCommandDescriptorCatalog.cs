@@ -6,10 +6,13 @@ internal static class GraphEditorCommandDescriptorCatalog
         new Dictionary<string, GraphEditorCommandDescriptorMetadata>(StringComparer.Ordinal)
         {
             ["nodes.add"] = new("Add Node", "nodes", "add", null),
+            ["nodes.insert-into-connection"] = new("Insert Node Into Connection", "nodes", "insert", null),
             ["selection.set"] = new("Set Selection", "selection", "select", null),
             ["selection.connections.set"] = new("Set Connection Selection", "selection", "select", null),
             ["selection.clear"] = new("Clear Selection", "selection", "select", "Escape"),
             ["selection.delete"] = new("Delete Selection", "selection", "delete", "Delete"),
+            ["selection.delete-reconnect"] = new("Delete And Reconnect", "selection", "connect", null),
+            ["selection.detach-connections"] = new("Detach And Reconnect", "selection", "disconnect", null),
             ["nodes.move"] = new("Move Nodes", "nodes", "move", null),
             ["nodes.resize"] = new("Resize Node", "nodes", "resize", null),
             ["nodes.resize-width"] = new("Resize Node Width", "nodes", "resize-width", null),
@@ -30,7 +33,9 @@ internal static class GraphEditorCommandDescriptorCatalog
             ["connections.connect"] = new("Create Connection", "connections", "connect", null),
             ["connections.cancel"] = new("Cancel Pending Connection", "connections", "cancel", "Escape"),
             ["connections.delete"] = new("Delete Connection", "connections", "delete", null),
+            ["connections.delete-selected"] = new("Delete Selected Connections", "connections", "delete", null),
             ["connections.disconnect"] = new("Disconnect Connection", "connections", "disconnect", null),
+            ["connections.slice"] = new("Slice Connections", "connections", "slice", null),
             ["connections.label.set"] = new("Set Connection Label", "connections", "rename", null),
             ["connections.note.set"] = new("Set Connection Note", "connections", "inspect", null),
             ["connections.route-vertex.insert"] = new("Insert Connection Route Vertex", "connections", "add", null),

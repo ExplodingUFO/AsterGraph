@@ -15,10 +15,13 @@ public sealed partial class GraphEditorSession
     private static readonly HashSet<string> KernelCommandIds = new(StringComparer.Ordinal)
     {
         "nodes.add",
+        "nodes.insert-into-connection",
         "selection.set",
         "selection.connections.set",
         "selection.clear",
         "selection.delete",
+        "selection.delete-reconnect",
+        "selection.detach-connections",
         "clipboard.copy",
         "clipboard.paste",
         "export.scene-svg",
@@ -61,7 +64,9 @@ public sealed partial class GraphEditorSession
         "connections.connect",
         "connections.cancel",
         "connections.delete",
+        "connections.delete-selected",
         "connections.disconnect",
+        "connections.slice",
         "connections.label.set",
         "connections.note.set",
         "connections.route-vertex.insert",

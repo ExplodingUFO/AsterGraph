@@ -81,6 +81,21 @@ internal sealed partial class GraphEditorKernel
         void IGraphEditorKernelCommandRouterHost.AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
             => _owner.AddNode(definitionId, preferredWorldPosition);
 
+        bool IGraphEditorKernelCommandRouterHost.TryInsertNodeIntoConnection(
+            string connectionId,
+            NodeDefinitionId definitionId,
+            string inputTargetId,
+            GraphConnectionTargetKind inputTargetKind,
+            string outputPortId,
+            GraphPoint? preferredWorldPosition)
+            => _owner.TryInsertNodeIntoConnection(
+                connectionId,
+                definitionId,
+                inputTargetId,
+                inputTargetKind,
+                outputPortId,
+                preferredWorldPosition);
+
         void IGraphEditorKernelCommandRouterHost.SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
             => _owner.SetSelection(nodeIds, primaryNodeId, updateStatus);
 
@@ -95,6 +110,18 @@ internal sealed partial class GraphEditorKernel
 
         void IGraphEditorKernelCommandRouterHost.DeleteSelection()
             => _owner.DeleteSelection();
+
+        bool IGraphEditorKernelCommandRouterHost.TryDeleteSelectionAndReconnect()
+            => _owner.TryDeleteSelectionAndReconnect();
+
+        bool IGraphEditorKernelCommandRouterHost.TryDetachSelectionFromConnections()
+            => _owner.TryDetachSelectionFromConnections();
+
+        bool IGraphEditorKernelCommandRouterHost.TryDeleteSelectedConnections()
+            => _owner.TryDeleteSelectedConnections();
+
+        bool IGraphEditorKernelCommandRouterHost.TrySliceConnections(GraphPoint start, GraphPoint end)
+            => _owner.TrySliceConnections(start, end);
 
         Task<bool> IGraphEditorKernelCommandRouterHost.TryCopySelectionAsync(CancellationToken cancellationToken)
             => _owner.TryCopySelectionAsync(cancellationToken);

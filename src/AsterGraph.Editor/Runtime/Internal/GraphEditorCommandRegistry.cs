@@ -19,6 +19,16 @@ internal static class GraphEditorCommandRegistry
                 Workbench("workbench.header", "selection.delete", 80),
                 ContextMenu("selection", "selection-delete", 0),
             ],
+            ["selection.delete-reconnect"] =
+            [
+                ContextMenu("selection", "selection-delete-reconnect", 5),
+                Tool("selection", "selection-delete-reconnect", 5),
+            ],
+            ["selection.detach-connections"] =
+            [
+                ContextMenu("selection", "selection-detach-connections", 6),
+                Tool("selection", "selection-detach-connections", 6),
+            ],
             ["fragments.export-selection"] =
             [
                 ContextMenu("selection", "selection-export", 10),
@@ -163,6 +173,11 @@ internal static class GraphEditorCommandRegistry
                 ContextMenu("node", "node-duplicate", 40),
                 Tool("node", "node-duplicate", 40),
             ],
+            ["nodes.insert-into-connection"] =
+            [
+                ContextMenu("connection", "connection-insert-node", 5),
+                Tool("connection", "connection-insert-node", 5),
+            ],
             ["connections.disconnect-incoming"] =
             [
                 ContextMenu("node", "node-disconnect-in", 50),
@@ -213,6 +228,15 @@ internal static class GraphEditorCommandRegistry
             [
                 ContextMenu("connection", "connection-disconnect", 20),
                 Tool("connection", "connection-disconnect", 10),
+            ],
+            ["connections.delete-selected"] =
+            [
+                ContextMenu("connection", "connection-delete-selected", 30),
+                Tool("connection", "connection-delete-selected", 30),
+            ],
+            ["connections.slice"] =
+            [
+                Tool("connection", "connection-slice", 40),
             ],
         };
 

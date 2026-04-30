@@ -744,6 +744,76 @@ public sealed class GraphEditorKernelCommandRouterTests
     }
 
     [Fact]
+    public void GraphEditorKernel_TryExecuteCommand_AcceptsSemanticClipboardPayloads()
+    {
+        var kernel = CreateKernel();
+        kernel.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("clipboard.copy")));
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("clipboard.paste")));
+
+        var document = kernel.CreateDocumentSnapshot();
+        Assert.Equal(3, document.Nodes.Count);
+        Assert.Contains(document.Nodes, node => !string.Equals(node.Id, SourceNodeId, StringComparison.Ordinal)
+            && node.Title == "Kernel Source");
+    }
+
+    [Fact]
+    public void GraphEditorKernel_TryExecuteCommand_AcceptsSemanticConnectionEditPayloads()
+    {
+        var deleteReconnectKernel = CreateKernel();
+        var insertedNodeId = InsertCompatibleNodeThroughCommandRoute(deleteReconnectKernel);
+
+        deleteReconnectKernel.SetSelection([insertedNodeId], insertedNodeId, updateStatus: false);
+
+        Assert.True(deleteReconnectKernel.TryExecuteCommand(CreateCommand("selection.delete-reconnect")));
+
+        var deleteReconnectDocument = deleteReconnectKernel.CreateDocumentSnapshot();
+        Assert.DoesNotContain(deleteReconnectDocument.Nodes, node => string.Equals(node.Id, insertedNodeId, StringComparison.Ordinal));
+        Assert.Contains(deleteReconnectDocument.Connections, connection =>
+            connection.SourceNodeId == SourceNodeId
+            && connection.TargetNodeId == TargetNodeId);
+
+        var detachKernel = CreateKernel();
+        insertedNodeId = InsertCompatibleNodeThroughCommandRoute(detachKernel);
+
+        detachKernel.SetSelection([insertedNodeId], insertedNodeId, updateStatus: false);
+
+        Assert.True(detachKernel.TryExecuteCommand(CreateCommand("selection.detach-connections")));
+
+        var detachDocument = detachKernel.CreateDocumentSnapshot();
+        Assert.Contains(detachDocument.Nodes, node => string.Equals(node.Id, insertedNodeId, StringComparison.Ordinal));
+        Assert.Contains(detachDocument.Connections, connection =>
+            connection.SourceNodeId == SourceNodeId
+            && connection.TargetNodeId == TargetNodeId);
+        var reconnectedConnectionId = Assert.Single(detachDocument.Connections, connection =>
+            connection.SourceNodeId == SourceNodeId
+            && connection.TargetNodeId == TargetNodeId).Id;
+        detachKernel.SetConnectionSelection([reconnectedConnectionId], reconnectedConnectionId, updateStatus: false);
+        Assert.True(detachKernel.TryExecuteCommand(CreateCommand("connections.delete-selected")));
+    }
+
+    [Fact]
+    public void GraphEditorKernel_CommandDescriptors_ExposeSemanticEditingCommandRoutes()
+    {
+        var kernel = CreateKernel();
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.Equal("Delete And Reconnect", descriptors["selection.delete-reconnect"].Title);
+        Assert.False(descriptors["selection.delete-reconnect"].IsEnabled);
+        Assert.Equal("Select a middle node first, then retry.", descriptors["selection.delete-reconnect"].RecoveryHint);
+        Assert.Equal("nodes.add", descriptors["selection.delete-reconnect"].RecoveryCommandId);
+
+        Assert.Equal("Insert Node Into Connection", descriptors["nodes.insert-into-connection"].Title);
+        Assert.False(descriptors["nodes.insert-into-connection"].IsEnabled);
+        Assert.Equal("Create a connection first.", descriptors["nodes.insert-into-connection"].RecoveryHint);
+        Assert.Equal("connections.connect", descriptors["nodes.insert-into-connection"].RecoveryCommandId);
+
+        Assert.Equal("Delete Selected Connections", descriptors["connections.delete-selected"].Title);
+        Assert.Equal("Slice Connections", descriptors["connections.slice"].Title);
+    }
+
+    [Fact]
     public void GraphEditorKernel_SaveWorkspace_PassesLiveDocumentToWorkspaceService()
     {
         var workspace = new MutatingWorkspaceService();
@@ -1154,6 +1224,34 @@ public sealed class GraphEditorKernelCommandRouterTests
                     defaultValue: 1.0d),
             ]));
         return catalog;
+    }
+
+    private static string InsertCompatibleNodeThroughCommandRoute(GraphEditorKernel kernel)
+    {
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "connections.connect",
+                ("sourceNodeId", SourceNodeId),
+                ("sourcePortId", SourcePortId),
+                ("targetNodeId", TargetNodeId),
+                ("targetPortId", TargetPortId))));
+
+        var connectionId = Assert.Single(kernel.CreateDocumentSnapshot().Connections).Id;
+
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "nodes.insert-into-connection",
+                ("connectionId", connectionId),
+                ("definitionId", DefinitionId.Value),
+                ("inputTargetId", TargetPortId),
+                ("inputTargetKind", GraphConnectionTargetKind.Port.ToString()),
+                ("outputPortId", SourcePortId),
+                ("worldX", "280"),
+                ("worldY", "160"))));
+
+        return Assert.Single(kernel.CreateDocumentSnapshot().Nodes, node =>
+            !string.Equals(node.Id, SourceNodeId, StringComparison.Ordinal)
+            && !string.Equals(node.Id, TargetNodeId, StringComparison.Ordinal)).Id;
     }
 
     private static GraphEditorCommandInvocationSnapshot CreateCommand(

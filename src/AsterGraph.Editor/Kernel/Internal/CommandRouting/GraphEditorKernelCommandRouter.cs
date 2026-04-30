@@ -58,6 +58,14 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition);
 
+    bool TryInsertNodeIntoConnection(
+        string connectionId,
+        NodeDefinitionId definitionId,
+        string inputTargetId,
+        GraphConnectionTargetKind inputTargetKind,
+        string outputPortId,
+        GraphPoint? preferredWorldPosition);
+
     void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus);
 
     void SetConnectionSelection(IReadOnlyList<string> connectionIds, string? primaryConnectionId, bool updateStatus);
@@ -67,6 +75,14 @@ internal interface IGraphEditorKernelCommandRouterHost
     void DuplicateNode(string nodeId);
 
     void DeleteSelection();
+
+    bool TryDeleteSelectionAndReconnect();
+
+    bool TryDetachSelectionFromConnections();
+
+    bool TryDeleteSelectedConnections();
+
+    bool TrySliceConnections(GraphPoint start, GraphPoint end);
 
     Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken);
 
@@ -229,6 +245,36 @@ internal sealed class GraphEditorKernelCommandRouter
                 hasSelection || !_host.BehaviorOptions.Commands.Nodes.AllowDelete ? null : "Select nodes first, then retry.",
                 hasSelection || !_host.BehaviorOptions.Commands.Nodes.AllowDelete ? null : "nodes.add"),
             GraphEditorCommandDescriptorCatalog.Create(
+                "selection.delete-reconnect",
+                GraphEditorCommandSourceKind.Kernel,
+                hasSelection
+                && _host.BehaviorOptions.Commands.Nodes.AllowDelete
+                && _host.BehaviorOptions.Commands.Connections.AllowCreate
+                && _host.BehaviorOptions.Commands.Connections.AllowDelete,
+                GetSelectionDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowDelete
+                    && _host.BehaviorOptions.Commands.Connections.AllowCreate
+                    && _host.BehaviorOptions.Commands.Connections.AllowDelete,
+                    hasSelection,
+                    "Delete and reconnect requires node delete plus connection create and delete permissions.",
+                    "Select one middle node before deleting and reconnecting."),
+                hasSelection ? null : "Select a middle node first, then retry.",
+                hasSelection ? null : "nodes.add"),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "selection.detach-connections",
+                GraphEditorCommandSourceKind.Kernel,
+                hasSelection
+                && _host.BehaviorOptions.Commands.Connections.AllowCreate
+                && _host.BehaviorOptions.Commands.Connections.AllowDelete,
+                GetSelectionDisabledReason(
+                    _host.BehaviorOptions.Commands.Connections.AllowCreate
+                    && _host.BehaviorOptions.Commands.Connections.AllowDelete,
+                    hasSelection,
+                    "Detach and reconnect requires connection create and delete permissions.",
+                    "Select one middle node before detaching its connections."),
+                hasSelection ? null : "Select a middle node first, then retry.",
+                hasSelection ? null : "nodes.add"),
+            GraphEditorCommandDescriptorCatalog.Create(
                 "clipboard.copy",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanCopySelection,
@@ -335,6 +381,32 @@ internal sealed class GraphEditorKernelCommandRouter
                 "nodes.duplicate",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.Document.Nodes.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowDuplicate),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "nodes.insert-into-connection",
+                GraphEditorCommandSourceKind.Kernel,
+                hasConnections
+                && _host.BehaviorOptions.Commands.Nodes.AllowCreate
+                && _host.BehaviorOptions.Commands.Connections.AllowCreate
+                && _host.BehaviorOptions.Commands.Connections.AllowDelete,
+                GetEntityDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowCreate
+                    && _host.BehaviorOptions.Commands.Connections.AllowCreate
+                    && _host.BehaviorOptions.Commands.Connections.AllowDelete,
+                    hasConnections,
+                    "Inserting a node into a connection requires node create plus connection create and delete permissions.",
+                    "Create a connection before inserting a node into it."),
+                GetEntityRecoveryHint(
+                    _host.BehaviorOptions.Commands.Nodes.AllowCreate
+                    && _host.BehaviorOptions.Commands.Connections.AllowCreate
+                    && _host.BehaviorOptions.Commands.Connections.AllowDelete,
+                    hasConnections,
+                    "Create a connection first."),
+                GetEntityRecoveryCommandId(
+                    _host.BehaviorOptions.Commands.Nodes.AllowCreate
+                    && _host.BehaviorOptions.Commands.Connections.AllowCreate
+                    && _host.BehaviorOptions.Commands.Connections.AllowDelete,
+                    hasConnections,
+                    "connections.connect")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.parameters.set",
                 GraphEditorCommandSourceKind.Kernel,
@@ -516,9 +588,17 @@ internal sealed class GraphEditorKernelCommandRouter
                 GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowDelete),
             GraphEditorCommandDescriptorCatalog.Create(
+                "connections.delete-selected",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Connections.AllowDelete),
+            GraphEditorCommandDescriptorCatalog.Create(
                 "connections.disconnect",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowDisconnect),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "connections.slice",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Connections.AllowDelete),
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.label.set",
                 GraphEditorCommandSourceKind.Kernel,
@@ -781,9 +861,12 @@ internal sealed class GraphEditorKernelCommandRouter
         {
             "selection.clear"
                 or "selection.delete"
+                or "selection.delete-reconnect"
+                or "selection.detach-connections"
                 or "clipboard.copy"
                 or "fragments.export-selection"
                 or "fragments.export-template"
+                or "nodes.insert-into-connection"
                 or "nodes.parameters.set"
                 or "groups.create"
                 or "layout.align-left"
@@ -871,13 +954,17 @@ internal sealed class GraphEditorKernelCommandRouter
                 _host.DeleteSelection();
                 return true;
 
+            case "selection.delete-reconnect":
+                return _host.TryDeleteSelectionAndReconnect();
+
+            case "selection.detach-connections":
+                return _host.TryDetachSelectionFromConnections();
+
             case "clipboard.copy":
-                _ = _host.TryCopySelectionAsync(CancellationToken.None);
-                return true;
+                return _host.TryCopySelectionAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             case "clipboard.paste":
-                _ = _host.TryPasteSelectionAsync(CancellationToken.None);
-                return true;
+                return _host.TryPasteSelectionAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             case "export.scene-svg":
                 return _host.TryExportSceneAsSvg(command.TryGetArgument("path", out var sceneExportPath) ? sceneExportPath : null);
@@ -1030,6 +1117,37 @@ internal sealed class GraphEditorKernelCommandRouter
 
                 _host.DuplicateNode(duplicateNodeId);
                 return true;
+
+            case "nodes.insert-into-connection":
+                if (!TryGetRequiredArgument(command, "connectionId", out var semanticInsertConnectionId)
+                    || !TryGetRequiredArgument(command, "definitionId", out var semanticInsertDefinitionId)
+                    || !TryGetRequiredArgument(command, "inputTargetId", out var semanticInputTargetId)
+                    || !TryGetEnumArgument(command, "inputTargetKind", out GraphConnectionTargetKind semanticInputTargetKind)
+                    || !TryGetRequiredArgument(command, "outputPortId", out var semanticOutputPortId))
+                {
+                    return false;
+                }
+
+                GraphPoint? semanticInsertWorldPosition = null;
+                if (command.TryGetArgument("worldX", out _)
+                    || command.TryGetArgument("worldY", out _))
+                {
+                    if (!TryGetDoubleArgument(command, "worldX", out var semanticInsertWorldX)
+                        || !TryGetDoubleArgument(command, "worldY", out var semanticInsertWorldY))
+                    {
+                        return false;
+                    }
+
+                    semanticInsertWorldPosition = new GraphPoint(semanticInsertWorldX, semanticInsertWorldY);
+                }
+
+                return _host.TryInsertNodeIntoConnection(
+                    semanticInsertConnectionId,
+                    new NodeDefinitionId(semanticInsertDefinitionId),
+                    semanticInputTargetId,
+                    semanticInputTargetKind,
+                    semanticOutputPortId,
+                    semanticInsertWorldPosition);
 
             case "nodes.parameters.set":
                 if (!TryGetRequiredArgument(command, "parameterKey", out var parameterKey)
@@ -1212,6 +1330,9 @@ internal sealed class GraphEditorKernelCommandRouter
                 _host.DeleteConnection(connectionId);
                 return true;
 
+            case "connections.delete-selected":
+                return _host.TryDeleteSelectedConnections();
+
             case "connections.disconnect":
                 if (!TryGetRequiredArgument(command, "connectionId", out var disconnectConnectionId))
                 {
@@ -1245,19 +1366,32 @@ internal sealed class GraphEditorKernelCommandRouter
                     noteText,
                     ResolveOptionalUpdateStatus(command, "updateStatus"));
 
+            case "connections.slice":
+                if (!TryGetDoubleArgument(command, "startX", out var sliceStartX)
+                    || !TryGetDoubleArgument(command, "startY", out var sliceStartY)
+                    || !TryGetDoubleArgument(command, "endX", out var sliceEndX)
+                    || !TryGetDoubleArgument(command, "endY", out var sliceEndY))
+                {
+                    return false;
+                }
+
+                return _host.TrySliceConnections(
+                    new GraphPoint(sliceStartX, sliceStartY),
+                    new GraphPoint(sliceEndX, sliceEndY));
+
             case "connections.route-vertex.insert":
-                if (!TryGetRequiredArgument(command, "connectionId", out var insertConnectionId)
-                    || !TryGetIntArgument(command, "vertexIndex", out var insertVertexIndex)
-                    || !TryGetDoubleArgument(command, "worldX", out var insertWorldX)
-                    || !TryGetDoubleArgument(command, "worldY", out var insertWorldY))
+                if (!TryGetRequiredArgument(command, "connectionId", out var routeInsertConnectionId)
+                    || !TryGetIntArgument(command, "vertexIndex", out var routeInsertVertexIndex)
+                    || !TryGetDoubleArgument(command, "worldX", out var routeInsertWorldX)
+                    || !TryGetDoubleArgument(command, "worldY", out var routeInsertWorldY))
                 {
                     return false;
                 }
 
                 return _host.TryInsertConnectionRouteVertex(
-                    insertConnectionId,
-                    insertVertexIndex,
-                    new GraphPoint(insertWorldX, insertWorldY),
+                    routeInsertConnectionId,
+                    routeInsertVertexIndex,
+                    new GraphPoint(routeInsertWorldX, routeInsertWorldY),
                     ResolveOptionalUpdateStatus(command, "updateStatus"));
 
             case "connections.route-vertex.move":
