@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: 455
+Phase: 456
 Plan: `.planning/ROADMAP.md`
-Status: v0.76 active; Phases 451-455 complete; ready to execute Phase 456
-Last activity: 2026-04-30 — Completed Phase 455 layout services and alignment tools
+Status: v0.76 active; Phases 451-455 complete; Phase 456 split and planned
+Last activity: 2026-04-30 — Planned Phase 456 designer workbench authoring UX
 
 ## Project Reference
 
@@ -22,7 +22,10 @@ See: `.planning/PROJECT.md` (updated 2026-04-30)
 - Complete: `avalonia-node-map-y7i.3` — Phase 453: Professional edge routing and connection geometry
 - Complete: `avalonia-node-map-y7i.4` — Phase 454: Groups subgraphs and collapsible containers
 - Complete: `avalonia-node-map-y7i.5` — Phase 455: Layout services and alignment tools
-- Ready after Phases 454 and 455: `avalonia-node-map-y7i.6` — Phase 456: Designer workbench authoring UX
+- In progress: `avalonia-node-map-y7i.6` — Phase 456: Designer workbench authoring UX
+  - Ready: `avalonia-node-map-y7i.6.1` — Navigator and outline projection
+  - Ready: `avalonia-node-map-y7i.6.2` — Route group layout recovery affordances
+  - Blocked by 456.1 and 456.2: `avalonia-node-map-y7i.6.3` — Designer cookbook proof and docs
 - Blocked by Phases 455 and 456: `avalonia-node-map-y7i.7` — Phase 457: Extension contracts documentation and release proof
 
 ## Notes
@@ -38,4 +41,4 @@ See: `.planning/PROJECT.md` (updated 2026-04-30)
 - Phase 452 and 453 can run in parallel after Phase 451. Phase 455 can start after 452 and 454. Phase 456 waits for 454 and 455. Phase 457 closes the milestone.
 
 ---
-*Last updated: 2026-04-30 after completing Phase 455*
+*Last updated: 2026-04-30 after planning Phase 456*
