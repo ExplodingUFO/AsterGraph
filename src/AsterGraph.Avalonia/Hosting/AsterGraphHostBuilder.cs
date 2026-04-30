@@ -4,10 +4,14 @@ using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
+using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Plugins;
+using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Hosting;
@@ -29,6 +33,12 @@ public sealed class AsterGraphHostBuilder
     private IGraphEditorPluginTrustPolicy? _pluginTrustPolicy;
     private IGraphLocalizationProvider? _localizationProvider;
     private IGraphEditorDiagnosticsSink? _diagnosticsSink;
+    private GraphEditorBehaviorOptions? _behaviorOptions;
+    private IGraphContextMenuAugmentor? _contextMenuAugmentor;
+    private INodePresentationProvider? _nodePresentationProvider;
+    private IGraphEditorToolProvider? _toolProvider;
+    private IGraphRuntimeOverlayProvider? _runtimeOverlayProvider;
+    private IGraphLayoutProvider? _layoutProvider;
     private string? _storageRootPath;
     private GraphEditorViewChromeMode _chromeMode = GraphEditorViewChromeMode.Default;
     private bool _enableDefaultContextMenu = true;
@@ -133,6 +143,66 @@ public sealed class AsterGraphHostBuilder
     }
 
     /// <summary>
+    /// Sets host-owned behavior configuration for the editor runtime.
+    /// </summary>
+    public AsterGraphHostBuilder UseBehaviorOptions(GraphEditorBehaviorOptions behaviorOptions)
+    {
+        ArgumentNullException.ThrowIfNull(behaviorOptions);
+        _behaviorOptions = behaviorOptions;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the host-owned context-menu augmentor used by the shared command/menu route.
+    /// </summary>
+    public AsterGraphHostBuilder UseContextMenuAugmentor(IGraphContextMenuAugmentor contextMenuAugmentor)
+    {
+        ArgumentNullException.ThrowIfNull(contextMenuAugmentor);
+        _contextMenuAugmentor = contextMenuAugmentor;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the editor-runtime node presentation provider.
+    /// </summary>
+    public AsterGraphHostBuilder UseNodePresentationProvider(INodePresentationProvider nodePresentationProvider)
+    {
+        ArgumentNullException.ThrowIfNull(nodePresentationProvider);
+        _nodePresentationProvider = nodePresentationProvider;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the host-owned contextual tool provider layered on the shared command route.
+    /// </summary>
+    public AsterGraphHostBuilder UseToolProvider(IGraphEditorToolProvider toolProvider)
+    {
+        ArgumentNullException.ThrowIfNull(toolProvider);
+        _toolProvider = toolProvider;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the host-owned runtime overlay provider.
+    /// </summary>
+    public AsterGraphHostBuilder UseRuntimeOverlayProvider(IGraphRuntimeOverlayProvider runtimeOverlayProvider)
+    {
+        ArgumentNullException.ThrowIfNull(runtimeOverlayProvider);
+        _runtimeOverlayProvider = runtimeOverlayProvider;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the host-owned layout provider.
+    /// </summary>
+    public AsterGraphHostBuilder UseLayoutProvider(IGraphLayoutProvider layoutProvider)
+    {
+        ArgumentNullException.ThrowIfNull(layoutProvider);
+        _layoutProvider = layoutProvider;
+        return this;
+    }
+
+    /// <summary>
     /// Sets the optional storage root forwarded to the editor factory.
     /// </summary>
     public AsterGraphHostBuilder UseStorageRoot(string storageRootPath)
@@ -215,6 +285,12 @@ public sealed class AsterGraphHostBuilder
             PluginTrustPolicy = _pluginTrustPolicy,
             LocalizationProvider = _localizationProvider,
             DiagnosticsSink = _diagnosticsSink,
+            BehaviorOptions = _behaviorOptions,
+            ContextMenuAugmentor = _contextMenuAugmentor,
+            NodePresentationProvider = _nodePresentationProvider,
+            ToolProvider = _toolProvider,
+            RuntimeOverlayProvider = _runtimeOverlayProvider,
+            LayoutProvider = _layoutProvider,
             StorageRootPath = _storageRootPath,
         };
 

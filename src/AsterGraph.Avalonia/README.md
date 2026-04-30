@@ -22,6 +22,7 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 - stock parameter-editor registry wiring through `AsterGraphPresentationOptions.NodeParameterEditorRegistry`
 - `AsterGraphAvaloniaViewFactory` plus standalone surface factories
 - `AsterGraphHostBuilder` as a thin hosted composition facade over `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`
+- narrow `AsterGraphHostBuilder` pass-throughs for stable editor seams such as behavior options, context-menu augmentation, node presentation state, tool descriptors, runtime overlays, and layout plans
 - Avalonia theme resources, input handling, and control-level integration glue
 
 ## This Package Does Not Own
@@ -73,7 +74,9 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 });
 ```
 
-Use the builder to reduce boilerplate in the common hosted route. Use explicit factories when the host owns storage, plugin trust, localization, diagnostics, presentation, or standalone surface composition separately. Both routes share the same editor/session owner.
+Use the builder to reduce boilerplate in the common hosted route. Use explicit factories when the host needs editor/view options that are not exposed by the builder, owns storage/export services directly, or composes standalone surfaces separately. Both routes share the same editor/session owner.
+
+`AsterGraphHostBuilder.UseNodePresentationProvider(...)` forwards `AsterGraphEditorOptions.NodePresentationProvider`, which supplies editor-runtime node presentation state. It is not the same seam as `AsterGraphPresentationOptions.NodeVisualPresenter`, `NodeBodyPresenter`, inspector, mini-map, or parameter-editor presenters, which replace Avalonia visuals.
 
 `NodeCanvas` consumes the shared editor command/query surface for tiered authoring UX. The same persisted node/group state drives resize handles, width/height tiers, node-side parameter values, fixed group frames, geometry-based membership, and editor-only group chrome.
 

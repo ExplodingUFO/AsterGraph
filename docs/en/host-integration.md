@@ -38,12 +38,18 @@ var view = AsterGraphHostBuilder
     .UsePluginTrustPolicy(pluginTrustPolicy)
     .UseLocalization(localization)
     .UseDiagnostics(diagnostics)
+    .UseRuntimeOverlayProvider(runtimeOverlayProvider)
+    .UseLayoutProvider(layoutProvider)
     .BuildAvaloniaView();
 ```
 
 `UseDefaultWorkbench()` is a hosted Avalonia convenience layer for the stock toolbar, command palette, stencil, inspector, mini-map, fragment, diagnostics, and status chrome. It remains on the existing `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` path; it does not create a second runtime model.
 
 The default workbench uses `AsterGraphWorkbenchPerformanceMode.Balanced`. Hosts can set `AsterGraphWorkbenchOptions.PerformanceMode` to `Quality`, `Balanced`, or `Throughput` to tune hosted chrome projection such as stencil card limits, mini-map projection cadence, advanced inspector projection, hovered toolbars, and command refresh batching. This is Avalonia hosted policy only, not a runtime execution or graph-model contract.
+
+The builder also has narrow pass-throughs for stable `AsterGraphEditorOptions` seams: `UseBehaviorOptions(...)`, `UseContextMenuAugmentor(...)`, `UseNodePresentationProvider(...)`, `UseToolProvider(...)`, `UseRuntimeOverlayProvider(...)`, and `UseLayoutProvider(...)`. Use them when the common hosted Avalonia route is still right and the host only needs those existing editor seams. Drop down to explicit factory wiring when the host owns services outside that list, storage/export composition, or standalone surfaces.
+
+`UseNodePresentationProvider(...)` forwards `AsterGraphEditorOptions.NodePresentationProvider`, which supplies editor-runtime presentation state for nodes. Avalonia visual replacement remains on `AsterGraphPresentationOptions` through `NodeVisualPresenter`, `NodeBodyPresenter`, inspector, mini-map, context-menu, and parameter-editor presenters.
 
 Use explicit factory wiring when the host needs separate ownership of editor options, view options, or standalone surfaces:
 
@@ -105,7 +111,7 @@ If you are starting new work, begin with [Quick Start](./quick-start.md) and kee
 Copy from each bounded source for the part it owns:
 
 - Copy from `CreateSession(...)`: host-owned runtime/session projection for custom UI hosts.
-- Copy from `AsterGraphHostBuilder`: common hosted Avalonia composition when document, catalog, compatibility, plugin trust, localization, and diagnostics inputs are enough.
+- Copy from `AsterGraphHostBuilder`: common hosted Avalonia composition when document, catalog, compatibility, plugin trust, localization, diagnostics, behavior, menu augmentation, node-presentation state, tools, runtime overlay, and layout inputs are enough.
 - Copy from `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`: shipped Avalonia composition for hosted UI hosts.
 - Copy from `ConsumerSample.Avalonia`: action projection, trust workflow, and selected-node parameter read/write seam only.
 - Copy from `Authoring Inspector Recipe`: definition-driven parameter metadata and stock inspector vocabulary.

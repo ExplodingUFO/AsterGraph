@@ -307,6 +307,39 @@ public sealed class GraphEditorInitializationTests
         Assert.Equal(storageRoot, options.StorageRootPath);
     }
 
+    [Fact]
+    public void AsterGraphHostBuilder_BuildEditorOptions_ForwardsHostIntegrationSeams()
+    {
+        var behaviorOptions = GraphEditorBehaviorOptions.Default with
+        {
+            View = GraphEditorBehaviorOptions.Default.View with
+            {
+                ShowMiniMap = false,
+            },
+        };
+        var contextMenuAugmentor = new TestContextMenuAugmentor();
+        var nodePresentationProvider = new TestNodePresentationProvider();
+        var toolProvider = new TestToolProvider();
+        var runtimeOverlayProvider = new TestRuntimeOverlayProvider();
+        var layoutProvider = new TestLayoutProvider();
+
+        var options = AsterGraphHostBuilder.Create()
+            .UseBehaviorOptions(behaviorOptions)
+            .UseContextMenuAugmentor(contextMenuAugmentor)
+            .UseNodePresentationProvider(nodePresentationProvider)
+            .UseToolProvider(toolProvider)
+            .UseRuntimeOverlayProvider(runtimeOverlayProvider)
+            .UseLayoutProvider(layoutProvider)
+            .BuildEditorOptions();
+
+        Assert.Same(behaviorOptions, options.BehaviorOptions);
+        Assert.Same(contextMenuAugmentor, options.ContextMenuAugmentor);
+        Assert.Same(nodePresentationProvider, options.NodePresentationProvider);
+        Assert.Same(toolProvider, options.ToolProvider);
+        Assert.Same(runtimeOverlayProvider, options.RuntimeOverlayProvider);
+        Assert.Same(layoutProvider, options.LayoutProvider);
+    }
+
     [AvaloniaFact]
     public void AsterGraphHostBuilder_BuildAvaloniaView_UsesCanonicalEditorAndViewFactories()
     {
@@ -741,6 +774,30 @@ public sealed class GraphEditorInitializationTests
     {
         public NodePresentationState GetNodePresentation(NodeViewModel node)
             => NodePresentationState.Empty;
+    }
+
+    private sealed class TestToolProvider : IGraphEditorToolProvider
+    {
+        public IReadOnlyList<GraphEditorToolDescriptorSnapshot> GetToolDescriptors(GraphEditorToolProviderContext context)
+            => [];
+    }
+
+    private sealed class TestRuntimeOverlayProvider : IGraphRuntimeOverlayProvider
+    {
+        public IReadOnlyList<GraphEditorNodeRuntimeOverlaySnapshot> GetNodeOverlays()
+            => [];
+
+        public IReadOnlyList<GraphEditorConnectionRuntimeOverlaySnapshot> GetConnectionOverlays()
+            => [];
+
+        public IReadOnlyList<GraphEditorRuntimeLogEntrySnapshot> GetRecentLogs()
+            => [];
+    }
+
+    private sealed class TestLayoutProvider : IGraphLayoutProvider
+    {
+        public GraphLayoutPlan CreateLayoutPlan(GraphLayoutRequest request)
+            => GraphLayoutPlan.Empty(request, "No layout in initialization test.");
     }
 
     private sealed class TestLocalizationProvider : IGraphLocalizationProvider

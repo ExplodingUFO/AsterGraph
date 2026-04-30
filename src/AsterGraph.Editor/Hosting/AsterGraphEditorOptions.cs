@@ -99,7 +99,8 @@ public sealed record AsterGraphEditorOptions
     public IGraphContextMenuAugmentor? ContextMenuAugmentor { get; init; }
 
     /// <summary>
-    /// Optional node-presentation provider.
+    /// Optional editor-runtime node-presentation provider for stable node presentation state.
+    /// This is distinct from Avalonia visual presenter replacement in <c>AsterGraphPresentationOptions</c>.
     /// </summary>
     public INodePresentationProvider? NodePresentationProvider { get; init; }
 

@@ -214,6 +214,8 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 
 `AsterGraphHostBuilder` 是叠在同一套 editor/session 和 Avalonia view factories 上的 thin hosted helper，不是第二套 runtime model。
 
+常见 hosted 路线仍然够用时，可以使用 builder 的窄透传：`UseBehaviorOptions(...)`、`UseContextMenuAugmentor(...)`、`UseNodePresentationProvider(...)`、`UseToolProvider(...)`、`UseRuntimeOverlayProvider(...)` 和 `UseLayoutProvider(...)`。`UseNodePresentationProvider(...)` 透传的是 `AsterGraphEditorOptions.NodePresentationProvider`，用于 editor-runtime node presentation state；Avalonia visual replacement 仍然走 `AsterGraphPresentationOptions`。
+
 ## 6. 插件信任边界
 
 插件加载当前是进程内执行。宿主可以发现候选、做 allow/block 信任策略、检查加载结果，但 AsterGraph 目前不提供沙箱或不受信任代码隔离。

@@ -1826,6 +1826,10 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.True(HasLineWithAll(hostIntegration, "builder delegates", "editor/session", "Avalonia view factories"));
         Assert.True(HasLineWithAll(hostIntegrationZh, "builder", "editor/session", "Avalonia view factories"));
         Assert.True(HasLineWithAll(avaloniaReadme, "Both routes", "same editor/session owner"));
+        Assert.True(HasLineWithAll(hostIntegration, "UseNodePresentationProvider", "AsterGraphEditorOptions.NodePresentationProvider", "AsterGraphPresentationOptions"));
+        Assert.True(HasLineWithAll(hostIntegrationZh, "UseNodePresentationProvider", "AsterGraphEditorOptions.NodePresentationProvider", "AsterGraphPresentationOptions"));
+        Assert.True(HasLineWithAll(quickStart, "UseRuntimeOverlayProvider", "UseLayoutProvider"));
+        Assert.True(HasLineWithAll(quickStartZh, "UseRuntimeOverlayProvider", "UseLayoutProvider"));
         Assert.Contains("dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", readme, StringComparison.Ordinal);
         Assert.Contains("dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", readmeZh, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(readme, "30 seconds", "AI workflow", "scenario"));

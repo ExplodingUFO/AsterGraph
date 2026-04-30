@@ -213,6 +213,8 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 
 `AsterGraphHostBuilder` is a thin hosted helper over the same editor/session and Avalonia view factories. It is not a second runtime model.
 
+Use builder pass-throughs such as `UseBehaviorOptions(...)`, `UseContextMenuAugmentor(...)`, `UseNodePresentationProvider(...)`, `UseToolProvider(...)`, `UseRuntimeOverlayProvider(...)`, and `UseLayoutProvider(...)` when the common hosted route is still enough. `UseNodePresentationProvider(...)` forwards `AsterGraphEditorOptions.NodePresentationProvider` for editor-runtime node presentation state; Avalonia visual replacement stays on `AsterGraphPresentationOptions`.
+
 ## 6. Plugin Trust Boundary
 
 Plugin loading is currently in-process. Hosts can discover candidates, apply an allow/block trust policy, and inspect load results. AsterGraph does not provide sandboxing or untrusted-code isolation.
