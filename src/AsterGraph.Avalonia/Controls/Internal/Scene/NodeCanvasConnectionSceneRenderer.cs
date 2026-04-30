@@ -73,6 +73,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 context,
                 GetPortAnchor(context, sourceNode, sourcePort),
                 geometry.Route,
+                geometry.RouteStyle,
                 GetConnectionTargetAnchor(context, targetNode, connection.Target),
                 connection,
                 sourcePort);
@@ -93,6 +94,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 context,
                 source,
                 GraphConnectionRoute.Empty,
+                GraphEditorConnectionRouteStyle.Bezier,
                 end,
                 new ConnectionViewModel(
                     "pending",
@@ -205,6 +207,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         NodeCanvasConnectionSceneContext context,
         GraphPoint start,
         GraphConnectionRoute route,
+        GraphEditorConnectionRouteStyle routeStyle,
         GraphPoint end,
         ConnectionViewModel connection,
         PortViewModel? sourcePort = null,
@@ -218,7 +221,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         var connectionStyle = context.ResolveConnectionStyle(connection);
         var focusKind = context.ViewModel.InteractionFocus.GetConnectionFocusKind(connection);
         var hasInspectionFocus = context.ViewModel.InteractionFocus.HasInspection;
-        var segments = ConnectionPathBuilder.BuildRoute(start, route, end);
+        var segments = ConnectionPathBuilder.BuildRoute(start, route, end, routeStyle);
         var path = new global::Avalonia.Controls.Shapes.Path
         {
             Data = CreateRouteGeometry(start, segments),

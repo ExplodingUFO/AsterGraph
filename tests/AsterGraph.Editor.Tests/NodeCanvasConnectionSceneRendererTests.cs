@@ -258,6 +258,7 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             var expectedBounds = CreateRouteGeometry(
                 expectedSource,
                 staleGeometry.Route,
+                staleGeometry.RouteStyle,
                 expectedTarget).Bounds;
 
             Assert.NotEqual(staleGeometry.Source.Position, expectedSource);
@@ -311,6 +312,7 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             var expectedBounds = CreateRouteGeometry(
                 expectedSource,
                 expectedGeometry.Route,
+                expectedGeometry.RouteStyle,
                 expectedTarget).Bounds;
 
             Assert.Equal(
@@ -636,9 +638,10 @@ public sealed class NodeCanvasConnectionSceneRendererTests
     private static global::Avalonia.Media.Geometry CreateRouteGeometry(
         GraphPoint start,
         GraphConnectionRoute route,
+        GraphEditorConnectionRouteStyle routeStyle,
         GraphPoint end)
     {
-        var segments = ConnectionPathBuilder.BuildRoute(start, route, end);
+        var segments = ConnectionPathBuilder.BuildRoute(start, route, end, routeStyle);
         var commands = string.Join(
             " ",
             segments.Select(segment =>

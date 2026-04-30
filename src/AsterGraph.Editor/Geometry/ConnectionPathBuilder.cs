@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.Geometry;
 
@@ -31,24 +32,60 @@ public static class ConnectionPathBuilder
         GraphPoint start,
         GraphConnectionRoute route,
         GraphPoint end)
+        => BuildRoute(start, route, end, GraphEditorConnectionRouteStyle.Bezier);
+
+    public static IReadOnlyList<BezierConnection> BuildRoute(
+        GraphPoint start,
+        GraphConnectionRoute route,
+        GraphPoint end,
+        GraphEditorConnectionRouteStyle routeStyle)
     {
         ArgumentNullException.ThrowIfNull(route);
 
-        if (route.IsEmpty)
+        if (routeStyle == GraphEditorConnectionRouteStyle.Bezier && route.IsEmpty)
         {
             return [Build(start, end)];
         }
 
-        var segments = new List<BezierConnection>(route.Vertices.Count + 1);
-        var previousPoint = start;
-        foreach (var vertex in route.Vertices)
+        var points = BuildRoutePoints(start, route, end, routeStyle);
+        var segments = new List<BezierConnection>(points.Count - 1);
+        for (var index = 0; index < points.Count - 1; index++)
         {
-            segments.Add(Build(previousPoint, vertex));
-            previousPoint = vertex;
+            segments.Add(routeStyle == GraphEditorConnectionRouteStyle.Orthogonal
+                ? BuildStraightSegment(points[index], points[index + 1])
+                : Build(points[index], points[index + 1]));
         }
 
-        segments.Add(Build(previousPoint, end));
         return segments;
+    }
+
+    public static IReadOnlyList<GraphPoint> BuildRoutePoints(
+        GraphPoint start,
+        GraphConnectionRoute route,
+        GraphPoint end,
+        GraphEditorConnectionRouteStyle routeStyle)
+    {
+        ArgumentNullException.ThrowIfNull(route);
+
+        if (routeStyle != GraphEditorConnectionRouteStyle.Orthogonal)
+        {
+            var bezierPoints = new List<GraphPoint>(route.Vertices.Count + 2) { start };
+            bezierPoints.AddRange(route.Vertices);
+            bezierPoints.Add(end);
+            return bezierPoints;
+        }
+
+        var anchors = new List<GraphPoint>(route.Vertices.Count + 2) { start };
+        anchors.AddRange(route.Vertices);
+        anchors.Add(end);
+
+        var points = new List<GraphPoint>(anchors.Count * 3) { anchors[0] };
+        for (var index = 0; index < anchors.Count - 1; index++)
+        {
+            AppendOrthogonalLeg(points, anchors[index], anchors[index + 1]);
+        }
+
+        return points;
     }
 
     public static GraphPoint ResolveSegmentMidpoint(
@@ -74,4 +111,44 @@ public static class ConnectionPathBuilder
             (segmentStart.X + segmentEnd.X) / 2d,
             (segmentStart.Y + segmentEnd.Y) / 2d);
     }
+
+    private static BezierConnection BuildStraightSegment(GraphPoint start, GraphPoint end)
+        => new(
+            start,
+            new GraphPoint(start.X + ((end.X - start.X) / 3d), start.Y + ((end.Y - start.Y) / 3d)),
+            new GraphPoint(start.X + (((end.X - start.X) * 2d) / 3d), start.Y + (((end.Y - start.Y) * 2d) / 3d)),
+            end);
+
+    private static void AppendOrthogonalLeg(List<GraphPoint> points, GraphPoint start, GraphPoint end)
+    {
+        if (IsSamePoint(start, end))
+        {
+            return;
+        }
+
+        if (NearlyEqual(start.X, end.X) || NearlyEqual(start.Y, end.Y))
+        {
+            AddDistinct(points, end);
+            return;
+        }
+
+        var midX = (start.X + end.X) / 2d;
+        AddDistinct(points, new GraphPoint(midX, start.Y));
+        AddDistinct(points, new GraphPoint(midX, end.Y));
+        AddDistinct(points, end);
+    }
+
+    private static void AddDistinct(List<GraphPoint> points, GraphPoint point)
+    {
+        if (points.Count == 0 || !IsSamePoint(points[^1], point))
+        {
+            points.Add(point);
+        }
+    }
+
+    private static bool IsSamePoint(GraphPoint left, GraphPoint right)
+        => NearlyEqual(left.X, right.X) && NearlyEqual(left.Y, right.Y);
+
+    private static bool NearlyEqual(double left, double right)
+        => Math.Abs(left - right) < 0.001d;
 }

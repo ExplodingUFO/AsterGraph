@@ -168,7 +168,8 @@ C:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot(System.Strin
 C:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot(System.String,System.String,System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult)
 C:AsterGraph.Editor.Runtime.GraphEditorCompositeNodeSnapshot(System.String,System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphCompositeBoundaryPort>,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphCompositeBoundaryPort>)
 C:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot(System.String,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,AsterGraph.Core.Models.GraphPoint)
-C:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot(System.String,AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot,AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot,AsterGraph.Core.Models.GraphConnectionRoute)
+C:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot(System.String,AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot,AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot)
+C:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot(System.Collections.Generic.IReadOnlyList<System.String>,System.Int32,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPoint>)
 C:AsterGraph.Editor.Runtime.GraphEditorConnectionRuntimeOverlaySnapshot(System.String,AsterGraph.Editor.Runtime.GraphEditorRuntimeOverlayStatus,System.String,System.String,System.Nullable<System.Int32>,System.Boolean)
 C:AsterGraph.Editor.Runtime.GraphEditorEdgeTemplateSnapshot(System.String,System.String,System.String,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,AsterGraph.Abstractions.Identifiers.PortTypeId,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String,System.String,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult)
 C:AsterGraph.Editor.Runtime.GraphEditorFeatureDescriptorSnapshot(System.String,System.String,System.Boolean)
@@ -386,6 +387,8 @@ F:AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind.Host:AsterGraph.Editor.
 F:AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind.Kernel:AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind
 F:AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind.Plugin:AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind
 F:AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind.Retained:AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind
+F:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle.Bezier:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle
+F:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle.Orthogonal:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle
 F:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState.Default:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState
 F:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState.Mixed:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState
 F:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState.Overridden:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState
@@ -1017,7 +1020,9 @@ M:AsterGraph.Editor.Geometry.BezierConnection.Equals(System.Object):System.Boole
 M:AsterGraph.Editor.Geometry.BezierConnection.GetHashCode():System.Int32
 M:AsterGraph.Editor.Geometry.BezierConnection.ToString():System.String
 M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.Build(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphPoint):AsterGraph.Editor.Geometry.BezierConnection
+M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.BuildRoute(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle):System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Geometry.BezierConnection>
 M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.BuildRoute(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint):System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Geometry.BezierConnection>
+M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.BuildRoutePoints(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle):System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPoint>
 M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.ResolveSegmentMidpoint(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint,System.Int32):AsterGraph.Core.Models.GraphPoint
 M:AsterGraph.Editor.Geometry.NodeBounds.Deconstruct(out System.Double&,out System.Double&,out System.Double&,out System.Double&):System.Void
 M:AsterGraph.Editor.Geometry.NodeBounds.Equals(AsterGraph.Editor.Geometry.NodeBounds):System.Boolean
@@ -1311,11 +1316,17 @@ M:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot.Equals
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot.GetHashCode():System.Int32
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot.ToString():System.String
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot
-M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Deconstruct(out System.String&,out AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot&,out AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot&,out AsterGraph.Core.Models.GraphConnectionRoute&):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Deconstruct(out System.String&,out AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot&,out AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot&,out AsterGraph.Core.Models.GraphConnectionRoute&,out AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle&,out AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot&):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Equals(System.Object):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.GetHashCode():System.Int32
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.ToString():System.String
+M:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot
+M:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.Deconstruct(out System.Collections.Generic.IReadOnlyList<System.String>&,out System.Int32&,out System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPoint>&):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.Equals(System.Object):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.GetHashCode():System.Int32
+M:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.ToString():System.String
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionRuntimeOverlaySnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorConnectionRuntimeOverlaySnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionRuntimeOverlaySnapshot.Deconstruct(out System.String&,out AsterGraph.Editor.Runtime.GraphEditorRuntimeOverlayStatus&,out System.String&,out System.String&,out System.Nullable<System.Int32>&,out System.Boolean&):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionRuntimeOverlaySnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorConnectionRuntimeOverlaySnapshot):System.Boolean
@@ -2886,8 +2897,13 @@ P:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot.NodeId
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot.Position:AsterGraph.Core.Models.GraphPoint:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.ConnectionId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Route:AsterGraph.Core.Models.GraphConnectionRoute:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.RouteStyle:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.RoutingEvidence:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Source:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Target:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.CrossingCount:System.Int32:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.ObstacleNodeIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.PathPoints:System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPoint>:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionRuntimeOverlaySnapshot.ConnectionId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionRuntimeOverlaySnapshot.IsStale:System.Boolean:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionRuntimeOverlaySnapshot.ItemCount:System.Nullable<System.Int32>:get,set
@@ -3572,6 +3588,7 @@ T:class AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorCompositeNodeSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot
+T:class AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorConnectionRuntimeOverlaySnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorEdgeTemplateSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorFeatureDescriptorSnapshot
@@ -3655,6 +3672,7 @@ T:enum AsterGraph.Editor.Plugins.GraphEditorPluginStageOutcome
 T:enum AsterGraph.Editor.Plugins.GraphEditorPluginTrustDecision
 T:enum AsterGraph.Editor.Plugins.GraphEditorPluginTrustEvaluationSource
 T:enum AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind
+T:enum AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle
 T:enum AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState
 T:enum AsterGraph.Editor.Runtime.GraphEditorRuntimeOverlayStatus
 T:enum AsterGraph.Editor.Runtime.GraphEditorToolContextKind
