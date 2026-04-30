@@ -17,6 +17,7 @@ public sealed class DemoCookbookVisualBaselineTests
         Assert.Contains("PART_CookbookWorkspaceRecipeContentPanel", RequiredNamedParts);
         Assert.Contains(OwnedFiles, path => path.EndsWith("DemoCookbookVisualBaselineTests.cs", StringComparison.Ordinal));
         Assert.DoesNotContain(OwnedFiles, path => path.Contains("MainWindowViewModel.Showcase", StringComparison.Ordinal));
+        Assert.DoesNotContain(OwnedFiles, path => path.Contains("DemoCookbookWorkspaceProjection", StringComparison.Ordinal));
         Assert.All(Risks, risk => Assert.False(string.IsNullOrWhiteSpace(risk)));
     }
 
@@ -39,6 +40,11 @@ public sealed class DemoCookbookVisualBaselineTests
         Assert.Contains("Classes.selected=\"{Binding IsSelected}\"", xaml, StringComparison.Ordinal);
         Assert.Contains("PART_CookbookWorkspaceScenarioCueList", xaml, StringComparison.Ordinal);
         Assert.Contains("SelectedItem=\"{Binding SelectedCookbookScenarioPoint, Mode=TwoWay}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("PART_CookbookWorkspaceCodeDemoSection", xaml, StringComparison.Ordinal);
+        Assert.Contains("PART_CookbookWorkspaceWorkflowSection", xaml, StringComparison.Ordinal);
+        Assert.Contains("PART_CookbookWorkspaceProofSupportSection", xaml, StringComparison.Ordinal);
+        Assert.Contains("SelectedCookbookWorkspaceWorkflowStepLines", xaml, StringComparison.Ordinal);
+        Assert.Contains("SelectedCookbookWorkspaceProofSupportLines", xaml, StringComparison.Ordinal);
         Assert.Contains("MaxHeight=\"260\"", xaml, StringComparison.Ordinal);
     }
 
@@ -53,22 +59,27 @@ public sealed class DemoCookbookVisualBaselineTests
         "PART_CookbookWorkspaceContentShell",
         "PART_MainGraphEditorHost",
         "PART_CookbookWorkspaceRecipeContentPanel",
+        "PART_CookbookWorkspaceCodeDemoSection",
+        "PART_CookbookWorkspaceWorkflowSection",
+        "PART_CookbookWorkspaceProofSupportSection",
         "PART_CookbookWorkspaceScenarioCueList",
+        "PART_CookbookWorkspaceWorkflowStepLines",
+        "PART_CookbookWorkspaceProofSupportLines",
         "PART_CookbookWorkspaceDetailModeSelector",
         "PART_CookbookWorkspaceDetailLines",
     ];
 
     private static readonly string[] OwnedFiles =
     [
-        "src/AsterGraph.Demo/Cookbook/DemoCookbookWorkspaceProjection.cs",
         "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.Cookbook.cs",
         "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.CookbookDetails.cs",
+        "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.CookbookState.cs",
         "src/AsterGraph.Demo/Views/MainWindow.axaml",
         "src/AsterGraph.Demo/Views/Resources/MainWindowResources.axaml",
         "tests/AsterGraph.Demo.Tests/DemoCookbookNavigationTests.cs",
-        "tests/AsterGraph.Demo.Tests/DemoCookbookProofClosureTests.cs",
+        "tests/AsterGraph.Demo.Tests/DemoCookbookNavigationPolishTests.cs",
+        "tests/AsterGraph.Demo.Tests/DemoCookbookDetailReadabilityTests.cs",
         "tests/AsterGraph.Demo.Tests/DemoCookbookVisualBaselineTests.cs",
-        "tests/AsterGraph.Demo.Tests/DemoCookbookWorkspaceProjectionTests.cs",
     ];
 
     private static readonly string[] Risks =

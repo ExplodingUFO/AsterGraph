@@ -192,8 +192,14 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(SelectedCookbookRecipeProofLines));
         OnPropertyChanged(nameof(SelectedCookbookRecipeSupportBoundary));
         OnPropertyChanged(nameof(SelectedCookbookScenarioPoint));
+        OnPropertyChanged(nameof(CookbookGraphDemoSectionTitle));
+        OnPropertyChanged(nameof(CookbookWorkflowSectionTitle));
+        OnPropertyChanged(nameof(CookbookProofSupportSectionTitle));
+        OnPropertyChanged(nameof(CookbookDetailSectionTitle));
         OnPropertyChanged(nameof(SelectedCookbookWorkspaceGraphLines));
         OnPropertyChanged(nameof(SelectedCookbookWorkspaceCoverageLines));
+        OnPropertyChanged(nameof(SelectedCookbookWorkspaceWorkflowStepLines));
+        OnPropertyChanged(nameof(SelectedCookbookWorkspaceProofSupportLines));
         OnPropertyChanged(nameof(SelectedCookbookWorkspaceDetailLines));
     }
 
@@ -202,6 +208,8 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(SelectedCookbookScenarioPoint));
         OnPropertyChanged(nameof(SelectedCookbookWorkspaceGraphLines));
         OnPropertyChanged(nameof(SelectedCookbookWorkspaceCoverageLines));
+        OnPropertyChanged(nameof(SelectedCookbookWorkspaceWorkflowStepLines));
+        OnPropertyChanged(nameof(SelectedCookbookWorkspaceProofSupportLines));
         OnPropertyChanged(nameof(SelectedCookbookWorkspaceDetailLines));
     }
     private bool MatchesCookbookSearch(DemoCookbookRecipe recipe, string searchText)

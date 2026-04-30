@@ -10,6 +10,14 @@ public partial class MainWindowViewModel
 
     public IReadOnlyList<CookbookDetailMode> CookbookDetailModes => _cookbookDetailModes;
 
+    public string CookbookGraphDemoSectionTitle => T("Code / Demo", "Code / Demo");
+
+    public string CookbookWorkflowSectionTitle => T("Workflow Step", "Workflow Step");
+
+    public string CookbookProofSupportSectionTitle => T("Proof / Support", "Proof / Support");
+
+    public string CookbookDetailSectionTitle => T("Detail View", "Detail View");
+
     public IReadOnlyList<string> SelectedCookbookWorkspaceGraphLines
     {
         get
@@ -45,6 +53,27 @@ public partial class MainWindowViewModel
         }
     }
 
+    public IReadOnlyList<string> SelectedCookbookWorkspaceWorkflowStepLines
+    {
+        get
+        {
+            var scenario = SelectedCookbookScenarioPoint;
+
+            return
+            [
+                T("Step：", "Step: ") + scenario.Label,
+                T("Graph：", "Graph: ") + scenario.GraphCueLabel + " -> " + scenario.GraphCueTarget,
+                T("Content：", "Content: ") + scenario.ContentCue,
+            ];
+        }
+    }
+
+    public IReadOnlyList<string> SelectedCookbookWorkspaceProofSupportLines =>
+    [
+        .. SelectedCookbookRecipe.ProofMarkers.Select(marker => T("Proof：", "Proof: ") + marker),
+        T("Support：", "Support: ") + SelectedCookbookRecipe.SupportBoundary,
+    ];
+
     public IReadOnlyList<string> SelectedCookbookWorkspaceDetailLines
         => SelectedCookbookDetailMode?.Key switch
         {
@@ -76,10 +105,10 @@ public partial class MainWindowViewModel
     {
         _cookbookDetailModes =
         [
-            new CookbookDetailMode("code", T("代码", "Code")),
+            new CookbookDetailMode("code", T("Code / Demo", "Code / Demo")),
             new CookbookDetailMode("proof", T("证明", "Proof")),
             new CookbookDetailMode("docs", T("文档", "Docs")),
-            new CookbookDetailMode("scenario", T("场景", "Scenario")),
+            new CookbookDetailMode("scenario", T("Workflow Step", "Workflow Step")),
             new CookbookDetailMode("interaction", T("交互", "Interaction")),
             new CookbookDetailMode("support", T("边界", "Support")),
         ];

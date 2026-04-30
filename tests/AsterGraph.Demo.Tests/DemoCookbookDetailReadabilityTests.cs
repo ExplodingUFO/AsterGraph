@@ -20,6 +20,14 @@ public sealed class DemoCookbookDetailReadabilityTests
         Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("支持路线：", StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("包边界：", StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Demo 边界：", StringComparison.Ordinal));
+        Assert.Equal("Code / Demo", viewModel.CookbookGraphDemoSectionTitle);
+        Assert.Equal("Workflow Step", viewModel.CookbookWorkflowSectionTitle);
+        Assert.Equal("Proof / Support", viewModel.CookbookProofSupportSectionTitle);
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.StartsWith("Step：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.StartsWith("Graph：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.StartsWith("Content：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceProofSupportLines, line => line.StartsWith("Proof：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceProofSupportLines, line => line.StartsWith("Support：", StringComparison.Ordinal));
         Assert.StartsWith("路径：", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.CodeAnchors[0].Path, StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.CodeAnchors[0].Evidence, StringComparison.Ordinal));
@@ -78,6 +86,9 @@ public sealed class DemoCookbookDetailReadabilityTests
         Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Supported route: ", StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Package boundary: ", StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Demo boundary: ", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.StartsWith("Step: ", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceProofSupportLines, line => line.StartsWith("Proof: ", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceProofSupportLines, line => line.StartsWith("Support: ", StringComparison.Ordinal));
 
         viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "scenario");
 

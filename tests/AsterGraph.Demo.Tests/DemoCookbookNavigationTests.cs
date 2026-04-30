@@ -149,6 +149,8 @@ public sealed class DemoCookbookNavigationTests
         var editorFrame = Assert.IsType<Border>(window.FindControl<Border>("MainEditorFrame"));
         var graphLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceGraphLines"));
         var coverageLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceCoverageLines"));
+        var workflowStepLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceWorkflowStepLines"));
+        var proofSupportLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceProofSupportLines"));
         var scenarioCueList = Assert.IsType<ListBox>(window.FindControl<ListBox>("PART_CookbookWorkspaceScenarioCueList"));
         var detailModeSelector = Assert.IsType<ComboBox>(window.FindControl<ComboBox>("PART_CookbookWorkspaceDetailModeSelector"));
         var detailLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceDetailLines"));
@@ -177,6 +179,14 @@ public sealed class DemoCookbookNavigationTests
             .Cast<string>()
             .ToArray();
         Assert.Equal(viewModel.SelectedCookbookWorkspaceCoverageLines, boundCoverageLines);
+        var boundWorkflowStepLines = Assert.IsAssignableFrom<System.Collections.IEnumerable>(workflowStepLines.ItemsSource)
+            .Cast<string>()
+            .ToArray();
+        Assert.Equal(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, boundWorkflowStepLines);
+        var boundProofSupportLines = Assert.IsAssignableFrom<System.Collections.IEnumerable>(proofSupportLines.ItemsSource)
+            .Cast<string>()
+            .ToArray();
+        Assert.Equal(viewModel.SelectedCookbookWorkspaceProofSupportLines, boundProofSupportLines);
         Assert.Equal(viewModel.CookbookWorkspace.SelectedRecipe.ScenarioPoints, scenarioCueList.ItemsSource);
         Assert.Equal(viewModel.SelectedCookbookScenarioPoint, scenarioCueList.SelectedItem);
         var boundGroups = Assert.IsAssignableFrom<System.Collections.IEnumerable>(navigationGroups.ItemsSource)

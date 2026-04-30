@@ -35,6 +35,14 @@
     </Border>
   </DataTemplate>
 
+  <DataTemplate x:Key="CookbookWorkspaceInlineLineTemplate">
+    <SelectableTextBlock Margin="0,0,0,4"
+                         TextWrapping="Wrap"
+                         LineHeight="17"
+                         Foreground="#D8EEF3"
+                         Text="{Binding}" />
+  </DataTemplate>
+
   <DataTemplate x:Key="CookbookWorkspaceStateLineTemplate">
     <Border Margin="0,0,0,6"
             Padding="10,8"
@@ -50,5 +58,13 @@
                            Foreground="#F6D8B6"
                            Text="{Binding}" />
     </Border>
+  </DataTemplate>
+
+  <DataTemplate x:Key="CookbookWorkspaceInlineStateLineTemplate">
+    <SelectableTextBlock Margin="0,0,0,4"
+                         TextWrapping="Wrap"
+                         LineHeight="17"
+                         Foreground="#F6D8B6"
+                         Text="{Binding}" />
   </DataTemplate>
 </ResourceDictionary>

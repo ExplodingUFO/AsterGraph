@@ -1376,9 +1376,61 @@
                     <TextBlock TextWrapping="Wrap"
                                Foreground="#C2D7E4"
                                Text="{Binding CookbookWorkspace.SelectedRecipe.Summary}" />
-                    <ItemsControl x:Name="PART_CookbookWorkspaceGraphLines"
-                                  ItemsSource="{Binding SelectedCookbookWorkspaceGraphLines}"
-                                  ItemTemplate="{StaticResource CookbookWorkspaceLineTemplate}" />
+                    <Grid ColumnDefinitions="1.1*,1*,1.1*"
+                          ColumnSpacing="10">
+                      <Border x:Name="PART_CookbookWorkspaceCodeDemoSection"
+                              Padding="10"
+                              Background="#101923"
+                              BorderBrush="#365063"
+                              BorderThickness="1"
+                              CornerRadius="8">
+                        <StackPanel Spacing="6">
+                          <TextBlock FontSize="12"
+                                     FontWeight="Bold"
+                                     Foreground="#7FE7D7"
+                                     Text="{Binding CookbookGraphDemoSectionTitle}" />
+                          <ItemsControl x:Name="PART_CookbookWorkspaceGraphLines"
+                                        ItemsSource="{Binding SelectedCookbookWorkspaceGraphLines}"
+                                        ItemTemplate="{StaticResource CookbookWorkspaceInlineLineTemplate}" />
+                        </StackPanel>
+                      </Border>
+
+                      <Border x:Name="PART_CookbookWorkspaceWorkflowSection"
+                              Grid.Column="1"
+                              Padding="10"
+                              Background="#101923"
+                              BorderBrush="#4E6D7C"
+                              BorderThickness="1"
+                              CornerRadius="8">
+                        <StackPanel Spacing="6">
+                          <TextBlock FontSize="12"
+                                     FontWeight="Bold"
+                                     Foreground="#A8F3E6"
+                                     Text="{Binding CookbookWorkflowSectionTitle}" />
+                          <ItemsControl x:Name="PART_CookbookWorkspaceWorkflowStepLines"
+                                        ItemsSource="{Binding SelectedCookbookWorkspaceWorkflowStepLines}"
+                                        ItemTemplate="{StaticResource CookbookWorkspaceInlineLineTemplate}" />
+                        </StackPanel>
+                      </Border>
+
+                      <Border x:Name="PART_CookbookWorkspaceProofSupportSection"
+                              Grid.Column="2"
+                              Padding="10"
+                              Background="#1A1714"
+                              BorderBrush="#8A6240"
+                              BorderThickness="1"
+                              CornerRadius="8">
+                        <StackPanel Spacing="6">
+                          <TextBlock FontSize="12"
+                                     FontWeight="Bold"
+                                     Foreground="#F6D8B6"
+                                     Text="{Binding CookbookProofSupportSectionTitle}" />
+                          <ItemsControl x:Name="PART_CookbookWorkspaceProofSupportLines"
+                                        ItemsSource="{Binding SelectedCookbookWorkspaceProofSupportLines}"
+                                        ItemTemplate="{StaticResource CookbookWorkspaceInlineStateLineTemplate}" />
+                        </StackPanel>
+                      </Border>
+                    </Grid>
                     <ItemsControl x:Name="PART_CookbookWorkspaceCoverageLines"
                                   ItemsSource="{Binding SelectedCookbookWorkspaceCoverageLines}"
                                   ItemTemplate="{StaticResource CookbookWorkspaceStateLineTemplate}" />
@@ -1410,16 +1462,22 @@
                             BorderBrush="#7FE7D7"
                             BorderThickness="1"
                             CornerRadius="8">
-                      <Grid ColumnDefinitions="Auto,*"
+                      <Grid ColumnDefinitions="Auto,Auto,*"
                             ColumnSpacing="10">
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   Foreground="#D8EEF3"
+                                   Text="{Binding CookbookDetailSectionTitle}" />
                         <TextBlock x:Name="PART_CookbookWorkspaceActiveDetailModeText"
+                                   Grid.Column="1"
                                    VerticalAlignment="Center"
                                    FontSize="12"
                                    FontWeight="SemiBold"
                                    Foreground="#7FE7D7"
                                    Text="{Binding SelectedCookbookDetailMode.DisplayName}" />
                         <ComboBox x:Name="PART_CookbookWorkspaceDetailModeSelector"
-                                  Grid.Column="1"
+                                  Grid.Column="2"
                                   HorizontalAlignment="Stretch"
                                   MinWidth="180"
                                   ItemsSource="{Binding CookbookDetailModes}"
