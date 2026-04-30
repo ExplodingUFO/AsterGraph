@@ -34,6 +34,16 @@ public partial class MainWindowViewModel
         T("落地点：", "Landing: ") + ResolveCookbookLandingGroup(SelectedCookbookRecipe),
     ];
 
+    public bool HasCookbookFilterResults => FilteredCookbookRecipes.Count > 0;
+
+    public bool HasCookbookEmptyFilterFeedback => !HasCookbookFilterResults;
+
+    public string CookbookFilterFeedback
+        => HasCookbookFilterResults
+            ? T("可以从下方分组中选择匹配配方。", "Choose a matching recipe from the grouped navigation below.")
+            : T("没有匹配配方，当前配方仍保持可见：", "No matching recipes; the current recipe stays visible: ")
+              + SelectedCookbookRecipe.Title;
+
     public IReadOnlyList<string> SelectedCookbookRecipeCodeLines =>
     [
         .. FormatCookbookAnchors(T("代码入口：", "Code: "), SelectedCookbookRecipe.CodeAnchors),
@@ -54,8 +64,22 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private CookbookCategoryFilter selectedCookbookCategoryFilter = null!;
 
-    [ObservableProperty]
     private DemoCookbookRecipe selectedCookbookRecipe = null!;
+
+    public DemoCookbookRecipe SelectedCookbookRecipe
+    {
+        get => selectedCookbookRecipe;
+        set
+        {
+            if (value is null || ReferenceEquals(selectedCookbookRecipe, value))
+            {
+                return;
+            }
+
+            SetProperty(ref selectedCookbookRecipe, value);
+            RefreshCookbookProjection();
+        }
+    }
 
     [ObservableProperty]
     private string lastCookbookNavigationStatus = string.Empty;
@@ -134,9 +158,6 @@ public partial class MainWindowViewModel
     partial void OnSelectedCookbookCategoryFilterChanged(CookbookCategoryFilter value)
         => RefreshFilteredCookbookRecipes();
 
-    partial void OnSelectedCookbookRecipeChanged(DemoCookbookRecipe value)
-        => RefreshCookbookProjection();
-
     private void RefreshFilteredCookbookRecipes()
     {
         if (_cookbookRecipes.Count == 0 || SelectedCookbookCategoryFilter is null)
@@ -169,6 +190,9 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsCookbookHostGroupSelected));
         OnPropertyChanged(nameof(CookbookSummary));
         OnPropertyChanged(nameof(CookbookLandingLines));
+        OnPropertyChanged(nameof(HasCookbookFilterResults));
+        OnPropertyChanged(nameof(HasCookbookEmptyFilterFeedback));
+        OnPropertyChanged(nameof(CookbookFilterFeedback));
         OnPropertyChanged(nameof(SelectedCookbookRecipeCodeLines));
         OnPropertyChanged(nameof(SelectedCookbookRecipeProofLines));
         OnPropertyChanged(nameof(SelectedCookbookRecipeSupportBoundary));

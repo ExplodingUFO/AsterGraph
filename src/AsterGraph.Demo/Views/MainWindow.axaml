@@ -33,11 +33,18 @@
     <Style Selector="Button.cookbook-workspace-recipe">
       <Setter Property="Background" Value="#101923" />
       <Setter Property="BorderBrush" Value="#365063" />
+      <Setter Property="BorderThickness" Value="1" />
       <Setter Property="Foreground" Value="#F4FFFC" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Button.cookbook-workspace-recipe:pointerover">
+      <Setter Property="Background" Value="#172837" />
+      <Setter Property="BorderBrush" Value="#5E8494" />
     </Style>
     <Style Selector="Button.cookbook-workspace-recipe.selected">
-      <Setter Property="Background" Value="#183744" />
-      <Setter Property="BorderBrush" Value="#7FE7D7" />
+      <Setter Property="Background" Value="#205563" />
+      <Setter Property="BorderBrush" Value="#9AF7EA" />
+      <Setter Property="BorderThickness" Value="2" />
       <Setter Property="Foreground" Value="#FFFFFF" />
     </Style>
   </Window.Styles>
@@ -1151,7 +1158,7 @@
                   BorderThickness="1"
                   CornerRadius="8"
                   IsVisible="{Binding IsCookbookHostGroupSelected}">
-            <Grid RowDefinitions="Auto,Auto,Auto,*"
+              <Grid RowDefinitions="Auto,Auto,Auto,Auto,*"
                   RowSpacing="10">
               <StackPanel Spacing="4">
                 <TextBlock FontSize="12"
@@ -1178,26 +1185,56 @@
                 </ComboBox.ItemTemplate>
               </ComboBox>
 
-              <ScrollViewer Grid.Row="3"
+              <Border x:Name="PART_CookbookWorkspaceNavigationFeedback"
+                      Grid.Row="3"
+                      Padding="10"
+                      Background="#101923"
+                      BorderBrush="#314859"
+                      BorderThickness="1"
+                      CornerRadius="8">
+                <StackPanel Spacing="6">
+                  <ItemsControl x:Name="PART_CookbookWorkspaceNavigationFeedbackLines"
+                                ItemsSource="{Binding CookbookLandingLines}"
+                                ItemTemplate="{StaticResource CookbookNavigationFeedbackLineTemplate}" />
+                  <Border x:Name="PART_CookbookWorkspaceEmptyFilterFeedback"
+                          Padding="8"
+                          Background="#221A13"
+                          BorderBrush="#8A6240"
+                          BorderThickness="1"
+                          CornerRadius="6"
+                          IsVisible="{Binding HasCookbookEmptyFilterFeedback}">
+                    <TextBlock TextWrapping="Wrap"
+                               Foreground="#F6D8B6"
+                               Text="{Binding CookbookFilterFeedback}" />
+                  </Border>
+                </StackPanel>
+              </Border>
+
+              <ScrollViewer Grid.Row="4"
                             HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="10">
                   <ItemsControl x:Name="PART_CookbookWorkspaceNavigationGroups"
                                 ItemsSource="{Binding CookbookWorkspace.NavigationGroups}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate x:DataType="cookbook:DemoCookbookWorkspaceNavigationGroup">
-                        <StackPanel Margin="0,0,0,12"
+                          <StackPanel Margin="0,0,0,12"
                                     Spacing="6">
-                          <TextBlock FontSize="12"
-                                     FontWeight="Bold"
-                                     Foreground="#7FE7D7"
-                                     Text="{Binding DisplayName}" />
-                          <ItemsControl ItemsSource="{Binding Recipes}">
+                           <Border Padding="8,5"
+                                   Background="#101923"
+                                   BorderBrush="#314859"
+                                   BorderThickness="0,0,0,1"
+                                   CornerRadius="6">
+                             <TextBlock FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="#7FE7D7"
+                                       Text="{Binding DisplayName}" />
+                           </Border>
+                           <ItemsControl ItemsSource="{Binding Recipes}">
                             <ItemsControl.ItemTemplate>
                               <DataTemplate x:DataType="cookbook:DemoCookbookWorkspaceNavigationItem">
                                 <Button Margin="0,0,0,6"
                                         Padding="10,8"
                                         HorizontalAlignment="Stretch"
-                                        BorderThickness="1"
                                         CornerRadius="8"
                                         Classes="cookbook-workspace-recipe"
                                         Classes.selected="{Binding IsSelected}"

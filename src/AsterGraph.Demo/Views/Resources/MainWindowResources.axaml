@@ -12,4 +12,11 @@
                  Text="{Binding}" />
     </Border>
   </DataTemplate>
+
+  <DataTemplate x:Key="CookbookNavigationFeedbackLineTemplate">
+    <TextBlock FontSize="12"
+               TextWrapping="Wrap"
+               Foreground="#B6CBD8"
+               Text="{Binding}" />
+  </DataTemplate>
 </ResourceDictionary>
