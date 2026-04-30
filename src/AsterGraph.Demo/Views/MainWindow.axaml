@@ -1382,6 +1382,28 @@
                     <ItemsControl x:Name="PART_CookbookWorkspaceCoverageLines"
                                   ItemsSource="{Binding SelectedCookbookWorkspaceCoverageLines}"
                                   ItemTemplate="{StaticResource CookbookWorkspaceStateLineTemplate}" />
+                    <ListBox x:Name="PART_CookbookWorkspaceScenarioCueList"
+                             MaxHeight="112"
+                             ItemsSource="{Binding CookbookWorkspace.SelectedRecipe.ScenarioPoints}"
+                             SelectedItem="{Binding SelectedCookbookScenarioPoint, Mode=TwoWay}"
+                             Background="#101923"
+                             BorderBrush="#365063"
+                             BorderThickness="1">
+                      <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="cookbook:DemoCookbookWorkspaceScenarioPoint">
+                          <StackPanel Spacing="2">
+                            <TextBlock FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F4FFFC"
+                                       Text="{Binding Label}" />
+                            <TextBlock FontSize="11"
+                                       TextWrapping="Wrap"
+                                       Foreground="#B6CBD8"
+                                       Text="{Binding GraphCueLabel}" />
+                          </StackPanel>
+                        </DataTemplate>
+                      </ListBox.ItemTemplate>
+                    </ListBox>
                     <Border x:Name="PART_CookbookWorkspaceDetailModeStrip"
                             Padding="10,8"
                             Background="#101923"

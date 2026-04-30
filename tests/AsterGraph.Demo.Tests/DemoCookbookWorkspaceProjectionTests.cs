@@ -69,6 +69,50 @@ public sealed class DemoCookbookWorkspaceProjectionTests
     }
 
     [Fact]
+    public void WorkspaceProjection_ProjectsBoundedScenarioGraphCues()
+    {
+        var content = DemoCookbookWorkspaceProjection.Create("authoring-surface-route").SelectedRecipe;
+        var graphCue = content.ScenarioPoints.Single(point => point.Kind == DemoCookbookScenarioKind.GraphOperations);
+        var metadataCue = content.ScenarioPoints.Single(point => point.Kind == DemoCookbookScenarioKind.NodeMetadata);
+
+        Assert.StartsWith(content.RecipeId + ":scenario-", graphCue.Key, StringComparison.Ordinal);
+        Assert.Equal("Graph operation cue", graphCue.GraphCueLabel);
+        Assert.Contains("tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleAuthoringSurfaceRecipe.cs", graphCue.GraphCueTarget, StringComparison.Ordinal);
+        Assert.Contains(graphCue.Evidence, graphCue.GraphCueTarget, StringComparison.Ordinal);
+        Assert.Equal("authoring-surface-route / GraphOperations", graphCue.ContentCue);
+        Assert.Equal("Node metadata cue", metadataCue.GraphCueLabel);
+        Assert.Contains("tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleHost.cs", metadataCue.GraphCueTarget, StringComparison.Ordinal);
+        Assert.DoesNotContain("fallback", content.ScenarioPoints.Select(point => point.ContentCue), StringComparer.OrdinalIgnoreCase);
+        Assert.DoesNotContain("script", content.ScenarioPoints.Select(point => point.ContentCue), StringComparer.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void WorkspaceProjection_ScenarioCueTargetsUseOwningEvidenceSource()
+    {
+        foreach (var recipe in DemoCookbookCatalog.Recipes)
+        {
+            var content = DemoCookbookWorkspaceProjection.Create(recipe.Id).SelectedRecipe;
+
+            foreach (var scenario in content.ScenarioPoints)
+            {
+                var anchor = recipe.CodeAnchors
+                    .Concat(recipe.DemoAnchors)
+                    .Concat(recipe.DocumentationAnchors)
+                    .FirstOrDefault(item => string.Equals(item.Evidence, scenario.Evidence, StringComparison.Ordinal));
+
+                if (anchor is not null)
+                {
+                    Assert.Equal(anchor.Path + "#" + scenario.Evidence, scenario.GraphCueTarget);
+                    continue;
+                }
+
+                Assert.Contains(scenario.Evidence, recipe.ProofMarkers);
+                Assert.Equal("proof:" + scenario.Evidence, scenario.GraphCueTarget);
+            }
+        }
+    }
+
+    [Fact]
     public void WorkspaceProjection_LeftNavigationCanUseFilteredRecipeSetWithoutChangingSelection()
     {
         var selectedRecipe = DemoCookbookCatalog.Recipes.Single(recipe => recipe.Id == "plugin-trust-route");
@@ -116,6 +160,10 @@ public sealed class DemoCookbookWorkspaceProjectionTests
             Assert.Equal(expected[index].Kind, actual[index].Kind);
             Assert.Equal(expected[index].Label, actual[index].Label);
             Assert.Equal(expected[index].Evidence, actual[index].Evidence);
+            Assert.False(string.IsNullOrWhiteSpace(actual[index].Key));
+            Assert.False(string.IsNullOrWhiteSpace(actual[index].GraphCueLabel));
+            Assert.False(string.IsNullOrWhiteSpace(actual[index].GraphCueTarget));
+            Assert.False(string.IsNullOrWhiteSpace(actual[index].ContentCue));
         }
     }
 }

@@ -34,6 +34,9 @@ public sealed class DemoCookbookDetailReadabilityTests
 
         viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "scenario");
         Assert.Equal(recipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
+        Assert.StartsWith("当前场景：", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("图线索：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("内容线索：", StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("图操作：", StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("节点元数据：", StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("支持证据：", StringComparison.Ordinal));
@@ -64,6 +67,7 @@ public sealed class DemoCookbookDetailReadabilityTests
 
         viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "scenario");
 
-        Assert.StartsWith("Graph operations: ", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
+        Assert.StartsWith("Selected scenario: ", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("Graph operations: ", StringComparison.Ordinal));
     }
 }

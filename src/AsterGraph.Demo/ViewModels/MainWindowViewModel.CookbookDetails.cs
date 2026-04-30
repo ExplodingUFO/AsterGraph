@@ -11,7 +11,19 @@ public partial class MainWindowViewModel
     public IReadOnlyList<CookbookDetailMode> CookbookDetailModes => _cookbookDetailModes;
 
     public IReadOnlyList<string> SelectedCookbookWorkspaceGraphLines
-        => FormatCookbookAnchors(T("图示上下文：", "Graph context: "), SelectedCookbookRecipe.DemoAnchors).ToArray();
+    {
+        get
+        {
+            var scenario = SelectedCookbookScenarioPoint;
+
+            return
+            [
+                .. FormatCookbookAnchors(T("图示上下文：", "Graph context: "), SelectedCookbookRecipe.DemoAnchors),
+                T("当前场景：", "Selected scenario: ") + scenario.Label,
+                T("图线索：", "Graph cue: ") + scenario.GraphCueLabel + " -> " + scenario.GraphCueTarget,
+            ];
+        }
+    }
 
     public IReadOnlyList<string> SelectedCookbookWorkspaceCoverageLines
     {
@@ -22,6 +34,7 @@ public partial class MainWindowViewModel
             return
             [
                 T("路线状态：", "Route status: ") + selected.RouteStatus,
+                T("内容线索：", "Content cue: ") + SelectedCookbookScenarioPoint.ContentCue,
                 T("路线说明：", "Route note: ") + selected.RouteStatusDescription,
                 T("不可用操作：", "Unavailable action: ") + selected.UnavailableActionDescription,
                 .. selected.DeferredGaps.Select(gap => T("延后缺口：", "Deferred gap: ") + gap),
@@ -36,7 +49,11 @@ public partial class MainWindowViewModel
                 .Select(marker => T("证明标记：", "Proof marker: ") + marker)
                 .ToArray(),
             "docs" => FormatCookbookDetailAnchors(SelectedCookbookRecipe.DocumentationAnchors).ToArray(),
-            "scenario" => FormatCookbookScenarioPoints(CookbookWorkspace.SelectedRecipe.ScenarioPoints).ToArray(),
+            "scenario" =>
+            [
+                .. FormatSelectedCookbookScenarioPoint(SelectedCookbookScenarioPoint),
+                .. FormatCookbookScenarioPoints(CookbookWorkspace.SelectedRecipe.ScenarioPoints),
+            ],
             "support" =>
             [
                 T("支持边界：", "Support boundary: ") + SelectedCookbookRecipe.Title,
@@ -75,6 +92,14 @@ public partial class MainWindowViewModel
         => scenarioPoints.Select(point => FormatCookbookScenarioKind(point.Kind)
                                            + point.Label + Environment.NewLine
                                            + T("证据：", "Evidence: ") + point.Evidence);
+
+    private IEnumerable<string> FormatSelectedCookbookScenarioPoint(
+        Cookbook.DemoCookbookWorkspaceScenarioPoint point)
+    {
+        yield return T("当前场景：", "Selected scenario: ") + point.Label;
+        yield return T("图线索：", "Graph cue: ") + point.GraphCueLabel + " -> " + point.GraphCueTarget;
+        yield return T("内容线索：", "Content cue: ") + point.ContentCue;
+    }
 
     private string FormatCookbookScenarioKind(Cookbook.DemoCookbookScenarioKind kind)
         => kind switch

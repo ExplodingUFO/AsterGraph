@@ -37,9 +37,13 @@ public sealed record DemoCookbookWorkspaceAnchor(
     string Evidence);
 
 public sealed record DemoCookbookWorkspaceScenarioPoint(
+    string Key,
     DemoCookbookScenarioKind Kind,
     string Label,
-    string Evidence);
+    string Evidence,
+    string GraphCueLabel,
+    string GraphCueTarget,
+    string ContentCue);
 
 public static class DemoCookbookWorkspaceProjection
 {
@@ -95,7 +99,7 @@ public static class DemoCookbookWorkspaceProjection
             ConvertAnchors(recipe.DemoAnchors),
             ConvertAnchors(recipe.CodeAnchors),
             ConvertAnchors(recipe.DocumentationAnchors),
-            ConvertScenarioPoints(recipe.ScenarioPoints),
+            ConvertScenarioPoints(recipe),
             recipe.ProofMarkers.ToArray(),
             posture.DeferredGaps,
             recipe.SupportBoundary);
@@ -148,10 +152,55 @@ public static class DemoCookbookWorkspaceProjection
             .ToArray();
 
     private static IReadOnlyList<DemoCookbookWorkspaceScenarioPoint> ConvertScenarioPoints(
-        IReadOnlyList<DemoCookbookScenarioPoint> scenarioPoints)
-        => scenarioPoints
-            .Select(point => new DemoCookbookWorkspaceScenarioPoint(point.Kind, point.Label, point.Evidence))
+        DemoCookbookRecipe recipe)
+        => recipe.ScenarioPoints
+            .Select((point, index) => new DemoCookbookWorkspaceScenarioPoint(
+                CreateScenarioPointKey(recipe.Id, index),
+                point.Kind,
+                point.Label,
+                point.Evidence,
+                FormatScenarioCueLabel(point.Kind),
+                ResolveScenarioCueTarget(recipe, point),
+                FormatScenarioContentCue(point.Kind, recipe.Id)))
             .ToArray();
+
+    private static string CreateScenarioPointKey(string recipeId, int index)
+        => recipeId + ":scenario-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string ResolveScenarioCueTarget(DemoCookbookRecipe recipe, DemoCookbookScenarioPoint point)
+    {
+        var anchor = recipe.CodeAnchors
+            .Concat(recipe.DemoAnchors)
+            .Concat(recipe.DocumentationAnchors)
+            .FirstOrDefault(anchor => string.Equals(anchor.Evidence, point.Evidence, StringComparison.Ordinal));
+
+        if (anchor is not null)
+        {
+            return anchor.Path + "#" + point.Evidence;
+        }
+
+        if (recipe.ProofMarkers.Contains(point.Evidence, StringComparer.Ordinal))
+        {
+            return "proof:" + point.Evidence;
+        }
+
+        throw new InvalidOperationException(
+            $"Cookbook scenario evidence '{point.Evidence}' is not owned by recipe '{recipe.Id}'.");
+    }
+
+    private static string FormatScenarioCueLabel(DemoCookbookScenarioKind kind)
+        => kind switch
+        {
+            DemoCookbookScenarioKind.GraphOperations => "Graph operation cue",
+            DemoCookbookScenarioKind.NodeMetadata => "Node metadata cue",
+            DemoCookbookScenarioKind.ValidationRuntimeOverlay => "Runtime overlay cue",
+            DemoCookbookScenarioKind.SupportEvidence => "Support evidence cue",
+            DemoCookbookScenarioKind.HostCodeExample => "Host code cue",
+            _ => kind + " cue",
+        };
+
+    private static string FormatScenarioContentCue(DemoCookbookScenarioKind kind, string routeId)
+        => routeId + " / " + kind;
 
     private static string FormatCategory(DemoCookbookRecipeCategory category)
         => category switch

@@ -89,6 +89,7 @@ public sealed class DemoCookbookProofClosureTests
             "tests/AsterGraph.Demo.Tests/DemoCookbookInteractionStateTests.cs",
             "tests/AsterGraph.Demo.Tests/DemoCookbookNavigationTests.cs",
             "tests/AsterGraph.Demo.Tests/DemoCookbookNavigationPolishTests.cs",
+            "tests/AsterGraph.Demo.Tests/DemoCookbookScenarioCueTests.cs",
             "tests/AsterGraph.Demo.Tests/DemoCookbookDocsTests.cs",
             "tests/AsterGraph.Demo.Tests/DemoCookbookProofClosureTests.cs",
             "tests/AsterGraph.Demo.Tests/DemoCookbookVisualBaselineTests.cs",

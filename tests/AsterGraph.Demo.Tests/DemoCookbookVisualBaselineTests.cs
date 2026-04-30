@@ -37,6 +37,8 @@ public sealed class DemoCookbookVisualBaselineTests
 
         Assert.Contains("Selector=\"Button.cookbook-workspace-recipe.selected\"", xaml, StringComparison.Ordinal);
         Assert.Contains("Classes.selected=\"{Binding IsSelected}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("PART_CookbookWorkspaceScenarioCueList", xaml, StringComparison.Ordinal);
+        Assert.Contains("SelectedItem=\"{Binding SelectedCookbookScenarioPoint, Mode=TwoWay}\"", xaml, StringComparison.Ordinal);
         Assert.Contains("MaxHeight=\"260\"", xaml, StringComparison.Ordinal);
     }
 
@@ -51,6 +53,7 @@ public sealed class DemoCookbookVisualBaselineTests
         "PART_CookbookWorkspaceContentShell",
         "PART_MainGraphEditorHost",
         "PART_CookbookWorkspaceRecipeContentPanel",
+        "PART_CookbookWorkspaceScenarioCueList",
         "PART_CookbookWorkspaceDetailModeSelector",
         "PART_CookbookWorkspaceDetailLines",
     ];

@@ -191,11 +191,19 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(SelectedCookbookRecipeCodeLines));
         OnPropertyChanged(nameof(SelectedCookbookRecipeProofLines));
         OnPropertyChanged(nameof(SelectedCookbookRecipeSupportBoundary));
+        OnPropertyChanged(nameof(SelectedCookbookScenarioPoint));
         OnPropertyChanged(nameof(SelectedCookbookWorkspaceGraphLines));
         OnPropertyChanged(nameof(SelectedCookbookWorkspaceCoverageLines));
         OnPropertyChanged(nameof(SelectedCookbookWorkspaceDetailLines));
     }
 
+    private void RefreshCookbookScenarioProjection()
+    {
+        OnPropertyChanged(nameof(SelectedCookbookScenarioPoint));
+        OnPropertyChanged(nameof(SelectedCookbookWorkspaceGraphLines));
+        OnPropertyChanged(nameof(SelectedCookbookWorkspaceCoverageLines));
+        OnPropertyChanged(nameof(SelectedCookbookWorkspaceDetailLines));
+    }
     private bool MatchesCookbookSearch(DemoCookbookRecipe recipe, string searchText)
         => Contains(recipe.Id, searchText)
            || Contains(FormatCookbookCategory(recipe.Category), searchText)
@@ -228,7 +236,6 @@ public partial class MainWindowViewModel
 
     private static string ResolvePrimaryAnchorPath(IReadOnlyList<DemoCookbookAnchor> anchors)
         => anchors.Count == 0 ? string.Empty : anchors[0].Path;
-
     private string ResolveCookbookLandingGroup(DemoCookbookRecipe recipe)
         => recipe.Category switch
         {

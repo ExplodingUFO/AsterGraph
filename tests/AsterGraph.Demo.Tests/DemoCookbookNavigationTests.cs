@@ -149,6 +149,7 @@ public sealed class DemoCookbookNavigationTests
         var editorFrame = Assert.IsType<Border>(window.FindControl<Border>("MainEditorFrame"));
         var graphLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceGraphLines"));
         var coverageLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceCoverageLines"));
+        var scenarioCueList = Assert.IsType<ListBox>(window.FindControl<ListBox>("PART_CookbookWorkspaceScenarioCueList"));
         var detailModeSelector = Assert.IsType<ComboBox>(window.FindControl<ComboBox>("PART_CookbookWorkspaceDetailModeSelector"));
         var detailLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceDetailLines"));
         var recipeList = Assert.IsType<ListBox>(window.FindControl<ListBox>("PART_CookbookWorkspaceRecipeList"));
@@ -176,6 +177,8 @@ public sealed class DemoCookbookNavigationTests
             .Cast<string>()
             .ToArray();
         Assert.Equal(viewModel.SelectedCookbookWorkspaceCoverageLines, boundCoverageLines);
+        Assert.Equal(viewModel.CookbookWorkspace.SelectedRecipe.ScenarioPoints, scenarioCueList.ItemsSource);
+        Assert.Equal(viewModel.SelectedCookbookScenarioPoint, scenarioCueList.SelectedItem);
         var boundGroups = Assert.IsAssignableFrom<System.Collections.IEnumerable>(navigationGroups.ItemsSource)
             .Cast<DemoCookbookWorkspaceNavigationGroup>()
             .ToArray();
