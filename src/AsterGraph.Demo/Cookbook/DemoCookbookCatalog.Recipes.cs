@@ -139,6 +139,75 @@ public static partial class DemoCookbookCatalog
                 "ConsumerSample is the copyable recipe; Demo presenters are visual proof only and do not define package contracts."),
             "Authoring samples reuse public seams and do not create a second editor/runtime model."),
         new DemoCookbookRecipe(
+            "performance-viewport-route",
+            DemoCookbookRecipeCategory.PerformanceViewport,
+            "Performance and viewport route",
+            "Trace visible-scene projection, minimap cadence, large-graph budgets, and scale proof for desktop graph hosts.",
+            [
+                new DemoCookbookAnchor(
+                    "Visible scene projection",
+                    "src/AsterGraph.Editor/Viewport/ViewportVisibleSceneProjection.cs",
+                    "ToBudgetMarker"),
+                new DemoCookbookAnchor(
+                    "Workbench performance policy",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphWorkbenchPerformancePolicy.cs",
+                    "ToMiniMapBudgetMarker"),
+                new DemoCookbookAnchor(
+                    "ConsumerSample viewport proof",
+                    "tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleProof.cs",
+                    "MinimapLightweightProjectionOk"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Demo cookbook graph workspace",
+                    "src/AsterGraph.Demo/Cookbook/DemoCookbookWorkspaceProjection.cs",
+                    "GraphOperations"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Scale baseline",
+                    "docs/en/scale-baseline.md",
+                    "SCALE_PERFORMANCE_BUDGET_OK"),
+                new DemoCookbookAnchor(
+                    "Feature catalog projection evidence",
+                    "docs/en/feature-catalog.md",
+                    "workbench.panel-projection-evidence"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Visible-scene projection reports graph counts against the current viewport.",
+                    "ToBudgetMarker"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "Mini-map cadence and projection markers stay visible in proof output.",
+                    "ToMiniMapBudgetMarker"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "ScaleSmoke keeps baseline, large, and stress budgets tied to release evidence.",
+                    "SCALE_PERFORMANCE_BUDGET_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "Viewport projection keeps graph density readable without adding a second renderer.",
+                    "ToBudgetMarker"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Workbench policy exposes minimap cadence as host-readable evidence.",
+                    "ToMiniMapBudgetMarker"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "ConsumerSample proof keeps minimap projection and inspector evidence bounded.",
+                    "MINIMAP_LIGHTWEIGHT_PROJECTION_OK"),
+            ],
+            ["MINIMAP_LIGHTWEIGHT_PROJECTION_OK", "PROJECTION_PERFORMANCE_EVIDENCE_OK", "SCALE_PERFORMANCE_BUDGET_OK"],
+            new DemoCookbookRouteClarity(
+                "Performance route: ViewportVisibleSceneProjector.Project(...) plus AsterGraphWorkbenchPerformancePolicy.FromMode(...).",
+                "Supported seams live in `AsterGraph.Editor` viewport projection and `AsterGraph.Avalonia` hosted workbench policy contracts.",
+                "Demo cookbook projection is a graph-above-code teaching surface only; ScaleSmoke and ConsumerSample remain the proof sources."),
+            "Performance proof reports projection and budget evidence; it does not add a background graph index, second renderer, or runtime execution mode."),
+        new DemoCookbookRecipe(
             "plugin-trust-route",
             DemoCookbookRecipeCategory.PluginTrust,
             "Plugin trust route",

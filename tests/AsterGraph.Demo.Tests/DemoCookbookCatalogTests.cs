@@ -27,6 +27,7 @@ public sealed class DemoCookbookCatalogTests
             {
                 DemoCookbookRecipeCategory.StarterHost,
                 DemoCookbookRecipeCategory.Authoring,
+                DemoCookbookRecipeCategory.PerformanceViewport,
                 DemoCookbookRecipeCategory.PluginTrust,
                 DemoCookbookRecipeCategory.DiagnosticsSupport,
                 DemoCookbookRecipeCategory.ReviewHelp,

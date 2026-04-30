@@ -219,6 +219,7 @@ public static class DemoCookbookProof
             DemoCookbookRecipeCategory.StarterHost or DemoCookbookRecipeCategory.Authoring =>
                 string.Equals(recipe.RouteStatus, "Supported SDK route", StringComparison.Ordinal),
             DemoCookbookRecipeCategory.PluginTrust
+                or DemoCookbookRecipeCategory.PerformanceViewport
                 or DemoCookbookRecipeCategory.DiagnosticsSupport
                 or DemoCookbookRecipeCategory.ReviewHelp =>
                 string.Equals(recipe.RouteStatus, "Proof/demo route", StringComparison.Ordinal),
