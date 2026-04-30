@@ -135,8 +135,16 @@ internal sealed class GraphEditorKernelClipboardCoordinator
         _host.StoreSelectionClipboard(fragment);
         var targetOrigin = _host.GetNextPasteOrigin();
         var nodeIdMap = new Dictionary<string, string>(StringComparer.Ordinal);
+        var groupIdMap = new Dictionary<string, string>(StringComparer.Ordinal);
         var pastedNodes = new List<GraphNode>(fragment.Nodes.Count);
         var pastedConnections = new List<GraphConnection>(fragment.Connections.Count);
+
+        foreach (var copiedGroup in fragment.Groups)
+        {
+            groupIdMap[copiedGroup.Id] = CreateGroupId(copiedGroup.Id, groupIdMap.Values);
+        }
+
+        var nodeGroupIds = CreateNodeGroupIdMap(fragment.Groups, groupIdMap);
 
         foreach (var copiedNode in fragment.Nodes)
         {
@@ -148,6 +156,7 @@ internal sealed class GraphEditorKernelClipboardCoordinator
             {
                 Id = newId,
                 Position = targetOrigin + relativePosition,
+                Surface = RemapNodeGroup(copiedNode.Surface, copiedNode.Id, nodeGroupIds),
             });
         }
 
@@ -167,6 +176,10 @@ internal sealed class GraphEditorKernelClipboardCoordinator
             });
         }
 
+        var pastedGroups = fragment.Groups
+            .Select(group => RemapGroup(group, groupIdMap, nodeIdMap, targetOrigin - fragment.Origin))
+            .ToList();
+
         if (pastedNodes.Count == 0)
         {
             _host.SetStatus("Nothing copied yet.");
@@ -178,6 +191,7 @@ internal sealed class GraphEditorKernelClipboardCoordinator
         {
             Nodes = activeScopeDocument.Nodes.Concat(pastedNodes).ToList(),
             Connections = activeScopeDocument.Connections.Concat(pastedConnections).ToList(),
+            Groups = (activeScopeDocument.Groups ?? []).Concat(pastedGroups).ToList(),
         });
 
         string? primaryNodeId = null;
@@ -217,6 +231,9 @@ internal sealed class GraphEditorKernelClipboardCoordinator
                 selectedNodeIds.Contains(connection.SourceNodeId)
                 && selectedNodeIds.Contains(connection.TargetNodeId))
             .ToList();
+        var copiedGroups = (activeScope.Groups ?? [])
+            .Where(group => group.NodeIds.Count > 0 && group.NodeIds.All(selectedNodeIds.Contains))
+            .ToList();
         var origin = new GraphPoint(
             selectedNodes.Min(node => node.Position.X),
             selectedNodes.Min(node => node.Position.Y));
@@ -225,7 +242,80 @@ internal sealed class GraphEditorKernelClipboardCoordinator
             selectedNodes,
             copiedConnections,
             origin,
-            _host.PrimarySelectedNodeId);
+            _host.PrimarySelectedNodeId,
+            copiedGroups);
+    }
+
+    private string CreateGroupId(string fallbackKey, IEnumerable<string> reservedIds)
+    {
+        var existingIds = _host.ActiveScopeDocument.Groups?.Select(group => group.Id).ToHashSet(StringComparer.Ordinal)
+            ?? new HashSet<string>(StringComparer.Ordinal);
+        existingIds.UnionWith(reservedIds);
+        if (!existingIds.Contains(fallbackKey))
+        {
+            return fallbackKey;
+        }
+
+        var suffix = 2;
+        string candidate;
+        do
+        {
+            candidate = $"{fallbackKey}-{suffix++}";
+        }
+        while (existingIds.Contains(candidate));
+
+        return candidate;
+    }
+
+    private static GraphNodeSurfaceState? RemapNodeGroup(
+        GraphNodeSurfaceState? surface,
+        string nodeId,
+        IReadOnlyDictionary<string, string> nodeGroupIds)
+    {
+        if (!nodeGroupIds.TryGetValue(nodeId, out var groupId))
+        {
+            return surface is null || string.IsNullOrWhiteSpace(surface.GroupId)
+                ? surface
+                : surface with { GroupId = null };
+        }
+
+        return (surface ?? GraphNodeSurfaceState.Default) with { GroupId = groupId };
+    }
+
+    private static GraphNodeGroup RemapGroup(
+        GraphNodeGroup group,
+        IReadOnlyDictionary<string, string> groupIdMap,
+        IReadOnlyDictionary<string, string> nodeIdMap,
+        GraphPoint offset)
+        => group with
+        {
+            Id = groupIdMap[group.Id],
+            Position = group.Position + offset,
+            NodeIds = group.NodeIds
+                .Where(nodeIdMap.ContainsKey)
+                .Select(nodeId => nodeIdMap[nodeId])
+                .ToList(),
+        };
+
+    private static Dictionary<string, string> CreateNodeGroupIdMap(
+        IReadOnlyList<GraphNodeGroup> groups,
+        IReadOnlyDictionary<string, string> groupIdMap)
+    {
+        var nodeGroupIds = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var group in groups)
+        {
+            if (!groupIdMap.TryGetValue(group.Id, out var groupId))
+            {
+                continue;
+            }
+
+            foreach (var nodeId in group.NodeIds)
+            {
+                nodeGroupIds[nodeId] = groupId;
+            }
+        }
+
+        return nodeGroupIds;
     }
 
     private async Task<GraphSelectionFragment?> GetBestAvailableClipboardFragmentAsync(CancellationToken cancellationToken)

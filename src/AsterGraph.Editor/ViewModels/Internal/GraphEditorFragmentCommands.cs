@@ -21,6 +21,8 @@ internal interface IGraphEditorFragmentCommandHost
 
     IEnumerable<ConnectionViewModel> Connections { get; }
 
+    IReadOnlyList<GraphNodeGroup> NodeGroups { get; }
+
     string? SelectedFragmentTemplatePath { get; }
 
     IGraphTextClipboardBridge? TextClipboardBridge { get; }
@@ -41,11 +43,15 @@ internal interface IGraphEditorFragmentCommandHost
 
     string CreateConnectionId();
 
+    string CreateGroupId(string fallbackKey, IEnumerable<string> reservedIds);
+
     void ApplyNodePresentation(NodeViewModel node);
 
     void AddNode(NodeViewModel node);
 
     void AddConnection(ConnectionViewModel connection);
+
+    void ReplaceNodeGroups(IReadOnlyList<GraphNodeGroup> groups);
 
     void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode);
 

@@ -8,7 +8,8 @@ internal sealed record GraphClipboardPayload(
     GraphPoint Origin,
     string? PrimaryNodeId,
     IReadOnlyList<GraphNode> Nodes,
-    IReadOnlyList<GraphConnection> Connections);
+    IReadOnlyList<GraphConnection> Connections,
+    IReadOnlyList<GraphNodeGroup>? Groups = null);
 
 internal sealed record GraphClipboardPayloadLegacy(
     string Format,

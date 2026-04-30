@@ -20,7 +20,8 @@ internal static class GraphClipboardPayloadCompatibility
             fragment.Origin,
             fragment.PrimaryNodeId,
             fragment.Nodes,
-            fragment.Connections);
+            fragment.Connections,
+            fragment.Groups);
     }
 
     public static bool TryDeserialize(
@@ -78,7 +79,8 @@ internal static class GraphClipboardPayloadCompatibility
                 payload.Nodes,
                 payload.Connections,
                 payload.Origin,
-                payload.PrimaryNodeId);
+                payload.PrimaryNodeId,
+                payload.Groups);
             return true;
         }
         catch (JsonException)

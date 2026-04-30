@@ -30,6 +30,8 @@ public sealed partial class GraphEditorViewModel
 
         IEnumerable<ConnectionViewModel> IGraphEditorFragmentCommandHost.Connections => _owner.Connections;
 
+        IReadOnlyList<GraphNodeGroup> IGraphEditorFragmentCommandHost.NodeGroups => _owner.GetNodeGroups();
+
         string? IGraphEditorFragmentCommandHost.SelectedFragmentTemplatePath => _owner.SelectedFragmentTemplate?.Path;
 
         IGraphTextClipboardBridge? IGraphEditorFragmentCommandHost.TextClipboardBridge => _owner._textClipboardBridge;
@@ -55,6 +57,31 @@ public sealed partial class GraphEditorViewModel
         string IGraphEditorFragmentCommandHost.CreateConnectionId()
             => _owner.CreateConnectionId();
 
+        string IGraphEditorFragmentCommandHost.CreateGroupId(string fallbackKey, IEnumerable<string> reservedIds)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(fallbackKey);
+            ArgumentNullException.ThrowIfNull(reservedIds);
+
+            var existingIds = _owner.GetNodeGroups()
+                .Select(group => group.Id)
+                .ToHashSet(StringComparer.Ordinal);
+            existingIds.UnionWith(reservedIds);
+            if (!existingIds.Contains(fallbackKey))
+            {
+                return fallbackKey;
+            }
+
+            var suffix = 2;
+            string candidate;
+            do
+            {
+                candidate = $"{fallbackKey}-{suffix++}";
+            }
+            while (existingIds.Contains(candidate));
+
+            return candidate;
+        }
+
         void IGraphEditorFragmentCommandHost.ApplyNodePresentation(NodeViewModel node)
             => _owner._presentationLocalizationCoordinator.ApplyNodePresentation(node);
 
@@ -63,6 +90,21 @@ public sealed partial class GraphEditorViewModel
 
         void IGraphEditorFragmentCommandHost.AddConnection(ConnectionViewModel connection)
             => _owner.Connections.Add(connection);
+
+        void IGraphEditorFragmentCommandHost.ReplaceNodeGroups(IReadOnlyList<GraphNodeGroup> groups)
+        {
+            ArgumentNullException.ThrowIfNull(groups);
+
+            var document = _owner._kernel.CreateDocumentSnapshotWithActiveScopeContents(
+                _owner.Nodes.Select(node => node.ToModel()).ToList(),
+                _owner.Connections.Select(connection => connection.ToModel()).ToList(),
+                groups);
+            _owner._sessionHost.CommitRetainedMutation(
+                document,
+                _owner.CreateSelectionSnapshot(),
+                _owner.StatusMessage,
+                GraphEditorDocumentChangeKind.FragmentPasted);
+        }
 
         void IGraphEditorFragmentCommandHost.SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode)
             => _owner.SetSelection(nodes, primaryNode);

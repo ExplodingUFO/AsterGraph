@@ -33,6 +33,9 @@ internal sealed class GraphEditorFragmentTransferSupport
                 && selectedIds.Contains(connection.TargetNodeId))
             .Select(connection => connection.ToModel())
             .ToList();
+        var copiedGroups = _host.NodeGroups
+            .Where(group => group.NodeIds.Count > 0 && group.NodeIds.All(selectedIds.Contains))
+            .ToList();
 
         var origin = new GraphPoint(
             copiedNodes.Min(node => node.Position.X),
@@ -42,7 +45,8 @@ internal sealed class GraphEditorFragmentTransferSupport
             copiedNodes,
             copiedConnections,
             origin,
-            _host.SelectedNodeId);
+            _host.SelectedNodeId,
+            copiedGroups);
     }
 
     public string? PasteFragment(GraphSelectionFragment fragment, string actionPrefix)
@@ -65,8 +69,16 @@ internal sealed class GraphEditorFragmentTransferSupport
         _host.StoreSelectionClipboard(fragment);
         var targetOrigin = _host.GetNextPasteOrigin();
         var nodeIdMap = new Dictionary<string, string>(StringComparer.Ordinal);
+        var groupIdMap = new Dictionary<string, string>(StringComparer.Ordinal);
         var pastedNodes = new List<NodeViewModel>(fragment.Nodes.Count);
         var pastedConnectionIds = new List<string>(fragment.Connections.Count);
+
+        foreach (var copiedGroup in fragment.Groups)
+        {
+            groupIdMap[copiedGroup.Id] = _host.CreateGroupId(copiedGroup.Id, groupIdMap.Values);
+        }
+
+        var nodeGroupIds = CreateNodeGroupIdMap(fragment.Groups, groupIdMap);
 
         foreach (var copiedNode in fragment.Nodes)
         {
@@ -78,6 +90,7 @@ internal sealed class GraphEditorFragmentTransferSupport
             {
                 Id = newId,
                 Position = targetOrigin + relativePosition,
+                Surface = RemapNodeGroup(copiedNode.Surface, copiedNode.Id, nodeGroupIds),
             });
 
             _host.ApplyNodePresentation(pastedNode);
@@ -108,6 +121,14 @@ internal sealed class GraphEditorFragmentTransferSupport
                 copiedConnection.TargetKind));
         }
 
+        var pastedGroups = fragment.Groups
+            .Select(group => RemapGroup(group, groupIdMap, nodeIdMap, targetOrigin - fragment.Origin))
+            .ToList();
+        if (pastedGroups.Count > 0)
+        {
+            _host.ReplaceNodeGroups(_host.NodeGroups.Concat(pastedGroups).ToList());
+        }
+
         if (pastedNodes.Count == 0)
         {
             return null;
@@ -129,5 +150,56 @@ internal sealed class GraphEditorFragmentTransferSupport
             GraphEditorDocumentChangeKind.FragmentPasted,
             nodeIds: pastedNodes.Select(node => node.Id).ToList(),
             connectionIds: pastedConnectionIds);
+    }
+
+    private static GraphNodeSurfaceState? RemapNodeGroup(
+        GraphNodeSurfaceState? surface,
+        string nodeId,
+        IReadOnlyDictionary<string, string> nodeGroupIds)
+    {
+        if (!nodeGroupIds.TryGetValue(nodeId, out var groupId))
+        {
+            return surface is null || string.IsNullOrWhiteSpace(surface.GroupId)
+                ? surface
+                : surface with { GroupId = null };
+        }
+
+        return (surface ?? GraphNodeSurfaceState.Default) with { GroupId = groupId };
+    }
+
+    private static GraphNodeGroup RemapGroup(
+        GraphNodeGroup group,
+        IReadOnlyDictionary<string, string> groupIdMap,
+        IReadOnlyDictionary<string, string> nodeIdMap,
+        GraphPoint offset)
+        => group with
+        {
+            Id = groupIdMap[group.Id],
+            Position = group.Position + offset,
+            NodeIds = group.NodeIds
+                .Where(nodeIdMap.ContainsKey)
+                .Select(nodeId => nodeIdMap[nodeId])
+                .ToList(),
+        };
+
+    private static Dictionary<string, string> CreateNodeGroupIdMap(
+        IReadOnlyList<GraphNodeGroup> groups,
+        IReadOnlyDictionary<string, string> groupIdMap)
+    {
+        var nodeGroupIds = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var group in groups)
+        {
+            if (!groupIdMap.TryGetValue(group.Id, out var groupId))
+            {
+                continue;
+            }
+
+            foreach (var nodeId in group.NodeIds)
+            {
+                nodeGroupIds[nodeId] = groupId;
+            }
+        }
+
+        return nodeGroupIds;
     }
 }
