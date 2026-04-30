@@ -625,6 +625,11 @@ internal sealed class GraphEditorKernelCommandRouter
 
     private bool TryBlockDisabledCommand(GraphEditorCommandInvocationSnapshot command)
     {
+        if (!CanExposeDisabledReason(command.CommandId))
+        {
+            return false;
+        }
+
         var descriptor = GetCommandDescriptors()
             .FirstOrDefault(item => string.Equals(item.Id, command.CommandId, StringComparison.Ordinal));
         if (descriptor is null || descriptor.IsEnabled || string.IsNullOrWhiteSpace(descriptor.DisabledReason))
@@ -635,6 +640,36 @@ internal sealed class GraphEditorKernelCommandRouter
         _host.SetStatus(descriptor.DisabledReason);
         return true;
     }
+
+    private static bool CanExposeDisabledReason(string commandId)
+        => commandId switch
+        {
+            "selection.clear"
+                or "selection.delete"
+                or "clipboard.copy"
+                or "fragments.export-selection"
+                or "fragments.export-template"
+                or "nodes.parameters.set"
+                or "groups.create"
+                or "layout.align-left"
+                or "layout.align-center"
+                or "layout.align-right"
+                or "layout.align-top"
+                or "layout.align-middle"
+                or "layout.align-bottom"
+                or "layout.distribute-horizontal"
+                or "layout.distribute-vertical"
+                or "composites.wrap-selection"
+                or "history.undo"
+                or "history.redo"
+                or "viewport.fit"
+                or "viewport.fit-selection"
+                or "viewport.focus-selection"
+                or "viewport.focus-current-scope"
+                or "workspace.save"
+                or "workspace.load" => true,
+            _ => false,
+        };
 
     public bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command)
     {

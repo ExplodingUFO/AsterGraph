@@ -12,6 +12,77 @@ namespace AsterGraph.Editor.Runtime;
 
 public sealed partial class GraphEditorSession
 {
+    private static readonly HashSet<string> KernelCommandIds = new(StringComparer.Ordinal)
+    {
+        "nodes.add",
+        "selection.set",
+        "selection.clear",
+        "selection.delete",
+        "clipboard.copy",
+        "clipboard.paste",
+        "export.scene-svg",
+        "export.scene-image",
+        "fragments.export-selection",
+        "fragments.import",
+        "fragments.clear-workspace",
+        "fragments.export-template",
+        "nodes.move",
+        "nodes.resize",
+        "nodes.surface.expand",
+        "nodes.inspect",
+        "nodes.delete-by-id",
+        "nodes.duplicate",
+        "nodes.parameters.set",
+        "groups.create",
+        "groups.collapse",
+        "groups.move",
+        "groups.resize",
+        "groups.membership.set",
+        "groups.promote",
+        "layout.align-left",
+        "layout.align-center",
+        "layout.align-right",
+        "layout.align-top",
+        "layout.align-middle",
+        "layout.align-bottom",
+        "layout.distribute-horizontal",
+        "layout.distribute-vertical",
+        "composites.wrap-selection",
+        "composites.expose-port",
+        "composites.unexpose-port",
+        "scopes.enter",
+        "scopes.exit",
+        "connections.start",
+        "connections.complete",
+        "connections.connect",
+        "connections.cancel",
+        "connections.delete",
+        "connections.disconnect",
+        "connections.label.set",
+        "connections.note.set",
+        "connections.route-vertex.insert",
+        "connections.route-vertex.move",
+        "connections.route-vertex.remove",
+        "connections.reconnect",
+        "connections.break-port",
+        "connections.disconnect-incoming",
+        "connections.disconnect-outgoing",
+        "connections.disconnect-all",
+        "history.undo",
+        "history.redo",
+        "viewport.fit",
+        "viewport.fit-selection",
+        "viewport.focus-selection",
+        "viewport.focus-current-scope",
+        "viewport.pan",
+        "viewport.resize",
+        "viewport.reset",
+        "viewport.center-node",
+        "viewport.center",
+        "workspace.save",
+        "workspace.load",
+    };
+
     public void Undo()
         => Execute("history.undo", _host.Undo);
 
@@ -717,10 +788,7 @@ public sealed partial class GraphEditorSession
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var hostCommandIds = _host.GetCommandDescriptors()
-            .Select(descriptor => descriptor.Id)
-            .ToHashSet(StringComparer.Ordinal);
-        var executed = hostCommandIds.Contains(command.CommandId)
+        var executed = KernelCommandIds.Contains(command.CommandId)
             ? _host.TryExecuteCommand(command)
             : TryExecutePluginCommand(command);
         if (!executed)
