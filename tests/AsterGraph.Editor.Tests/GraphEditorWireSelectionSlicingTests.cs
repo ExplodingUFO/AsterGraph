@@ -32,6 +32,27 @@ public sealed class GraphEditorWireSelectionSlicingTests
     }
 
     [Fact]
+    public void Commands_TryExecuteCommand_RoutesCanonicalConnectionSelection()
+    {
+        var session = CreateSession();
+        session.Commands.SetSelection(["source-001"], "source-001", updateStatus: false);
+
+        var routed = session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(
+            "selection.connections.set",
+            [
+                new GraphEditorCommandArgumentSnapshot("connectionId", "connection-002"),
+                new GraphEditorCommandArgumentSnapshot("primaryConnectionId", "connection-002"),
+                new GraphEditorCommandArgumentSnapshot("updateStatus", bool.FalseString),
+            ]));
+
+        var selection = session.Queries.GetSelectionSnapshot();
+        Assert.True(routed);
+        Assert.Empty(selection.SelectedNodeIds);
+        Assert.Equal(["connection-002"], selection.SelectedConnectionIds);
+        Assert.Equal("connection-002", selection.PrimarySelectedConnectionId);
+    }
+
+    [Fact]
     public void Commands_DeleteSelectedConnections_RemovesSelectedWiresAndClearsConnectionSelection()
     {
         var session = CreateSession();

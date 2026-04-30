@@ -7,6 +7,7 @@ internal static class GraphEditorCommandDescriptorCatalog
         {
             ["nodes.add"] = new("Add Node", "nodes", "add", null),
             ["selection.set"] = new("Set Selection", "selection", "select", null),
+            ["selection.connections.set"] = new("Set Connection Selection", "selection", "select", null),
             ["selection.clear"] = new("Clear Selection", "selection", "select", "Escape"),
             ["selection.delete"] = new("Delete Selection", "selection", "delete", "Delete"),
             ["nodes.move"] = new("Move Nodes", "nodes", "move", null),

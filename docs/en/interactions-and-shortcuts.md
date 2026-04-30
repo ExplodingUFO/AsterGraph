@@ -22,6 +22,7 @@ Trackpad guidance:
 | Action | Shortcut |
 | --- | --- |
 | **Select node** | Left-click |
+| **Select connection** | Left-click the wire or connection label |
 | **Append selection** | `Shift` + left-click |
 | **Toggle selection** | `Ctrl` + left-click |
 | **Marquee select** | Left-drag on empty canvas |
@@ -30,6 +31,8 @@ Trackpad guidance:
 | **Paste selection** | `Ctrl + V` |
 | **Undo** | `Ctrl + Z` |
 | **Redo** | `Ctrl + Y` or `Ctrl + Shift + Z` |
+
+Connection selection is exposed through the canonical `selection.connections.set` route. Hosts can inspect selected connection ids from `IGraphEditorSession.Queries.GetSelectionSnapshot()` and can edit persisted bend points through the existing `connections.route-vertex.insert`, `connections.route-vertex.move`, and `connections.route-vertex.remove` commands.
 
 ## Workspace Commands
 
@@ -42,8 +45,8 @@ Trackpad guidance:
 
 If you embed `NodeCanvas` as a standalone surface and want to own shortcuts yourself, disable the stock bindings:
 
-```xml
-<avalonia:NodeCanvas EnableDefaultCommandShortcuts="False" />
+```csharp
+canvas.CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Disabled;
 ```
 
 Keep the command route explicit in host documentation when you do this so users do not have to guess whether the canvas still owns `Ctrl+Z`, `Ctrl+S`, or clipboard shortcuts.

@@ -232,6 +232,19 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 : ResolveStrokeThickness(connectionStyle, focusKind),
             StrokeLineCap = PenLineCap.Round,
         };
+        if (!isPreview)
+        {
+            path.PointerPressed += (_, args) =>
+            {
+                if (!args.GetCurrentPoint(context.CoordinateRoot).Properties.IsLeftButtonPressed)
+                {
+                    return;
+                }
+
+                args.Handled = TrySelectConnection(context, connection.Id);
+            };
+        }
+
         context.ConnectionLayer.Children.Add(path);
 
         if (isPreview)
@@ -371,6 +384,22 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 $"{segment.Control2.X:0.##},{segment.Control2.Y:0.##} " +
                 $"{segment.End.X:0.##},{segment.End.Y:0.##}"));
         return Geometry.Parse($"M {start.X:0.##},{start.Y:0.##} {commands}");
+    }
+
+    private static bool TrySelectConnection(NodeCanvasConnectionSceneContext context, string connectionId)
+    {
+        if (context.ViewModel is null || string.IsNullOrWhiteSpace(connectionId))
+        {
+            return false;
+        }
+
+        return context.ViewModel.Session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "selection.connections.set",
+                [
+                    new GraphEditorCommandArgumentSnapshot("connectionId", connectionId),
+                    new GraphEditorCommandArgumentSnapshot("primaryConnectionId", connectionId),
+                ]));
     }
 
     private static double ResolveStrokeOpacity(

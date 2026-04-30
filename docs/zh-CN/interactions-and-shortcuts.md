@@ -22,6 +22,7 @@ AsterGraph 默认带有一套画布、节点和工作区交互。
 | 操作 | 快捷键 |
 | --- | --- |
 | **选择节点** | 左键单击 |
+| **选择连线** | 左键单击连线或连线标签 |
 | **追加选择** | `Shift` + 左键单击 |
 | **切换选择** | `Ctrl` + 左键单击 |
 | **框选** | 在空白画布上左键拖拽 |
@@ -30,6 +31,8 @@ AsterGraph 默认带有一套画布、节点和工作区交互。
 | **粘贴选择** | `Ctrl + V` |
 | **撤销** | `Ctrl + Z` |
 | **重做** | `Ctrl + Y` 或 `Ctrl + Shift + Z` |
+
+连线选择通过 canonical `selection.connections.set` route 暴露。宿主可以从 `IGraphEditorSession.Queries.GetSelectionSnapshot()` 读取已选连线 id，并通过现有的 `connections.route-vertex.insert`、`connections.route-vertex.move`、`connections.route-vertex.remove` 命令编辑持久化折点。
 
 ## 工作区命令
 
@@ -42,8 +45,8 @@ AsterGraph 默认带有一套画布、节点和工作区交互。
 
 如果你把 `NodeCanvas` 当成独立表面嵌入，并且希望快捷键完全由宿主管理，可以关闭默认绑定：
 
-```xml
-<avalonia:NodeCanvas EnableDefaultCommandShortcuts="False" />
+```csharp
+canvas.CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Disabled;
 ```
 
 这样做之后，最好在宿主文档里明确说明 `Ctrl+Z`、`Ctrl+S`、剪贴板等命令到底由谁接管，避免用户猜测。

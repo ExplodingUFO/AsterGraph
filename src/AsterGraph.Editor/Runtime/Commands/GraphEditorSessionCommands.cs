@@ -16,6 +16,7 @@ public sealed partial class GraphEditorSession
     {
         "nodes.add",
         "selection.set",
+        "selection.connections.set",
         "selection.clear",
         "selection.delete",
         "clipboard.copy",

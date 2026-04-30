@@ -205,6 +205,14 @@ public sealed class GraphEditorKernelCommandRouterTests
         Assert.Equal("Escape", cancelPendingConnection.DefaultShortcut);
         Assert.Equal(GraphEditorCommandSourceKind.Kernel, cancelPendingConnection.Source);
 
+        var setConnectionSelection = descriptors["selection.connections.set"];
+        Assert.Equal("Set Connection Selection", setConnectionSelection.Title);
+        Assert.Equal("selection", setConnectionSelection.Group);
+        Assert.Equal("select", setConnectionSelection.IconKey);
+        Assert.Null(setConnectionSelection.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, setConnectionSelection.Source);
+        Assert.True(setConnectionSelection.CanExecute);
+
         var undo = descriptors["history.undo"];
         Assert.Equal("Undo", undo.Title);
         Assert.Equal("history", undo.Group);
@@ -540,6 +548,17 @@ public sealed class GraphEditorKernelCommandRouterTests
         Assert.Equal(
             [new GraphPoint(360d, 120d)],
             Assert.Single(kernel.CreateDocumentSnapshot().Connections).Presentation?.Route?.Vertices);
+        kernel.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "selection.connections.set",
+                ("connectionId", connectionId),
+                ("primaryConnectionId", connectionId),
+                ("updateStatus", "false"))));
+        var selection = kernel.GetSelectionSnapshot();
+        Assert.Empty(selection.SelectedNodeIds);
+        Assert.Equal([connectionId], selection.SelectedConnectionIds);
+        Assert.Equal(connectionId, selection.PrimarySelectedConnectionId);
         Assert.True(kernel.TryExecuteCommand(
             CreateCommand(
                 "connections.route-vertex.move",

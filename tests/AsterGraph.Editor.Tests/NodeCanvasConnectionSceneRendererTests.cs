@@ -183,6 +183,40 @@ public sealed class NodeCanvasConnectionSceneRendererTests
     }
 
     [AvaloniaFact]
+    public void RenderConnections_LeftPressedPath_SelectsConnectionThroughCanonicalCommandRoute()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var editor = CreateEditor(includeConnection: true);
+        var hostedScene = CreateHostedScene(editor);
+        var pointer = new global::Avalonia.Input.Pointer(0, PointerType.Mouse, true);
+
+        try
+        {
+            renderer.RenderConnections(CreateSceneContext(
+                editor,
+                hostedScene.ConnectionLayer,
+                hostedScene.NodeLayer,
+                hostedScene.CoordinateRoot,
+                hostedScene.NodeVisuals));
+
+            var path = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            var args = CreatePointerPressedArgs(path, hostedScene.CoordinateRoot, pointer, new Point(360, 220), KeyModifiers.None);
+
+            path.RaiseEvent(args);
+
+            var selection = editor.Session.Queries.GetSelectionSnapshot();
+            Assert.True(args.Handled);
+            Assert.Empty(selection.SelectedNodeIds);
+            Assert.Equal([ConnectionId], selection.SelectedConnectionIds);
+            Assert.Equal(ConnectionId, selection.PrimarySelectedConnectionId);
+        }
+        finally
+        {
+            hostedScene.Window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void RenderConnections_UsesLiveNodeAnchors_WhenGeometrySnapshotLagsDuringDrag()
     {
         var renderer = new NodeCanvasConnectionSceneRenderer();

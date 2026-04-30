@@ -6,6 +6,7 @@ internal static class GraphEditorTestCommandContracts
     [
         "nodes.add",
         "selection.set",
+        "selection.connections.set",
         "selection.clear",
         "selection.delete",
         "nodes.resize-width",

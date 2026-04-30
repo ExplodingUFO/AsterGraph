@@ -60,6 +60,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus);
 
+    void SetConnectionSelection(IReadOnlyList<string> connectionIds, string? primaryConnectionId, bool updateStatus);
+
     void DeleteNodeById(string nodeId);
 
     void DuplicateNode(string nodeId);
@@ -191,6 +193,10 @@ internal sealed class GraphEditorKernelCommandRouter
                 _host.BehaviorOptions.Commands.Nodes.AllowCreate),
             GraphEditorCommandDescriptorCatalog.Create(
                 "selection.set",
+                GraphEditorCommandSourceKind.Kernel,
+                true),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "selection.connections.set",
                 GraphEditorCommandSourceKind.Kernel,
                 true),
             GraphEditorCommandDescriptorCatalog.Create(
@@ -717,6 +723,19 @@ internal sealed class GraphEditorKernelCommandRouter
 
                 command.TryGetArgument("primaryNodeId", out var primaryNodeId);
                 _host.SetSelection(nodeIds, primaryNodeId, ResolveOptionalUpdateStatus(command, "updateStatus"));
+                return true;
+
+            case "selection.connections.set":
+                var connectionIds = command.GetArguments("connectionId")
+                    .Where(value => !string.IsNullOrWhiteSpace(value))
+                    .ToList();
+                if (connectionIds.Count == 0)
+                {
+                    return false;
+                }
+
+                command.TryGetArgument("primaryConnectionId", out var primaryConnectionId);
+                _host.SetConnectionSelection(connectionIds, primaryConnectionId, ResolveOptionalUpdateStatus(command, "updateStatus"));
                 return true;
 
             case "selection.delete":
