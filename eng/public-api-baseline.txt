@@ -179,6 +179,8 @@ C:AsterGraph.Editor.Runtime.GraphEditorGroupMoveConstraintsSnapshot(System.Boole
 C:AsterGraph.Editor.Runtime.GraphEditorHierarchyConnectionSnapshot(System.String,System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean)
 C:AsterGraph.Editor.Runtime.GraphEditorHierarchyNodeSnapshot(System.String,System.String,System.String,System.Boolean)
 C:AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot(AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot,System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCompositeNodeSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorHierarchyNodeSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorHierarchyConnectionSnapshot>,AsterGraph.Editor.Runtime.GraphEditorGroupMoveConstraintsSnapshot)
+C:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot(System.String,AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind,System.String,System.String,System.String,System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.String)
+C:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot(AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot>)
 C:AsterGraph.Editor.Runtime.GraphEditorNodeGroupMembershipChange(System.String,System.String)
 C:AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot(System.String,System.String,AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize,AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize,AsterGraph.Core.Models.GraphPadding,System.Collections.Generic.IReadOnlyList<System.String>,System.Boolean,System.Boolean)
 C:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot(AsterGraph.Abstractions.Definitions.NodeParameterDefinition,System.Object,System.Boolean,System.Boolean,System.Boolean,System.String,System.Boolean,System.Boolean,System.String,System.String,System.String,System.Boolean,AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState,System.String)
@@ -390,6 +392,10 @@ F:AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind.Plugin:AsterGraph.Edito
 F:AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind.Retained:AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind
 F:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle.Bezier:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle
 F:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle.Orthogonal:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle
+F:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind.Connection:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind
+F:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind.Group:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind
+F:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind.Node:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind
+F:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind.Scope:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind
 F:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState.Default:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState
 F:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState.Mixed:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState
 F:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState.Overridden:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState
@@ -1388,6 +1394,18 @@ M:AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot.Equals(AsterGraph.
 M:AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot.Equals(System.Object):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot.GetHashCode():System.Int32
 M:AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot.ToString():System.String
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.Deconstruct(out System.String&,out AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind&,out System.String&,out System.String&,out System.String&,out System.String&,out System.Int32&,out System.Boolean&,out System.Boolean&,out System.Boolean&,out System.Boolean&,out System.String&):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.Equals(System.Object):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.GetHashCode():System.Int32
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.ToString():System.String
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot.Deconstruct(out AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot&,out System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot>&):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot.Equals(System.Object):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot.GetHashCode():System.Int32
+M:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot.ToString():System.String
 M:AsterGraph.Editor.Runtime.GraphEditorNodeGroupMembershipChange.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorNodeGroupMembershipChange
 M:AsterGraph.Editor.Runtime.GraphEditorNodeGroupMembershipChange.Deconstruct(out System.String&,out System.String&):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorNodeGroupMembershipChange.Equals(AsterGraph.Editor.Runtime.GraphEditorNodeGroupMembershipChange):System.Boolean
@@ -1507,6 +1525,7 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.GetFeatureDescriptors():System.Co
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetFragmentStorageSnapshot():AsterGraph.Editor.Runtime.GraphEditorFragmentStorageSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetFragmentTemplateSnapshots():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorFragmentTemplateSnapshot>
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetHierarchyStateSnapshot():AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot
+M:AsterGraph.Editor.Runtime.GraphEditorSession.GetNavigatorOutlineSnapshot():AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetNodeGroups():System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphNodeGroup>
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetNodeGroupSnapshots():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot>
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetNodeParameterSnapshots(System.String):System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot>
@@ -1744,6 +1763,7 @@ M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetFeatureDescriptors():System.C
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetFragmentStorageSnapshot():AsterGraph.Editor.Runtime.GraphEditorFragmentStorageSnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetFragmentTemplateSnapshots():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorFragmentTemplateSnapshot>
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetHierarchyStateSnapshot():AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot
+M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetNavigatorOutlineSnapshot():AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetNodeGroups():System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphNodeGroup>
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetNodeGroupSnapshots():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot>
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetNodeParameterSnapshots(System.String):System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot>
@@ -2992,6 +3012,20 @@ P:AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot.NodeGroups:System.
 P:AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot.Nodes:System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorHierarchyNodeSnapshot>:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot.ParentCompositeNodeId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot.ScopeNavigation:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.ChildScopeId:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.Depth:System.Int32:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.Id:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.IsCollapsed:System.Boolean:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.IsPrimarySelection:System.Boolean:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.IsSelected:System.Boolean:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.IsVisibleInActiveScope:System.Boolean:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.Kind:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.ParentItemId:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.SourceId:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.Subtitle:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot.Title:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot.Items:System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot>:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot.ScopeNavigation:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeGroupMembershipChange.GroupId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeGroupMembershipChange.NodeId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot.ContentPosition:AsterGraph.Core.Models.GraphPoint:get,set
@@ -3638,6 +3672,8 @@ T:class AsterGraph.Editor.Runtime.GraphEditorGroupMoveConstraintsSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorHierarchyConnectionSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorHierarchyNodeSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorHierarchyStateSnapshot
+T:class AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemSnapshot
+T:class AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorNodeGroupMembershipChange
 T:class AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot
@@ -3714,6 +3750,7 @@ T:enum AsterGraph.Editor.Plugins.GraphEditorPluginTrustDecision
 T:enum AsterGraph.Editor.Plugins.GraphEditorPluginTrustEvaluationSource
 T:enum AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind
 T:enum AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle
+T:enum AsterGraph.Editor.Runtime.GraphEditorNavigatorOutlineItemKind
 T:enum AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState
 T:enum AsterGraph.Editor.Runtime.GraphEditorRuntimeOverlayStatus
 T:enum AsterGraph.Editor.Runtime.GraphEditorToolContextKind
