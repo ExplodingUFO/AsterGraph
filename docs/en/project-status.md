@@ -6,6 +6,7 @@
 - matching public prerelease tag for this package line: `v0.11.0-beta`
 - historical legacy repository milestone tag series: `v1.x`-style pre-launch checkpoints
 - repo posture: public beta
+- v0.75 library-grade closure markers: `V075_LIBRARY_GRADE_PROOF_OK:True`, `V075_RENDERING_VIEWPORT_PROOF_OK:True`, `V075_INTERACTION_CONTRACT_PROOF_OK:True`, `V075_EXTENSION_SURFACE_PROOF_OK:True`, `V075_HOST_PACKAGING_PROOF_OK:True`, `V075_COOKBOOK_PROFESSIONAL_PROOF_OK:True`, and `V075_RELEASE_GATE_CLEAN_HANDOFF_OK:True`
 - v0.56 adoption-readiness handoff markers: `ADOPTION_READINESS_HANDOFF_OK:True`, `ADOPTION_SCOPE_BOUNDARY_OK:True`, and `V056_MILESTONE_PROOF_OK:True`
 - v0.58 authoring-depth handoff markers: `AUTHORING_DEPTH_HANDOFF_OK:True`, `AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`, and `V058_MILESTONE_PROOF_OK:True`
 - v0.59 large-graph UX baseline markers: `LARGE_GRAPH_UX_POLICY_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, and `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`
@@ -92,6 +93,7 @@
 - contract, maintenance, and release proof lanes
 - packed `HostSample` compatibility proof under `.NET 10` in the release lane
 - public API guidance proof stays with the template/plugin proof in the release story: `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, `PUBLIC_API_GUIDANCE_OK`, `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, `PUBLIC_API_STABILITY_SCOPE_OK:True`, `ASTERGRAPH_TEMPLATE_SMOKE_OK`, `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`
+- v0.75 library-grade proof maps phases 445-449 into one release gate: rendering/viewport projection, interaction contracts, extension surfaces, host packaging/template proof, and professional cookbook coverage are all documented without widening package, adapter, graph-size, marketplace, execution-engine, or GA claims.
 
 ## Current Priorities
 

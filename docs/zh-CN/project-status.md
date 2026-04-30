@@ -6,6 +6,7 @@
 - 与当前包版本配对的对外 SemVer prerelease 标签：`v0.11.0-beta`
 - 历史仓库里程碑标签系列：`v1.x` 风格的公开前检查点
 - 仓库阶段：公开 Beta（稳定化收口）
+- v0.75 library-grade closure markers：`V075_LIBRARY_GRADE_PROOF_OK:True`、`V075_RENDERING_VIEWPORT_PROOF_OK:True`、`V075_INTERACTION_CONTRACT_PROOF_OK:True`、`V075_EXTENSION_SURFACE_PROOF_OK:True`、`V075_HOST_PACKAGING_PROOF_OK:True`、`V075_COOKBOOK_PROFESSIONAL_PROOF_OK:True` 和 `V075_RELEASE_GATE_CLEAN_HANDOFF_OK:True`
 - v0.56 adoption-readiness handoff markers：`ADOPTION_READINESS_HANDOFF_OK:True`、`ADOPTION_SCOPE_BOUNDARY_OK:True` 和 `V056_MILESTONE_PROOF_OK:True`
 - v0.58 authoring-depth handoff markers：`AUTHORING_DEPTH_HANDOFF_OK:True`、`AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True` 和 `V058_MILESTONE_PROOF_OK:True`
 - v0.59 large-graph UX baseline markers：`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`
@@ -91,6 +92,7 @@
 - contract、maintenance、release 验证 lanes
 - release lane 里的 `.NET 10` 打包 `HostSample` 兼容性验证
 - public API guidance proof 继续和 template/plugin proof 放在同一条 release story：`PUBLIC_API_SURFACE_OK`、`PUBLIC_API_SCOPE_OK`、`PUBLIC_API_GUIDANCE_OK`、`PUBLIC_API_DIFF_GATE_OK:True`、`PUBLIC_API_USAGE_GUIDANCE_OK:True`、`PUBLIC_API_STABILITY_SCOPE_OK:True`、`ASTERGRAPH_TEMPLATE_SMOKE_OK`、`TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`
+- v0.75 library-grade proof 把 phases 445-449 映射到同一个 release gate：rendering/viewport projection、interaction contracts、extension surfaces、host packaging/template proof 和 professional cookbook coverage 都已进入文档，而且不扩大 package、adapter、graph-size、marketplace、execution-engine 或 GA claims。
 
 ## 当前优先事项
 

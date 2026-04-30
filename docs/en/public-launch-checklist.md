@@ -97,6 +97,13 @@ Expected high-signal markers:
 - `PUBLIC_API_DIFF_GATE_OK:True`
 - `PUBLIC_API_USAGE_GUIDANCE_OK:True`
 - `PUBLIC_API_STABILITY_SCOPE_OK:True`
+- `V075_LIBRARY_GRADE_PROOF_OK:True`
+- `V075_RENDERING_VIEWPORT_PROOF_OK:True`
+- `V075_INTERACTION_CONTRACT_PROOF_OK:True`
+- `V075_EXTENSION_SURFACE_PROOF_OK:True`
+- `V075_HOST_PACKAGING_PROOF_OK:True`
+- `V075_COOKBOOK_PROFESSIONAL_PROOF_OK:True`
+- `V075_RELEASE_GATE_CLEAN_HANDOFF_OK:True`
 - `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`
 - `SCALE_PERFORMANCE_BUDGET_OK:large:True:...`
 - `SCALE_PERFORMANCE_BUDGET_OK:stress:True:...`
@@ -190,6 +197,7 @@ Expected high-signal markers:
 - confirm the generated prerelease notes also publish the proof summary block, not only workflow artifacts
 - confirm the proof summary keeps public API guidance proof next to template/plugin proof: `ASTERGRAPH_TEMPLATE_SMOKE_OK:True`, `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`, `PUBLIC_API_SURFACE_OK:...:net9.0`, `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia`, and `PUBLIC_API_GUIDANCE_OK:True`
 - confirm the public API proof summary also includes `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, and `PUBLIC_API_STABILITY_SCOPE_OK:True`
+- confirm the v0.75 library-grade closure summary includes `V075_LIBRARY_GRADE_PROOF_OK:True`, `V075_RENDERING_VIEWPORT_PROOF_OK:True`, `V075_INTERACTION_CONTRACT_PROOF_OK:True`, `V075_EXTENSION_SURFACE_PROOF_OK:True`, `V075_HOST_PACKAGING_PROOF_OK:True`, `V075_COOKBOOK_PROFESSIONAL_PROOF_OK:True`, and `V075_RELEASE_GATE_CLEAN_HANDOFF_OK:True`, and maps those markers to phases 445, 446, 447, 448, and 449 without widening package, adapter, graph-size, marketplace, execution-engine, or GA claims
 - confirm runtime feedback proof stays host-owned and visible in release notes: `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`, `RUNTIME_LOG_LOCATE_OK:True`, `RUNTIME_LOG_EXPORT_OK:True`, `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`, `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`, and `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True`
 - confirm runtime feedback copy does not imply an algorithm execution engine, workflow scripting UI, plugin marketplace, sandboxing, WPF parity, or GA / `1.0` support language
 - confirm the generated notes and announcement text explicitly carry the frozen support boundary story and the adapter matrix story, plus `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, `ADAPTER2_PERFORMANCE_BASELINE_OK:True`, `ADAPTER2_EXPORT_BREADTH_OK:True`, `ADAPTER2_PROJECTION_BUDGET_OK:True:none`, `ADAPTER2_COMMAND_BUDGET_OK:True:none`, `ADAPTER2_SCENE_BUDGET_OK:True:none`, `ADAPTER2_VALIDATION_SCOPE_OK:True`, `ADAPTER2_MATRIX_HANDOFF_OK:True`, `ADAPTER2_SCOPE_BOUNDARY_OK:True`, `ADAPTER2_WPF_SAMPLE_PROOF_OK:True`, `ADAPTER2_CANONICAL_ROUTE_OK:True`, `ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`, `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`, `ADAPTER2_RECIPE_ALIGNMENT_OK:True`, `ADAPTER2_PROOF_BUDGET_OK:True`, `ADAPTER2_VALIDATION_HANDOFF_OK:True`, `ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True`, `V060_MILESTONE_PROOF_OK:True`, `HELLOWORLD_WPF_OK:True`, `ADAPTER_CAPABILITY_MATRIX_FORMAT:1`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, and `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
