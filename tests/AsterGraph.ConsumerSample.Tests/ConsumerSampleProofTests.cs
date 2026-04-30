@@ -69,8 +69,8 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(host.OnboardingCopyPathLines, line => line.Contains("Demo", StringComparison.Ordinal));
         Assert.Contains(host.RouteBoundaryLines, line => line.Contains("Hosted UI route", StringComparison.Ordinal) && line.Contains("AsterGraphAvaloniaViewFactory.Create", StringComparison.Ordinal));
         Assert.Contains(host.RouteBoundaryLines, line => line.Contains("Runtime-only route", StringComparison.Ordinal) && line.Contains("CreateSession", StringComparison.Ordinal));
-        Assert.Contains(host.RouteBoundaryLines, line => line.Contains("Plugin route", StringComparison.Ordinal) && line.Contains("PluginTrustPolicy", StringComparison.Ordinal));
-        Assert.Contains(host.RouteBoundaryLines, line => line.Contains("Migration route", StringComparison.Ordinal) && line.Contains("retained migration", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(host.RouteBoundaryLines, line => line.Contains("Plugin route", StringComparison.Ordinal) && line.Contains("DiscoverPluginCandidates", StringComparison.Ordinal) && line.Contains("PluginTrustPolicy", StringComparison.Ordinal));
+        Assert.Contains(host.RouteBoundaryLines, line => line.Contains("Migration route", StringComparison.Ordinal) && line.Contains("GraphEditorViewModel", StringComparison.Ordinal) && line.Contains("GraphEditorView", StringComparison.Ordinal));
         Assert.Contains(ConsumerSampleHost.PluginCommandId, commandIds);
         Assert.Contains("workspace.save", commandIds);
         Assert.Contains("workspace.load", commandIds);

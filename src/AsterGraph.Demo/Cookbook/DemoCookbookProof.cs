@@ -71,9 +71,13 @@ public static class DemoCookbookProof
         var routeCoverageOk = workspaceSnapshots.All(snapshot =>
             !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.RouteStatus)
             && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.RouteStatusDescription)
+            && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.RouteClarity.SupportedRoute)
+            && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.RouteClarity.PackageBoundary)
+            && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.RouteClarity.DemoBoundary)
             && snapshot.SelectedRecipe.DeferredGaps.Count > 0)
             && workspaceSnapshots.Any(snapshot => string.Equals(snapshot.SelectedRecipe.RouteStatus, "Supported SDK route", StringComparison.Ordinal))
-            && workspaceSnapshots.Any(snapshot => string.Equals(snapshot.SelectedRecipe.RouteStatus, "Proof/demo route", StringComparison.Ordinal));
+            && workspaceSnapshots.Any(snapshot => string.Equals(snapshot.SelectedRecipe.RouteStatus, "Proof/demo route", StringComparison.Ordinal))
+            && workspaceSnapshots.All(snapshot => IsExpectedRouteStatus(snapshot.SelectedRecipe));
         var visualHierarchyOk = workspaceSnapshots.All(snapshot =>
             snapshot.NavigationGroups.All(group => !string.IsNullOrWhiteSpace(group.DisplayName))
             && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.Title)
@@ -186,4 +190,16 @@ public static class DemoCookbookProof
            || text.Contains("marketplace is enabled", StringComparison.OrdinalIgnoreCase)
            || text.Contains("sandbox is active", StringComparison.OrdinalIgnoreCase)
            || text.Contains("telemetry is active", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsExpectedRouteStatus(DemoCookbookWorkspaceRecipeContent recipe)
+        => recipe.Category switch
+        {
+            DemoCookbookRecipeCategory.StarterHost or DemoCookbookRecipeCategory.Authoring =>
+                string.Equals(recipe.RouteStatus, "Supported SDK route", StringComparison.Ordinal),
+            DemoCookbookRecipeCategory.PluginTrust
+                or DemoCookbookRecipeCategory.DiagnosticsSupport
+                or DemoCookbookRecipeCategory.ReviewHelp =>
+                string.Equals(recipe.RouteStatus, "Proof/demo route", StringComparison.Ordinal),
+            _ => false,
+        };
 }

@@ -50,20 +50,41 @@ public sealed class DemoCookbookWorkspaceProjectionTests
             AssertEquivalentScenarioPoints(recipe.ScenarioPoints, content.ScenarioPoints);
             Assert.Equal(recipe.ProofMarkers, content.ProofMarkers);
             Assert.NotEmpty(content.DeferredGaps);
+            Assert.Equal(recipe.RouteClarity, content.RouteClarity);
             Assert.Equal(recipe.SupportBoundary, content.SupportBoundary);
         }
+    }
+
+    [Fact]
+    public void WorkspaceProjection_ProjectsSourceBackedRouteClarity()
+    {
+        var starter = DemoCookbookWorkspaceProjection.Create("starter-host-route").SelectedRecipe;
+        var plugin = DemoCookbookWorkspaceProjection.Create("plugin-trust-route").SelectedRecipe;
+
+        Assert.Contains("AsterGraphHostBuilder.Create", starter.RouteClarity.SupportedRoute, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.Avalonia", starter.RouteClarity.PackageBoundary, StringComparison.Ordinal);
+        Assert.Contains("copy the starter host code", starter.RouteClarity.DemoBoundary, StringComparison.Ordinal);
+        Assert.Contains("DiscoverPluginCandidates", plugin.RouteClarity.SupportedRoute, StringComparison.Ordinal);
+        Assert.Contains("PluginTrustPolicy", plugin.RouteClarity.SupportedRoute, StringComparison.Ordinal);
+        Assert.DoesNotContain("sandbox is active", plugin.RouteClarity.DemoBoundary, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
     public void WorkspaceProjection_LabelsSupportedProofAndDeferredRouteDepth()
     {
         var starter = DemoCookbookWorkspaceProjection.Create("starter-host-route").SelectedRecipe;
+        var authoring = DemoCookbookWorkspaceProjection.Create("authoring-surface-route").SelectedRecipe;
         var plugin = DemoCookbookWorkspaceProjection.Create("plugin-trust-route").SelectedRecipe;
+        var diagnostics = DemoCookbookWorkspaceProjection.Create("diagnostics-support-route").SelectedRecipe;
+        var review = DemoCookbookWorkspaceProjection.Create("review-help-route").SelectedRecipe;
 
         Assert.Equal("Supported SDK route", starter.RouteStatus);
+        Assert.Equal("Supported SDK route", authoring.RouteStatus);
         Assert.Contains(starter.DeferredGaps, gap => gap.Contains("WPF", StringComparison.Ordinal));
         Assert.Contains("display guidance", starter.UnavailableActionDescription, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("Proof/demo route", plugin.RouteStatus);
+        Assert.Equal("Proof/demo route", diagnostics.RouteStatus);
+        Assert.Equal("Proof/demo route", review.RouteStatus);
         Assert.Contains(plugin.DeferredGaps, gap => gap.Contains("sandbox", StringComparison.OrdinalIgnoreCase));
         Assert.Contains("no sandbox", plugin.UnavailableActionDescription, StringComparison.OrdinalIgnoreCase);
     }

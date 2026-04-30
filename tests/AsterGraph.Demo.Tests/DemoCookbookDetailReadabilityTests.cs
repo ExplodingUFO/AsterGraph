@@ -17,6 +17,9 @@ public sealed class DemoCookbookDetailReadabilityTests
         Assert.Equal("code", viewModel.SelectedCookbookDetailMode.Key);
         Assert.Contains(viewModel.SelectedCookbookWorkspaceGraphLines, line => line.Contains(recipe.DemoAnchors[0].Path, StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.Contains(viewModel.CookbookWorkspace.SelectedRecipe.RouteStatus, StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("支持路线：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("包边界：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Demo 边界：", StringComparison.Ordinal));
         Assert.StartsWith("路径：", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.CodeAnchors[0].Path, StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.CodeAnchors[0].Evidence, StringComparison.Ordinal));
@@ -64,6 +67,9 @@ public sealed class DemoCookbookDetailReadabilityTests
 
         Assert.StartsWith("Support boundary: ", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
         Assert.Contains(recipe.SupportBoundary, viewModel.SelectedCookbookWorkspaceDetailLines);
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Supported route: ", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Package boundary: ", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Demo boundary: ", StringComparison.Ordinal));
 
         viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "scenario");
 

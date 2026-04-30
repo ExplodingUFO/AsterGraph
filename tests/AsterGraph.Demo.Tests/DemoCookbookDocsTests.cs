@@ -74,12 +74,49 @@ public sealed class DemoCookbookDocsTests
         }
     }
 
+    [Fact]
+    public void DemoCookbookDocs_DefineRoutePostureAndSourceBackedRoutes()
+    {
+        var english = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chinese = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+
+        foreach (var contents in new[] { english, chinese })
+        {
+            Assert.Contains("DEMO_COOKBOOK_ROUTE_COVERAGE_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("Supported SDK route", contents, StringComparison.Ordinal);
+            Assert.Contains("Proof/demo route", contents, StringComparison.Ordinal);
+            Assert.Contains("Hosted UI route", contents, StringComparison.Ordinal);
+            Assert.Contains("Runtime-only route", contents, StringComparison.Ordinal);
+            Assert.Contains("Plugin route", contents, StringComparison.Ordinal);
+            Assert.Contains("Migration route", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphEditorFactory.CreateSession", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphAvaloniaViewFactory.Create", contents, StringComparison.Ordinal);
+            Assert.Contains("PluginTrustPolicy", contents, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void HostRecipeDocs_ClarifyDefendedRouteAndConsumerSampleMarkers()
+    {
+        var hostIntegration = ReadRepoFile("docs/en/host-integration.md");
+        var hostRecipeLadder = ReadRepoFile("docs/en/host-recipe-ladder.md");
+
+        Assert.Contains("not another canonical route", hostIntegration, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", hostRecipeLadder, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK:True", hostRecipeLadder, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True", hostRecipeLadder, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True", hostRecipeLadder, StringComparison.Ordinal);
+    }
+
     private static void AssertRecipeIndexed(string contents, DemoCookbookRecipe recipe)
     {
         Assert.Contains(recipe.Id, contents, StringComparison.Ordinal);
         Assert.Contains(recipe.Title, contents, StringComparison.Ordinal);
         Assert.Contains(recipe.Category.ToString(), contents, StringComparison.Ordinal);
         Assert.Contains(recipe.SupportBoundary, contents, StringComparison.Ordinal);
+        Assert.Contains(recipe.RouteClarity.SupportedRoute, contents, StringComparison.Ordinal);
+        Assert.Contains(recipe.RouteClarity.PackageBoundary, contents, StringComparison.Ordinal);
+        Assert.Contains(recipe.RouteClarity.DemoBoundary, contents, StringComparison.Ordinal);
 
         foreach (var anchor in recipe.CodeAnchors.Concat(recipe.DemoAnchors).Concat(recipe.DocumentationAnchors))
         {

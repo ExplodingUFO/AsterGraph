@@ -51,6 +51,7 @@ public sealed class DemoCookbookCatalogTests
             Assert.NotEmpty(recipe.DocumentationAnchors);
             Assert.NotEmpty(recipe.ScenarioPoints);
             Assert.NotEmpty(recipe.ProofMarkers);
+            AssertRouteClarityIsBounded(recipe);
             Assert.False(string.IsNullOrWhiteSpace(recipe.SupportBoundary), $"{recipe.Id} support boundary is missing.");
 
             AssertAnchorsExist(repositoryRoot, recipe.Id, nameof(recipe.CodeAnchors), recipe.CodeAnchors);
@@ -168,6 +169,17 @@ public sealed class DemoCookbookCatalogTests
         {
             Assert.Contains(point.Evidence, recipeEvidence);
         }
+    }
+
+    private static void AssertRouteClarityIsBounded(DemoCookbookRecipe recipe)
+    {
+        Assert.False(string.IsNullOrWhiteSpace(recipe.RouteClarity.SupportedRoute), $"{recipe.Id} route is missing.");
+        Assert.False(string.IsNullOrWhiteSpace(recipe.RouteClarity.PackageBoundary), $"{recipe.Id} package boundary is missing.");
+        Assert.False(string.IsNullOrWhiteSpace(recipe.RouteClarity.DemoBoundary), $"{recipe.Id} Demo boundary is missing.");
+        Assert.Contains("AsterGraph.", recipe.RouteClarity.PackageBoundary, StringComparison.Ordinal);
+        Assert.Contains("Demo", recipe.RouteClarity.DemoBoundary, StringComparison.Ordinal);
+        Assert.DoesNotContain("fallback", recipe.RouteClarity.SupportedRoute, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("sandbox is active", recipe.RouteClarity.DemoBoundary, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string GetRepositoryRoot()

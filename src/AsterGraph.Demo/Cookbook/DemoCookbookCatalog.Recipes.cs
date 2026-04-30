@@ -13,7 +13,19 @@ public static partial class DemoCookbookCatalog
                 new DemoCookbookAnchor(
                     "Starter Avalonia host entry",
                     "tools/AsterGraph.Starter.Avalonia/Program.cs",
-                    "StarterAvaloniaAppBuilder"),
+                    "CreateRuntimeSurface"),
+                new DemoCookbookAnchor(
+                    "Starter hosted builder",
+                    "tools/AsterGraph.Starter.Avalonia/Program.cs",
+                    "CreateHostBuilder"),
+                new DemoCookbookAnchor(
+                    "Hosted Avalonia builder facade",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphHostBuilder.cs",
+                    "BuildAvaloniaView"),
+                new DemoCookbookAnchor(
+                    "Runtime-only route contrast",
+                    "src/AsterGraph.Editor/Hosting/AsterGraphEditorFactory.cs",
+                    "CreateSession(AsterGraphEditorOptions)"),
             ],
             [
                 new DemoCookbookAnchor(
@@ -31,7 +43,7 @@ public static partial class DemoCookbookCatalog
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.HostCodeExample,
                     "Host startup copies the shipped Avalonia boot route.",
-                    "StarterAvaloniaAppBuilder"),
+                    "CreateRuntimeSurface"),
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.GraphOperations,
                     "The AI pipeline preset opens a ready graph for onboarding.",
@@ -42,6 +54,10 @@ public static partial class DemoCookbookCatalog
                     "FIVE_MINUTE_ONBOARDING_OK"),
             ],
             ["FIVE_MINUTE_ONBOARDING_OK"],
+            new DemoCookbookRouteClarity(
+                "Shipped Avalonia route: AsterGraphHostBuilder.Create(...).BuildAvaloniaView() via StarterAvaloniaAppBuilder.",
+                "`AsterGraph.Avalonia` composes the hosted UI on top of `AsterGraph.Editor` session/runtime surfaces.",
+                "Demo scenario launch is inspection/proof only; copy the starter host code instead of Demo ViewModel code."),
             "Avalonia is the shipped hosted route; WPF remains validation-only and Demo remains sample/proof surface."),
         new DemoCookbookRecipe(
             "authoring-surface-route",
@@ -89,6 +105,10 @@ public static partial class DemoCookbookCatalog
                     "AUTHORING_SURFACE_OK"),
             ],
             ["AUTHORING_SURFACE_OK"],
+            new DemoCookbookRouteClarity(
+                "Hosted Avalonia authoring route: AsterGraphHostBuilder.UsePresentation(...) with IGraphEditorSession.Queries.GetCommandDescriptors().",
+                "Supported seams live in `AsterGraph.Avalonia` hosting and `AsterGraph.Editor` session/query/command contracts.",
+                "ConsumerSample is the copyable recipe; Demo presenters are visual proof only and do not define package contracts."),
             "Authoring samples reuse public seams and do not create a second editor/runtime model."),
         new DemoCookbookRecipe(
             "plugin-trust-route",
@@ -97,15 +117,27 @@ public static partial class DemoCookbookCatalog
             "Inspect trusted in-process plugin discovery, allowlist decisions, manifest validation, and load snapshots.",
             [
                 new DemoCookbookAnchor(
-                    "Demo plugin trust policy",
-                    "src/AsterGraph.Demo/Integration/DemoPluginTrustWorkspace.cs",
-                    "PluginTrustDecision"),
+                    "Plugin discovery entry point",
+                    "src/AsterGraph.Editor/Hosting/AsterGraphEditorFactory.cs",
+                    "DiscoverPluginCandidates"),
+                new DemoCookbookAnchor(
+                    "Plugin package staging entry point",
+                    "src/AsterGraph.Editor/Hosting/AsterGraphEditorFactory.cs",
+                    "StagePluginPackage"),
+                new DemoCookbookAnchor(
+                    "ConsumerSample route boundary",
+                    "tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleHost.cs",
+                    "RouteBoundaryLines"),
                 new DemoCookbookAnchor(
                     "ConsumerSample plugin proof",
                     "tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleProof.cs",
                     "PluginTrustEvidencePanelOk"),
             ],
             [
+                new DemoCookbookAnchor(
+                    "Demo plugin trust policy",
+                    "src/AsterGraph.Demo/Integration/DemoPluginTrustWorkspace.cs",
+                    "PluginTrustDecision"),
                 new DemoCookbookAnchor(
                     "Demo extensions panel projection",
                     "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.Extensions.cs",
@@ -132,6 +164,10 @@ public static partial class DemoCookbookCatalog
                     "PLUGIN_TRUST_EVIDENCE_PANEL_OK"),
             ],
             ["PLUGIN_TRUST_EVIDENCE_PANEL_OK"],
+            new DemoCookbookRouteClarity(
+                "Plugin route: AsterGraphEditorFactory.DiscoverPluginCandidates(...) with host-owned PluginTrustPolicy before loading.",
+                "Supported APIs live in `AsterGraph.Editor` plugin discovery, trust, and registration contracts.",
+                "Demo trust workspace is an evidence surface only; it does not sandbox or isolate untrusted plugin code."),
             "Plugins are trusted in-process extensions; the recipe does not imply sandboxing or untrusted-code isolation."),
         new DemoCookbookRecipe(
             "diagnostics-support-route",
@@ -140,15 +176,23 @@ public static partial class DemoCookbookCatalog
             "Capture support-bundle and runtime diagnostics evidence from ConsumerSample and Demo runtime projections.",
             [
                 new DemoCookbookAnchor(
+                    "Runtime overlay option seam",
+                    "src/AsterGraph.Editor/Hosting/AsterGraphEditorOptions.cs",
+                    "RuntimeOverlayProvider"),
+                new DemoCookbookAnchor(
+                    "ConsumerSample runtime query path",
+                    "tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleHost.cs",
+                    "GetRuntimeOverlaySnapshot"),
+                new DemoCookbookAnchor(
                     "ConsumerSample support bundle",
                     "tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleSupportBundle.cs",
                     "RuntimeLogs"),
+            ],
+            [
                 new DemoCookbookAnchor(
                     "Demo runtime diagnostics projection",
                     "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.RuntimeProjection.cs",
                     "RuntimeDiagnosticEntry"),
-            ],
-            [
                 new DemoCookbookAnchor(
                     "Demo runtime timeline",
                     "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.RuntimeTimeline.cs",
@@ -175,6 +219,10 @@ public static partial class DemoCookbookCatalog
                     "RuntimeCommandTimelineEntry"),
             ],
             ["RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK"],
+            new DemoCookbookRouteClarity(
+                "Runtime diagnostics route: AsterGraphEditorOptions.RuntimeOverlayProvider plus IGraphEditorSession.Queries.GetRuntimeOverlaySnapshot().",
+                "Supported APIs live in `AsterGraph.Editor` runtime overlay/query contracts and ConsumerSample local support-bundle code.",
+                "Demo runtime timeline is a local projection only; it does not add telemetry or remote sync."),
             "Support bundles are local handoff evidence, not telemetry, remote sync, or support-scope expansion."),
         new DemoCookbookRecipe(
             "review-help-route",
@@ -218,6 +266,10 @@ public static partial class DemoCookbookCatalog
                     "RepairHelpReviewLoopOk"),
             ],
             ["REPAIR_HELP_REVIEW_LOOP_OK"],
+            new DemoCookbookRouteClarity(
+                "Review/help route: IGraphEditorSession validation feedback and ConsumerSample support-bundle proof.",
+                "Supported seams stay in `AsterGraph.Editor` session validation, repair, and support evidence contracts.",
+                "Demo proof panels are review evidence only; they do not add a workflow engine or macro scheduler."),
             "Review/help evidence stays bounded to existing validation and support-bundle proof; it is not a new workflow engine."),
     ];
 }

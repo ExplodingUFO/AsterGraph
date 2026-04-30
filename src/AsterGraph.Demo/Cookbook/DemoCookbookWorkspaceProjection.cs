@@ -29,6 +29,7 @@ public sealed record DemoCookbookWorkspaceRecipeContent(
     IReadOnlyList<DemoCookbookWorkspaceScenarioPoint> ScenarioPoints,
     IReadOnlyList<string> ProofMarkers,
     IReadOnlyList<string> DeferredGaps,
+    DemoCookbookRouteClarity RouteClarity,
     string SupportBoundary);
 
 public sealed record DemoCookbookWorkspaceAnchor(
@@ -102,6 +103,7 @@ public static class DemoCookbookWorkspaceProjection
             ConvertScenarioPoints(recipe),
             recipe.ProofMarkers.ToArray(),
             posture.DeferredGaps,
+            recipe.RouteClarity,
             recipe.SupportBoundary);
     }
 

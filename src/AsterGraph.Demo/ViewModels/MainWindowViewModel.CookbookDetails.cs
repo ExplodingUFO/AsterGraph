@@ -35,6 +35,9 @@ public partial class MainWindowViewModel
             [
                 T("路线状态：", "Route status: ") + selected.RouteStatus,
                 T("内容线索：", "Content cue: ") + SelectedCookbookScenarioPoint.ContentCue,
+                T("支持路线：", "Supported route: ") + selected.RouteClarity.SupportedRoute,
+                T("包边界：", "Package boundary: ") + selected.RouteClarity.PackageBoundary,
+                T("Demo 边界：", "Demo boundary: ") + selected.RouteClarity.DemoBoundary,
                 T("路线说明：", "Route note: ") + selected.RouteStatusDescription,
                 T("不可用操作：", "Unavailable action: ") + selected.UnavailableActionDescription,
                 .. selected.DeferredGaps.Select(gap => T("延后缺口：", "Deferred gap: ") + gap),

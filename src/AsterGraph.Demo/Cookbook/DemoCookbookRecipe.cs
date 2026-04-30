@@ -10,6 +10,7 @@ public sealed record DemoCookbookRecipe(
     IReadOnlyList<DemoCookbookAnchor> DocumentationAnchors,
     IReadOnlyList<DemoCookbookScenarioPoint> ScenarioPoints,
     IReadOnlyList<string> ProofMarkers,
+    DemoCookbookRouteClarity RouteClarity,
     string SupportBoundary);
 
 public sealed record DemoCookbookAnchor(
@@ -21,6 +22,11 @@ public sealed record DemoCookbookScenarioPoint(
     DemoCookbookScenarioKind Kind,
     string Label,
     string Evidence);
+
+public sealed record DemoCookbookRouteClarity(
+    string SupportedRoute,
+    string PackageBoundary,
+    string DemoBoundary);
 
 public enum DemoCookbookScenarioKind
 {
