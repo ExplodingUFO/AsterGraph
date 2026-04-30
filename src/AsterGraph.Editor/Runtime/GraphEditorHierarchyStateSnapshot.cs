@@ -10,6 +10,7 @@ namespace AsterGraph.Editor.Runtime;
 /// <param name="CompositeNodes">Composite shells present in the active scope.</param>
 /// <param name="NodeGroups">Resolved node-group snapshots present in the active scope.</param>
 /// <param name="Nodes">Per-node hierarchy state for the active scope.</param>
+/// <param name="Connections">Per-connection hierarchy state for collapse and boundary-edge projection.</param>
 /// <param name="GroupMoveConstraints">Explicit group-movement constraints for the active scope.</param>
 public sealed record GraphEditorHierarchyStateSnapshot(
     GraphEditorScopeNavigationSnapshot ScopeNavigation,
@@ -17,4 +18,5 @@ public sealed record GraphEditorHierarchyStateSnapshot(
     IReadOnlyList<GraphEditorCompositeNodeSnapshot> CompositeNodes,
     IReadOnlyList<GraphEditorNodeGroupSnapshot> NodeGroups,
     IReadOnlyList<GraphEditorHierarchyNodeSnapshot> Nodes,
+    IReadOnlyList<GraphEditorHierarchyConnectionSnapshot> Connections,
     GraphEditorGroupMoveConstraintsSnapshot GroupMoveConstraints);

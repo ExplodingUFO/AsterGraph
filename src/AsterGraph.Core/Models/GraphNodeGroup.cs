@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace AsterGraph.Core.Models;
 
 /// <summary>
@@ -17,4 +19,17 @@ public sealed record GraphNodeGroup(
     GraphSize Size,
     IReadOnlyList<string> NodeIds,
     bool IsCollapsed = false,
-    GraphPadding ExtraPadding = default);
+    GraphPadding ExtraPadding = default)
+{
+    /// <summary>
+    /// Node groups are single-scope editor containers; membership is defined by <see cref="NodeIds"/>.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsContainer => true;
+
+    /// <summary>
+    /// Whether member nodes are directly projected in the active scope.
+    /// </summary>
+    [JsonIgnore]
+    public bool ProjectsMemberNodes => !IsCollapsed;
+}

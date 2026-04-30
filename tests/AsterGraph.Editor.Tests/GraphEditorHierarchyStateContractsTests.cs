@@ -18,6 +18,9 @@ public sealed class GraphEditorHierarchyStateContractsTests
     private const string ChildGraphId = "graph-child-001";
     private const string ChildSourceNodeId = "tests.hierarchy.child-source-001";
     private const string ChildTargetNodeId = "tests.hierarchy.child-target-001";
+    private const string ChildExternalNodeId = "tests.hierarchy.child-external-001";
+    private const string ChildInternalConnectionId = "connection-child-001";
+    private const string ChildBoundaryConnectionId = "connection-child-boundary-001";
     private const string SourcePortId = "output-001";
     private const string TargetPortId = "input-001";
 
@@ -36,12 +39,27 @@ public sealed class GraphEditorHierarchyStateContractsTests
         Assert.NotNull(typeof(GraphEditorHierarchyStateSnapshot).GetProperty(nameof(GraphEditorHierarchyStateSnapshot.CompositeNodes)));
         Assert.NotNull(typeof(GraphEditorHierarchyStateSnapshot).GetProperty(nameof(GraphEditorHierarchyStateSnapshot.NodeGroups)));
         Assert.NotNull(typeof(GraphEditorHierarchyStateSnapshot).GetProperty(nameof(GraphEditorHierarchyStateSnapshot.Nodes)));
+        Assert.NotNull(typeof(GraphEditorHierarchyStateSnapshot).GetProperty(nameof(GraphEditorHierarchyStateSnapshot.Connections)));
         Assert.NotNull(typeof(GraphEditorHierarchyStateSnapshot).GetProperty(nameof(GraphEditorHierarchyStateSnapshot.GroupMoveConstraints)));
+
+        Assert.NotNull(typeof(GraphNodeGroup).GetProperty(nameof(GraphNodeGroup.IsContainer)));
+        Assert.NotNull(typeof(GraphNodeGroup).GetProperty(nameof(GraphNodeGroup.ProjectsMemberNodes)));
+        Assert.NotNull(typeof(GraphEditorNodeGroupSnapshot).GetProperty(nameof(GraphEditorNodeGroupSnapshot.IsContainer)));
+        Assert.NotNull(typeof(GraphEditorNodeGroupSnapshot).GetProperty(nameof(GraphEditorNodeGroupSnapshot.ProjectsMemberNodes)));
 
         Assert.NotNull(typeof(GraphEditorHierarchyNodeSnapshot).GetProperty(nameof(GraphEditorHierarchyNodeSnapshot.NodeId)));
         Assert.NotNull(typeof(GraphEditorHierarchyNodeSnapshot).GetProperty(nameof(GraphEditorHierarchyNodeSnapshot.ParentGroupId)));
         Assert.NotNull(typeof(GraphEditorHierarchyNodeSnapshot).GetProperty(nameof(GraphEditorHierarchyNodeSnapshot.CollapsedByGroupId)));
         Assert.NotNull(typeof(GraphEditorHierarchyNodeSnapshot).GetProperty(nameof(GraphEditorHierarchyNodeSnapshot.IsVisibleInActiveScope)));
+
+        Assert.NotNull(typeof(GraphEditorHierarchyConnectionSnapshot).GetProperty(nameof(GraphEditorHierarchyConnectionSnapshot.ConnectionId)));
+        Assert.NotNull(typeof(GraphEditorHierarchyConnectionSnapshot).GetProperty(nameof(GraphEditorHierarchyConnectionSnapshot.SourceNodeId)));
+        Assert.NotNull(typeof(GraphEditorHierarchyConnectionSnapshot).GetProperty(nameof(GraphEditorHierarchyConnectionSnapshot.TargetNodeId)));
+        Assert.NotNull(typeof(GraphEditorHierarchyConnectionSnapshot).GetProperty(nameof(GraphEditorHierarchyConnectionSnapshot.SourceCollapsedByGroupId)));
+        Assert.NotNull(typeof(GraphEditorHierarchyConnectionSnapshot).GetProperty(nameof(GraphEditorHierarchyConnectionSnapshot.TargetCollapsedByGroupId)));
+        Assert.NotNull(typeof(GraphEditorHierarchyConnectionSnapshot).GetProperty(nameof(GraphEditorHierarchyConnectionSnapshot.IsInternalToCollapsedGroup)));
+        Assert.NotNull(typeof(GraphEditorHierarchyConnectionSnapshot).GetProperty(nameof(GraphEditorHierarchyConnectionSnapshot.IsCrossingCollapsedGroupBoundary)));
+        Assert.NotNull(typeof(GraphEditorHierarchyConnectionSnapshot).GetProperty(nameof(GraphEditorHierarchyConnectionSnapshot.IsVisibleInActiveScope)));
 
         Assert.NotNull(typeof(GraphEditorGroupMoveConstraintsSnapshot).GetProperty(nameof(GraphEditorGroupMoveConstraintsSnapshot.CanMoveFrameIndependently)));
         Assert.NotNull(typeof(GraphEditorGroupMoveConstraintsSnapshot).GetProperty(nameof(GraphEditorGroupMoveConstraintsSnapshot.CanMoveFrameWithMembers)));
@@ -82,12 +100,12 @@ public sealed class GraphEditorHierarchyStateContractsTests
         Assert.Equal(CompositeNodeId, childState.ParentCompositeNodeId);
         Assert.Empty(childState.CompositeNodes);
         Assert.Equal(
-            [ChildSourceNodeId, ChildTargetNodeId],
+            [ChildExternalNodeId, ChildSourceNodeId, ChildTargetNodeId],
             childState.Nodes.Select(snapshot => snapshot.NodeId).OrderBy(id => id, StringComparer.Ordinal));
     }
 
     [Fact]
-    public void SessionQueries_GetHierarchyStateSnapshot_ExposesCollapsedGroupMembershipAndMoveConstraints()
+    public void SessionQueries_GetHierarchyStateSnapshot_ExposesCollapsedGroupMembershipBoundaryEdgesAndMoveConstraints()
     {
         var session = CreateSession(CreateScopedDocument());
 
@@ -112,23 +130,47 @@ public sealed class GraphEditorHierarchyStateContractsTests
         var group = Assert.Single(hierarchy.NodeGroups);
         var sourceNode = Assert.Single(hierarchy.Nodes, snapshot => snapshot.NodeId == ChildSourceNodeId);
         var targetNode = Assert.Single(hierarchy.Nodes, snapshot => snapshot.NodeId == ChildTargetNodeId);
+        var externalNode = Assert.Single(hierarchy.Nodes, snapshot => snapshot.NodeId == ChildExternalNodeId);
+        var internalConnection = Assert.Single(hierarchy.Connections, snapshot => snapshot.ConnectionId == ChildInternalConnectionId);
+        var boundaryConnection = Assert.Single(hierarchy.Connections, snapshot => snapshot.ConnectionId == ChildBoundaryConnectionId);
         var currentPositions = session.Queries.GetNodePositions()
             .ToDictionary(snapshot => snapshot.NodeId, snapshot => snapshot.Position, StringComparer.Ordinal);
 
         Assert.True(hierarchy.GroupMoveConstraints.CanMoveFrameIndependently);
         Assert.True(hierarchy.GroupMoveConstraints.CanMoveFrameWithMembers);
         Assert.Equal(groupId, group.Id);
+        Assert.True(group.IsContainer);
         Assert.True(group.IsCollapsed);
+        Assert.False(group.ProjectsMemberNodes);
         Assert.Equal(
             [ChildSourceNodeId, ChildTargetNodeId],
             group.NodeIds.OrderBy(id => id, StringComparer.Ordinal));
 
         Assert.Equal(groupId, sourceNode.ParentGroupId);
         Assert.Equal(groupId, targetNode.ParentGroupId);
+        Assert.Null(externalNode.ParentGroupId);
         Assert.Equal(groupId, sourceNode.CollapsedByGroupId);
         Assert.Equal(groupId, targetNode.CollapsedByGroupId);
+        Assert.Null(externalNode.CollapsedByGroupId);
         Assert.False(sourceNode.IsVisibleInActiveScope);
         Assert.False(targetNode.IsVisibleInActiveScope);
+        Assert.True(externalNode.IsVisibleInActiveScope);
+
+        Assert.Equal(ChildSourceNodeId, internalConnection.SourceNodeId);
+        Assert.Equal(ChildTargetNodeId, internalConnection.TargetNodeId);
+        Assert.Equal(groupId, internalConnection.SourceCollapsedByGroupId);
+        Assert.Equal(groupId, internalConnection.TargetCollapsedByGroupId);
+        Assert.True(internalConnection.IsInternalToCollapsedGroup);
+        Assert.False(internalConnection.IsCrossingCollapsedGroupBoundary);
+        Assert.False(internalConnection.IsVisibleInActiveScope);
+
+        Assert.Equal(ChildSourceNodeId, boundaryConnection.SourceNodeId);
+        Assert.Equal(ChildExternalNodeId, boundaryConnection.TargetNodeId);
+        Assert.Equal(groupId, boundaryConnection.SourceCollapsedByGroupId);
+        Assert.Null(boundaryConnection.TargetCollapsedByGroupId);
+        Assert.False(boundaryConnection.IsInternalToCollapsedGroup);
+        Assert.True(boundaryConnection.IsCrossingCollapsedGroupBoundary);
+        Assert.True(boundaryConnection.IsVisibleInActiveScope);
 
         Assert.Equal(originalPositions[ChildSourceNodeId], currentPositions[ChildSourceNodeId]);
         Assert.Equal(originalPositions[ChildTargetNodeId], currentPositions[ChildTargetNodeId]);
@@ -207,15 +249,35 @@ public sealed class GraphEditorHierarchyStateContractsTests
                             [],
                             "#F3B36B",
                             DefinitionId),
+                        new GraphNode(
+                            ChildExternalNodeId,
+                            "Child External",
+                            "Tests",
+                            "Hierarchy",
+                            "Child scope node outside the collapsed group.",
+                            new GraphPoint(680d, 160d),
+                            new GraphSize(220d, 150d),
+                            [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                            [],
+                            "#F3B36B",
+                            DefinitionId),
                     ],
                     [
                         new GraphConnection(
-                            "connection-child-001",
+                            ChildInternalConnectionId,
                             ChildSourceNodeId,
                             SourcePortId,
                             ChildTargetNodeId,
                             TargetPortId,
                             "Child Flow",
+                            "#6AD5C4"),
+                        new GraphConnection(
+                            ChildBoundaryConnectionId,
+                            ChildSourceNodeId,
+                            SourcePortId,
+                            ChildExternalNodeId,
+                            TargetPortId,
+                            "Boundary Flow",
                             "#6AD5C4"),
                     ]),
             ]);

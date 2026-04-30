@@ -14,6 +14,7 @@ namespace AsterGraph.Editor.Runtime;
 /// <param name="ExtraPadding">Persisted per-edge padding envelope around the member-node bounds.</param>
 /// <param name="NodeIds">Stable member node identifiers.</param>
 /// <param name="IsCollapsed">Whether the group is currently collapsed.</param>
+/// <param name="IsContainer">Whether this snapshot should be treated as a single-scope container boundary.</param>
 public sealed record GraphEditorNodeGroupSnapshot(
     string Id,
     string Title,
@@ -23,4 +24,11 @@ public sealed record GraphEditorNodeGroupSnapshot(
     GraphSize ContentSize,
     GraphPadding ExtraPadding,
     IReadOnlyList<string> NodeIds,
-    bool IsCollapsed);
+    bool IsCollapsed,
+    bool IsContainer = true)
+{
+    /// <summary>
+    /// Whether member nodes are directly projected in the active scope.
+    /// </summary>
+    public bool ProjectsMemberNodes => !IsCollapsed;
+}

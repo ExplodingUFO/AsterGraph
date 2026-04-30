@@ -1627,6 +1627,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             GetCompositeNodeSnapshots(),
             GetNodeGroupSnapshots(),
             activeScope.Nodes,
+            activeScope.Connections,
             _behaviorOptions.Commands.Nodes.AllowMove);
     }
 
