@@ -28,6 +28,18 @@
 - [x] **Phase 456: Designer Workbench Authoring UX** — integrate navigator/outline, inspector, route-aware affordances, group/layout workflows, recovery states, and cookbook scenarios.
 - [ ] **Phase 457: Extension Contracts, Documentation, And Release Proof** — close supported contracts, docs, examples, proof markers, full verification, beads, Dolt, and Git handoff.
 
+## v0.76 Requirement Proof Map
+
+| Requirement | Phase | Proof markers / source evidence | Public docs / examples |
+| --- | --- | --- | --- |
+| `ENGINE-01` | Phase 451 | `451-SUMMARY.md` seam map and non-goal audit; implementation proof deferred to Phases 452-457. | `docs/en/architecture.md`, `docs/zh-CN/architecture.md` |
+| `VIRTUAL-01` | Phase 452 | `ViewportVisibleSceneProjection.ToBudgetMarker(...)`, `VISIBLE_SCENE_INVALIDATION:*`, `MINIMAP_LIGHTWEIGHT_PROJECTION_OK`, `PROJECTION_PERFORMANCE_EVIDENCE_OK`, `SCALE_PERFORMANCE_BUDGET_OK:*`. | `docs/en/scale-baseline.md`, `docs/en/feature-catalog.md`, `docs/en/demo-cookbook.md`, plus localized counterparts |
+| `ROUTE-01` | Phase 453 | `GraphEditorConnectionGeometrySnapshot.RouteStyle`, `GraphEditorConnectionRouteEvidenceSnapshot`, `GetConnectionGeometrySnapshots()`, connection geometry/rendering contract tests. | `docs/en/public-api-inventory.md`, `docs/en/authoring-surface-recipe.md`, `docs/en/advanced-editing.md`, plus localized counterparts |
+| `GROUP-01` | Phase 454 | `GROUP_SERIALIZATION_COOKBOOK_OK`, `WritesAndReadsCollapsedGroupBoundaryPayload`, hierarchy boundary-edge and collapsed canvas tests. | `docs/en/advanced-editing.md`, `docs/en/demo-cookbook.md`, plus localized counterparts |
+| `LAYOUT-01` | Phase 455 | `LAYOUT_PROVIDER_SEAM_OK`, `LAYOUT_PREVIEW_APPLY_CANCEL_OK`, `LAYOUT_UNDO_TRANSACTION_OK`, `DEMO_COOKBOOK_LAYOUT_SERVICES_OK`, layout command tests. | `docs/en/public-api-inventory.md`, `docs/en/demo-cookbook.md`, `docs/en/feature-catalog.md`, plus localized counterparts |
+| `DESIGNER-01` | Phase 456 | `DEMO_COOKBOOK_DESIGNER_WORKBENCH_OK`, `DESIGNER_WORKBENCH_AUTHORING_OK`, `GetNavigatorOutlineSnapshot`, `RecoveryHint`, designer command tests. | `docs/en/demo-cookbook.md`, `docs/en/authoring-surface-recipe.md`, plus localized counterparts |
+| `CONTRACT-01` | Phase 457 | `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, `PUBLIC_API_GUIDANCE_OK`, `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, `PUBLIC_API_STABILITY_SCOPE_OK:True`, Phase 457 release verification. | `docs/en/extension-contracts.md`, `docs/en/public-api-inventory.md`, `docs/en/public-launch-checklist.md`, plus localized counterparts |
+
 ## Phase Details
 
 ### Phase 451: Canvas Engine Architecture And Scale Audit
