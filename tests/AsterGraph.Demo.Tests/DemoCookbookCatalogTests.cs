@@ -50,6 +50,7 @@ public sealed class DemoCookbookCatalogTests
             Assert.NotEmpty(recipe.DemoAnchors);
             Assert.NotEmpty(recipe.DocumentationAnchors);
             Assert.NotEmpty(recipe.ScenarioPoints);
+            Assert.NotEmpty(recipe.InteractionFacets);
             Assert.NotEmpty(recipe.ProofMarkers);
             AssertRouteClarityIsBounded(recipe);
             Assert.False(string.IsNullOrWhiteSpace(recipe.SupportBoundary), $"{recipe.Id} support boundary is missing.");
@@ -91,6 +92,41 @@ public sealed class DemoCookbookCatalogTests
             Assert.All(recipe.ScenarioPoints, point => Assert.False(string.IsNullOrWhiteSpace(point.Label)));
             Assert.All(recipe.ScenarioPoints, point => Assert.False(string.IsNullOrWhiteSpace(point.Evidence)));
             AssertScenarioPointsTieBackToRecipeEvidence(recipe);
+            AssertInteractionFacetsTieBackToRecipeEvidence(recipe);
+        }
+    }
+
+    [Fact]
+    public void CookbookCatalog_CoversRequiredProfessionalInteractionFacets()
+    {
+        Assert.Equal(
+            new[]
+            {
+                DemoCookbookInteractionKind.Selection,
+                DemoCookbookInteractionKind.Connection,
+                DemoCookbookInteractionKind.LayoutReadability,
+                DemoCookbookInteractionKind.Inspection,
+                DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+            },
+            DemoCookbookCatalog.RequiredInteractionKinds);
+
+        var interactionKinds = DemoCookbookCatalog.Recipes
+            .SelectMany(recipe => recipe.InteractionFacets)
+            .Select(facet => facet.Kind)
+            .Distinct()
+            .ToArray();
+
+        foreach (var requiredInteractionKind in DemoCookbookCatalog.RequiredInteractionKinds)
+        {
+            Assert.Contains(requiredInteractionKind, interactionKinds);
+        }
+
+        foreach (var recipe in DemoCookbookCatalog.Recipes)
+        {
+            Assert.True(recipe.InteractionFacets.Count >= 3, $"{recipe.Id} needs professional interaction facets.");
+            Assert.All(recipe.InteractionFacets, facet => Assert.False(string.IsNullOrWhiteSpace(facet.Label)));
+            Assert.All(recipe.InteractionFacets, facet => Assert.False(string.IsNullOrWhiteSpace(facet.Evidence)));
+            AssertInteractionFacetsTieBackToRecipeEvidence(recipe);
         }
     }
 
@@ -157,6 +193,18 @@ public sealed class DemoCookbookCatalogTests
     }
 
     private static void AssertScenarioPointsTieBackToRecipeEvidence(DemoCookbookRecipe recipe)
+        => AssertEvidenceBackedItemsTieBackToRecipeEvidence(
+            recipe,
+            recipe.ScenarioPoints.Select(point => point.Evidence).ToArray());
+
+    private static void AssertInteractionFacetsTieBackToRecipeEvidence(DemoCookbookRecipe recipe)
+        => AssertEvidenceBackedItemsTieBackToRecipeEvidence(
+            recipe,
+            recipe.InteractionFacets.Select(facet => facet.Evidence).ToArray());
+
+    private static void AssertEvidenceBackedItemsTieBackToRecipeEvidence(
+        DemoCookbookRecipe recipe,
+        IReadOnlyList<string> evidenceItems)
     {
         var recipeEvidence = recipe.CodeAnchors
             .Concat(recipe.DemoAnchors)
@@ -165,9 +213,9 @@ public sealed class DemoCookbookCatalogTests
             .Concat(recipe.ProofMarkers)
             .ToArray();
 
-        foreach (var point in recipe.ScenarioPoints)
+        foreach (var evidence in evidenceItems)
         {
-            Assert.Contains(point.Evidence, recipeEvidence);
+            Assert.Contains(evidence, recipeEvidence);
         }
     }
 

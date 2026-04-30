@@ -51,6 +51,16 @@ Use it when you want to move from "I can see the Demo" to "I know which code and
 - `SupportEvidence`: each route keeps support claims tied to local proof or docs evidence.
 - `HostCodeExample`: host-copy examples remain anchored to starter or consumer sample code.
 
+## Professional Interaction Facets
+
+`DEMO_COOKBOOK_PROFESSIONAL_INTERACTION_OK` proves the cookbook exposes bounded interaction facets. It is paired with `DEMO_COOKBOOK_VISUAL_HIERARCHY_OK`, `DEMO_COOKBOOK_NAVIGATION_FEEDBACK_OK`, `DEMO_COOKBOOK_DETAIL_READABILITY_OK`, and `DEMO_COOKBOOK_INTERACTION_STATES_OK`.
+
+- `Selection`: preset launch selects a ready graph (`AiPipelineScenario`); authoring projects selection-owned commands (`GetCommandDescriptors`).
+- `Connection`: authoring keeps connection overlays visible (`CreateEdgeOverlay`); support review keeps command effects visible (`RuntimeCommandTimelineEntry`); repair/help covers connection handoff (`RepairHelpReviewLoopOk`).
+- `LayoutReadability`: first-run route copy stays separate in the ladder (`Host Recipe Ladder`); plugin route boundaries stay explicit (`RouteBoundaryLines`).
+- `Inspection`: hosted entry points, trust decisions, support logs, and proof panels remain inspectable (`CreateRuntimeSurface`, `PluginTrustDecision`, `RuntimeLogs`, `DemoHostMenuGroups.Proof`).
+- `ValidationRuntimeFeedback`: extension, runtime, and review feedback stay local and source-backed (`PluginTrust`, `RuntimeDiagnosticEntry`, `ValidationFeedback`).
+
 ## How To Use It
 
 1. Start with [Quick Start](./quick-start.md) if you have not run the SDK before.

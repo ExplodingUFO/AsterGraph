@@ -20,6 +20,15 @@ public static partial class DemoCookbookCatalog
         DemoCookbookScenarioKind.HostCodeExample,
     ];
 
+    public static IReadOnlyList<DemoCookbookInteractionKind> RequiredInteractionKinds { get; } =
+    [
+        DemoCookbookInteractionKind.Selection,
+        DemoCookbookInteractionKind.Connection,
+        DemoCookbookInteractionKind.LayoutReadability,
+        DemoCookbookInteractionKind.Inspection,
+        DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+    ];
+
     public static IReadOnlyList<string> Validate()
     {
         var issues = new List<string>();
@@ -38,6 +47,7 @@ public static partial class DemoCookbookCatalog
             AddIfMissing(issues, recipe.Id, nameof(recipe.DemoAnchors), recipe.DemoAnchors);
             AddIfMissing(issues, recipe.Id, nameof(recipe.DocumentationAnchors), recipe.DocumentationAnchors);
             AddIfMissing(issues, recipe.Id, nameof(recipe.ScenarioPoints), recipe.ScenarioPoints);
+            AddIfMissing(issues, recipe.Id, nameof(recipe.InteractionFacets), recipe.InteractionFacets);
             AddIfMissing(issues, recipe.Id, nameof(recipe.ProofMarkers), recipe.ProofMarkers);
             AddIfMissing(issues, recipe.Id, nameof(recipe.SupportBoundary), recipe.SupportBoundary);
 
@@ -45,6 +55,7 @@ public static partial class DemoCookbookCatalog
             AddAnchorIssues(issues, recipe.Id, nameof(recipe.DemoAnchors), recipe.DemoAnchors);
             AddAnchorIssues(issues, recipe.Id, nameof(recipe.DocumentationAnchors), recipe.DocumentationAnchors);
             AddScenarioPointIssues(issues, recipe);
+            AddInteractionFacetIssues(issues, recipe);
 
             foreach (var proofMarker in recipe.ProofMarkers)
             {
@@ -65,6 +76,14 @@ public static partial class DemoCookbookCatalog
             if (!Recipes.Any(recipe => recipe.ScenarioPoints.Any(point => point.Kind == requiredScenarioKind)))
             {
                 issues.Add($"Missing required scenario kind: {requiredScenarioKind}");
+            }
+        }
+
+        foreach (var requiredInteractionKind in RequiredInteractionKinds)
+        {
+            if (!Recipes.Any(recipe => recipe.InteractionFacets.Any(facet => facet.Kind == requiredInteractionKind)))
+            {
+                issues.Add($"Missing required interaction kind: {requiredInteractionKind}");
             }
         }
 
@@ -108,6 +127,28 @@ public static partial class DemoCookbookCatalog
 
     private static void AddScenarioPointIssues(ICollection<string> issues, DemoCookbookRecipe recipe)
     {
+        AddEvidenceBackedItemIssues(
+            issues,
+            recipe,
+            nameof(recipe.ScenarioPoints),
+            recipe.ScenarioPoints.Select(point => (point.Label, point.Evidence)).ToArray());
+    }
+
+    private static void AddInteractionFacetIssues(ICollection<string> issues, DemoCookbookRecipe recipe)
+    {
+        AddEvidenceBackedItemIssues(
+            issues,
+            recipe,
+            nameof(recipe.InteractionFacets),
+            recipe.InteractionFacets.Select(facet => (facet.Label, facet.Evidence)).ToArray());
+    }
+
+    private static void AddEvidenceBackedItemIssues(
+        ICollection<string> issues,
+        DemoCookbookRecipe recipe,
+        string fieldName,
+        IReadOnlyList<(string Label, string Evidence)> items)
+    {
         var evidenceAnchors = recipe.CodeAnchors
             .Concat(recipe.DemoAnchors)
             .Concat(recipe.DocumentationAnchors)
@@ -115,15 +156,15 @@ public static partial class DemoCookbookCatalog
             .Concat(recipe.ProofMarkers)
             .ToArray();
 
-        for (var index = 0; index < recipe.ScenarioPoints.Count; index++)
+        for (var index = 0; index < items.Count; index++)
         {
-            var point = recipe.ScenarioPoints[index];
-            AddIfMissing(issues, recipe.Id, $"{nameof(recipe.ScenarioPoints)}[{index}].{nameof(point.Label)}", point.Label);
-            AddIfMissing(issues, recipe.Id, $"{nameof(recipe.ScenarioPoints)}[{index}].{nameof(point.Evidence)}", point.Evidence);
+            var item = items[index];
+            AddIfMissing(issues, recipe.Id, $"{fieldName}[{index}].Label", item.Label);
+            AddIfMissing(issues, recipe.Id, $"{fieldName}[{index}].Evidence", item.Evidence);
 
-            if (!evidenceAnchors.Contains(point.Evidence, StringComparer.Ordinal))
+            if (!evidenceAnchors.Contains(item.Evidence, StringComparer.Ordinal))
             {
-                issues.Add($"{recipe.Id} {nameof(recipe.ScenarioPoints)}[{index}] evidence is not tied to a recipe anchor or proof marker: {point.Evidence}");
+                issues.Add($"{recipe.Id} {fieldName}[{index}] evidence is not tied to a recipe anchor or proof marker: {item.Evidence}");
             }
         }
     }

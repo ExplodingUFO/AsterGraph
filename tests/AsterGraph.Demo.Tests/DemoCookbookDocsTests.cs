@@ -75,6 +75,27 @@ public sealed class DemoCookbookDocsTests
     }
 
     [Fact]
+    public void DemoCookbookDocs_AnchorProfessionalInteractionProof()
+    {
+        var english = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chinese = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+
+        foreach (var contents in new[] { english, chinese })
+        {
+            Assert.Contains("DEMO_COOKBOOK_PROFESSIONAL_INTERACTION_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("DEMO_COOKBOOK_VISUAL_HIERARCHY_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("DEMO_COOKBOOK_NAVIGATION_FEEDBACK_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("DEMO_COOKBOOK_DETAIL_READABILITY_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("DEMO_COOKBOOK_INTERACTION_STATES_OK", contents, StringComparison.Ordinal);
+
+            foreach (var interactionKind in DemoCookbookCatalog.RequiredInteractionKinds)
+            {
+                Assert.Contains(interactionKind.ToString(), contents, StringComparison.Ordinal);
+            }
+        }
+    }
+
+    [Fact]
     public void DemoCookbookDocs_DefineRoutePostureAndSourceBackedRoutes()
     {
         var english = ReadRepoFile("docs/en/demo-cookbook.md");
@@ -127,6 +148,11 @@ public sealed class DemoCookbookDocsTests
         foreach (var proofMarker in recipe.ProofMarkers)
         {
             Assert.Contains(proofMarker, contents, StringComparison.Ordinal);
+        }
+
+        foreach (var facet in recipe.InteractionFacets)
+        {
+            Assert.Contains(facet.Evidence, contents, StringComparison.Ordinal);
         }
     }
 

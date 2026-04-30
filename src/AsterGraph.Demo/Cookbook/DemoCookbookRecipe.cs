@@ -9,6 +9,7 @@ public sealed record DemoCookbookRecipe(
     IReadOnlyList<DemoCookbookAnchor> DemoAnchors,
     IReadOnlyList<DemoCookbookAnchor> DocumentationAnchors,
     IReadOnlyList<DemoCookbookScenarioPoint> ScenarioPoints,
+    IReadOnlyList<DemoCookbookInteractionFacet> InteractionFacets,
     IReadOnlyList<string> ProofMarkers,
     DemoCookbookRouteClarity RouteClarity,
     string SupportBoundary);
@@ -20,6 +21,11 @@ public sealed record DemoCookbookAnchor(
 
 public sealed record DemoCookbookScenarioPoint(
     DemoCookbookScenarioKind Kind,
+    string Label,
+    string Evidence);
+
+public sealed record DemoCookbookInteractionFacet(
+    DemoCookbookInteractionKind Kind,
     string Label,
     string Evidence);
 
@@ -35,4 +41,13 @@ public enum DemoCookbookScenarioKind
     ValidationRuntimeOverlay,
     SupportEvidence,
     HostCodeExample,
+}
+
+public enum DemoCookbookInteractionKind
+{
+    Selection,
+    Connection,
+    LayoutReadability,
+    Inspection,
+    ValidationRuntimeFeedback,
 }

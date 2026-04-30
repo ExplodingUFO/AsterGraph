@@ -48,6 +48,7 @@ public sealed class DemoCookbookWorkspaceProjectionTests
             AssertEquivalentAnchors(recipe.CodeAnchors, content.CodeExamples);
             AssertEquivalentAnchors(recipe.DocumentationAnchors, content.DocumentationLinks);
             AssertEquivalentScenarioPoints(recipe.ScenarioPoints, content.ScenarioPoints);
+            AssertEquivalentInteractionFacets(recipe.InteractionFacets, content.InteractionFacets);
             Assert.Equal(recipe.ProofMarkers, content.ProofMarkers);
             Assert.NotEmpty(content.DeferredGaps);
             Assert.Equal(recipe.RouteClarity, content.RouteClarity);
@@ -134,6 +135,49 @@ public sealed class DemoCookbookWorkspaceProjectionTests
     }
 
     [Fact]
+    public void WorkspaceProjection_ProjectsProfessionalInteractionFacets()
+    {
+        var content = DemoCookbookWorkspaceProjection.Create("review-help-route").SelectedRecipe;
+        var validation = content.InteractionFacets.Single(point =>
+            point.Kind == DemoCookbookInteractionKind.ValidationRuntimeFeedback);
+        var connection = content.InteractionFacets.Single(point =>
+            point.Kind == DemoCookbookInteractionKind.Connection);
+
+        Assert.StartsWith(content.RecipeId + ":interaction-", validation.Key, StringComparison.Ordinal);
+        Assert.Equal("Validation/runtime feedback focus", validation.FocusLabel);
+        Assert.Contains("tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleSupportBundle.cs", validation.FocusTarget, StringComparison.Ordinal);
+        Assert.Contains(validation.Evidence, validation.FocusTarget, StringComparison.Ordinal);
+        Assert.Equal("Connection focus", connection.FocusLabel);
+        Assert.Contains("tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleProof.cs", connection.FocusTarget, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void WorkspaceProjection_InteractionFocusTargetsUseOwningEvidenceSource()
+    {
+        foreach (var recipe in DemoCookbookCatalog.Recipes)
+        {
+            var content = DemoCookbookWorkspaceProjection.Create(recipe.Id).SelectedRecipe;
+
+            foreach (var facet in content.InteractionFacets)
+            {
+                var anchor = recipe.CodeAnchors
+                    .Concat(recipe.DemoAnchors)
+                    .Concat(recipe.DocumentationAnchors)
+                    .FirstOrDefault(item => string.Equals(item.Evidence, facet.Evidence, StringComparison.Ordinal));
+
+                if (anchor is not null)
+                {
+                    Assert.Equal(anchor.Path + "#" + facet.Evidence, facet.FocusTarget);
+                    continue;
+                }
+
+                Assert.Contains(facet.Evidence, recipe.ProofMarkers);
+                Assert.Equal("proof:" + facet.Evidence, facet.FocusTarget);
+            }
+        }
+    }
+
+    [Fact]
     public void WorkspaceProjection_LeftNavigationCanUseFilteredRecipeSetWithoutChangingSelection()
     {
         var selectedRecipe = DemoCookbookCatalog.Recipes.Single(recipe => recipe.Id == "plugin-trust-route");
@@ -185,6 +229,23 @@ public sealed class DemoCookbookWorkspaceProjectionTests
             Assert.False(string.IsNullOrWhiteSpace(actual[index].GraphCueLabel));
             Assert.False(string.IsNullOrWhiteSpace(actual[index].GraphCueTarget));
             Assert.False(string.IsNullOrWhiteSpace(actual[index].ContentCue));
+        }
+    }
+
+    private static void AssertEquivalentInteractionFacets(
+        IReadOnlyList<DemoCookbookInteractionFacet> expected,
+        IReadOnlyList<DemoCookbookWorkspaceInteractionFacet> actual)
+    {
+        Assert.Equal(expected.Count, actual.Count);
+
+        for (var index = 0; index < expected.Count; index++)
+        {
+            Assert.Equal(expected[index].Kind, actual[index].Kind);
+            Assert.Equal(expected[index].Label, actual[index].Label);
+            Assert.Equal(expected[index].Evidence, actual[index].Evidence);
+            Assert.False(string.IsNullOrWhiteSpace(actual[index].Key));
+            Assert.False(string.IsNullOrWhiteSpace(actual[index].FocusLabel));
+            Assert.False(string.IsNullOrWhiteSpace(actual[index].FocusTarget));
         }
     }
 }

@@ -53,6 +53,20 @@ public static partial class DemoCookbookCatalog
                     "The onboarding proof marker bounds this route to supported host setup.",
                     "FIVE_MINUTE_ONBOARDING_OK"),
             ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Preset launch selects a ready graph for first-run inspection.",
+                    "AiPipelineScenario"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "The host ladder keeps the first copied route separate from deeper proof routes.",
+                    "Host Recipe Ladder"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Startup evidence points to the hosted entry point instead of Demo internals.",
+                    "CreateRuntimeSurface"),
+            ],
             ["FIVE_MINUTE_ONBOARDING_OK"],
             new DemoCookbookRouteClarity(
                 "Shipped Avalonia route: AsterGraphHostBuilder.Create(...).BuildAvaloniaView() via StarterAvaloniaAppBuilder.",
@@ -103,6 +117,20 @@ public static partial class DemoCookbookCatalog
                     DemoCookbookScenarioKind.SupportEvidence,
                     "The authoring recipe is backed by an explicit proof marker.",
                     "AUTHORING_SURFACE_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Selection-owned commands are projected from the hosted session.",
+                    "GetCommandDescriptors"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Connection overlays stay visible as graph-surface authoring evidence.",
+                    "CreateEdgeOverlay"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Parameter and command metadata remain tied to ConsumerSample surfaces.",
+                    "GetCommandDescriptors"),
             ],
             ["AUTHORING_SURFACE_OK"],
             new DemoCookbookRouteClarity(
@@ -163,6 +191,20 @@ public static partial class DemoCookbookCatalog
                     "The ConsumerSample proof panel evidence backs the trust route.",
                     "PLUGIN_TRUST_EVIDENCE_PANEL_OK"),
             ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Trust decisions stay inspectable as explicit plugin metadata.",
+                    "PluginTrustDecision"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "The extensions panel projects trusted in-process loading state.",
+                    "PluginTrust"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "Route boundary lines keep plugin trust evidence out of the canonical host path.",
+                    "RouteBoundaryLines"),
+            ],
             ["PLUGIN_TRUST_EVIDENCE_PANEL_OK"],
             new DemoCookbookRouteClarity(
                 "Plugin route: AsterGraphEditorFactory.DiscoverPluginCandidates(...) with host-owned PluginTrustPolicy before loading.",
@@ -218,6 +260,20 @@ public static partial class DemoCookbookCatalog
                     "The runtime timeline links graph commands to captured diagnostics.",
                     "RuntimeCommandTimelineEntry"),
             ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Runtime diagnostics are projected as local feedback rows.",
+                    "RuntimeDiagnosticEntry"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Command timeline entries keep graph-command effects visible during support review.",
+                    "RuntimeCommandTimelineEntry"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Support bundles preserve runtime log evidence for handoff.",
+                    "RuntimeLogs"),
+            ],
             ["RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK"],
             new DemoCookbookRouteClarity(
                 "Runtime diagnostics route: AsterGraphEditorOptions.RuntimeOverlayProvider plus IGraphEditorSession.Queries.GetRuntimeOverlaySnapshot().",
@@ -263,6 +319,20 @@ public static partial class DemoCookbookCatalog
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.HostCodeExample,
                     "ConsumerSample proof code is the host-facing example for repair/help handoff.",
+                    "RepairHelpReviewLoopOk"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Validation feedback points repair actions at concrete graph issues.",
+                    "ValidationFeedback"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Proof panels expose review/help evidence without adding a workflow engine.",
+                    "DemoHostMenuGroups.Proof"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Repair/help proof covers connection repair handoff evidence.",
                     "RepairHelpReviewLoopOk"),
             ],
             ["REPAIR_HELP_REVIEW_LOOP_OK"],

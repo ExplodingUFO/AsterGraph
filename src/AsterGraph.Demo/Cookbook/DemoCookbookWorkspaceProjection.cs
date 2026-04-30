@@ -27,6 +27,7 @@ public sealed record DemoCookbookWorkspaceRecipeContent(
     IReadOnlyList<DemoCookbookWorkspaceAnchor> CodeExamples,
     IReadOnlyList<DemoCookbookWorkspaceAnchor> DocumentationLinks,
     IReadOnlyList<DemoCookbookWorkspaceScenarioPoint> ScenarioPoints,
+    IReadOnlyList<DemoCookbookWorkspaceInteractionFacet> InteractionFacets,
     IReadOnlyList<string> ProofMarkers,
     IReadOnlyList<string> DeferredGaps,
     DemoCookbookRouteClarity RouteClarity,
@@ -45,6 +46,14 @@ public sealed record DemoCookbookWorkspaceScenarioPoint(
     string GraphCueLabel,
     string GraphCueTarget,
     string ContentCue);
+
+public sealed record DemoCookbookWorkspaceInteractionFacet(
+    string Key,
+    DemoCookbookInteractionKind Kind,
+    string Label,
+    string Evidence,
+    string FocusLabel,
+    string FocusTarget);
 
 public static class DemoCookbookWorkspaceProjection
 {
@@ -101,6 +110,7 @@ public static class DemoCookbookWorkspaceProjection
             ConvertAnchors(recipe.CodeAnchors),
             ConvertAnchors(recipe.DocumentationAnchors),
             ConvertScenarioPoints(recipe),
+            ConvertInteractionFacets(recipe),
             recipe.ProofMarkers.ToArray(),
             posture.DeferredGaps,
             recipe.RouteClarity,
@@ -162,33 +172,12 @@ public static class DemoCookbookWorkspaceProjection
                 point.Label,
                 point.Evidence,
                 FormatScenarioCueLabel(point.Kind),
-                ResolveScenarioCueTarget(recipe, point),
+                ResolveEvidenceTarget(recipe, point.Evidence, "scenario"),
                 FormatScenarioContentCue(point.Kind, recipe.Id)))
             .ToArray();
 
     private static string CreateScenarioPointKey(string recipeId, int index)
         => recipeId + ":scenario-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
-
-    private static string ResolveScenarioCueTarget(DemoCookbookRecipe recipe, DemoCookbookScenarioPoint point)
-    {
-        var anchor = recipe.CodeAnchors
-            .Concat(recipe.DemoAnchors)
-            .Concat(recipe.DocumentationAnchors)
-            .FirstOrDefault(anchor => string.Equals(anchor.Evidence, point.Evidence, StringComparison.Ordinal));
-
-        if (anchor is not null)
-        {
-            return anchor.Path + "#" + point.Evidence;
-        }
-
-        if (recipe.ProofMarkers.Contains(point.Evidence, StringComparer.Ordinal))
-        {
-            return "proof:" + point.Evidence;
-        }
-
-        throw new InvalidOperationException(
-            $"Cookbook scenario evidence '{point.Evidence}' is not owned by recipe '{recipe.Id}'.");
-    }
 
     private static string FormatScenarioCueLabel(DemoCookbookScenarioKind kind)
         => kind switch
@@ -203,6 +192,53 @@ public static class DemoCookbookWorkspaceProjection
 
     private static string FormatScenarioContentCue(DemoCookbookScenarioKind kind, string routeId)
         => routeId + " / " + kind;
+
+    private static IReadOnlyList<DemoCookbookWorkspaceInteractionFacet> ConvertInteractionFacets(
+        DemoCookbookRecipe recipe)
+        => recipe.InteractionFacets
+            .Select((facet, index) => new DemoCookbookWorkspaceInteractionFacet(
+                CreateInteractionFacetKey(recipe.Id, index),
+                facet.Kind,
+                facet.Label,
+                facet.Evidence,
+                FormatInteractionFocusLabel(facet.Kind),
+                ResolveEvidenceTarget(recipe, facet.Evidence, "interaction")))
+            .ToArray();
+
+    private static string CreateInteractionFacetKey(string recipeId, int index)
+        => recipeId + ":interaction-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string ResolveEvidenceTarget(DemoCookbookRecipe recipe, string evidence, string itemKind)
+    {
+        var anchor = recipe.CodeAnchors
+            .Concat(recipe.DemoAnchors)
+            .Concat(recipe.DocumentationAnchors)
+            .FirstOrDefault(anchor => string.Equals(anchor.Evidence, evidence, StringComparison.Ordinal));
+
+        if (anchor is not null)
+        {
+            return anchor.Path + "#" + evidence;
+        }
+
+        if (recipe.ProofMarkers.Contains(evidence, StringComparer.Ordinal))
+        {
+            return "proof:" + evidence;
+        }
+
+        throw new InvalidOperationException(
+            $"Cookbook {itemKind} evidence '{evidence}' is not owned by recipe '{recipe.Id}'.");
+    }
+
+    private static string FormatInteractionFocusLabel(DemoCookbookInteractionKind kind)
+        => kind switch
+        {
+            DemoCookbookInteractionKind.Selection => "Selection focus",
+            DemoCookbookInteractionKind.Connection => "Connection focus",
+            DemoCookbookInteractionKind.LayoutReadability => "Layout/readability focus",
+            DemoCookbookInteractionKind.Inspection => "Inspection focus",
+            DemoCookbookInteractionKind.ValidationRuntimeFeedback => "Validation/runtime feedback focus",
+            _ => kind + " focus",
+        };
 
     private static string FormatCategory(DemoCookbookRecipeCategory category)
         => category switch

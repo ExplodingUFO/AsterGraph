@@ -51,6 +51,16 @@ Demo cookbook 是面向 AsterGraph 评估者的“代码 + 演示”索引。它
 - `SupportEvidence`: 每条路线的支持声明都绑定到本地 proof 或 docs evidence。
 - `HostCodeExample`: 可复制的宿主示例仍锚定到 starter 或 consumer sample 代码。
 
+## Professional interaction facets
+
+`DEMO_COOKBOOK_PROFESSIONAL_INTERACTION_OK` 证明 cookbook 显示的是有边界的交互 facet。它和 `DEMO_COOKBOOK_VISUAL_HIERARCHY_OK`、`DEMO_COOKBOOK_NAVIGATION_FEEDBACK_OK`、`DEMO_COOKBOOK_DETAIL_READABILITY_OK`、`DEMO_COOKBOOK_INTERACTION_STATES_OK` 一起闭环。
+
+- `Selection`: preset launch selects a ready graph (`AiPipelineScenario`)；authoring projects selection-owned commands (`GetCommandDescriptors`)。
+- `Connection`: authoring keeps connection overlays visible (`CreateEdgeOverlay`)；support review keeps command effects visible (`RuntimeCommandTimelineEntry`)；repair/help covers connection handoff (`RepairHelpReviewLoopOk`)。
+- `LayoutReadability`: first-run route copy stays separate in the ladder (`Host Recipe Ladder`)；plugin route boundaries stay explicit (`RouteBoundaryLines`)。
+- `Inspection`: hosted entry points、trust decisions、support logs 和 proof panels 都保持可检查（`CreateRuntimeSurface`、`PluginTrustDecision`、`RuntimeLogs`、`DemoHostMenuGroups.Proof`）。
+- `ValidationRuntimeFeedback`: extension、runtime 和 review feedback 都保持本地、source-backed（`PluginTrust`、`RuntimeDiagnosticEntry`、`ValidationFeedback`）。
+
 ## 怎么用
 
 1. 如果还没有跑过 SDK，先看 [Quick Start](./quick-start.md)。

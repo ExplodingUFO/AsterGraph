@@ -45,6 +45,14 @@ public sealed class DemoCookbookDetailReadabilityTests
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("支持证据：", StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.ScenarioPoints[0].Evidence, StringComparison.Ordinal));
 
+        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "interaction");
+        Assert.Equal(recipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("选择：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("连接：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("检查：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains("焦点：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains("目标：", StringComparison.Ordinal));
+
         viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "support");
         Assert.Equal(recipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
         Assert.StartsWith("支持边界：", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
@@ -75,5 +83,10 @@ public sealed class DemoCookbookDetailReadabilityTests
 
         Assert.StartsWith("Selected scenario: ", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("Graph operations: ", StringComparison.Ordinal));
+
+        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "interaction");
+
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("Selection: ", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains("Focus: ", StringComparison.Ordinal));
     }
 }

@@ -66,6 +66,7 @@ public static class DemoCookbookProof
             && snapshot.SelectedRecipe.GraphAnchors.Count > 0
             && snapshot.SelectedRecipe.CodeExamples.Count > 0
             && snapshot.SelectedRecipe.DocumentationLinks.Count > 0
+            && snapshot.SelectedRecipe.InteractionFacets.Count > 0
             && snapshot.SelectedRecipe.ProofMarkers.Count > 0
             && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.SupportBoundary));
         var routeCoverageOk = workspaceSnapshots.All(snapshot =>
@@ -104,6 +105,11 @@ public static class DemoCookbookProof
             .ToArray();
         var filteredSnapshot = DemoCookbookWorkspaceProjection.Create(pluginRecipe.Id, diagnosticsRecipes);
         var emptyFilteredSnapshot = DemoCookbookWorkspaceProjection.Create(pluginRecipe.Id, []);
+        var projectedInteractionKinds = workspaceSnapshots
+            .SelectMany(snapshot => snapshot.SelectedRecipe.InteractionFacets)
+            .Select(facet => facet.Kind)
+            .Distinct()
+            .ToArray();
         var professionalInteractionOk =
             filteredSnapshot.NavigationGroups.Count == 1
             && filteredSnapshot.NavigationGroups[0].Category == DemoCookbookRecipeCategory.DiagnosticsSupport
@@ -111,8 +117,15 @@ public static class DemoCookbookProof
             && filteredSnapshot.SelectedRecipe.RecipeId == pluginRecipe.Id
             && emptyFilteredSnapshot.NavigationGroups.Count == 0
             && emptyFilteredSnapshot.SelectedRecipe.RecipeId == pluginRecipe.Id
+            && DemoCookbookCatalog.RequiredInteractionKinds.All(projectedInteractionKinds.Contains)
             && workspaceSnapshots.All(snapshot =>
                 snapshot.SelectedRecipe.GraphAnchors.Count > 0
+                && snapshot.SelectedRecipe.InteractionFacets.Count >= 3
+                && snapshot.SelectedRecipe.InteractionFacets.All(facet =>
+                    !string.IsNullOrWhiteSpace(facet.Label)
+                    && !string.IsNullOrWhiteSpace(facet.Evidence)
+                    && !string.IsNullOrWhiteSpace(facet.FocusLabel)
+                    && HasInteractionEvidence(snapshot.SelectedRecipe, facet))
                 && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.RouteStatus)
                 && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.UnavailableActionDescription));
         var projectedScenarioKinds = workspaceSnapshots
@@ -184,6 +197,15 @@ public static class DemoCookbookProof
                .Concat(recipe.DocumentationLinks)
                .Any(anchor => string.Equals(anchor.Evidence, point.Evidence, StringComparison.Ordinal))
            || recipe.ProofMarkers.Any(marker => string.Equals(marker, point.Evidence, StringComparison.Ordinal));
+
+    private static bool HasInteractionEvidence(
+        DemoCookbookWorkspaceRecipeContent recipe,
+        DemoCookbookWorkspaceInteractionFacet facet)
+        => recipe.GraphAnchors
+               .Concat(recipe.CodeExamples)
+               .Concat(recipe.DocumentationLinks)
+               .Any(anchor => string.Equals(anchor.Evidence, facet.Evidence, StringComparison.Ordinal))
+           || recipe.ProofMarkers.Any(marker => string.Equals(marker, facet.Evidence, StringComparison.Ordinal));
 
     private static bool ContainsUnsupportedPromise(string text)
         => text.Contains("enabled fallback", StringComparison.OrdinalIgnoreCase)

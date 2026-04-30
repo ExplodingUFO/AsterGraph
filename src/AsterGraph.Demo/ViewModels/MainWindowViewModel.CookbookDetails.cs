@@ -57,6 +57,10 @@ public partial class MainWindowViewModel
                 .. FormatSelectedCookbookScenarioPoint(SelectedCookbookScenarioPoint),
                 .. FormatCookbookScenarioPoints(CookbookWorkspace.SelectedRecipe.ScenarioPoints),
             ],
+            "interaction" =>
+            [
+                .. FormatCookbookInteractionFacets(CookbookWorkspace.SelectedRecipe.InteractionFacets),
+            ],
             "support" =>
             [
                 T("支持边界：", "Support boundary: ") + SelectedCookbookRecipe.Title,
@@ -76,6 +80,7 @@ public partial class MainWindowViewModel
             new CookbookDetailMode("proof", T("证明", "Proof")),
             new CookbookDetailMode("docs", T("文档", "Docs")),
             new CookbookDetailMode("scenario", T("场景", "Scenario")),
+            new CookbookDetailMode("interaction", T("交互", "Interaction")),
             new CookbookDetailMode("support", T("边界", "Support")),
         ];
 
@@ -96,6 +101,14 @@ public partial class MainWindowViewModel
                                            + point.Label + Environment.NewLine
                                            + T("证据：", "Evidence: ") + point.Evidence);
 
+    private IEnumerable<string> FormatCookbookInteractionFacets(
+        IReadOnlyList<Cookbook.DemoCookbookWorkspaceInteractionFacet> interactionFacets)
+        => interactionFacets.Select(facet => FormatCookbookInteractionKind(facet.Kind)
+                                             + facet.Label + Environment.NewLine
+                                             + T("焦点：", "Focus: ") + facet.FocusLabel
+                                             + Environment.NewLine
+                                             + T("目标：", "Target: ") + facet.FocusTarget);
+
     private IEnumerable<string> FormatSelectedCookbookScenarioPoint(
         Cookbook.DemoCookbookWorkspaceScenarioPoint point)
     {
@@ -112,6 +125,17 @@ public partial class MainWindowViewModel
             Cookbook.DemoCookbookScenarioKind.ValidationRuntimeOverlay => T("验证/运行时覆盖：", "Validation/runtime overlay: "),
             Cookbook.DemoCookbookScenarioKind.SupportEvidence => T("支持证据：", "Support evidence: "),
             Cookbook.DemoCookbookScenarioKind.HostCodeExample => T("宿主代码示例：", "Host code example: "),
+            _ => kind + ": ",
+        };
+
+    private string FormatCookbookInteractionKind(Cookbook.DemoCookbookInteractionKind kind)
+        => kind switch
+        {
+            Cookbook.DemoCookbookInteractionKind.Selection => T("选择：", "Selection: "),
+            Cookbook.DemoCookbookInteractionKind.Connection => T("连接：", "Connection: "),
+            Cookbook.DemoCookbookInteractionKind.LayoutReadability => T("布局/可读性：", "Layout/readability: "),
+            Cookbook.DemoCookbookInteractionKind.Inspection => T("检查：", "Inspection: "),
+            Cookbook.DemoCookbookInteractionKind.ValidationRuntimeFeedback => T("验证/运行反馈：", "Validation/runtime feedback: "),
             _ => kind + ": ",
         };
 }
