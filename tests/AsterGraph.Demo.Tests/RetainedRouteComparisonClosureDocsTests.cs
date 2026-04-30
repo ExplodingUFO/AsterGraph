@@ -13,6 +13,8 @@ public sealed class RetainedRouteComparisonClosureDocsTests
         var hostIntegration = ReadRepoFile("docs/en/host-integration.md");
         var retainedRecipe = ReadRepoFile("docs/en/retained-migration-recipe.md");
 
+        Assert.Contains("This guide documents the supported host routes", hostIntegration, StringComparison.Ordinal);
+        Assert.DoesNotContain("expands the supported host routes", hostIntegration, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("When To Choose Retained", hostIntegration, StringComparison.Ordinal);
         Assert.Contains("Use `CreateSession(...)` when you are starting new work or own your UI.", hostIntegration, StringComparison.Ordinal);
         Assert.Contains("Use `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` when you want the shipped Avalonia route.", hostIntegration, StringComparison.Ordinal);
@@ -30,6 +32,8 @@ public sealed class RetainedRouteComparisonClosureDocsTests
         var hostIntegration = ReadRepoFile("docs/zh-CN/host-integration.md");
         var retainedRecipe = ReadRepoFile("docs/zh-CN/retained-migration-recipe.md");
 
+        Assert.Contains("这份文档只说明受支持的宿主路线", hostIntegration, StringComparison.Ordinal);
+        Assert.DoesNotContain("只展开受支持的宿主路线", hostIntegration, StringComparison.Ordinal);
         Assert.Contains("何时选择 retained", hostIntegration, StringComparison.Ordinal);
         Assert.Contains("当你在开始新工作或宿主自己拥有 UI 时，请使用 `CreateSession(...)`", hostIntegration, StringComparison.Ordinal);
         Assert.Contains("当你想使用 shipped Avalonia 路线时，请使用 `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`", hostIntegration, StringComparison.Ordinal);

@@ -1,6 +1,6 @@
 # Host Integration Guide
 
-This guide expands the supported host routes without turning the public onboarding flow into maintainer proof documentation. The canonical route stays session-first/runtime-first; retained MVVM is only a compatibility bridge during migration.
+This guide documents the supported host routes without turning the public onboarding flow into maintainer proof documentation. The canonical route stays session-first/runtime-first; retained MVVM is only a compatibility bridge during migration.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 
