@@ -12,7 +12,11 @@ public sealed record DemoCookbookRecipe(
     IReadOnlyList<DemoCookbookInteractionFacet> InteractionFacets,
     IReadOnlyList<string> ProofMarkers,
     DemoCookbookRouteClarity RouteClarity,
-    string SupportBoundary);
+    string SupportBoundary,
+    IReadOnlyList<DemoCookbookWorkflowStep>? WorkflowSteps = null)
+{
+    public IReadOnlyList<DemoCookbookWorkflowStep> WorkflowSteps { get; } = WorkflowSteps ?? [];
+}
 
 public sealed record DemoCookbookAnchor(
     string Label,
@@ -34,6 +38,14 @@ public sealed record DemoCookbookRouteClarity(
     string PackageBoundary,
     string DemoBoundary);
 
+public sealed record DemoCookbookWorkflowStep(
+    DemoCookbookWorkflowKind Kind,
+    string Title,
+    string CommandId,
+    string CodeEvidence,
+    string DemoEvidence,
+    string ProofMarker);
+
 public enum DemoCookbookScenarioKind
 {
     GraphOperations,
@@ -50,4 +62,13 @@ public enum DemoCookbookInteractionKind
     LayoutReadability,
     Inspection,
     ValidationRuntimeFeedback,
+}
+
+public enum DemoCookbookWorkflowKind
+{
+    CommandRegistry,
+    SemanticEditing,
+    TemplatePreset,
+    SelectionTransform,
+    NavigationFocus,
 }

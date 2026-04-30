@@ -58,6 +58,7 @@ public static partial class DemoCookbookCatalog
             AddAnchorIssues(issues, recipe.Id, nameof(recipe.DocumentationAnchors), recipe.DocumentationAnchors);
             AddScenarioPointIssues(issues, recipe);
             AddInteractionFacetIssues(issues, recipe);
+            AddWorkflowStepIssues(issues, recipe);
 
             foreach (var proofMarker in recipe.ProofMarkers)
             {
@@ -143,6 +144,46 @@ public static partial class DemoCookbookCatalog
             recipe,
             nameof(recipe.InteractionFacets),
             recipe.InteractionFacets.Select(facet => (facet.Label, facet.Evidence)).ToArray());
+    }
+
+    private static void AddWorkflowStepIssues(ICollection<string> issues, DemoCookbookRecipe recipe)
+    {
+        if (recipe.WorkflowSteps.Count == 0)
+        {
+            return;
+        }
+
+        var evidenceAnchors = recipe.CodeAnchors
+            .Concat(recipe.DemoAnchors)
+            .Concat(recipe.DocumentationAnchors)
+            .Select(anchor => anchor.Evidence)
+            .Concat(recipe.ProofMarkers)
+            .ToHashSet(StringComparer.Ordinal);
+
+        for (var index = 0; index < recipe.WorkflowSteps.Count; index++)
+        {
+            var step = recipe.WorkflowSteps[index];
+            AddIfMissing(issues, recipe.Id, $"{nameof(recipe.WorkflowSteps)}[{index}].{nameof(step.Title)}", step.Title);
+            AddIfMissing(issues, recipe.Id, $"{nameof(recipe.WorkflowSteps)}[{index}].{nameof(step.CommandId)}", step.CommandId);
+            AddIfMissing(issues, recipe.Id, $"{nameof(recipe.WorkflowSteps)}[{index}].{nameof(step.CodeEvidence)}", step.CodeEvidence);
+            AddIfMissing(issues, recipe.Id, $"{nameof(recipe.WorkflowSteps)}[{index}].{nameof(step.DemoEvidence)}", step.DemoEvidence);
+            AddIfMissing(issues, recipe.Id, $"{nameof(recipe.WorkflowSteps)}[{index}].{nameof(step.ProofMarker)}", step.ProofMarker);
+
+            if (!evidenceAnchors.Contains(step.CodeEvidence))
+            {
+                issues.Add($"{recipe.Id} {nameof(recipe.WorkflowSteps)}[{index}] code evidence is not tied to a recipe anchor or proof marker: {step.CodeEvidence}");
+            }
+
+            if (!evidenceAnchors.Contains(step.DemoEvidence))
+            {
+                issues.Add($"{recipe.Id} {nameof(recipe.WorkflowSteps)}[{index}] demo evidence is not tied to a recipe anchor or proof marker: {step.DemoEvidence}");
+            }
+
+            if (!recipe.ProofMarkers.Contains(step.ProofMarker, StringComparer.Ordinal))
+            {
+                issues.Add($"{recipe.Id} {nameof(recipe.WorkflowSteps)}[{index}] proof marker is not listed on the recipe: {step.ProofMarker}");
+            }
+        }
     }
 
     private static void AddEvidenceBackedItemIssues(

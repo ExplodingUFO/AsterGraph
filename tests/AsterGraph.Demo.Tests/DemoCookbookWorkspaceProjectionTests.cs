@@ -49,6 +49,7 @@ public sealed class DemoCookbookWorkspaceProjectionTests
             AssertEquivalentAnchors(recipe.DocumentationAnchors, content.DocumentationLinks);
             AssertEquivalentScenarioPoints(recipe.ScenarioPoints, content.ScenarioPoints);
             AssertEquivalentInteractionFacets(recipe.InteractionFacets, content.InteractionFacets);
+            AssertEquivalentWorkflowSteps(recipe.WorkflowSteps, content.WorkflowSteps);
             Assert.Equal(recipe.ProofMarkers, content.ProofMarkers);
             Assert.NotEmpty(content.DeferredGaps);
             Assert.Equal(recipe.RouteClarity, content.RouteClarity);
@@ -178,6 +179,30 @@ public sealed class DemoCookbookWorkspaceProjectionTests
     }
 
     [Fact]
+    public void WorkspaceProjection_ProjectsV077WorkflowStepTargets()
+    {
+        var recipe = DemoCookbookCatalog.Recipes.Single(item => item.Id == "v077-authoring-platform-route");
+        var content = DemoCookbookWorkspaceProjection.Create(recipe.Id).SelectedRecipe;
+
+        Assert.Equal(recipe.WorkflowSteps.Count, content.WorkflowSteps.Count);
+        Assert.Contains(content.WorkflowSteps, step =>
+            step.Kind == DemoCookbookWorkflowKind.CommandRegistry
+            && step.CommandId == "query.command-registry"
+            && step.CodeTarget.Contains("src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs#GetCommandRegistry", StringComparison.Ordinal));
+        Assert.Contains(content.WorkflowSteps, step =>
+            step.Kind == DemoCookbookWorkflowKind.NavigationFocus
+            && step.CommandId == "viewport.focus-search-result"
+            && step.DemoTarget.Contains("tests/AsterGraph.Editor.Tests/GraphEditorNavigationFocusWorkflowTests.cs#Commands_ViewportBookmarksCaptureActivateAndRemoveCurrentScopeViewport", StringComparison.Ordinal));
+        Assert.All(content.WorkflowSteps, step =>
+        {
+            Assert.StartsWith(recipe.Id + ":workflow-", step.Key, StringComparison.Ordinal);
+            Assert.Contains(step.ProofMarker, recipe.ProofMarkers);
+            Assert.False(string.IsNullOrWhiteSpace(step.CodeTarget));
+            Assert.False(string.IsNullOrWhiteSpace(step.DemoTarget));
+        });
+    }
+
+    [Fact]
     public void WorkspaceProjection_LeftNavigationCanUseFilteredRecipeSetWithoutChangingSelection()
     {
         var selectedRecipe = DemoCookbookCatalog.Recipes.Single(recipe => recipe.Id == "plugin-trust-route");
@@ -246,6 +271,24 @@ public sealed class DemoCookbookWorkspaceProjectionTests
             Assert.False(string.IsNullOrWhiteSpace(actual[index].Key));
             Assert.False(string.IsNullOrWhiteSpace(actual[index].FocusLabel));
             Assert.False(string.IsNullOrWhiteSpace(actual[index].FocusTarget));
+        }
+    }
+
+    private static void AssertEquivalentWorkflowSteps(
+        IReadOnlyList<DemoCookbookWorkflowStep> expected,
+        IReadOnlyList<DemoCookbookWorkspaceWorkflowStep> actual)
+    {
+        Assert.Equal(expected.Count, actual.Count);
+
+        for (var index = 0; index < expected.Count; index++)
+        {
+            Assert.Equal(expected[index].Kind, actual[index].Kind);
+            Assert.Equal(expected[index].Title, actual[index].Title);
+            Assert.Equal(expected[index].CommandId, actual[index].CommandId);
+            Assert.Equal(expected[index].ProofMarker, actual[index].ProofMarker);
+            Assert.False(string.IsNullOrWhiteSpace(actual[index].Key));
+            Assert.False(string.IsNullOrWhiteSpace(actual[index].CodeTarget));
+            Assert.False(string.IsNullOrWhiteSpace(actual[index].DemoTarget));
         }
     }
 }

@@ -28,6 +28,7 @@ public sealed record DemoCookbookWorkspaceRecipeContent(
     IReadOnlyList<DemoCookbookWorkspaceAnchor> DocumentationLinks,
     IReadOnlyList<DemoCookbookWorkspaceScenarioPoint> ScenarioPoints,
     IReadOnlyList<DemoCookbookWorkspaceInteractionFacet> InteractionFacets,
+    IReadOnlyList<DemoCookbookWorkspaceWorkflowStep> WorkflowSteps,
     IReadOnlyList<string> ProofMarkers,
     IReadOnlyList<string> DeferredGaps,
     DemoCookbookRouteClarity RouteClarity,
@@ -54,6 +55,15 @@ public sealed record DemoCookbookWorkspaceInteractionFacet(
     string Evidence,
     string FocusLabel,
     string FocusTarget);
+
+public sealed record DemoCookbookWorkspaceWorkflowStep(
+    string Key,
+    DemoCookbookWorkflowKind Kind,
+    string Title,
+    string CommandId,
+    string CodeTarget,
+    string DemoTarget,
+    string ProofMarker);
 
 public static class DemoCookbookWorkspaceProjection
 {
@@ -111,6 +121,7 @@ public static class DemoCookbookWorkspaceProjection
             ConvertAnchors(recipe.DocumentationAnchors),
             ConvertScenarioPoints(recipe),
             ConvertInteractionFacets(recipe),
+            ConvertWorkflowSteps(recipe),
             recipe.ProofMarkers.ToArray(),
             posture.DeferredGaps,
             recipe.RouteClarity,
@@ -208,6 +219,19 @@ public static class DemoCookbookWorkspaceProjection
                 facet.Evidence,
                 FormatInteractionFocusLabel(facet.Kind),
                 ResolveEvidenceTarget(recipe, facet.Evidence, "interaction")))
+            .ToArray();
+
+    private static IReadOnlyList<DemoCookbookWorkspaceWorkflowStep> ConvertWorkflowSteps(
+        DemoCookbookRecipe recipe)
+        => recipe.WorkflowSteps
+            .Select((step, index) => new DemoCookbookWorkspaceWorkflowStep(
+                recipe.Id + ":workflow-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                step.Kind,
+                step.Title,
+                step.CommandId,
+                ResolveEvidenceTarget(recipe, step.CodeEvidence, "workflow code"),
+                ResolveEvidenceTarget(recipe, step.DemoEvidence, "workflow demo"),
+                step.ProofMarker))
             .ToArray();
 
     private static string CreateInteractionFacetKey(string recipeId, int index)

@@ -163,6 +163,166 @@ public static partial class DemoCookbookCatalog
                 "ConsumerSample is the copyable recipe; Demo presenters are visual proof only and do not define package contracts."),
             "Authoring samples reuse public seams, source-backed outline projection, and command recovery metadata without creating a second editor/runtime model."),
         new DemoCookbookRecipe(
+            "v077-authoring-platform-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "v0.77 authoring platform route",
+            "Walk command discovery, semantic edits, reusable presets, selection transforms, and navigation focus as one supported authoring flow.",
+            [
+                new DemoCookbookAnchor(
+                    "Runtime command registry",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetCommandRegistry"),
+                new DemoCookbookAnchor(
+                    "Semantic delete and reconnect",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryDeleteSelectionAndReconnect"),
+                new DemoCookbookAnchor(
+                    "Reusable preset application",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryApplyFragmentTemplatePreset"),
+                new DemoCookbookAnchor(
+                    "Selection transform snapshot",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetSelectionTransformSnapshot"),
+                new DemoCookbookAnchor(
+                    "Graph item search and bookmarks",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "SearchGraphItems"),
+                new DemoCookbookAnchor(
+                    "Search result focus command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryFocusGraphItemSearchResult"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Command registry proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorCommandRegistryTests.cs",
+                    "CommandRegistry_ExposesStableMenuToolAndShortcutPlacements"),
+                new DemoCookbookAnchor(
+                    "Semantic editing proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorDeleteReconnectDetachTests.cs",
+                    "TryDeleteSelectionAndReconnect"),
+                new DemoCookbookAnchor(
+                    "Template preset proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionFragmentContractsTests.cs",
+                    "SessionCommands_ApplyFragmentTemplatePreset_IsOneUndoableRemappedFragmentPaste"),
+                new DemoCookbookAnchor(
+                    "Selection transform proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSelectionTransformContractsTests.cs",
+                    "Commands_RouteSelectionTransformMoveThroughCanonicalCommandInvocation"),
+                new DemoCookbookAnchor(
+                    "Navigation search proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorGraphItemSearchProjectionTests.cs",
+                    "Queries_SearchGraphItemsReturnsStableNodeGroupConnectionScopeAndIssueResults"),
+                new DemoCookbookAnchor(
+                    "Bookmark focus proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorNavigationFocusWorkflowTests.cs",
+                    "Commands_ViewportBookmarksCaptureActivateAndRemoveCurrentScopeViewport"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Public API inventory",
+                    "docs/en/public-api-inventory.md",
+                    "canonical session route"),
+                new DemoCookbookAnchor(
+                    "Command surface support note",
+                    "docs/en/support-bundle.md",
+                    "Command palette and toolbar contribution proof remains on the shared command/session route"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.HostCodeExample,
+                    "The command registry is the code anchor for menus, tools, shortcuts, and disabled recovery states.",
+                    "GetCommandRegistry"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Semantic edits and reusable presets run through undoable session commands.",
+                    "TryDeleteSelectionAndReconnect"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Selection transform and snap evidence stay query-backed instead of UI-local.",
+                    "GetSelectionTransformSnapshot"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "Search and focus workflows return stable graph item targets.",
+                    "SearchGraphItems"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Focused tests prove each v0.77 workflow without turning Demo into a generator.",
+                    "CommandRegistry_ExposesStableMenuToolAndShortcutPlacements"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Selection movement is represented by source-backed transform snapshots and canonical move commands.",
+                    "Commands_RouteSelectionTransformMoveThroughCanonicalCommandInvocation"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Delete-and-reconnect keeps semantic connection repair on the shared command route.",
+                    "TryDeleteSelectionAndReconnect"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "Template presets and snap/transform evidence keep repeated authoring actions readable.",
+                    "TryApplyFragmentTemplatePreset"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Command registry entries expose where hosts should present actions.",
+                    "CommandRegistry_ExposesStableMenuToolAndShortcutPlacements"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Search-result and issue focus reuse stable runtime targets.",
+                    "TryFocusGraphItemSearchResult"),
+            ],
+            [
+                "CommandRegistry_ExposesStableMenuToolAndShortcutPlacements",
+                "SessionCommands_ApplyFragmentTemplatePreset_IsOneUndoableRemappedFragmentPaste",
+                "Commands_RouteSelectionTransformMoveThroughCanonicalCommandInvocation",
+                "Queries_SearchGraphItemsReturnsStableNodeGroupConnectionScopeAndIssueResults",
+                "Commands_ViewportBookmarksCaptureActivateAndRemoveCurrentScopeViewport",
+            ],
+            new DemoCookbookRouteClarity(
+                "v0.77 route: IGraphEditorSession.Queries.GetCommandRegistry(), SearchGraphItems(), GetSelectionTransformSnapshot(), and IGraphEditorSession.Commands semantic/template/focus commands.",
+                "Supported seams live in `AsterGraph.Editor` command/query snapshots and `AsterGraph.Avalonia` hosted projection surfaces.",
+                "Demo cookbook presents code anchors and proof markers only; it does not generate workflows or execute macro scripts."),
+            "v0.77 cookbook steps are code-plus-proof guidance over supported session contracts; Demo remains a sample/proof surface.",
+            [
+                new DemoCookbookWorkflowStep(
+                    DemoCookbookWorkflowKind.CommandRegistry,
+                    "Discover command surfaces",
+                    "query.command-registry",
+                    "GetCommandRegistry",
+                    "CommandRegistry_ExposesStableMenuToolAndShortcutPlacements",
+                    "CommandRegistry_ExposesStableMenuToolAndShortcutPlacements"),
+                new DemoCookbookWorkflowStep(
+                    DemoCookbookWorkflowKind.SemanticEditing,
+                    "Run semantic delete and reconnect",
+                    "selection.delete-reconnect",
+                    "TryDeleteSelectionAndReconnect",
+                    "TryDeleteSelectionAndReconnect",
+                    "CommandRegistry_ExposesStableMenuToolAndShortcutPlacements"),
+                new DemoCookbookWorkflowStep(
+                    DemoCookbookWorkflowKind.TemplatePreset,
+                    "Apply a reusable fragment preset",
+                    "fragments.apply-template-preset",
+                    "TryApplyFragmentTemplatePreset",
+                    "SessionCommands_ApplyFragmentTemplatePreset_IsOneUndoableRemappedFragmentPaste",
+                    "SessionCommands_ApplyFragmentTemplatePreset_IsOneUndoableRemappedFragmentPaste"),
+                new DemoCookbookWorkflowStep(
+                    DemoCookbookWorkflowKind.SelectionTransform,
+                    "Inspect and move selected graph items",
+                    "selection.transform.move",
+                    "GetSelectionTransformSnapshot",
+                    "Commands_RouteSelectionTransformMoveThroughCanonicalCommandInvocation",
+                    "Commands_RouteSelectionTransformMoveThroughCanonicalCommandInvocation"),
+                new DemoCookbookWorkflowStep(
+                    DemoCookbookWorkflowKind.NavigationFocus,
+                    "Search, bookmark, and focus graph items",
+                    "viewport.focus-search-result",
+                    "SearchGraphItems",
+                    "Commands_ViewportBookmarksCaptureActivateAndRemoveCurrentScopeViewport",
+                    "Queries_SearchGraphItemsReturnsStableNodeGroupConnectionScopeAndIssueResults"),
+            ]),
+        new DemoCookbookRecipe(
             "performance-viewport-route",
             DemoCookbookRecipeCategory.PerformanceViewport,
             "Performance and viewport route",
