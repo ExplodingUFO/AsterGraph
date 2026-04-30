@@ -18,6 +18,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     GraphDocument Document { get; }
 
+    GraphEditorSelectionSnapshot Selection { get; }
+
     int SelectedNodeCount { get; }
 
     bool CanUndo { get; }
@@ -228,6 +230,15 @@ internal sealed class GraphEditorKernelCommandRouter
                 "selection.connections.set",
                 GraphEditorCommandSourceKind.Kernel,
                 true),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "selection.transform.move",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Nodes.AllowMove && hasSelection,
+                GetSelectionDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                    hasSelection,
+                    "Selection transform is disabled by host permissions.",
+                    "Select one or more nodes before moving the selection.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "selection.clear",
                 GraphEditorCommandSourceKind.Kernel,
@@ -879,6 +890,7 @@ internal sealed class GraphEditorKernelCommandRouter
                 or "selection.delete"
                 or "selection.delete-reconnect"
                 or "selection.detach-connections"
+                or "selection.transform.move"
                 or "clipboard.copy"
                 or "fragments.export-selection"
                 or "fragments.export-template"
@@ -1062,6 +1074,34 @@ internal sealed class GraphEditorKernelCommandRouter
                 }
 
                 _host.SetNodePositions(positions.Select(position => position!).ToList(), ResolveOptionalUpdateStatus(command, "updateStatus"));
+                return true;
+
+            case "selection.transform.move":
+                if (!TryGetDoubleArgument(command, "deltaX", out var selectionDeltaX)
+                    || !TryGetDoubleArgument(command, "deltaY", out var selectionDeltaY))
+                {
+                    return false;
+                }
+
+                var constrainedDelta = ResolveOptionalBool(command, "constrainToPrimaryAxis")
+                    ? ConstrainDeltaToPrimaryAxis(new GraphPoint(selectionDeltaX, selectionDeltaY))
+                    : new GraphPoint(selectionDeltaX, selectionDeltaY);
+                if (constrainedDelta == new GraphPoint(0d, 0d))
+                {
+                    return false;
+                }
+
+                var selectedNodeIds = _host.Selection.SelectedNodeIds.ToHashSet(StringComparer.Ordinal);
+                var selectedIds = _host.Document.Nodes
+                    .Where(node => selectedNodeIds.Contains(node.Id))
+                    .Select(node => new NodePositionSnapshot(node.Id, node.Position + constrainedDelta))
+                    .ToList();
+                if (selectedIds.Count == 0)
+                {
+                    return false;
+                }
+
+                _host.SetNodePositions(selectedIds, ResolveOptionalUpdateStatus(command, "updateStatus"));
                 return true;
 
             case "layout.apply-plan":
@@ -1574,6 +1614,16 @@ internal sealed class GraphEditorKernelCommandRouter
         => !command.TryGetArgument(argumentName, out var updateStatusValue)
             || !bool.TryParse(updateStatusValue, out var parsedUpdateStatus)
             || parsedUpdateStatus;
+
+    private static bool ResolveOptionalBool(GraphEditorCommandInvocationSnapshot command, string argumentName)
+        => command.TryGetArgument(argumentName, out var value)
+           && bool.TryParse(value, out var parsed)
+           && parsed;
+
+    private static GraphPoint ConstrainDeltaToPrimaryAxis(GraphPoint delta)
+        => Math.Abs(delta.X) >= Math.Abs(delta.Y)
+            ? new GraphPoint(delta.X, 0d)
+            : new GraphPoint(0d, delta.Y);
 
     private static GraphConnectionTargetRef CreateConnectionTarget(
         GraphEditorCommandInvocationSnapshot command,

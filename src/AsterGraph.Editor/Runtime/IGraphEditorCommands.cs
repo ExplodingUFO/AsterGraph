@@ -241,6 +241,9 @@ public interface IGraphEditorCommands
     bool TrySnapAllNodesToGrid(double gridSize = 20, bool updateStatus = true)
         => throw new NotSupportedException();
 
+    bool TryMoveSelectionBy(double deltaX, double deltaY, bool constrainToPrimaryAxis = false, bool updateStatus = true)
+        => throw new NotSupportedException();
+
     /// <summary>
     /// Attempts to update one node's persisted card width through the runtime mutation path.
     /// </summary>

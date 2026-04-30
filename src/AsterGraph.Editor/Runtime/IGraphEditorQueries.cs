@@ -27,6 +27,9 @@ public interface IGraphEditorQueries
     IReadOnlyList<string> GetSelectedNodeConnectionIds()
         => [];
 
+    GraphEditorSelectionTransformSnapshot GetSelectionTransformSnapshot(GraphEditorSelectionTransformQuery? query = null)
+        => throw new NotSupportedException();
+
     /// <summary>
     /// 获取当前视口快照。
     /// </summary>

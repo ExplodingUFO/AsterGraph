@@ -38,6 +38,56 @@ public sealed partial class GraphEditorSession
             .ToList();
     }
 
+    public GraphEditorSelectionTransformSnapshot GetSelectionTransformSnapshot(GraphEditorSelectionTransformQuery? query = null)
+    {
+        query ??= new GraphEditorSelectionTransformQuery();
+        var document = _host.CreateActiveScopeDocumentSnapshot();
+        var selection = GetSelectionSnapshot();
+        var selectedNodeIds = selection.SelectedNodeIds.ToHashSet(StringComparer.Ordinal);
+        var selectedNodes = document.Nodes
+            .Where(node => selectedNodeIds.Contains(node.Id))
+            .ToList();
+        var selectedGroups = _host.GetNodeGroups()
+            .Where(group => group.NodeIds.Any(selectedNodeIds.Contains))
+            .Select(group => group.Id)
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToList();
+        var selectedConnectionIds = document.Connections
+            .Where(connection => selectedNodeIds.Contains(connection.SourceNodeId) && selectedNodeIds.Contains(connection.TargetNodeId))
+            .Select(connection => connection.Id)
+            .Concat(selection.SelectedConnectionIds)
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToList();
+        var previewDelta = NormalizeTransformDelta(query.PreviewDelta ?? new GraphPoint(0d, 0d), query.ConstrainPreviewToPrimaryAxis);
+        var items = selectedNodes
+            .OrderBy(node => node.Id, StringComparer.Ordinal)
+            .Select(node => new GraphEditorSelectionTransformItemSnapshot(
+                node.Id,
+                node.Position,
+                node.Size,
+                node.Position + previewDelta))
+            .ToList();
+        var (boundsPosition, boundsSize) = CreateBounds(selectedNodes);
+        var (rectangleNodeIds, rectangleConnectionIds) = ProjectSelectionRectangle(document, query);
+        var emptyReason = selectedNodes.Count == 0
+            ? "Select one or more nodes before transforming the selection."
+            : null;
+
+        return new GraphEditorSelectionTransformSnapshot(
+            selectedNodes.Count > 0,
+            selectedNodes.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal).ToList(),
+            selectedConnectionIds,
+            selectedGroups,
+            boundsPosition,
+            boundsSize,
+            previewDelta,
+            items,
+            rectangleNodeIds,
+            rectangleConnectionIds,
+            emptyReason);
+    }
+
     public GraphEditorViewportSnapshot GetViewportSnapshot()
         => _host.GetViewportSnapshot();
 
@@ -614,6 +664,69 @@ public sealed partial class GraphEditorSession
 
     private static string NormalizeSearchText(string? searchText)
         => string.IsNullOrWhiteSpace(searchText) ? string.Empty : searchText.Trim();
+
+    private static (GraphPoint? Position, GraphSize? Size) CreateBounds(IReadOnlyList<GraphNode> nodes)
+    {
+        if (nodes.Count == 0)
+        {
+            return (null, null);
+        }
+
+        var left = nodes.Min(node => node.Position.X);
+        var top = nodes.Min(node => node.Position.Y);
+        var right = nodes.Max(node => node.Position.X + node.Size.Width);
+        var bottom = nodes.Max(node => node.Position.Y + node.Size.Height);
+        return (new GraphPoint(left, top), new GraphSize(right - left, bottom - top));
+    }
+
+    private static (IReadOnlyList<string> NodeIds, IReadOnlyList<string> ConnectionIds) ProjectSelectionRectangle(
+        GraphDocument document,
+        GraphEditorSelectionTransformQuery query)
+    {
+        if (query.SelectionRectanglePosition is not { } position || query.SelectionRectangleSize is not { } size)
+        {
+            return ([], []);
+        }
+
+        var left = Math.Min(position.X, position.X + size.Width);
+        var top = Math.Min(position.Y, position.Y + size.Height);
+        var right = Math.Max(position.X, position.X + size.Width);
+        var bottom = Math.Max(position.Y, position.Y + size.Height);
+        var nodeIds = document.Nodes
+            .Where(node => Intersects(left, top, right, bottom, node.Position, node.Size))
+            .Select(node => node.Id)
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToList();
+        var nodeIdSet = nodeIds.ToHashSet(StringComparer.Ordinal);
+        var connectionIds = document.Connections
+            .Where(connection => nodeIdSet.Contains(connection.SourceNodeId) && nodeIdSet.Contains(connection.TargetNodeId))
+            .Select(connection => connection.Id)
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToList();
+        return (nodeIds, connectionIds);
+    }
+
+    private static bool Intersects(double left, double top, double right, double bottom, GraphPoint position, GraphSize size)
+    {
+        var nodeRight = position.X + size.Width;
+        var nodeBottom = position.Y + size.Height;
+        return position.X <= right
+               && nodeRight >= left
+               && position.Y <= bottom
+               && nodeBottom >= top;
+    }
+
+    private static GraphPoint NormalizeTransformDelta(GraphPoint delta, bool constrainToPrimaryAxis)
+    {
+        if (!constrainToPrimaryAxis)
+        {
+            return delta;
+        }
+
+        return Math.Abs(delta.X) >= Math.Abs(delta.Y)
+            ? new GraphPoint(delta.X, 0d)
+            : new GraphPoint(0d, delta.Y);
+    }
 
     private static bool MatchesTemplatePaletteSearch(GraphEditorTemplatePaletteItemSnapshot item, string searchText)
         => Contains(item.Id, searchText)

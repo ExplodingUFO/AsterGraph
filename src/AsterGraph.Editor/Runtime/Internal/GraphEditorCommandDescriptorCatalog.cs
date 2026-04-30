@@ -13,6 +13,7 @@ internal static class GraphEditorCommandDescriptorCatalog
             ["selection.delete"] = new("Delete Selection", "selection", "delete", "Delete"),
             ["selection.delete-reconnect"] = new("Delete And Reconnect", "selection", "connect", null),
             ["selection.detach-connections"] = new("Detach And Reconnect", "selection", "disconnect", null),
+            ["selection.transform.move"] = new("Move Selection", "selection", "move", null),
             ["nodes.move"] = new("Move Nodes", "nodes", "move", null),
             ["nodes.resize"] = new("Resize Node", "nodes", "resize", null),
             ["nodes.resize-width"] = new("Resize Node Width", "nodes", "resize-width", null),

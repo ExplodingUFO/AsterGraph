@@ -32,6 +32,7 @@ public sealed partial class GraphEditorSession
         "fragments.export-template",
         "fragments.apply-template-preset",
         "nodes.move",
+        "selection.transform.move",
         "nodes.resize",
         "nodes.surface.expand",
         "nodes.inspect",
@@ -425,6 +426,35 @@ public sealed partial class GraphEditorSession
         }
 
         return snapped;
+    }
+
+    public bool TryMoveSelectionBy(double deltaX, double deltaY, bool constrainToPrimaryAxis = false, bool updateStatus = true)
+    {
+        var delta = NormalizeSelectionTransformDelta(new GraphPoint(deltaX, deltaY), constrainToPrimaryAxis);
+        if (delta == new GraphPoint(0d, 0d))
+        {
+            return false;
+        }
+
+        var document = _host.CreateActiveScopeDocumentSnapshot();
+        var nodesById = document.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        var positions = _host.GetSelectionSnapshot()
+            .SelectedNodeIds
+            .Where(nodesById.ContainsKey)
+            .Select(nodeId =>
+            {
+                var node = nodesById[nodeId];
+                return new NodePositionSnapshot(node.Id, node.Position + delta);
+            })
+            .ToList();
+        if (positions.Count == 0)
+        {
+            return false;
+        }
+
+        _host.SetNodePositions(positions, updateStatus);
+        PublishCommandExecuted("selection.transform.move");
+        return true;
     }
 
     public bool TrySetNodeWidth(string nodeId, double width, bool updateStatus = true)
@@ -878,6 +908,18 @@ public sealed partial class GraphEditorSession
 
         PublishCommandExecuted(command.CommandId);
         return true;
+    }
+
+    private static GraphPoint NormalizeSelectionTransformDelta(GraphPoint delta, bool constrainToPrimaryAxis)
+    {
+        if (!constrainToPrimaryAxis)
+        {
+            return delta;
+        }
+
+        return Math.Abs(delta.X) >= Math.Abs(delta.Y)
+            ? new GraphPoint(delta.X, 0d)
+            : new GraphPoint(0d, delta.Y);
     }
 
     private void Execute(string commandId, Action action)

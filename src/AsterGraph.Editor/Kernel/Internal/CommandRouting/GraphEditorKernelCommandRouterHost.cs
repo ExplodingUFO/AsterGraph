@@ -27,6 +27,8 @@ internal sealed partial class GraphEditorKernel
 
         GraphDocument IGraphEditorKernelCommandRouterHost.Document => _owner.CreateActiveScopeDocumentSnapshot();
 
+        GraphEditorSelectionSnapshot IGraphEditorKernelCommandRouterHost.Selection => _owner.GetSelectionSnapshot();
+
         int IGraphEditorKernelCommandRouterHost.SelectedNodeCount => _owner._selectedNodeIds.Count;
 
         bool IGraphEditorKernelCommandRouterHost.CanUndo
