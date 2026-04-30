@@ -49,12 +49,47 @@ public sealed class DemoCookbookCatalogTests
             Assert.NotEmpty(recipe.CodeAnchors);
             Assert.NotEmpty(recipe.DemoAnchors);
             Assert.NotEmpty(recipe.DocumentationAnchors);
+            Assert.NotEmpty(recipe.ScenarioPoints);
             Assert.NotEmpty(recipe.ProofMarkers);
             Assert.False(string.IsNullOrWhiteSpace(recipe.SupportBoundary), $"{recipe.Id} support boundary is missing.");
 
             AssertAnchorsExist(repositoryRoot, recipe.Id, nameof(recipe.CodeAnchors), recipe.CodeAnchors);
             AssertAnchorsExist(repositoryRoot, recipe.Id, nameof(recipe.DemoAnchors), recipe.DemoAnchors);
             AssertAnchorsExist(repositoryRoot, recipe.Id, nameof(recipe.DocumentationAnchors), recipe.DocumentationAnchors);
+        }
+    }
+
+    [Fact]
+    public void CookbookCatalog_CoversProfessionalScenarioDepth()
+    {
+        Assert.Equal(
+            new[]
+            {
+                DemoCookbookScenarioKind.GraphOperations,
+                DemoCookbookScenarioKind.NodeMetadata,
+                DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                DemoCookbookScenarioKind.SupportEvidence,
+                DemoCookbookScenarioKind.HostCodeExample,
+            },
+            DemoCookbookCatalog.RequiredScenarioKinds);
+
+        var scenarioKinds = DemoCookbookCatalog.Recipes
+            .SelectMany(recipe => recipe.ScenarioPoints)
+            .Select(point => point.Kind)
+            .Distinct()
+            .ToArray();
+
+        foreach (var requiredScenarioKind in DemoCookbookCatalog.RequiredScenarioKinds)
+        {
+            Assert.Contains(requiredScenarioKind, scenarioKinds);
+        }
+
+        foreach (var recipe in DemoCookbookCatalog.Recipes)
+        {
+            Assert.True(recipe.ScenarioPoints.Count >= 3, $"{recipe.Id} needs professional scenario depth.");
+            Assert.All(recipe.ScenarioPoints, point => Assert.False(string.IsNullOrWhiteSpace(point.Label)));
+            Assert.All(recipe.ScenarioPoints, point => Assert.False(string.IsNullOrWhiteSpace(point.Evidence)));
+            AssertScenarioPointsTieBackToRecipeEvidence(recipe);
         }
     }
 
@@ -117,6 +152,21 @@ public sealed class DemoCookbookCatalogTests
             Assert.False(string.IsNullOrWhiteSpace(anchor.Evidence), $"{recipeId} {anchorSetName}[{index}] evidence is missing.");
             Assert.True(File.Exists(path), $"{recipeId} {anchorSetName}[{index}] path does not exist: {anchor.Path}");
             Assert.Contains(anchor.Evidence, File.ReadAllText(path), StringComparison.Ordinal);
+        }
+    }
+
+    private static void AssertScenarioPointsTieBackToRecipeEvidence(DemoCookbookRecipe recipe)
+    {
+        var recipeEvidence = recipe.CodeAnchors
+            .Concat(recipe.DemoAnchors)
+            .Concat(recipe.DocumentationAnchors)
+            .Select(anchor => anchor.Evidence)
+            .Concat(recipe.ProofMarkers)
+            .ToArray();
+
+        foreach (var point in recipe.ScenarioPoints)
+        {
+            Assert.Contains(point.Evidence, recipeEvidence);
         }
     }
 
