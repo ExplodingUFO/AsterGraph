@@ -2,7 +2,7 @@
 
 ## Current Milestone
 
-**v0.77.0-beta Semantic Authoring And Command Platform** — active locally 2026-05-01.
+**v0.77.0-beta Semantic Authoring And Command Platform** — completed locally 2026-05-01.
 
 **Goal:** take the next larger step from professional canvas/workbench depth into a semantic authoring platform with unified command discovery/execution, advanced editing operations, reusable templates, selection transforms, navigation/search workflows, cookbook proof, and release contracts.
 
@@ -27,7 +27,7 @@
 - [x] **Phase 462: Advanced Selection Transform And Spatial Editing** — added source-backed selection transform snapshots, rectangle projection, constrained selection move, and snap guide projection.
 - [x] **Phase 463: Viewport Navigation Search And Focus Workflows** — add search, jump, breadcrumb, bookmark, minimap-aware focus, and measured large-graph navigation evidence.
 - [x] **Phase 464: Professional Cookbook Authoring Flows** — demonstrate command, editing, template, selection, and navigation workflows as code plus live proof.
-- [ ] **Phase 465: v0.77 Contracts Documentation And Release Proof** — close supported contracts, docs, examples, public API baseline, CI-sensitive tests, beads, Dolt, and Git handoff.
+- [x] **Phase 465: v0.77 Contracts Documentation And Release Proof** — close supported contracts, docs, examples, public API baseline, CI-sensitive tests, beads, Dolt, and Git handoff.
 
 ## Phase Details
 
@@ -169,7 +169,7 @@
 
 ## Next Step
 
-Continue Phase 465. Phase 464 cookbook flows are closed and v0.77 contract/release proof is now unblocked.
+v0.77 is complete. Start the next milestone from `.planning/v0.77-MILESTONE-AUDIT.md` and the current project constraints.
 
 ---
-*Roadmap updated: 2026-05-01 after completing Phase 464*
+*Roadmap updated: 2026-05-01 after completing Phase 465*

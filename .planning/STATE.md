@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: 464 complete
+Phase: v0.77 milestone complete
 Plan: `.planning/ROADMAP.md`
-Status: Phase 464 complete; the Avalonia Demo cookbook now demonstrates v0.77 authoring workflows as code plus live proof
-Last activity: 2026-05-01 — Completed Phase 464 Professional Cookbook Authoring Flows
+Status: v0.77 complete; semantic authoring commands, editing, templates, selection transforms, navigation/search, cookbook proof, docs, API baseline, and release gates are closed
+Last activity: 2026-05-01 — Completed Phase 465 v0.77 Contracts Documentation And Release Proof
 
 ## Project Reference
 
@@ -16,7 +16,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 
 ## Active Beads
 
-- Active epic: `avalonia-node-map-48w` — v0.77 Semantic Authoring And Command Platform
+- Completed epic: `avalonia-node-map-48w` — v0.77 Semantic Authoring And Command Platform
 - Completed: `avalonia-node-map-48w.1` — Phase 458: Command Platform Architecture And Input Audit
 - Completed: `avalonia-node-map-48w.2` — Phase 459: Unified Command Registry And Keybinding Surface
 - Completed: `avalonia-node-map-48w.3` — Phase 460: Semantic Editing Operations And Clipboard Model
@@ -24,7 +24,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 - Completed: `avalonia-node-map-48w.5` — Phase 462: Advanced Selection Transform And Spatial Editing
 - Completed: `avalonia-node-map-48w.6` — Phase 463: Viewport Navigation Search And Focus Workflows
 - Completed: `avalonia-node-map-48w.7` — Phase 464: Professional Cookbook Authoring Flows
-- Next: `avalonia-node-map-48w.8` — Phase 465: v0.77 Contracts Documentation And Release Proof
+- Completed: `avalonia-node-map-48w.8` — Phase 465: v0.77 Contracts Documentation And Release Proof
 
 ## Notes
 
@@ -43,8 +43,9 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 - Phase 462 added queryable selection transform state, rectangle projection, constrained selection movement, and source-backed snap guide projection.
 - Phase 463 added stable graph item search across scopes, nodes, groups, connections, validation issues, viewport bookmark snapshots, and command workflows for focus-node, focus-issue, focus-search-result, and bookmark add/remove/activate.
 - Phase 464 added a v0.77 cookbook route with command registry, semantic editing, template preset, selection transform, and navigation focus workflow steps, plus clearer Avalonia cookbook code/demo/proof presentation.
+- Phase 465 aligned public docs/API inventory, updated the public API baseline for intended v0.77 symbols, and passed integrated release proof gates.
 - Spark workers hit a model quota error during 463.3 and 462.3; use the main model or a non-spark worker until the quota resets.
-- Phase 465 closes the milestone with contract docs, public API/release proof, beads, Dolt, Git, and workspace handoff.
+- Next milestone should continue from the professional desktop node graph library direction without naming external inspiration projects in docs or planning artifacts.
 
 ---
-*Last updated: 2026-05-01 after completing Phase 464*
+*Last updated: 2026-05-01 after completing v0.77*

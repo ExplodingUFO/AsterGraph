@@ -1,6 +1,6 @@
 # Milestones
 
-- v0.77.0-beta — Semantic Authoring And Command Platform — active locally 2026-05-01 (beads epic: `avalonia-node-map-48w`)
+- v0.77.0-beta — Semantic Authoring And Command Platform — completed locally 2026-05-01 (beads epic: `avalonia-node-map-48w`)
 - v0.76.0-beta — Professional Canvas Engine And Authoring Workbench — completed locally 2026-05-01 (beads epic: `avalonia-node-map-y7i`)
 - v0.75.0-beta — Cross-Platform High-Performance Desktop Node Graph Library — completed locally 2026-04-30 (beads epic: `avalonia-node-map-mqm`)
 - v0.74.0-beta — Cookbook Scenario Depth And Component Polish — completed locally 2026-04-30 (beads epic: `avalonia-node-map-h3e`)
@@ -78,4 +78,4 @@
 - v1.25 — Command Pipeline, Inspector Deepening, And Semantic Authoring — completed 2026-04-21
 
 ---
-*Last updated: 2026-05-01 after starting `v0.77.0-beta Semantic Authoring And Command Platform`*
+*Last updated: 2026-05-01 after completing `v0.77.0-beta Semantic Authoring And Command Platform`*
