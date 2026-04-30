@@ -133,6 +133,97 @@ public sealed class GraphEditorPluginCommandContractTests
         Assert.Equal(["host.review.add"], shortcuts.Select(action => action.Id));
     }
 
+    [Fact]
+    public void HostedActionShortcutConflictDetector_WithDefaultShortcuts_ReportsDuplicateEffectiveShortcuts()
+    {
+        var actions = CreateShortcutActions(
+            ("host.review.add", "commands.addReview", "Ctrl+Shift+R"),
+            ("plugin.review.add", "plugin.addReview", "Ctrl+Shift+R"));
+
+        var conflicts = AsterGraphHostedActionShortcutConflictDetector.FindConflicts(actions);
+        var conflict = Assert.Single(conflicts);
+
+        Assert.Equal("Ctrl+Shift+R", conflict.Shortcut);
+        Assert.Equal(["host.review.add", "plugin.review.add"], conflict.ActionIds);
+        Assert.Equal(["commands.addReview", "plugin.addReview"], conflict.CommandIds);
+    }
+
+    [Fact]
+    public void HostedActionShortcutConflictDetector_WithPolicyOverrides_ReportsEffectiveShortcutConflicts()
+    {
+        var actions = CreateShortcutActions(
+            ("host.review.add", "commands.addReview", "Ctrl+Shift+R"),
+            ("plugin.review.add", "plugin.addReview", "Ctrl+Alt+R"));
+        var effectiveActions = AsterGraphHostedActionFactory.ApplyCommandShortcutPolicy(
+            actions,
+            new AsterGraphCommandShortcutPolicy
+            {
+                ShortcutOverrides = new Dictionary<string, string?>
+                {
+                    ["plugin.review.add"] = "Ctrl+Shift+R",
+                },
+            });
+
+        var conflict = Assert.Single(AsterGraphHostedActionShortcutConflictDetector.FindConflicts(effectiveActions));
+
+        Assert.Equal("Ctrl+Shift+R", conflict.Shortcut);
+        Assert.Equal(["host.review.add", "plugin.review.add"], conflict.ActionIds);
+    }
+
+    [Fact]
+    public void HostedActionShortcutConflictDetector_WithDisabledShortcutPolicy_IgnoresDisabledShortcuts()
+    {
+        var actions = CreateShortcutActions(
+            ("host.review.add", "commands.addReview", "Ctrl+Shift+R"),
+            ("plugin.review.add", "plugin.addReview", "Ctrl+Shift+R"));
+        var effectiveActions = AsterGraphHostedActionFactory.ApplyCommandShortcutPolicy(
+            actions,
+            AsterGraphCommandShortcutPolicy.Disabled);
+
+        var conflicts = AsterGraphHostedActionShortcutConflictDetector.FindConflicts(effectiveActions);
+
+        Assert.Empty(conflicts);
+    }
+
+    [Fact]
+    public void HostedActionShortcutConflictDetector_WithBlankShortcuts_IgnoresBlankShortcuts()
+    {
+        var actions = CreateShortcutActions(
+            ("host.review.add", "commands.addReview", "Ctrl+Shift+R"),
+            ("plugin.review.add", "plugin.addReview", " "),
+            ("plugin.review.approve", "plugin.approveReview", null));
+
+        var conflicts = AsterGraphHostedActionShortcutConflictDetector.FindConflicts(actions);
+
+        Assert.Empty(conflicts);
+    }
+
+    [Fact]
+    public void HostedActionShortcutConflictDetector_WithExcludedActionIds_IgnoresExcludedShortcuts()
+    {
+        var actions = CreateShortcutActions(
+            ("host.review.add", "commands.addReview", "Ctrl+Shift+R"),
+            ("plugin.review.add", "plugin.addReview", "Ctrl+Shift+R"));
+
+        var conflicts = AsterGraphHostedActionShortcutConflictDetector.FindConflicts(
+            actions,
+            ["plugin.review.add"]);
+
+        Assert.Empty(conflicts);
+    }
+
+    [Fact]
+    public void HostedActionShortcutConflictDetector_WithDistinctShortcuts_ReturnsNoConflicts()
+    {
+        var actions = CreateShortcutActions(
+            ("host.review.add", "commands.addReview", "Ctrl+Shift+R"),
+            ("plugin.review.add", "plugin.addReview", "Ctrl+Alt+R"));
+
+        var conflicts = AsterGraphHostedActionShortcutConflictDetector.FindConflicts(actions);
+
+        Assert.Empty(conflicts);
+    }
+
     private static AsterGraphEditorOptions CreateOptions(params GraphEditorPluginRegistration[] pluginRegistrations)
         => new()
         {
@@ -169,6 +260,22 @@ public sealed class GraphEditorPluginCommandContractTests
         catalog.RegisterDefinition(new NodeDefinition(PluginDefinitionId, "Plugin Node", "Tests", "Plugin Commands", [], []));
         return catalog;
     }
+
+    private static IReadOnlyList<AsterGraphHostedActionDescriptor> CreateShortcutActions(
+        params (string ActionId, string CommandId, string? Shortcut)[] actions)
+        => actions
+            .Select(action => new AsterGraphHostedActionDescriptor(
+                new GraphEditorCommandDescriptorSnapshot(
+                    action.ActionId,
+                    action.ActionId,
+                    "tests",
+                    null,
+                    action.Shortcut,
+                    GraphEditorCommandSourceKind.Host,
+                    isEnabled: true),
+                () => true,
+                action.CommandId))
+            .ToList();
 
     private sealed class PluginCommandPlugin : IGraphEditorPlugin
     {
