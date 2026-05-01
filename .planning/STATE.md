@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: 467 ready
+Phase: 470 ready
 Plan: `.planning/ROADMAP.md`
-Status: Phase 466 complete; rendering, customization, and spatial implementation phases are unblocked
-Last activity: 2026-05-01 — Completed Phase 466 Canvas Interaction Engine Audit
+Status: Phases 467, 468, and 469 complete; cookbook component showcase is unblocked
+Last activity: 2026-05-01 — Completed rendering, customization, and spatial authoring proof phases
 
 ## Project Reference
 
@@ -18,10 +18,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 
 - Active epic: `avalonia-node-map-v78` — v0.78 Professional Desktop Node Graph Component Platform
 - Completed: `avalonia-node-map-v78.1` — Phase 466: Canvas Interaction Engine Audit
-- Ready: `avalonia-node-map-v78.2` — Phase 467: High-Performance Rendering And Viewport Pipeline
-- Ready: `avalonia-node-map-v78.3` — Phase 468: Professional Node And Edge Customization Surface
-- Ready: `avalonia-node-map-v78.4` — Phase 469: Layout And Spatial Authoring Workbench
-- Blocked by Phases 467-469: `avalonia-node-map-v78.5` — Phase 470: Cookbook Component Showcase
+- Completed: `avalonia-node-map-v78.2` — Phase 467: High-Performance Rendering And Viewport Pipeline
+- Completed: `avalonia-node-map-v78.3` — Phase 468: Professional Node And Edge Customization Surface
+- Completed: `avalonia-node-map-v78.4` — Phase 469: Layout And Spatial Authoring Workbench
+- Ready: `avalonia-node-map-v78.5` — Phase 470: Cookbook Component Showcase
 - Blocked by Phase 470: `avalonia-node-map-v78.6` — Phase 471: v0.78 Release Proof And API Governance
 
 ## Notes
@@ -45,8 +45,12 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 - v0.78 should deepen the product as a reusable professional desktop node graph component: interaction engine, rendering/viewport performance, customization surfaces, spatial authoring, cookbook showcase, and release proof.
 - Phase 466 completed the interaction-engine audit. The canonical route is: editor-owned pure routing/viewport/projection/commands, Avalonia-owned pointer capture/focus/visual/menu presentation, and session-owned command execution.
 - Phase 466 follow-up split: Phase 467 starts with visible-scene budget, connection render cadence, viewport invalidation diff, minimap cadence, and grid/hit-test latency proof; Phase 468 starts with customization input-scope, descriptor/menu contribution, edge style, and shortcut conflict proof; Phase 469 starts with spatial command, focus, selection/group coherence, and command-surface freshness proof.
+- Phase 467 completed source-backed rendering proof: visible-scene node/group budgeting, committed connection route-bound rendering, pending preview preservation, viewport diff markers, minimap cadence, grid density, and resize hover hit-test proof.
+- Phase 468 completed customization proof: custom input-scope behavior, descriptor-backed node/edge actions, connection style/overlay semantics, and effective shortcut conflict detection.
+- Phase 469 completed spatial workbench proof: canonical spatial command routing, focus recovery, selection/group/snap coherence, and hosted command-surface freshness.
+- Phase 470 should now turn the completed proof surfaces into cookbook code-plus-demo recipes without widening claims or making Demo a separate contract.
 - Spark workers hit a model quota error during 463.3 and 462.3; use the main model or a non-spark worker until the quota resets.
 - Worktrees must stay inside the project folder under `.worktrees/`.
 
 ---
-*Last updated: 2026-05-01 after completing Phase 466*
+*Last updated: 2026-05-01 after completing Phases 467-469*
