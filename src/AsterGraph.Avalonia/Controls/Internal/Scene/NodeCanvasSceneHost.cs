@@ -94,6 +94,8 @@ internal sealed class NodeCanvasSceneHost
 
     public ViewportVisibleSceneProjection? LastVisibleSceneProjection { get; private set; }
 
+    public string? LastVisibleSceneInvalidationMarker { get; private set; }
+
     public void RebuildScene()
     {
         if (_host.NodeLayer is null || _host.ConnectionLayer is null || _host.GroupLayer is null)
@@ -110,6 +112,7 @@ internal sealed class NodeCanvasSceneHost
         if (_host.ViewModel is null)
         {
             LastVisibleSceneProjection = null;
+            LastVisibleSceneInvalidationMarker = null;
             return;
         }
 
@@ -567,12 +570,16 @@ internal sealed class NodeCanvasSceneHost
         if (_host.ViewModel is null)
         {
             LastVisibleSceneProjection = null;
+            LastVisibleSceneInvalidationMarker = null;
             return;
         }
 
-        LastVisibleSceneProjection = ViewportVisibleSceneProjector.Project(
+        var previous = LastVisibleSceneProjection;
+        var current = ViewportVisibleSceneProjector.Project(
             _host.ViewModel.CreateDocumentSnapshot(),
             _host.ViewModel.Session.Queries.GetViewportSnapshot());
+        LastVisibleSceneProjection = current;
+        LastVisibleSceneInvalidationMarker = previous?.ToInvalidationBudgetMarker(current);
     }
 
     private ConnectionStyleOptions GetConnectionStyle(ConnectionViewModel connection)

@@ -88,6 +88,8 @@ public sealed class ViewportVisibleSceneProjectionTests
         Assert.Equal(["group-hidden"], diff.GroupsEnteringViewport);
         Assert.Equal(7, diff.InvalidatedSceneItemCount);
         Assert.Equal("VISIBLE_SCENE_INVALIDATION:nodes=3:connections=2:groups=2:total=7", diff.ToBudgetMarker());
+        Assert.Equal(diff.ToBudgetMarker(), first.Diff(second).ToBudgetMarker());
+        Assert.Equal(diff.ToBudgetMarker(), first.ToInvalidationBudgetMarker(second));
     }
 
     private static GraphDocument CreateDocument()

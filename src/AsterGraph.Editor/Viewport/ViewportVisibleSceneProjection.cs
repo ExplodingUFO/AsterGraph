@@ -43,6 +43,12 @@ public sealed record ViewportVisibleSceneProjection(
            + $"groups={VisibleGroups}/{TotalGroups}:overscan={OverscanWorldUnits:0.##}";
 
     /// <summary>
+    /// Computes a machine-readable invalidation marker for the diff to the next projection.
+    /// </summary>
+    public string ToInvalidationBudgetMarker(ViewportVisibleSceneProjection next)
+        => Diff(next).ToBudgetMarker();
+
+    /// <summary>
     /// Computes the bounded scene-item invalidation between two visible-scene projections.
     /// </summary>
     internal ViewportVisibleSceneInvalidation Diff(ViewportVisibleSceneProjection next)
