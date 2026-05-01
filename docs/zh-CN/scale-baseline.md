@@ -91,7 +91,7 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 | --- | ---: | ---: | ---: | ---: |
 | `baseline` | 300 ms | 2500 ms | 3500 ms | 250 ms |
 | `large` | 600 ms | 16000 ms | 12000 ms | 400 ms |
-| `stress` | 300 ms | 120000 ms | 100000 ms | 800 ms |
+| `stress` | telemetry | 120000 ms | 100000 ms | 800 ms |
 
 `ScaleSmoke` 会为这些 defended 层级输出 `SCALE_EXPORT_BUDGET:...`、`SCALE_EXPORT_METRICS:...`、`SCALE_EXPORT_BUDGET_OK:...`、`EXPORT_PROGRESS_OK:...`、`EXPORT_CANCEL_OK:...`、`EXPORT_SCOPE_OK:...`、`EXPORT_SELECTION_SCOPE_OK:...` 和 `SCALE_EXPORT_SUMMARY:...`。
 
@@ -99,7 +99,7 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 
 ## Stress Raster Export
 
-`stress` 层级现在防守 performance、authoring、SVG export、PNG/JPEG raster export 和 export reload。第一版 raster 红线刻意保守，用于让 release validation 捕捉病态回归，而不是宣称 5000 节点 raster export 已经很快。
+`stress` 层级现在防守 performance、authoring、PNG/JPEG raster export 和 export reload。5000 节点 SVG export 的序列化场景规模受运行环境影响较大，因此只保留 telemetry；第一版 raster 红线刻意保守，用于让 release validation 捕捉病态回归，而不是宣称 5000 节点 raster export 已经很快。
 
 ## 运行方式
 
@@ -146,7 +146,7 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 
 `SCALE_AUTHORING_BUDGET_OK` 是三个层级共同的 defended authoring 信号。
 
-`SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800` 和 `SCALE_RASTER_EXPORT_STRESS_OK:True` 是 5000 节点 export 故事的边界：raster export 受保守红线防守，但不表示它已经很快。
+`SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800` 和 `SCALE_RASTER_EXPORT_STRESS_OK:True` 是 5000 节点 export 故事的边界：raster export 受保守红线防守，但不表示它已经很快。
 
 对 `xlarge` 来说，`SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`、`SCALE_AUTHORING_BUDGET:xlarge:budget=informational-only` 和 `SCALE_EXPORT_BUDGET:xlarge:budget=informational-only` 都只是 telemetry marker。
 

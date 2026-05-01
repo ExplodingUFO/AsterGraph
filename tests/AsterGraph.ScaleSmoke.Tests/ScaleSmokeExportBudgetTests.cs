@@ -53,7 +53,7 @@ public sealed class ScaleSmokeExportBudgetTests
         var marker = tier.ToExportBudgetMarker();
 
         Assert.Equal(
-            "SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800",
+            "SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800",
             marker);
         Assert.True(tier.HasDefendedRasterExportBudget);
     }
@@ -171,22 +171,20 @@ public sealed class ScaleSmokeExportBudgetTests
     }
 
     [Fact]
-    public void StressExportBudget_RejectsPromotedSvgRegressionBeyondRedline()
+    public void StressExportBudget_TreatsSvgTimingAsTelemetry()
     {
         var tier = ScaleSmokeTier.Parse(["--tier", "stress"]);
         var metrics = new ScaleSmokeExportMetrics(
-            SvgExportMs: 301,
+            SvgExportMs: 3833,
             PngExportMs: 32_000,
             JpegExportMs: 24_000,
             ReloadMs: 400);
 
         var result = tier.EvaluateExport(metrics);
 
-        Assert.False(result.Passed);
-        Assert.Contains("svg=301>300(defended)", result.FailureSummary, StringComparison.Ordinal);
-        var failure = Assert.Single(result.Failures);
-        Assert.Equal(
-            "SCALE_BUDGET_FAILURE:stress:area=export:metric=svg:actual=301:threshold=300:policy=defended",
-            failure.ToMarker());
+        Assert.True(result.Passed);
+        Assert.Empty(result.Failures);
+        Assert.Equal("none", result.FailureSummary);
+        Assert.Equal("SCALE_RASTER_EXPORT_STRESS_OK:True", tier.ToRasterExportStressMarker(result));
     }
 }

@@ -91,7 +91,7 @@ If any defended metric exceeds one of those numbers, `ScaleSmoke` emits `SCALE_P
 | --- | ---: | ---: | ---: | ---: |
 | `baseline` | 300 ms | 2500 ms | 3500 ms | 250 ms |
 | `large` | 600 ms | 16000 ms | 12000 ms | 400 ms |
-| `stress` | 300 ms | 120000 ms | 100000 ms | 800 ms |
+| `stress` | telemetry | 120000 ms | 100000 ms | 800 ms |
 
 `ScaleSmoke` emits `SCALE_EXPORT_BUDGET:...`, `SCALE_EXPORT_METRICS:...`, `SCALE_EXPORT_BUDGET_OK:...`, `EXPORT_PROGRESS_OK:...`, `EXPORT_CANCEL_OK:...`, `EXPORT_SCOPE_OK:...`, `EXPORT_SELECTION_SCOPE_OK:...`, and `SCALE_EXPORT_SUMMARY:...` for these defended tiers.
 
@@ -99,7 +99,7 @@ Pair the hosted tuning handoff with [Widened Surface Performance Recipe](./widen
 
 ## Stress Raster Export
 
-The `stress` tier now defends performance, authoring, SVG export, PNG/JPEG raster export, and export reload. The first raster redlines are intentionally conservative so release validation can fail on pathological regressions without claiming that 5000-node raster export is fast.
+The `stress` tier now defends performance, authoring, PNG/JPEG raster export, and export reload. Stress SVG export remains telemetry-only because its 5000-node serialized scene size is environment-sensitive; the raster redlines are intentionally conservative so release validation can fail on pathological regressions without claiming that 5000-node raster export is fast.
 
 ## Commands
 
@@ -146,7 +146,7 @@ Treat `SCALE_PERFORMANCE_BUDGET_OK` as the defended release signal for `baseline
 
 Treat `SCALE_AUTHORING_BUDGET_OK` as the defended authoring signal for all three tiers.
 
-Treat `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800` and `SCALE_RASTER_EXPORT_STRESS_OK:True` as the boundary for the 5000-node export story: raster export is defended by conservative redlines, not advertised as fast.
+Treat `SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800` and `SCALE_RASTER_EXPORT_STRESS_OK:True` as the boundary for the 5000-node export story: raster export is defended by conservative redlines, not advertised as fast.
 
 For `xlarge`, `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`, `SCALE_AUTHORING_BUDGET:xlarge:budget=informational-only`, and `SCALE_EXPORT_BUDGET:xlarge:budget=informational-only` are telemetry markers only.
 

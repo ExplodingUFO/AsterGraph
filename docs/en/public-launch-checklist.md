@@ -108,7 +108,7 @@ Expected high-signal markers:
 - `SCALE_PERFORMANCE_BUDGET_OK:large:True:...`
 - `SCALE_PERFORMANCE_BUDGET_OK:stress:True:...`
 - `SCALE_AUTHORING_BUDGET_OK:stress:True:...`
-- `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`
+- `SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800`
 - `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`
 - `SCALE_RASTER_EXPORT_STRESS_OK:True`
 - `EXPORT_PROGRESS_OK:True`
