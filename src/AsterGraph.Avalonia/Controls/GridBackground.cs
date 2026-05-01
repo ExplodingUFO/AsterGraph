@@ -51,25 +51,47 @@ public sealed class GridBackground : Control
 
     private void DrawGrid(DrawingContext context, Rect bounds, double rawSpacing, IBrush brush, double thickness)
     {
-        var spacing = NormalizeSpacing(rawSpacing);
-        if (spacing <= 0)
+        var verticalLines = CalculateVisibleLineMetrics(bounds.Width, rawSpacing, ViewModel!.PanX);
+        if (verticalLines.Spacing <= 0)
         {
             return;
         }
 
-        var offsetX = NormalizeOffset(ViewModel!.PanX, spacing);
-        var offsetY = NormalizeOffset(ViewModel.PanY, spacing);
+        var horizontalLines = CalculateVisibleLineMetrics(bounds.Height, rawSpacing, ViewModel.PanY);
+        if (horizontalLines.Spacing <= 0)
+        {
+            return;
+        }
+
         var pen = new Pen(brush, thickness);
 
-        for (var x = offsetX; x <= bounds.Width; x += spacing)
+        for (var x = verticalLines.Offset; x <= bounds.Width; x += verticalLines.Spacing)
         {
             context.DrawLine(pen, new Point(x, 0), new Point(x, bounds.Height));
         }
 
-        for (var y = offsetY; y <= bounds.Height; y += spacing)
+        for (var y = horizontalLines.Offset; y <= bounds.Height; y += horizontalLines.Spacing)
         {
             context.DrawLine(pen, new Point(0, y), new Point(bounds.Width, y));
         }
+    }
+
+    internal static GridBackgroundLineMetrics CalculateVisibleLineMetrics(double length, double rawSpacing, double offset)
+    {
+        var spacing = NormalizeSpacing(rawSpacing);
+        if (spacing <= 0 || length <= 0)
+        {
+            return new GridBackgroundLineMetrics(0, 0, 0);
+        }
+
+        var normalizedOffset = NormalizeOffset(offset, spacing);
+        var lineCount = 0;
+        for (var position = normalizedOffset; position <= length; position += spacing)
+        {
+            lineCount++;
+        }
+
+        return new GridBackgroundLineMetrics(spacing, normalizedOffset, lineCount);
     }
 
     private static double NormalizeSpacing(double spacing)
@@ -93,3 +115,5 @@ public sealed class GridBackground : Control
         return normalized < 0 ? normalized + spacing : normalized;
     }
 }
+
+internal readonly record struct GridBackgroundLineMetrics(double Spacing, double Offset, int LineCount);
