@@ -1257,6 +1257,61 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void BorderResizeHandles_PointerPress_FocusesCanvasAndKeepsDeleteShortcutRouted()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.FindNode(TargetNodeId)!, updateStatus: false);
+        var focusOrigin = new TextBox
+        {
+            Focusable = true,
+            Text = "Focus origin",
+        };
+        var canvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+        {
+            Editor = editor,
+        });
+        var layout = new Grid();
+        layout.Children.Add(canvas);
+        layout.Children.Add(focusOrigin);
+        var window = CreateWindow(layout);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var widthThumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target width resize handle",
+                    StringComparison.Ordinal));
+
+            Assert.True(focusOrigin.Focus());
+            Assert.True(focusOrigin.IsFocused);
+
+            widthThumb.RaiseEvent(CreatePointerPressedArgs(widthThumb, canvas, pointer, new Point(655, 220), KeyModifiers.None));
+
+            Assert.True(canvas.IsFocused);
+            Assert.False(focusOrigin.IsFocused);
+
+            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, new Point(655, 220), KeyModifiers.None));
+            var deleteArgs = new KeyEventArgs
+            {
+                Key = Key.Delete,
+                Source = canvas,
+            };
+            InvokeCanvasKeyDown(canvas, deleteArgs);
+
+            Assert.True(deleteArgs.Handled);
+            Assert.Single(editor.Nodes);
+            Assert.Equal(SourceNodeId, editor.Nodes[0].Id);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void NodeSurfaceHover_NearRightEdge_UsesResizeCursorBeforePress()
     {
         var editor = CreateEditor();
@@ -2385,6 +2440,64 @@ public sealed class NodeCanvasStandaloneTests
 
             Assert.True(pressedArgs.Handled);
             Assert.Same(canvas, pointer.Captured);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void GroupResizeHandlePointerPress_FocusesCanvasAndKeepsDeleteShortcutRouted()
+    {
+        var editor = CreateEditor();
+        editor.Session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Canvas Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+        editor.Session.Commands.SetSelection([TargetNodeId], TargetNodeId, updateStatus: false);
+        var focusOrigin = new TextBox
+        {
+            Focusable = true,
+            Text = "Focus origin",
+        };
+        var canvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+        {
+            Editor = editor,
+        });
+        var layout = new Grid();
+        layout.Children.Add(canvas);
+        layout.Children.Add(focusOrigin);
+        var window = CreateWindow(layout);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var thumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group right resize handle",
+                    StringComparison.Ordinal));
+
+            Assert.True(focusOrigin.Focus());
+            Assert.True(focusOrigin.IsFocused);
+
+            thumb.RaiseEvent(CreatePointerPressedArgs(thumb, canvas, pointer, new Point(652, 240), KeyModifiers.None));
+
+            Assert.True(canvas.IsFocused);
+            Assert.False(focusOrigin.IsFocused);
+
+            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, new Point(652, 240), KeyModifiers.None));
+            var deleteArgs = new KeyEventArgs
+            {
+                Key = Key.Delete,
+                Source = canvas,
+            };
+            InvokeCanvasKeyDown(canvas, deleteArgs);
+
+            Assert.True(deleteArgs.Handled);
+            Assert.Single(editor.Nodes);
+            Assert.Equal(SourceNodeId, editor.Nodes[0].Id);
         }
         finally
         {

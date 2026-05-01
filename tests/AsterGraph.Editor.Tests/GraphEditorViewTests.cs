@@ -1026,6 +1026,55 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void AuthoringToolsChrome_SelectionLayoutActionRestoresCanvasFocusAndKeyboardRouting()
+    {
+        var editor = CreateSelectionEditor();
+        editor.Session.Commands.SetNodePositions(
+            [
+                new NodePositionSnapshot("tests.view.source-001", new GraphPoint(121, 163)),
+                new NodePositionSnapshot("tests.view.target-001", new GraphPoint(523, 187)),
+            ],
+            updateStatus: false);
+        editor.Session.Commands.SetSelection(["tests.view.source-001", "tests.view.target-001"], "tests.view.target-001", updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var canvas = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas");
+        var snapGridButton = FindRequiredDescendant<Button>(view, "PART_SelectionToolSnapGridButton");
+
+        try
+        {
+            Assert.True(canvas.Focus());
+            Assert.Same(canvas, GetFocusedElement(view));
+
+            Assert.True(snapGridButton.Focus());
+            Assert.Same(snapGridButton, GetFocusedElement(view));
+
+            snapGridButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+            Assert.Same(canvas, GetFocusedElement(view));
+
+            var deleteArgs = new KeyEventArgs
+            {
+                Key = Key.Delete,
+                Source = GetFocusedElement(view),
+            };
+            InvokeViewKeyDown(view, deleteArgs);
+
+            Assert.True(deleteArgs.Handled);
+            Assert.Empty(editor.Session.Queries.CreateDocumentSnapshot().Nodes);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void CompositeWorkflowChrome_ProjectsBreadcrumbsAndScopeNavigation()
     {
         var editor = CreateScopedEditor();

@@ -200,6 +200,7 @@ public partial class GraphEditorView : UserControl
         _compositionCoordinator = new GraphEditorViewCompositionCoordinator(new GraphEditorViewCompositionHost(this));
         InitializeComponent();
         AddHandler(KeyDownEvent, HandleKeyDown, RoutingStrategies.Bubble);
+        AddHandler(Button.ClickEvent, HandleSelectionToolClickFocusRecovery, RoutingStrategies.Bubble, handledEventsToo: true);
     }
 
     /// <summary>
@@ -558,6 +559,17 @@ public partial class GraphEditorView : UserControl
                 ]))
         {
             args.Handled = true;
+        }
+    }
+
+    private void HandleSelectionToolClickFocusRecovery(object? sender, RoutedEventArgs args)
+    {
+        if (args.Source is Button { Name: { } name }
+            && name.StartsWith("PART_SelectionTool", StringComparison.Ordinal)
+            && _nodeCanvas is not null
+            && _nodeCanvas.Focusable)
+        {
+            _nodeCanvas.Focus();
         }
     }
 
