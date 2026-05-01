@@ -25,7 +25,7 @@
 - [x] **Phase 467: High-Performance Rendering And Viewport Pipeline** — strengthen large-graph rendering, visible-scene projection, viewport invalidation, minimap cadence, hit testing, and interaction latency evidence.
 - [x] **Phase 468: Professional Node And Edge Customization Surface** — deepen supported node visual, port handle, edge overlay, connection style, inspector/editor, and host-owned extension points.
 - [x] **Phase 469: Layout And Spatial Authoring Workbench** — productize layout, alignment, snapping, group/subgraph, selection transform, and spatial editing workflows.
-- [ ] **Phase 470: Cookbook Component Showcase** — turn the Avalonia cookbook into a component showcase for rendering, interaction, customization, layout, and code-plus-demo recipes.
+- [x] **Phase 470: Cookbook Component Showcase** — turn the Avalonia cookbook into a component showcase for rendering, interaction, customization, layout, and code-plus-demo recipes.
 - [ ] **Phase 471: v0.78 Release Proof And API Governance** — close public API inventory, docs, baseline updates, CI-sensitive .NET 8/9/10 verification, beads, Dolt, Git, and workspace handoff.
 
 ## Phase Details
@@ -137,7 +137,7 @@
 
 ## Next Step
 
-Start Phase 470. Phases 467, 468, and 469 completed the rendering/viewport, customization, and spatial authoring proof surfaces that the cookbook component showcase should now demonstrate as code-plus-demo recipes.
+Start Phase 471. Phase 470 completed cookbook code-plus-demo routes for rendering/viewport, customization, and spatial authoring, with source anchors, demo proof, docs anchors, support-boundary text, and focused Demo cookbook tests.
 
 ---
 *Roadmap updated: 2026-05-01 after completing Phases 467-469*
