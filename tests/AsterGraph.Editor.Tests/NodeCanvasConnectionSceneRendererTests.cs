@@ -431,6 +431,137 @@ public sealed class NodeCanvasConnectionSceneRendererTests
         }
     }
 
+    [AvaloniaFact]
+    public void RenderConnections_CustomConnectionStyle_PreservesRouteSelectionAndPendingPreviewSemantics()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var editor = CreateEditor(
+            includeConnection: true,
+            route: new GraphConnectionRoute(
+            [
+                new GraphPoint(345d, 132d),
+                new GraphPoint(390d, 286d),
+            ]));
+        editor.StartConnection(SourceNodeId, SourcePortId);
+        var hostedScene = CreateHostedScene(editor);
+        var pointer = new global::Avalonia.Input.Pointer(0, PointerType.Mouse, true);
+        var style = GraphEditorStyleOptions.Default.Connection with
+        {
+            Thickness = 7.25,
+            PreviewThickness = 4.5,
+            StrokeOpacity = 0.67,
+            PreviewStrokeOpacity = 0.31,
+            LabelBackgroundHex = "#102030",
+            LabelBackgroundOpacity = 0.73,
+            LabelBorderThickness = 3,
+            LabelCornerRadius = 5,
+            LabelHorizontalPadding = 13,
+            LabelVerticalPadding = 6,
+            LabelFontSize = 14,
+            LabelOffsetX = 18,
+            LabelOffsetY = -22,
+            LabelBorderOpacity = 0.58,
+            LabelForegroundHex = "#F4E8B8",
+            LabelForegroundOpacity = 0.91,
+        };
+
+        try
+        {
+            var context = CreateSceneContext(
+                editor,
+                hostedScene.ConnectionLayer,
+                hostedScene.NodeLayer,
+                hostedScene.CoordinateRoot,
+                hostedScene.NodeVisuals,
+                pointerScreenPosition: new Point(760, 300),
+                resolveConnectionStyle: _ => style);
+
+            renderer.RenderConnections(context);
+
+            var expectedGeometry = Assert.Single(editor.Session.Queries.GetConnectionGeometrySnapshots());
+            var paths = hostedScene.ConnectionLayer.Children
+                .OfType<global::Avalonia.Controls.Shapes.Path>()
+                .ToList();
+            Assert.Equal(2, paths.Count);
+            var committedPath = paths[0];
+            var previewPath = paths[1];
+            var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
+            var chipLabel = Assert.IsType<TextBlock>(chip.Child);
+            var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+            var sourcePort = sourceNode.Outputs.Single(port => port.Id == SourcePortId);
+            var targetNode = editor.Nodes.Single(node => node.Id == TargetNodeId);
+            var expectedSource = renderer.GetPortAnchor(context, sourceNode, sourcePort);
+            var expectedTarget = renderer.GetConnectionTargetAnchor(
+                context,
+                targetNode,
+                new GraphConnectionTargetRef(targetNode.Id, TargetPortId, GraphConnectionTargetKind.Port));
+            var expectedBounds = CreateRouteGeometry(
+                expectedSource,
+                expectedGeometry.Route,
+                expectedGeometry.RouteStyle,
+                expectedTarget).Bounds;
+            var expectedLabelAnchor = ConnectionPathBuilder.ResolveSegmentMidpoint(
+                expectedSource,
+                expectedGeometry.Route,
+                expectedTarget,
+                expectedGeometry.Route.Vertices.Count / 2);
+            var previewEnd = editor.ScreenToWorld(new GraphPoint(760, 300));
+            var expectedPreviewBounds = CreateRouteGeometry(
+                expectedSource,
+                GraphConnectionRoute.Empty,
+                GraphEditorConnectionRouteStyle.Bezier,
+                previewEnd).Bounds;
+
+            Assert.Equal(style.Thickness, committedPath.StrokeThickness);
+            Assert.Equal(style.PreviewThickness, previewPath.StrokeThickness);
+            Assert.Equal(expectedBounds.X, committedPath.Data!.Bounds.X, 6);
+            Assert.Equal(expectedBounds.Y, committedPath.Data.Bounds.Y, 6);
+            Assert.Equal(expectedBounds.Width, committedPath.Data.Bounds.Width, 6);
+            Assert.Equal(expectedBounds.Height, committedPath.Data.Bounds.Height, 6);
+            Assert.Equal(expectedPreviewBounds.X, previewPath.Data!.Bounds.X, 6);
+            Assert.Equal(expectedPreviewBounds.Y, previewPath.Data.Bounds.Y, 6);
+            Assert.Equal(expectedPreviewBounds.Width, previewPath.Data.Bounds.Width, 6);
+            Assert.Equal(expectedPreviewBounds.Height, previewPath.Data.Bounds.Height, 6);
+            Assert.Equal(expectedLabelAnchor.X + style.LabelOffsetX, Canvas.GetLeft(chip), 6);
+            Assert.Equal(expectedLabelAnchor.Y + style.LabelOffsetY, Canvas.GetTop(chip), 6);
+            Assert.Equal(new Thickness(style.LabelBorderThickness), chip.BorderThickness);
+            Assert.Equal(new CornerRadius(style.LabelCornerRadius), chip.CornerRadius);
+            Assert.Equal(new Thickness(style.LabelHorizontalPadding, style.LabelVerticalPadding), chip.Padding);
+            Assert.Equal(style.LabelFontSize, chipLabel.FontSize);
+
+            var committedArgs = CreatePointerPressedArgs(
+                committedPath,
+                hostedScene.CoordinateRoot,
+                pointer,
+                new Point(360, 220),
+                KeyModifiers.None);
+            committedPath.RaiseEvent(committedArgs);
+
+            var selected = editor.Session.Queries.GetSelectionSnapshot();
+            Assert.True(committedArgs.Handled);
+            Assert.Equal([ConnectionId], selected.SelectedConnectionIds);
+            Assert.Equal(ConnectionId, selected.PrimarySelectedConnectionId);
+
+            var previewArgs = CreatePointerPressedArgs(
+                previewPath,
+                hostedScene.CoordinateRoot,
+                pointer,
+                new Point(620, 260),
+                KeyModifiers.None);
+            previewPath.RaiseEvent(previewArgs);
+
+            var afterPreviewPress = editor.Session.Queries.GetSelectionSnapshot();
+            Assert.False(previewArgs.Handled);
+            Assert.Equal(selected.SelectedConnectionIds, afterPreviewPress.SelectedConnectionIds);
+            Assert.Equal(selected.PrimarySelectedConnectionId, afterPreviewPress.PrimarySelectedConnectionId);
+            Assert.True(editor.HasPendingConnection);
+        }
+        finally
+        {
+            hostedScene.Window.Close();
+        }
+    }
+
     private static NodeCanvasConnectionSceneContext CreateSceneContext(
         GraphEditorViewModel editor,
         Canvas connectionLayer,
@@ -439,7 +570,8 @@ public sealed class NodeCanvasConnectionSceneRendererTests
         IReadOnlyDictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> nodeVisuals,
         Point? pointerScreenPosition = null,
         Func<Control, ContextMenuContext, bool>? openContextMenu = null,
-        Func<NodeViewModel, GraphSize?>? resolveNodePreviewSize = null)
+        Func<NodeViewModel, GraphSize?>? resolveNodePreviewSize = null,
+        Func<ConnectionViewModel, ConnectionStyleOptions>? resolveConnectionStyle = null)
         => new(
             editor,
             connectionLayer,
@@ -450,7 +582,7 @@ public sealed class NodeCanvasConnectionSceneRendererTests
                 .ToDictionary(snapshot => snapshot.ConnectionId, StringComparer.Ordinal),
             editor.Session.Queries.GetHierarchyStateSnapshot(),
             pointerScreenPosition,
-            connection => GraphEditorStyleOptions.Default.Connection,
+            resolveConnectionStyle ?? (_ => GraphEditorStyleOptions.Default.Connection),
             () => new NodeCanvasContextMenuSnapshot(
                 editor.SelectedNode?.Id,
                 editor.SelectedNodes.Select(node => node.Id).ToList(),
