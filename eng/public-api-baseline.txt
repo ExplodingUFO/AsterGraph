@@ -2162,6 +2162,7 @@ M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.Equals(AsterGraph.Ed
 M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.Equals(System.Object):System.Boolean
 M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.GetHashCode():System.Int32
 M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.ToBudgetMarker(System.String):System.String
+M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.ToInvalidationBudgetMarker(AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection):System.String
 M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection.ToString():System.String
 M:AsterGraph.Editor.Viewport.ViewportVisibleSceneProjector.Project(AsterGraph.Core.Models.GraphDocument,AsterGraph.Editor.Runtime.GraphEditorViewportSnapshot,System.Double):AsterGraph.Editor.Viewport.ViewportVisibleSceneProjection
 M:CompiledAvaloniaXaml.!AvaloniaResources.Build:/Themes/AsterGraphTheme.axaml(System.IServiceProvider):Avalonia.Controls.ResourceDictionary
