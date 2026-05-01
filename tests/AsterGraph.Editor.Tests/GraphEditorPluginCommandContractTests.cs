@@ -171,6 +171,53 @@ public sealed class GraphEditorPluginCommandContractTests
     }
 
     [Fact]
+    public void HostedActionShortcutConflictDetector_WithCommandIdPolicyOverride_ReportsEffectiveShortcutConflicts()
+    {
+        var actions = CreateShortcutActions(
+            ("host.review.add", "commands.addReview", "Ctrl+Shift+R"),
+            ("plugin.review.add", "plugin.addReview", "Ctrl+Alt+R"));
+        var effectiveActions = AsterGraphHostedActionFactory.ApplyCommandShortcutPolicy(
+            actions,
+            new AsterGraphCommandShortcutPolicy
+            {
+                ShortcutOverrides = new Dictionary<string, string?>
+                {
+                    ["plugin.addReview"] = "Ctrl+Shift+R",
+                },
+            });
+
+        var conflict = Assert.Single(AsterGraphHostedActionShortcutConflictDetector.FindConflicts(effectiveActions));
+
+        Assert.Equal("Ctrl+Shift+R", conflict.Shortcut);
+        Assert.Equal(["host.review.add", "plugin.review.add"], conflict.ActionIds);
+        Assert.Equal(["commands.addReview", "plugin.addReview"], conflict.CommandIds);
+    }
+
+    [Fact]
+    public void HostedActionShortcutConflictDetector_WithActionAndCommandIdPolicyOverrides_UsesActionOverride()
+    {
+        var actions = CreateShortcutActions(
+            ("host.review.add", "commands.addReview", "Ctrl+Shift+R"),
+            ("plugin.review.add", "plugin.addReview", "Ctrl+Alt+R"));
+        var effectiveActions = AsterGraphHostedActionFactory.ApplyCommandShortcutPolicy(
+            actions,
+            new AsterGraphCommandShortcutPolicy
+            {
+                ShortcutOverrides = new Dictionary<string, string?>
+                {
+                    ["plugin.review.add"] = "Ctrl+Alt+A",
+                    ["plugin.addReview"] = "Ctrl+Shift+R",
+                },
+            });
+
+        var conflicts = AsterGraphHostedActionShortcutConflictDetector.FindConflicts(effectiveActions);
+
+        Assert.Empty(conflicts);
+        var pluginAction = Assert.Single(effectiveActions, action => string.Equals(action.Id, "plugin.review.add", StringComparison.Ordinal));
+        Assert.Equal("Ctrl+Alt+A", pluginAction.DefaultShortcut);
+    }
+
+    [Fact]
     public void HostedActionShortcutConflictDetector_WithDisabledShortcutPolicy_IgnoresDisabledShortcuts()
     {
         var actions = CreateShortcutActions(

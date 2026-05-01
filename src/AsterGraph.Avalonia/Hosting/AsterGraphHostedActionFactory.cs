@@ -22,7 +22,7 @@ public static class AsterGraphHostedActionFactory
             {
                 ArgumentNullException.ThrowIfNull(action);
 
-                var effectiveShortcut = policy.ResolveShortcut(action.Id, action.DefaultShortcut);
+                var effectiveShortcut = ResolveEffectiveShortcut(action, policy);
                 if (string.Equals(effectiveShortcut, action.DefaultShortcut, StringComparison.Ordinal))
                 {
                     return action;
@@ -42,6 +42,20 @@ public static class AsterGraphHostedActionFactory
                 return new AsterGraphHostedActionDescriptor(descriptor, action.TryExecute, action.CommandId);
             })
             .ToList();
+    }
+
+    private static string? ResolveEffectiveShortcut(
+        AsterGraphHostedActionDescriptor action,
+        AsterGraphCommandShortcutPolicy policy)
+    {
+        if (policy.ShortcutOverrides.ContainsKey(action.Id)
+            || string.IsNullOrWhiteSpace(action.CommandId)
+            || string.Equals(action.CommandId, action.Id, StringComparison.Ordinal))
+        {
+            return policy.ResolveShortcut(action.Id, action.DefaultShortcut);
+        }
+
+        return policy.ResolveShortcut(action.CommandId, action.DefaultShortcut);
     }
 
     public static IReadOnlyList<AsterGraphHostedActionDescriptor> CreateCommandActions(
