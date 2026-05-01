@@ -82,6 +82,82 @@ public sealed class GraphEditorSelectionTransformContractsTests
             descriptor => descriptor.Id == "selection.transform.move" && descriptor.IsEnabled);
     }
 
+    [Fact]
+    public void Commands_ComposeSelectionMoveSnapGroupRouteAndLayoutResetConstraints()
+    {
+        var session = CreateSession();
+        session.Commands.SetSelection(["source-001", "target-001"], "source-001", updateStatus: false);
+        var groupId = session.Commands.TryCreateNodeGroupFromSelection("Coherent Pipeline");
+
+        var preview = session.Queries.GetSelectionTransformSnapshot(new GraphEditorSelectionTransformQuery(
+            PreviewDelta: new GraphPoint(13, 17),
+            ConstrainPreviewToPrimaryAxis: true));
+
+        Assert.Equal(new GraphPoint(0, 17), preview.PreviewDelta);
+        Assert.Equal(["connection-001"], preview.SelectedConnectionIds);
+        Assert.Equal([groupId], preview.SelectedGroupIds);
+
+        Assert.True(session.Commands.TryMoveSelectionBy(13, 17, constrainToPrimaryAxis: true, updateStatus: false));
+
+        var guides = session.Queries.GetSnapGuideSnapshot(new GraphEditorSnapGuideQuery(20));
+        Assert.True(guides.IsAvailable);
+        Assert.Equal(["source-001", "target-001"], guides.Items.Select(item => item.NodeId));
+        Assert.Contains(guides.Items, item => item.NodeId == "source-001" && item.SnappedPosition == new GraphPoint(120, 140));
+        Assert.Contains(guides.Items, item => item.NodeId == "target-001" && item.SnappedPosition == new GraphPoint(420, 140));
+
+        Assert.True(session.Commands.TrySnapSelectedNodesToGrid(20, updateStatus: false));
+
+        var snapped = session.Queries.CreateDocumentSnapshot();
+        var snappedNodes = snapped.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        Assert.Equal(new GraphPoint(120, 140), snappedNodes["source-001"].Position);
+        Assert.Equal(new GraphPoint(420, 140), snappedNodes["target-001"].Position);
+        Assert.Equal(groupId, snappedNodes["source-001"].Surface?.GroupId);
+        Assert.Equal(groupId, snappedNodes["target-001"].Surface?.GroupId);
+        var snappedGroup = snapped.Groups!.Single(group => group.Id == groupId);
+        Assert.Equal(["source-001", "target-001"], snappedGroup.NodeIds);
+        Assert.Equal(new GraphConnectionRoute([new GraphPoint(300, 180)]), Assert.Single(snapped.Connections).Presentation?.Route);
+
+        Assert.True(session.Commands.TryApplyLayoutPlan(new GraphLayoutPlan(
+            true,
+            new GraphLayoutRequest { Mode = GraphLayoutRequestMode.Selection, SelectedNodeIds = ["source-001", "target-001"] },
+            [
+                new GraphLayoutNodePosition("source-001", new GraphPoint(160, 100)),
+                new GraphLayoutNodePosition("target-001", new GraphPoint(480, 100)),
+            ],
+            ResetManualRoutes: true),
+            updateStatus: false));
+
+        var laidOut = session.Queries.CreateDocumentSnapshot();
+        Assert.Equal(new GraphPoint(160, 100), laidOut.Nodes.Single(node => node.Id == "source-001").Position);
+        Assert.Equal(new GraphPoint(480, 100), laidOut.Nodes.Single(node => node.Id == "target-001").Position);
+        Assert.Equal(groupId, laidOut.Nodes.Single(node => node.Id == "source-001").Surface?.GroupId);
+        Assert.Equal(groupId, laidOut.Nodes.Single(node => node.Id == "target-001").Surface?.GroupId);
+        Assert.Null(Assert.Single(laidOut.Connections).Presentation?.Route);
+    }
+
+    [Fact]
+    public void Queries_RejectEmptySelectionTransformWithoutProjectingStaleGroupOrRouteState()
+    {
+        var session = CreateSession();
+
+        var snapshot = session.Queries.GetSelectionTransformSnapshot(new GraphEditorSelectionTransformQuery(
+            new GraphPoint(96, 96),
+            new GraphSize(584, 180),
+            new GraphPoint(12, 8),
+            ConstrainPreviewToPrimaryAxis: true));
+
+        Assert.False(snapshot.HasSelection);
+        Assert.Empty(snapshot.SelectedNodeIds);
+        Assert.Empty(snapshot.SelectedConnectionIds);
+        Assert.Empty(snapshot.SelectedGroupIds);
+        Assert.Null(snapshot.BoundsPosition);
+        Assert.Null(snapshot.BoundsSize);
+        Assert.Equal(new GraphPoint(12, 0), snapshot.PreviewDelta);
+        Assert.Equal(["source-001", "target-001"], snapshot.RectangleNodeIds);
+        Assert.Equal(["connection-001"], snapshot.RectangleConnectionIds);
+        Assert.Equal("Select one or more nodes before transforming the selection.", snapshot.EmptyReason);
+    }
+
     private static IGraphEditorSession CreateSession()
     {
         var catalog = new NodeCatalog();
@@ -139,7 +215,8 @@ public sealed class GraphEditorSelectionTransformContractsTests
                         "target-001",
                         "in",
                         "Source To Target",
-                        "#6AD5C4"),
+                        "#6AD5C4",
+                        Presentation: new GraphEdgePresentation(Route: new GraphConnectionRoute([new GraphPoint(300, 180)]))),
                 ],
                 [
                     new GraphNodeGroup(
