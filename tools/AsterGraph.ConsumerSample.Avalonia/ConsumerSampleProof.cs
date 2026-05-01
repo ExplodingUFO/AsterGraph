@@ -1509,7 +1509,7 @@ public static class ConsumerSampleProof
                 HasConnectionValidationFeedback();
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
             (commandPaletteGroupingOk, commandPaletteDisabledReasonOk, commandPaletteRecentActionsOk) =
-                HasCommandPaletteProductivity(capabilityWindow);
+                HasCommandPaletteProductivity(capabilityWindow, host);
             (commandProjectionUnifiedOk, commandPaletteOk, toolbarDescriptorOk, contextMenuDescriptorOk, commandDisabledReasonOk) =
                 HasUnifiedCommandProjection(capabilityWindow, host);
             (nodeToolbarContributionOk, edgeToolbarContributionOk, toolbarContributionDescriptorOk, toolbarContributionScopeBoundaryOk) =
@@ -3872,7 +3872,9 @@ public static class ConsumerSampleProof
         && Math.Abs(left.ViewportWidth - right.ViewportWidth) < 0.0001d
         && Math.Abs(left.ViewportHeight - right.ViewportHeight) < 0.0001d;
 
-    private static (bool GroupingOk, bool DisabledReasonOk, bool RecentActionsOk) HasCommandPaletteProductivity(Window window)
+    private static (bool GroupingOk, bool DisabledReasonOk, bool RecentActionsOk) HasCommandPaletteProductivity(
+        Window window,
+        ConsumerSampleHost host)
     {
         var paletteToggle = FindNamed<Button>(window, "PART_OpenCommandPaletteButton");
         if (paletteToggle is null)
@@ -3889,6 +3891,8 @@ public static class ConsumerSampleProof
         var saveButton = FindNamed<Button>(window, "PART_CommandPaletteAction_workspace.save");
         var distributeButton = FindNamed<Button>(window, "PART_CommandPaletteAction_layout.distribute-horizontal");
         var expansionButton = FindNamed<Button>(window, "PART_CommandPaletteAction_node-toggle-surface-expansion");
+        var descriptors = host.Session.Queries.GetCommandDescriptors()
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
 
         var groupingOk = paletteItems is not null
             && workspaceGroup?.Text == "workspace"
@@ -3896,10 +3900,8 @@ public static class ConsumerSampleProof
             && saveButton is not null
             && expansionButton is not null;
         var disabledReasonOk = distributeButton is { IsEnabled: false }
-            && string.Equals(
-                ToolTip.GetTip(distributeButton)?.ToString(),
-                "Select at least three nodes before distributing.",
-                StringComparison.Ordinal);
+            && descriptors.TryGetValue("layout.distribute-horizontal", out var distributeDescriptor)
+            && HasCommandDisabledToolTip(distributeButton, distributeDescriptor);
 
         expansionButton?.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         FlushUi();
@@ -3959,7 +3961,7 @@ public static class ConsumerSampleProof
             && string.Equals(AutomationProperties.GetName(savePaletteButton), saveDescriptor.Title, StringComparison.Ordinal)
             && savePaletteButton.IsEnabled == saveDescriptor.IsEnabled;
         var paletteDisabledReasonOk = distributePaletteButton is { IsEnabled: false }
-            && string.Equals(ToolTip.GetTip(distributePaletteButton)?.ToString(), distributeDescriptor.DisabledReason, StringComparison.Ordinal);
+            && HasCommandDisabledToolTip(distributePaletteButton, distributeDescriptor);
         var paletteChrome = FindNamed<Border>(window, "PART_CommandPaletteChrome");
         if (paletteChrome?.IsVisible == true)
         {
@@ -3995,6 +3997,24 @@ public static class ConsumerSampleProof
             && disabledReasonOk;
         return (unifiedOk, paletteOk, toolbarOk, contextMenuOk, disabledReasonOk);
     }
+
+    private static bool HasCommandDisabledToolTip(
+        Control control,
+        GraphEditorCommandDescriptorSnapshot descriptor)
+    {
+        var toolTip = ToolTip.GetTip(control)?.ToString();
+        return !descriptor.IsEnabled
+            && !string.IsNullOrWhiteSpace(descriptor.DisabledReason)
+            && string.Equals(
+                toolTip,
+                CreateCommandDisabledToolTip(descriptor.DisabledReason, descriptor.RecoveryHint),
+                StringComparison.Ordinal);
+    }
+
+    private static string CreateCommandDisabledToolTip(string disabledReason, string? recoveryHint)
+        => string.IsNullOrWhiteSpace(recoveryHint)
+            ? disabledReason
+            : $"{disabledReason}\n→ {recoveryHint}";
 
     private static (bool NodeOk, bool EdgeOk, bool DescriptorOk, bool ScopeBoundaryOk) HasToolbarContributions(
         ConsumerSampleHost host,
