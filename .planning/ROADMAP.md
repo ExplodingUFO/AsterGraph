@@ -21,7 +21,7 @@
 
 ## Phases
 
-- [ ] **Phase 466: Canvas Interaction Engine Audit** — map pan, zoom, select, drag, connect, resize, context menu, focus, keyboard, and command interaction ownership before implementation.
+- [x] **Phase 466: Canvas Interaction Engine Audit** — map pan, zoom, select, drag, connect, resize, context menu, focus, keyboard, and command interaction ownership before implementation.
 - [ ] **Phase 467: High-Performance Rendering And Viewport Pipeline** — strengthen large-graph rendering, visible-scene projection, viewport invalidation, minimap cadence, hit testing, and interaction latency evidence.
 - [ ] **Phase 468: Professional Node And Edge Customization Surface** — deepen supported node visual, port handle, edge overlay, connection style, inspector/editor, and host-owned extension points.
 - [ ] **Phase 469: Layout And Spatial Authoring Workbench** — productize layout, alignment, snapping, group/subgraph, selection transform, and spatial editing workflows.
@@ -137,7 +137,7 @@
 
 ## Next Step
 
-Start Phase 466. The first phase is an audit and should create narrow implementation beads for the parallel rendering, customization, and spatial authoring phases.
+Start Phase 467. Phase 466 created source-backed handoff artifacts and narrow implementation bead recommendations for the parallel rendering, customization, and spatial authoring phases.
 
 ---
-*Roadmap updated: 2026-05-01 after starting v0.78*
+*Roadmap updated: 2026-05-01 after completing Phase 466*
