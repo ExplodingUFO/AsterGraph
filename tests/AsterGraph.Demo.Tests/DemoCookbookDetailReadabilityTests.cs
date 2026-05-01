@@ -31,6 +31,16 @@ public sealed class DemoCookbookDetailReadabilityTests
         Assert.StartsWith("路径：", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.CodeAnchors[0].Path, StringComparison.Ordinal));
         Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.CodeAnchors[0].Evidence, StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.DemoAnchors[0].Path, StringComparison.Ordinal));
+
+        viewModel.SelectedCookbookRecipe = viewModel.CookbookRecipes.Single(item => item.Id == "v077-authoring-platform-route");
+
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.StartsWith("Workflow：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.Contains("代码目标：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.Contains("Demo 目标：", StringComparison.Ordinal));
+        Assert.Contains(viewModel.SelectedCookbookWorkspaceGraphLines, line => line.StartsWith("组件展示：", StringComparison.Ordinal));
+
+        viewModel.SelectedCookbookRecipe = recipe;
 
         viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "proof");
         Assert.Equal(recipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);

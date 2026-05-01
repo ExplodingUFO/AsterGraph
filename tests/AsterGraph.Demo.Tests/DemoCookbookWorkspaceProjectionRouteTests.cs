@@ -8,6 +8,31 @@ namespace AsterGraph.Demo.Tests;
 public sealed class DemoCookbookWorkspaceProjectionRouteTests
 {
     [Fact]
+    public void WorkspaceProjection_ProjectsV078ComponentShowcaseLanes()
+    {
+        var performance = DemoCookbookWorkspaceProjection.Create("performance-viewport-route").SelectedRecipe;
+        var authoring = DemoCookbookWorkspaceProjection.Create("authoring-surface-route").SelectedRecipe;
+        var v077Workflow = DemoCookbookWorkspaceProjection.Create("v077-authoring-platform-route").SelectedRecipe;
+        var performanceGroup = DemoCookbookWorkspaceProjection.Create("performance-viewport-route")
+            .NavigationGroups
+            .Single(group => group.Category == DemoCookbookRecipeCategory.PerformanceViewport);
+
+        Assert.Equal("Performance And Viewport", performanceGroup.DisplayName);
+        Assert.Contains(performance.ComponentShowcaseLines, line =>
+            line.StartsWith("Rendering code: Visible scene projection -> ", StringComparison.Ordinal)
+            && line.Contains("ViewportVisibleSceneProjection.cs#ToBudgetMarker", StringComparison.Ordinal));
+        Assert.Contains(performance.ComponentShowcaseLines, line =>
+            line.StartsWith("Spatial code: Layout apply and snap commands -> ", StringComparison.Ordinal)
+            && line.Contains("IGraphEditorCommands.cs#TryApplyLayoutRequest", StringComparison.Ordinal));
+        Assert.Contains(authoring.ComponentShowcaseLines, line =>
+            line.StartsWith("Customization code: ", StringComparison.Ordinal)
+            && line.Contains("ConsumerSample", StringComparison.Ordinal));
+        Assert.Contains(v077Workflow.ComponentShowcaseLines, line =>
+            line.StartsWith("Spatial workflow: ", StringComparison.Ordinal)
+            && line.Contains("viewport.focus-search-result", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void WorkspaceProjection_ProjectsV077WorkflowStepTargets()
     {
         var recipe = DemoCookbookCatalog.Recipes.Single(item => item.Id == "v077-authoring-platform-route");

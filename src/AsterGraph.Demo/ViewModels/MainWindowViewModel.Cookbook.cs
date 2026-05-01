@@ -234,6 +234,7 @@ public partial class MainWindowViewModel
         {
             DemoCookbookRecipeCategory.StarterHost => T("Starter Host", "Starter Host"),
             DemoCookbookRecipeCategory.Authoring => T("Authoring", "Authoring"),
+            DemoCookbookRecipeCategory.PerformanceViewport => T("Performance / Viewport", "Performance / Viewport"),
             DemoCookbookRecipeCategory.PluginTrust => T("Plugin Trust", "Plugin Trust"),
             DemoCookbookRecipeCategory.DiagnosticsSupport => T("Diagnostics Support", "Diagnostics Support"),
             DemoCookbookRecipeCategory.ReviewHelp => T("Review Help", "Review Help"),

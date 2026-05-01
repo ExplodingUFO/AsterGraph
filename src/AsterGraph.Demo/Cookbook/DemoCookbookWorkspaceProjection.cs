@@ -3,18 +3,15 @@ namespace AsterGraph.Demo.Cookbook;
 public sealed record DemoCookbookWorkspaceSnapshot(
     IReadOnlyList<DemoCookbookWorkspaceNavigationGroup> NavigationGroups,
     DemoCookbookWorkspaceRecipeContent SelectedRecipe);
-
 public sealed record DemoCookbookWorkspaceNavigationGroup(
     DemoCookbookRecipeCategory Category,
     string DisplayName,
     IReadOnlyList<DemoCookbookWorkspaceNavigationItem> Recipes);
-
 public sealed record DemoCookbookWorkspaceNavigationItem(
     string RecipeId,
     string Title,
     DemoCookbookRecipeCategory Category,
     bool IsSelected);
-
 public sealed record DemoCookbookWorkspaceRecipeContent(
     string RecipeId,
     string Title,
@@ -29,16 +26,15 @@ public sealed record DemoCookbookWorkspaceRecipeContent(
     IReadOnlyList<DemoCookbookWorkspaceScenarioPoint> ScenarioPoints,
     IReadOnlyList<DemoCookbookWorkspaceInteractionFacet> InteractionFacets,
     IReadOnlyList<DemoCookbookWorkspaceWorkflowStep> WorkflowSteps,
+    IReadOnlyList<string> ComponentShowcaseLines,
     IReadOnlyList<string> ProofMarkers,
     IReadOnlyList<string> DeferredGaps,
     DemoCookbookRouteClarity RouteClarity,
     string SupportBoundary);
-
 public sealed record DemoCookbookWorkspaceAnchor(
     string Label,
     string Path,
     string Evidence);
-
 public sealed record DemoCookbookWorkspaceScenarioPoint(
     string Key,
     DemoCookbookScenarioKind Kind,
@@ -47,7 +43,6 @@ public sealed record DemoCookbookWorkspaceScenarioPoint(
     string GraphCueLabel,
     string GraphCueTarget,
     string ContentCue);
-
 public sealed record DemoCookbookWorkspaceInteractionFacet(
     string Key,
     DemoCookbookInteractionKind Kind,
@@ -55,7 +50,6 @@ public sealed record DemoCookbookWorkspaceInteractionFacet(
     string Evidence,
     string FocusLabel,
     string FocusTarget);
-
 public static partial class DemoCookbookWorkspaceProjection
 {
     public static DemoCookbookWorkspaceSnapshot Create(
@@ -76,7 +70,6 @@ public static partial class DemoCookbookWorkspaceProjection
             CreateNavigationGroups(navigationRecipes ?? recipes, selectedRecipe.Id),
             CreateRecipeContent(selectedRecipe));
     }
-
     private static IReadOnlyList<DemoCookbookWorkspaceNavigationGroup> CreateNavigationGroups(
         IReadOnlyList<DemoCookbookRecipe> recipes,
         string selectedRecipeId)
@@ -94,7 +87,6 @@ public static partial class DemoCookbookWorkspaceProjection
                         string.Equals(recipe.Id, selectedRecipeId, StringComparison.Ordinal)))
                     .ToArray()))
             .ToArray();
-
     private static DemoCookbookWorkspaceRecipeContent CreateRecipeContent(DemoCookbookRecipe recipe)
     {
         var posture = CreateRoutePosture(recipe.Category);
@@ -113,6 +105,7 @@ public static partial class DemoCookbookWorkspaceProjection
             ConvertScenarioPoints(recipe),
             ConvertInteractionFacets(recipe),
             ConvertWorkflowSteps(recipe),
+            CreateComponentShowcaseLines(recipe),
             recipe.ProofMarkers.ToArray(),
             posture.DeferredGaps,
             recipe.RouteClarity,
@@ -132,6 +125,11 @@ public static partial class DemoCookbookWorkspaceProjection
                 "Uses public authoring, command, node, port, and parameter extension seams.",
                 "This recipe is display guidance; no generated workflow feature is enabled.",
                 ["Retained/migration cookbook depth remains deferred."]),
+            DemoCookbookRecipeCategory.PerformanceViewport => new DemoCookbookRoutePosture(
+                "Proof/demo route",
+                "Uses public viewport projection, minimap cadence, and layout command seams.",
+                "This recipe is display guidance; no second renderer, background graph index, or runtime execution mode is enabled.",
+                ["Background graph indexing, alternate renderers, and runtime execution modes remain deferred."]),
             DemoCookbookRecipeCategory.GroupsSubgraphs => new DemoCookbookRoutePosture(
                 "Proof/demo route",
                 "Demonstrates persisted groups, composite scopes, collapsed projection, and boundary-edge evidence.",
@@ -251,6 +249,7 @@ public static partial class DemoCookbookWorkspaceProjection
         {
             DemoCookbookRecipeCategory.StarterHost => "Starter Host",
             DemoCookbookRecipeCategory.Authoring => "Authoring",
+            DemoCookbookRecipeCategory.PerformanceViewport => "Performance And Viewport",
             DemoCookbookRecipeCategory.GroupsSubgraphs => "Groups And Subgraphs",
             DemoCookbookRecipeCategory.PluginTrust => "Plugin Trust",
             DemoCookbookRecipeCategory.DiagnosticsSupport => "Diagnostics Support",

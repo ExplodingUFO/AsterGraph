@@ -50,6 +50,7 @@ public sealed class DemoCookbookWorkspaceProjectionTests
             AssertEquivalentScenarioPoints(recipe.ScenarioPoints, content.ScenarioPoints);
             AssertEquivalentInteractionFacets(recipe.InteractionFacets, content.InteractionFacets);
             AssertEquivalentWorkflowSteps(recipe.WorkflowSteps, content.WorkflowSteps);
+            Assert.All(content.ComponentShowcaseLines, line => Assert.False(string.IsNullOrWhiteSpace(line)));
             Assert.Equal(recipe.ProofMarkers, content.ProofMarkers);
             Assert.NotEmpty(content.DeferredGaps);
             Assert.Equal(recipe.RouteClarity, content.RouteClarity);

@@ -29,6 +29,7 @@ public partial class MainWindowViewModel
                 .. FormatCookbookAnchors(T("图示上下文：", "Graph context: "), SelectedCookbookRecipe.DemoAnchors),
                 T("当前场景：", "Selected scenario: ") + scenario.Label,
                 T("图线索：", "Graph cue: ") + scenario.GraphCueLabel + " -> " + scenario.GraphCueTarget,
+                .. CookbookWorkspace.SelectedRecipe.ComponentShowcaseLines.Select(line => T("组件展示：", "Component showcase: ") + line),
             ];
         }
     }
@@ -58,12 +59,14 @@ public partial class MainWindowViewModel
         get
         {
             var scenario = SelectedCookbookScenarioPoint;
+            var workflowSteps = CookbookWorkspace.SelectedRecipe.WorkflowSteps;
 
             return
             [
                 T("Step：", "Step: ") + scenario.Label,
                 T("Graph：", "Graph: ") + scenario.GraphCueLabel + " -> " + scenario.GraphCueTarget,
                 T("Content：", "Content: ") + scenario.ContentCue,
+                .. workflowSteps.Select(FormatCookbookWorkflowStep),
             ];
         }
     }
@@ -71,6 +74,7 @@ public partial class MainWindowViewModel
     public IReadOnlyList<string> SelectedCookbookWorkspaceProofSupportLines =>
     [
         .. SelectedCookbookRecipe.ProofMarkers.Select(marker => T("Proof：", "Proof: ") + marker),
+        .. FormatCookbookAnchors(T("Docs：", "Docs: "), SelectedCookbookRecipe.DocumentationAnchors),
         T("Support：", "Support: ") + SelectedCookbookRecipe.SupportBoundary,
     ];
 
@@ -95,7 +99,12 @@ public partial class MainWindowViewModel
                 T("支持边界：", "Support boundary: ") + SelectedCookbookRecipe.Title,
                 SelectedCookbookRecipe.SupportBoundary,
             ],
-            _ => FormatCookbookDetailAnchors(SelectedCookbookRecipe.CodeAnchors).ToArray(),
+            _ =>
+            [
+                .. FormatCookbookDetailAnchors(SelectedCookbookRecipe.CodeAnchors),
+                .. FormatCookbookDetailAnchors(SelectedCookbookRecipe.DemoAnchors),
+                .. CookbookWorkspace.SelectedRecipe.ComponentShowcaseLines.Select(line => T("组件展示：", "Component showcase: ") + line),
+            ],
         };
 
     [ObservableProperty]
@@ -138,6 +147,14 @@ public partial class MainWindowViewModel
                                              + Environment.NewLine
                                              + T("目标：", "Target: ") + facet.FocusTarget);
 
+    private string FormatCookbookWorkflowStep(Cookbook.DemoCookbookWorkspaceWorkflowStep step)
+        => T("Workflow：", "Workflow: ") + FormatCookbookWorkflowKind(step.Kind)
+           + step.Title + Environment.NewLine
+           + T("命令：", "Command: ") + step.CommandId + Environment.NewLine
+           + T("代码目标：", "Code target: ") + step.CodeTarget + Environment.NewLine
+           + T("Demo 目标：", "Demo target: ") + step.DemoTarget + Environment.NewLine
+           + T("证明：", "Proof: ") + step.ProofMarker;
+
     private IEnumerable<string> FormatSelectedCookbookScenarioPoint(
         Cookbook.DemoCookbookWorkspaceScenarioPoint point)
     {
@@ -165,6 +182,17 @@ public partial class MainWindowViewModel
             Cookbook.DemoCookbookInteractionKind.LayoutReadability => T("布局/可读性：", "Layout/readability: "),
             Cookbook.DemoCookbookInteractionKind.Inspection => T("检查：", "Inspection: "),
             Cookbook.DemoCookbookInteractionKind.ValidationRuntimeFeedback => T("验证/运行反馈：", "Validation/runtime feedback: "),
+            _ => kind + ": ",
+        };
+
+    private string FormatCookbookWorkflowKind(Cookbook.DemoCookbookWorkflowKind kind)
+        => kind switch
+        {
+            Cookbook.DemoCookbookWorkflowKind.CommandRegistry => T("命令注册：", "Command registry: "),
+            Cookbook.DemoCookbookWorkflowKind.SemanticEditing => T("语义编辑：", "Semantic editing: "),
+            Cookbook.DemoCookbookWorkflowKind.TemplatePreset => T("模板预设：", "Template preset: "),
+            Cookbook.DemoCookbookWorkflowKind.SelectionTransform => T("选择变换：", "Selection transform: "),
+            Cookbook.DemoCookbookWorkflowKind.NavigationFocus => T("导航聚焦：", "Navigation focus: "),
             _ => kind + ": ",
         };
 }
