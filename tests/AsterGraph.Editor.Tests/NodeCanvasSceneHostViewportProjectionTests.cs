@@ -23,6 +23,26 @@ public sealed class NodeCanvasSceneHostViewportProjectionTests
     private static readonly NodeDefinitionId NodeDefinitionId = new("tests.scene-host.viewport");
 
     [AvaloniaFact]
+    public void RebuildScene_BoundsNodeAndGroupVisualsToVisibleProjectionBudget()
+    {
+        var editor = CreateEditor();
+        editor.UpdateViewportSize(640d, 420d);
+        var host = new TestSceneHost(editor);
+        var sceneHost = new NodeCanvasSceneHost(host);
+
+        sceneHost.RebuildScene();
+
+        Assert.NotNull(sceneHost.LastVisibleSceneProjection);
+        Assert.Equal(
+            "VISIBLE_SCENE_PROJECTION:scene-host:nodes=2/3:connections=1/2:groups=1/2:overscan=96",
+            sceneHost.LastVisibleSceneProjection.ToBudgetMarker("scene-host"));
+        Assert.Equal(["node-a", "node-b"], host.NodeVisuals.Keys.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Equal(["group-visible"], host.GroupVisuals.Keys.OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Equal(2, host.NodeLayer!.Children.Count);
+        Assert.Single(host.GroupLayer!.Children);
+    }
+
+    [AvaloniaFact]
     public void UpdateViewportTransform_ReportsVisibleSceneInvalidationDiffMarker()
     {
         var editor = CreateEditor();
@@ -197,7 +217,15 @@ public sealed class NodeCanvasSceneHostViewportProjectionTests
     private sealed class StubNodeVisualPresenter : IGraphNodeVisualPresenter
     {
         public GraphNodeVisual Create(GraphNodeVisualContext context)
-            => throw new NotSupportedException();
+        {
+            var root = new Border
+            {
+                Width = context.Node.Width,
+                Height = context.Node.Height,
+            };
+
+            return new GraphNodeVisual(root, new Dictionary<string, Control>(StringComparer.Ordinal));
+        }
 
         public void Update(GraphNodeVisual visual, GraphNodeVisualContext context)
         {

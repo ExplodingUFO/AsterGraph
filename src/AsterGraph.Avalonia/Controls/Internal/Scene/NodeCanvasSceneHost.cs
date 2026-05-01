@@ -116,14 +116,34 @@ internal sealed class NodeCanvasSceneHost
             return;
         }
 
-        RefreshVisibleSceneProjection();
+        var visibleSceneProjection = RefreshVisibleSceneProjection();
         var hierarchy = _host.ViewModel.Session.Queries.GetHierarchyStateSnapshot();
         var visibleNodeIds = hierarchy.Nodes
             .Where(node => node.IsVisibleInActiveScope)
             .Select(node => node.NodeId)
             .ToHashSet(StringComparer.Ordinal);
+        var applyVisibleSceneBudget = ShouldApplyVisibleSceneBudget()
+                                      && visibleSceneProjection is not null;
+        if (applyVisibleSceneBudget)
+        {
+            visibleNodeIds.IntersectWith(_host.ViewModel.Nodes
+                .Where(node => IntersectsVisibleSceneBudget(visibleSceneProjection!, node.X, node.Y, node.Width, node.Height))
+                .Select(node => node.Id));
+        }
 
-        foreach (var group in hierarchy.NodeGroups)
+        var visibleGroupIds = applyVisibleSceneBudget
+            ? hierarchy.NodeGroups
+                .Where(group => IntersectsVisibleSceneBudget(
+                    visibleSceneProjection!,
+                    group.Position.X,
+                    group.Position.Y,
+                    group.Size.Width,
+                    group.Size.Height))
+                .Select(group => group.Id)
+                .ToHashSet(StringComparer.Ordinal)
+            : null;
+
+        foreach (var group in hierarchy.NodeGroups.Where(group => visibleGroupIds?.Contains(group.Id) != false))
         {
             var visual = CreateGroupVisual(group);
             _host.GroupVisuals[group.Id] = visual;
@@ -565,13 +585,13 @@ internal sealed class NodeCanvasSceneHost
             [],
             new GraphEditorGroupMoveConstraintsSnapshot(false, false));
 
-    private void RefreshVisibleSceneProjection()
+    private ViewportVisibleSceneProjection? RefreshVisibleSceneProjection()
     {
         if (_host.ViewModel is null)
         {
             LastVisibleSceneProjection = null;
             LastVisibleSceneInvalidationMarker = null;
-            return;
+            return null;
         }
 
         var previous = LastVisibleSceneProjection;
@@ -580,6 +600,35 @@ internal sealed class NodeCanvasSceneHost
             _host.ViewModel.Session.Queries.GetViewportSnapshot());
         LastVisibleSceneProjection = current;
         LastVisibleSceneInvalidationMarker = previous?.ToInvalidationBudgetMarker(current);
+        return current;
+    }
+
+    private bool ShouldApplyVisibleSceneBudget()
+    {
+        if (_host.ViewModel is null)
+        {
+            return false;
+        }
+
+        var viewport = _host.ViewModel.Session.Queries.GetViewportSnapshot();
+        return viewport.ViewportWidth > 0d
+               && viewport.ViewportHeight > 0d
+               && viewport.Zoom > 0d;
+    }
+
+    private static bool IntersectsVisibleSceneBudget(
+        ViewportVisibleSceneProjection projection,
+        double x,
+        double y,
+        double width,
+        double height)
+    {
+        var right = x + Math.Max(0d, width);
+        var bottom = y + Math.Max(0d, height);
+        return x <= projection.WorldBottomRight.X
+               && right >= projection.WorldTopLeft.X
+               && y <= projection.WorldBottomRight.Y
+               && bottom >= projection.WorldTopLeft.Y;
     }
 
     private ConnectionStyleOptions GetConnectionStyle(ConnectionViewModel connection)
