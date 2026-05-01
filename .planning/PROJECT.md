@@ -10,21 +10,19 @@ External hosts can embed AsterGraph and get a high-performance, definition-drive
 
 ## Current Milestone
 
-v0.77.0-beta Semantic Authoring And Command Platform
+v0.78.0-beta Professional Desktop Node Graph Component Platform
 
-**Goal:** Take the next larger step from professional canvas/workbench depth into a semantic authoring platform: unified command discovery/execution, advanced editing operations, reusable templates, selection transforms, navigation/search workflows, cookbook proof, and release-grade contracts.
+**Goal:** Take the next larger step from semantic authoring into a professional desktop node graph component platform: canvas interaction architecture, rendering/viewport performance, node and edge customization, spatial authoring workflows, cookbook showcase, and release-grade contracts.
 
 **Target features:**
-- **M0 — Command Platform Audit:** map command, input, menu, tool, undo, and host extension boundaries before implementation.
-- **M1 — Unified Command Registry:** make command discovery, keybinding metadata, menu/tool projection, and execution route through the canonical session boundary.
-- **M2 — Semantic Editing Operations:** support copy, paste, duplicate, reconnect, insert-into-route, and batch edit operations with explicit undo boundaries.
-- **M3 — Template Palette:** support reusable node/group/fragment templates and searchable palette projection without generated code execution.
-- **M4 — Selection Transform And Spatial Editing:** deepen selection, transform, snap-guide, constrained move/resize, and keyboard-driven editing workflows.
-- **M5 — Navigation Search And Focus:** support search, jump, breadcrumb, bookmark, minimap-aware focus, and large-graph navigation evidence.
-- **M6 — Professional Cookbook Flows:** demonstrate v0.77 workflows in the Avalonia cookbook as code plus live proof.
-- **M7 — Contracts And Release Proof:** close public API inventory, docs, proof markers, CI-sensitive gates, beads, Dolt, and Git handoff.
+- **M0 — Canvas Interaction Audit:** map pan, zoom, select, drag, connect, resize, context menu, focus, keyboard, and command interaction ownership before implementation.
+- **M1 — Rendering And Viewport Pipeline:** strengthen large-graph rendering, visible-scene projection, invalidation, minimap cadence, hit testing, and latency evidence.
+- **M2 — Node And Edge Customization Surface:** deepen supported node visual, port handle, edge overlay, connection style, inspector/editor, and host-owned extension points.
+- **M3 — Layout And Spatial Authoring Workbench:** productize layout, alignment, snapping, group/subgraph, selection transform, and spatial editing workflows.
+- **M4 — Cookbook Component Showcase:** turn the Avalonia cookbook into a component showcase with code, graph proof, demo behavior, and support boundaries.
+- **M5 — Release Proof And API Governance:** close public API inventory, docs, proof markers, net8/net9/net10 gates, beads, Dolt, and Git handoff.
 
-**Status:** Active locally. Epic bead: `avalonia-node-map-48w`.
+**Status:** Active locally. Epic bead: `avalonia-node-map-v78`.
 
 ## Current State
 
@@ -36,7 +34,9 @@ v0.75.0-beta Cross-Platform High-Performance Desktop Node Graph Library is compl
 
 v0.76.0-beta Professional Canvas Engine And Authoring Workbench is complete locally (2026-05-01). It shifted from proof-backed library surface into deeper professional canvas capabilities: virtualized scene/indexing, edge routing, groups/subgraphs, layout services, designer workbench UX, extension contracts, and release proof.
 
-v0.77.0-beta Semantic Authoring And Command Platform is active (2026-05-01). It should turn the professional canvas/workbench foundation into a host-extensible authoring platform with semantic commands, advanced editing operations, reusable templates, precise selection transforms, navigation/search workflows, and cookbook proof.
+v0.77.0-beta Semantic Authoring And Command Platform is complete locally (2026-05-01). It turned the professional canvas/workbench foundation into a host-extensible authoring platform with semantic commands, advanced editing operations, reusable templates, precise selection transforms, navigation/search workflows, cookbook proof, and public API release proof.
+
+v0.78.0-beta Professional Desktop Node Graph Component Platform is active (2026-05-01). It should turn the semantic authoring platform into a more complete reusable desktop node graph component with stronger interaction architecture, rendering/viewport performance, customization seams, spatial authoring workflows, cookbook showcase, and release proof.
 
 ## Requirements
 
@@ -53,13 +53,12 @@ v0.77.0-beta Semantic Authoring And Command Platform is active (2026-05-01). It 
 
 ### Active
 
-- **CMD-01:** Users can discover, project, bind, and execute supported commands through one canonical command registry without scattering command ownership across UI surfaces.
-- **EDIT-01:** Users can perform semantic graph editing operations such as copy, paste, duplicate, insert into route, reconnect, delete with repair, and batch edit with explicit undo boundaries.
-- **TPL-01:** Users can provide and apply reusable node, group, and graph-fragment templates through supported package contracts and a searchable workbench palette.
-- **SEL-01:** Users can transform multi-selection state precisely with marquee/lasso projection, keyboard nudging, constrained move/resize, snap guides, and route/group-aware constraints.
-- **NAV-01:** Users can find, jump to, bookmark, and focus graph content through source-backed search/navigation projections that remain measurable on large graphs.
-- **COOK-01:** Users can learn the v0.77 authoring platform through cookbook flows that pair code, workbench behavior, proof markers, and support boundaries.
-- **REL-01:** Users can verify v0.77 contracts through public API inventory, docs, baseline gates, CI-sensitive tests, beads, Dolt, and Git handoff.
+- **INT-01:** Users get professional canvas interactions for pan, zoom, select, drag, connect, resize, focus, context menus, and keyboard flows through coherent source-backed ownership.
+- **RENDER-01:** Users can work with large graphs through measured rendering, viewport, invalidation, minimap, and hit-test behavior.
+- **CUSTOM-01:** Users can customize nodes, ports, edges, overlays, inspectors, and editor affordances through supported package contracts.
+- **SPACE-01:** Users can compose layout, alignment, snapping, groups/subgraphs, selection transforms, and spatial editing as one professional workbench flow.
+- **COOK-02:** Users can learn the component platform through cookbook recipes that pair code, graph proof, demo behavior, and support boundaries.
+- **REL-02:** Users can verify v0.78 through public API inventory, docs, baseline gates, .NET 8/9/10 CI-sensitive tests, beads, Dolt, and Git handoff.
 
 ### Out of Scope
 
@@ -89,7 +88,7 @@ v0.77.0-beta Semantic Authoring And Command Platform is active (2026-05-01). It 
 - v0.74 completed the cookbook proof surface: scenario coverage, graph/content cues, source-backed routes, professional interaction facets, docs, and proof markers.
 - v0.75 completed the first library-grade step: rendering/viewport proof, interaction contracts, extension seams, host packaging, professional examples, and release gate closure.
 - v0.76 completed professional canvas depth: scalable scene indexing, edge routing, groups/subgraphs, layout services, workbench-grade authoring UX, and public API proof.
-- The new bottleneck is semantic authoring depth: command extensibility, reusable templates, advanced edit operations, selection transforms, and navigation workflows that hosts can compose without UI-only shortcuts.
+- The new bottleneck is component-platform depth: professional interaction architecture, high-performance rendering/viewport behavior, deeper customization seams, spatial authoring workflows, cookbook showcase quality, and release proof.
 - Demo cookbook still matters, but it now proves professional scenarios for the SDK rather than defining supported package contracts.
 - Supported SDK contracts stay in packages, public APIs, docs, ConsumerSample, starter templates, and proof markers.
 - Performance claims must stay tied to measured tests and proof output.
@@ -115,7 +114,8 @@ v0.77.0-beta Semantic Authoring And Command Platform is active (2026-05-01). It 
 | Make v0.74 Cookbook Scenario Depth And Component Polish | The cookbook/professional Demo needed direct alignment between graph behavior, source code, routes, and proof evidence | Completed 2026-04-30 |
 | Make v0.75 Cross-Platform High-Performance Desktop Node Graph Library | The product bottleneck was library-grade rendering, interaction, customization, packaging, examples, and cross-platform proof | Completed 2026-04-30 |
 | Make v0.76 Professional Canvas Engine And Authoring Workbench | The product bottleneck was professional canvas depth: virtualized scene/indexing, routing, groups/subgraphs, layout services, designer workbench UX, extension contracts, and proof | Completed 2026-05-01 |
-| Make v0.77 Semantic Authoring And Command Platform | The next bottleneck is host-extensible semantic authoring: commands, editing operations, templates, selection transforms, navigation/search, cookbook proof, and release contracts | Active |
+| Make v0.77 Semantic Authoring And Command Platform | The product bottleneck was host-extensible semantic authoring: commands, editing operations, templates, selection transforms, navigation/search, cookbook proof, and release contracts | Completed 2026-05-01 |
+| Make v0.78 Professional Desktop Node Graph Component Platform | The next bottleneck is component-platform depth: interaction engine quality, rendering/viewport performance, customization seams, spatial authoring, cookbook showcase, and release contracts | Active |
 
 ## Evolution
 
@@ -135,4 +135,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with the newest shipped state and next bottleneck.
 
 ---
-*Last updated: 2026-05-01 after starting `v0.77.0-beta Semantic Authoring And Command Platform`*
+*Last updated: 2026-05-01 after starting `v0.78.0-beta Professional Desktop Node Graph Component Platform`*

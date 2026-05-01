@@ -2,29 +2,27 @@
 
 ## Current Position
 
-Phase: v0.77 milestone complete
+Phase: v0.78 milestone active
 Plan: `.planning/ROADMAP.md`
-Status: v0.77 complete; semantic authoring commands, editing, templates, selection transforms, navigation/search, cookbook proof, docs, API baseline, and release gates are closed
-Last activity: 2026-05-01 — Completed Phase 465 v0.77 Contracts Documentation And Release Proof
+Status: v0.78 started; professional desktop node graph component platform phases are planned and Phase 466 is ready
+Last activity: 2026-05-01 — Started v0.78 Professional Desktop Node Graph Component Platform
 
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated 2026-05-01)
 
 **Core value:** External hosts can embed AsterGraph and get a high-performance, definition-driven desktop node graph library with professional canvas depth, composable interactions, customizable nodes and edges, designer workbench UX, inspection, runtime feedback, local plugin trust, professional examples, and proof-backed cross-platform desktop verification.
-**Current focus:** Move from v0.76 professional canvas/workbench depth into v0.77 semantic authoring platform capabilities.
+**Current focus:** Move from v0.77 semantic authoring into a professional desktop node graph component platform.
 
 ## Active Beads
 
-- Completed epic: `avalonia-node-map-48w` — v0.77 Semantic Authoring And Command Platform
-- Completed: `avalonia-node-map-48w.1` — Phase 458: Command Platform Architecture And Input Audit
-- Completed: `avalonia-node-map-48w.2` — Phase 459: Unified Command Registry And Keybinding Surface
-- Completed: `avalonia-node-map-48w.3` — Phase 460: Semantic Editing Operations And Clipboard Model
-- Completed: `avalonia-node-map-48w.4` — Phase 461: Template Palette And Reusable Authoring Presets
-- Completed: `avalonia-node-map-48w.5` — Phase 462: Advanced Selection Transform And Spatial Editing
-- Completed: `avalonia-node-map-48w.6` — Phase 463: Viewport Navigation Search And Focus Workflows
-- Completed: `avalonia-node-map-48w.7` — Phase 464: Professional Cookbook Authoring Flows
-- Completed: `avalonia-node-map-48w.8` — Phase 465: v0.77 Contracts Documentation And Release Proof
+- Active epic: `avalonia-node-map-v78` — v0.78 Professional Desktop Node Graph Component Platform
+- Next: `avalonia-node-map-v78.1` — Phase 466: Canvas Interaction Engine Audit
+- Blocked by Phase 466: `avalonia-node-map-v78.2` — Phase 467: High-Performance Rendering And Viewport Pipeline
+- Blocked by Phase 466: `avalonia-node-map-v78.3` — Phase 468: Professional Node And Edge Customization Surface
+- Blocked by Phase 466: `avalonia-node-map-v78.4` — Phase 469: Layout And Spatial Authoring Workbench
+- Blocked by Phases 467-469: `avalonia-node-map-v78.5` — Phase 470: Cookbook Component Showcase
+- Blocked by Phase 470: `avalonia-node-map-v78.6` — Phase 471: v0.78 Release Proof And API Governance
 
 ## Notes
 
@@ -44,8 +42,9 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 - Phase 463 added stable graph item search across scopes, nodes, groups, connections, validation issues, viewport bookmark snapshots, and command workflows for focus-node, focus-issue, focus-search-result, and bookmark add/remove/activate.
 - Phase 464 added a v0.77 cookbook route with command registry, semantic editing, template preset, selection transform, and navigation focus workflow steps, plus clearer Avalonia cookbook code/demo/proof presentation.
 - Phase 465 aligned public docs/API inventory, updated the public API baseline for intended v0.77 symbols, and passed integrated release proof gates.
+- v0.78 should deepen the product as a reusable professional desktop node graph component: interaction engine, rendering/viewport performance, customization surfaces, spatial authoring, cookbook showcase, and release proof.
 - Spark workers hit a model quota error during 463.3 and 462.3; use the main model or a non-spark worker until the quota resets.
-- Next milestone should continue from the professional desktop node graph library direction without naming external inspiration projects in docs or planning artifacts.
+- Worktrees must stay inside the project folder under `.worktrees/`.
 
 ---
-*Last updated: 2026-05-01 after completing v0.77*
+*Last updated: 2026-05-01 after starting v0.78*
