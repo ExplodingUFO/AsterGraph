@@ -16,6 +16,7 @@ using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor;
@@ -439,6 +440,60 @@ public sealed class GraphEditorViewTests
         AssertFocusRoundTrip(view, nodeSurface!, paletteChrome, paletteSearchBox);
         AssertFocusRoundTrip(view, stencilSearchBox, paletteChrome, paletteSearchBox);
         AssertFocusRoundTrip(view, parameterSearchBox, paletteChrome, paletteSearchBox);
+    }
+
+    [AvaloniaFact]
+    public void CustomNodeBodyInputScope_SuppressesDestructiveShortcutButKeepsCommandPaletteShortcut()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+            Presentation = new AsterGraphPresentationOptions
+            {
+                NodeBodyPresenter = new InputScopeNodeBodyPresenter(),
+            },
+        });
+        var view = (GraphEditorView)window.Content!;
+        var customEditor = FindRequiredDescendant<Button>(view, "PART_CustomBodyInputScopeEditor");
+        var paletteChrome = FindRequiredControl<Border>(view, "PART_CommandPaletteChrome");
+
+        try
+        {
+            AssertInputScopeShortcutBehavior(view, editor, customEditor, paletteChrome);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void CustomNodeVisualInputScope_SuppressesDestructiveShortcutButKeepsCommandPaletteShortcut()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+            Presentation = new AsterGraphPresentationOptions
+            {
+                NodeVisualPresenter = new InputScopeNodeVisualPresenter(),
+            },
+        });
+        var view = (GraphEditorView)window.Content!;
+        var customEditor = FindRequiredDescendant<Button>(view, "PART_CustomVisualInputScopeEditor");
+        var paletteChrome = FindRequiredControl<Border>(view, "PART_CommandPaletteChrome");
+
+        try
+        {
+            AssertInputScopeShortcutBehavior(view, editor, customEditor, paletteChrome);
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 
     [AvaloniaFact]
@@ -1275,6 +1330,38 @@ public sealed class GraphEditorViewTests
         Assert.Same(focusOrigin, GetFocusedElement(view));
     }
 
+    private static void AssertInputScopeShortcutBehavior(
+        GraphEditorView view,
+        GraphEditorViewModel editor,
+        Control inputScopeEditor,
+        Border paletteChrome)
+    {
+        var deleteArgs = new KeyEventArgs
+        {
+            Key = Key.Delete,
+            Source = inputScopeEditor,
+        };
+
+        InvokeViewKeyDown(view, deleteArgs);
+
+        Assert.False(deleteArgs.Handled);
+        Assert.Single(editor.Nodes);
+        Assert.Equal("tests.view.node-001", editor.Nodes[0].Id);
+        Assert.Equal("tests.view.node-001", editor.SelectedNode?.Id);
+
+        var paletteArgs = new KeyEventArgs
+        {
+            Key = Key.P,
+            KeyModifiers = KeyModifiers.Control | KeyModifiers.Shift,
+            Source = inputScopeEditor,
+        };
+
+        InvokeViewKeyDown(view, paletteArgs);
+
+        Assert.True(paletteArgs.Handled);
+        Assert.True(paletteChrome.IsVisible);
+    }
+
     private static IInputElement? GetFocusedElement(GraphEditorView view)
         => TopLevel.GetTopLevel(view)?.FocusManager?.GetFocusedElement();
 
@@ -2019,6 +2106,53 @@ public sealed class GraphEditorViewTests
             QueryCount++;
             return _definitions;
         }
+    }
+
+    private sealed class InputScopeNodeVisualPresenter : IGraphNodeVisualPresenter
+    {
+        public GraphNodeVisual Create(GraphNodeVisualContext context)
+        {
+            var surface = new InputScopeHost
+            {
+                Width = context.Node.Width,
+                Height = context.Node.Height,
+                Child = new Button
+                {
+                    Name = "PART_CustomVisualInputScopeEditor",
+                    Content = "Custom visual editor",
+                },
+            };
+
+            return new GraphNodeVisual(surface, new Dictionary<string, Control>(StringComparer.Ordinal));
+        }
+
+        public void Update(GraphNodeVisual visual, GraphNodeVisualContext context)
+        {
+            visual.Root.Width = context.Node.Width;
+            visual.Root.Height = context.Node.Height;
+        }
+    }
+
+    private sealed class InputScopeNodeBodyPresenter : IGraphNodeBodyPresenter
+    {
+        public GraphNodeBodyVisual Create(GraphNodeVisualContext context)
+            => new(
+                new InputScopeHost
+                {
+                    Child = new Button
+                    {
+                        Name = "PART_CustomBodyInputScopeEditor",
+                        Content = "Custom body editor",
+                    },
+                });
+
+        public void Update(GraphNodeBodyVisual visual, GraphNodeVisualContext context)
+        {
+        }
+    }
+
+    private sealed class InputScopeHost : Border, IGraphEditorInputScope
+    {
     }
 }
 
