@@ -59,6 +59,60 @@ public sealed class GraphMiniMapStandaloneTests
     }
 
     [AvaloniaFact]
+    public void HostedMiniMap_BalancedModeInvalidatesOnViewportChange()
+    {
+        var editor = CreateEditor();
+        editor.UpdateViewportSize(480, 320);
+        var view = new GraphEditorView
+        {
+            Editor = editor,
+            WorkbenchPerformanceMode = AsterGraphWorkbenchPerformanceMode.Balanced,
+        };
+        var miniMap = Assert.IsType<GraphMiniMap>(view.FindControl<GraphMiniMap>("PART_MiniMapSurface"));
+
+        var beforeInvalidations = miniMap.ViewportInvalidationCount;
+
+        editor.PanBy(96, 48);
+
+        Assert.False(ReadMiniMapLightweightProjection(miniMap));
+        Assert.Equal("MINIMAP_VIEWPORT_CADENCE:Balanced:viewport=continuous-invalidate:nodes=projected", miniMap.ViewportCadenceProofMarker);
+        Assert.Equal(beforeInvalidations + 1, miniMap.ViewportInvalidationCount);
+        Assert.Equal(0, miniMap.DeferredViewportRefreshCount);
+    }
+
+    [AvaloniaFact]
+    public void HostedMiniMap_ThroughputModeDefersViewportInvalidationButReadsFreshViewportOnProjection()
+    {
+        var editor = CreateEditor();
+        editor.UpdateViewportSize(480, 320);
+        var view = new GraphEditorView
+        {
+            Editor = editor,
+            WorkbenchPerformanceMode = AsterGraphWorkbenchPerformanceMode.Throughput,
+        };
+        var miniMap = Assert.IsType<GraphMiniMap>(view.FindControl<GraphMiniMap>("PART_MiniMapSurface"));
+        var firstProjection = InvokeStockSurfaceProjection(miniMap, editor.Session);
+        var firstNodes = ReadProjectionProperty(firstProjection, "Nodes");
+        var firstViewport = ReadProjectionProperty<GraphEditorViewportSnapshot>(firstProjection, "Viewport");
+        var beforeInvalidations = miniMap.ViewportInvalidationCount;
+        var beforeDeferredRefreshes = miniMap.DeferredViewportRefreshCount;
+
+        editor.PanBy(96, 48);
+
+        var secondProjection = InvokeStockSurfaceProjection(miniMap, editor.Session);
+        var secondNodes = ReadProjectionProperty(secondProjection, "Nodes");
+        var secondViewport = ReadProjectionProperty<GraphEditorViewportSnapshot>(secondProjection, "Viewport");
+
+        Assert.True(ReadMiniMapLightweightProjection(miniMap));
+        Assert.Equal("MINIMAP_VIEWPORT_CADENCE:Throughput:viewport=deferred-until-render:nodes=cached", miniMap.ViewportCadenceProofMarker);
+        Assert.Equal(beforeInvalidations, miniMap.ViewportInvalidationCount);
+        Assert.Equal(beforeDeferredRefreshes + 1, miniMap.DeferredViewportRefreshCount);
+        Assert.Same(firstNodes, secondNodes);
+        Assert.Equal(firstViewport.PanX + 96d, secondViewport.PanX);
+        Assert.Equal(firstViewport.PanY + 48d, secondViewport.PanY);
+    }
+
+    [AvaloniaFact]
     public void LightweightMiniMap_ReusesNodeProjectionButRefreshesViewportSnapshot()
     {
         var editor = CreateEditor();

@@ -6,6 +6,7 @@ using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Viewport;
 
@@ -78,6 +79,12 @@ public sealed class GraphMiniMap : UserControl
         get => _stockSurface.UseLightweightProjection;
         set => _stockSurface.UseLightweightProjection = value;
     }
+
+    internal string ViewportCadenceProofMarker => _stockSurface.ViewportCadenceProofMarker;
+
+    internal int ViewportInvalidationCount => _stockSurface.ViewportInvalidationCount;
+
+    internal int DeferredViewportRefreshCount => _stockSurface.DeferredViewportRefreshCount;
 
     /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -232,6 +239,15 @@ public sealed class GraphMiniMap : UserControl
                 InvalidateVisual();
             }
         }
+
+        public string ViewportCadenceProofMarker
+            => UseLightweightProjection
+                ? "MINIMAP_VIEWPORT_CADENCE:Throughput:viewport=deferred-until-render:nodes=cached"
+                : "MINIMAP_VIEWPORT_CADENCE:Balanced:viewport=continuous-invalidate:nodes=projected";
+
+        public int ViewportInvalidationCount { get; private set; }
+
+        public int DeferredViewportRefreshCount { get; private set; }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
         {
@@ -390,7 +406,7 @@ public sealed class GraphMiniMap : UserControl
             {
                 _observedSession.Events.DocumentChanged -= HandleSessionChanged;
                 _observedSession.Events.SelectionChanged -= HandleSessionChanged;
-                _observedSession.Events.ViewportChanged -= HandleSessionChanged;
+                _observedSession.Events.ViewportChanged -= HandleViewportChanged;
             }
 
             _observedSession = current;
@@ -402,14 +418,24 @@ public sealed class GraphMiniMap : UserControl
 
             _observedSession.Events.DocumentChanged += HandleSessionChanged;
             _observedSession.Events.SelectionChanged += HandleSessionChanged;
-            if (!UseLightweightProjection)
-            {
-                _observedSession.Events.ViewportChanged += HandleSessionChanged;
-            }
+            _observedSession.Events.ViewportChanged += HandleViewportChanged;
         }
 
         private void HandleSessionChanged(object? sender, EventArgs args)
         {
+            _projection = null;
+            InvalidateVisual();
+        }
+
+        private void HandleViewportChanged(object? sender, GraphEditorViewportChangedEventArgs args)
+        {
+            if (UseLightweightProjection)
+            {
+                DeferredViewportRefreshCount++;
+                return;
+            }
+
+            ViewportInvalidationCount++;
             _projection = null;
             InvalidateVisual();
         }
