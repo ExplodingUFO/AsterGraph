@@ -26,7 +26,7 @@
 - [x] **Phase 468: Professional Node And Edge Customization Surface** — deepen supported node visual, port handle, edge overlay, connection style, inspector/editor, and host-owned extension points.
 - [x] **Phase 469: Layout And Spatial Authoring Workbench** — productize layout, alignment, snapping, group/subgraph, selection transform, and spatial editing workflows.
 - [x] **Phase 470: Cookbook Component Showcase** — turn the Avalonia cookbook into a component showcase for rendering, interaction, customization, layout, and code-plus-demo recipes.
-- [ ] **Phase 471: v0.78 Release Proof And API Governance** — close public API inventory, docs, baseline updates, CI-sensitive .NET 8/9/10 verification, beads, Dolt, Git, and workspace handoff.
+- [x] **Phase 471: v0.78 Release Proof And API Governance** — close public API inventory, docs, baseline updates, CI-sensitive .NET 8/9/10 verification, beads, Dolt, Git, and workspace handoff.
 
 ## Phase Details
 
@@ -137,7 +137,7 @@
 
 ## Next Step
 
-Start Phase 471. Phase 470 completed cookbook code-plus-demo routes for rendering/viewport, customization, and spatial authoring, with source anchors, demo proof, docs anchors, support-boundary text, and focused Demo cookbook tests.
+v0.78 is complete locally. Phase 471 closed public API inventory/baseline classification, docs/examples release proof, .NET 8/9/10 CI-sensitive verification, and milestone handoff.
 
 ---
 *Roadmap updated: 2026-05-01 after completing Phases 467-469*

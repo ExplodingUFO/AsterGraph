@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: 471 ready
+Phase: v0.78 complete
 Plan: `.planning/ROADMAP.md`
-Status: Phase 470 complete; v0.78 release proof and API governance is unblocked
-Last activity: 2026-05-01 — Completed cookbook component showcase code-plus-demo proof
+Status: v0.78 milestone complete locally; next milestone can be planned
+Last activity: 2026-05-01 — Completed v0.78 release proof and API governance
 
 ## Project Reference
 
@@ -22,7 +22,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 - Completed: `avalonia-node-map-v78.3` — Phase 468: Professional Node And Edge Customization Surface
 - Completed: `avalonia-node-map-v78.4` — Phase 469: Layout And Spatial Authoring Workbench
 - Completed: `avalonia-node-map-v78.5` — Phase 470: Cookbook Component Showcase
-- Ready: `avalonia-node-map-v78.6` — Phase 471: v0.78 Release Proof And API Governance
+- Completed: `avalonia-node-map-v78.6` — Phase 471: v0.78 Release Proof And API Governance
 
 ## Notes
 
@@ -49,9 +49,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-01)
 - Phase 468 completed customization proof: custom input-scope behavior, descriptor-backed node/edge actions, connection style/overlay semantics, and effective shortcut conflict detection.
 - Phase 469 completed spatial workbench proof: canonical spatial command routing, focus recovery, selection/group/snap coherence, and hosted command-surface freshness.
 - Phase 470 completed cookbook code-plus-demo recipes for rendering/viewport, customization, and spatial authoring without widening claims or making Demo a separate contract.
-- Phase 471 should close v0.78 through public API inventory, docs/examples release proof, .NET 8/9/10 CI-sensitive verification, and clean beads/Dolt/Git handoff.
+- Phase 471 closed v0.78 through public API inventory, docs/examples release proof, .NET 8/9/10 CI-sensitive verification, and clean beads/Dolt/Git handoff.
+- Next recommended step: open the next milestone only after confirming whether v0.78 remote CI is green, because local release proof passed but GitHub-hosted Linux/macOS still depends on Actions execution.
 - Spark workers hit a model quota error during 463.3 and 462.3; use the main model or a non-spark worker until the quota resets.
 - Worktrees must stay inside the project folder under `.worktrees/`.
 
 ---
-*Last updated: 2026-05-01 after completing Phase 470*
+*Last updated: 2026-05-01 after completing v0.78*
