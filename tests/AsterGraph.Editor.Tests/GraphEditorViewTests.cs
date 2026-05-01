@@ -1041,7 +1041,6 @@ public sealed class GraphEditorViewTests
             Editor = editor,
         });
         var view = (GraphEditorView)window.Content!;
-
         var canvas = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas");
         var snapGridButton = FindRequiredDescendant<Button>(view, "PART_SelectionToolSnapGridButton");
 
@@ -1072,6 +1071,67 @@ public sealed class GraphEditorViewTests
         {
             window.Close();
         }
+    }
+
+    [AvaloniaFact]
+    public void HostedCommandSurface_RefreshesAfterLayoutPlanApply()
+    {
+        var editor = CreateSelectionEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var undoButton = FindRequiredDescendant<Button>(view, "PART_HeaderCommand_history.undo");
+
+        Assert.False(undoButton.IsEnabled);
+
+        var applied = editor.Session.Commands.TryApplyLayoutPlan(
+            new GraphLayoutPlan(
+                true,
+                new GraphLayoutRequest { Mode = GraphLayoutRequestMode.All },
+                [
+                    new GraphLayoutNodePosition("tests.view.source-001", new GraphPoint(180, 120)),
+                    new GraphLayoutNodePosition("tests.view.target-001", new GraphPoint(560, 120)),
+                ]),
+            updateStatus: false);
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        undoButton = FindRequiredDescendant<Button>(view, "PART_HeaderCommand_history.undo");
+        Assert.True(applied);
+        Assert.True(undoButton.IsEnabled);
+        Assert.Equal("Undo", AutomationProperties.GetName(undoButton));
+    }
+
+    [AvaloniaFact]
+    public void HostedCommandSurface_RefreshesAfterPendingConnectionStartAndCancel()
+    {
+        var editor = CreateConnectionToolEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var paletteToggle = FindRequiredControl<Button>(view, "PART_OpenCommandPaletteButton");
+
+        paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        var cancelPending = FindRequiredDescendant<Button>(view, "PART_CommandPaletteAction_connections.cancel");
+        Assert.False(cancelPending.IsEnabled);
+
+        editor.Session.Commands.StartConnection("tests.view.tools-source-001", "out");
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        cancelPending = FindRequiredDescendant<Button>(view, "PART_CommandPaletteAction_connections.cancel");
+        Assert.True(cancelPending.IsEnabled);
+        Assert.Equal("Cancel Pending Connection", AutomationProperties.GetName(cancelPending));
+
+        cancelPending.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        cancelPending = FindRequiredDescendant<Button>(view, "PART_CommandPaletteAction_connections.cancel");
+        Assert.False(cancelPending.IsEnabled);
     }
 
     [AvaloniaFact]
