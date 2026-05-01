@@ -323,6 +323,340 @@ public static partial class DemoCookbookCatalog
                     "Queries_SearchGraphItemsReturnsStableNodeGroupConnectionScopeAndIssueResults"),
             ]),
         new DemoCookbookRecipe(
+            "v078-rendering-viewport-route",
+            DemoCookbookRecipeCategory.PerformanceViewport,
+            "v0.78 rendering and viewport route",
+            "Trace scene snapshots, viewport projection, visible-connection budgeting, and ConsumerSample LOD proof for rendering hosts.",
+            [
+                new DemoCookbookAnchor(
+                    "Scene snapshot query",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetSceneSnapshot"),
+                new DemoCookbookAnchor(
+                    "Viewport snapshot query",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetViewportSnapshot"),
+                new DemoCookbookAnchor(
+                    "Visible scene projection marker",
+                    "src/AsterGraph.Editor/Viewport/ViewportVisibleSceneProjection.cs",
+                    "ToBudgetMarker"),
+                new DemoCookbookAnchor(
+                    "Connection renderer budget gate",
+                    "src/AsterGraph.Avalonia/Controls/Internal/Scene/NodeCanvasConnectionSceneRenderer.cs",
+                    "ApplyVisibleSceneBudget"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Visible connection rendering proof",
+                    "tests/AsterGraph.Editor.Tests/NodeCanvasConnectionSceneRendererTests.cs",
+                    "RenderConnections_VisibleSceneBudgetScopesCommittedConnectionsButPreservesPendingPreview"),
+                new DemoCookbookAnchor(
+                    "Scene host viewport invalidation proof",
+                    "tests/AsterGraph.Editor.Tests/NodeCanvasSceneHostViewportProjectionTests.cs",
+                    "UpdateViewportTransform_ReportsVisibleSceneInvalidationDiffMarker"),
+                new DemoCookbookAnchor(
+                    "ConsumerSample viewport LOD proof",
+                    "tests/AsterGraph.ConsumerSample.Tests/ConsumerSampleProofTests.cs",
+                    "VIEWPORT_LOD_POLICY_OK:True"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "ConsumerSample viewport LOD docs",
+                    "docs/en/consumer-sample.md",
+                    "VIEWPORT_LOD_POLICY_OK:True"),
+                new DemoCookbookAnchor(
+                    "ConsumerSample edge rendering docs",
+                    "docs/en/consumer-sample.md",
+                    "EDGE_RENDERING_SCOPE_BOUNDARY_OK:True"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Hosts read one scene snapshot that combines document, viewport, selection, and pending connection state.",
+                    "GetSceneSnapshot"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Committed connection rendering can be scoped by the visible scene budget while pending previews remain visible.",
+                    "ApplyVisibleSceneBudget"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "Viewport projection emits budget markers for the currently visible graph region.",
+                    "ToBudgetMarker"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "ConsumerSample LOD proof bounds selected and hovered affordances to hosted workbench policy.",
+                    "VIEWPORT_LOD_POLICY_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Selected and hovered adorners remain scoped to the viewport LOD policy.",
+                    "SELECTED_HOVERED_ADORNER_SCOPE_OK"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Edge rendering stays bounded to connection geometry and viewport projection evidence.",
+                    "EDGE_RENDERING_SCOPE_BOUNDARY_OK"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "Visible scene projection keeps dense graphs readable without a second rendering route.",
+                    "ToBudgetMarker"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Viewport state remains inspectable through the session query surface.",
+                    "GetViewportSnapshot"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "LOD scope proof keeps rendering behavior bounded to host-visible feedback.",
+                    "VIEWPORT_LOD_SCOPE_BOUNDARY_OK"),
+            ],
+            [
+                "VIEWPORT_LOD_POLICY_OK",
+                "SELECTED_HOVERED_ADORNER_SCOPE_OK",
+                "LARGE_GRAPH_BALANCED_UX_OK",
+                "VIEWPORT_LOD_SCOPE_BOUNDARY_OK",
+                "EDGE_RENDERING_SCOPE_BOUNDARY_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "v0.78 rendering route: IGraphEditorSession.Queries.GetSceneSnapshot(), GetViewportSnapshot(), and ViewportVisibleSceneProjector feed the Avalonia scene renderer.",
+                "Supported seams live in `AsterGraph.Editor` scene/viewport snapshots and `AsterGraph.Avalonia` scene rendering controls.",
+                "Demo cookbook references rendering evidence only; Demo does not claim another renderer or alternate runtime path."),
+            "Rendering and viewport coverage is code/demo/docs proof over existing scene contracts, not a new renderer, virtualizer, or executable sample promise."),
+        new DemoCookbookRecipe(
+            "v078-customization-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "v0.78 customization route",
+            "Trace custom node presenters, parameter editor registries, edge overlays, and runtime inspector proof through ConsumerSample.",
+            [
+                new DemoCookbookAnchor(
+                    "Presentation options wiring",
+                    "tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleAuthoringSurfaceRecipe.cs",
+                    "CreatePresentationOptions"),
+                new DemoCookbookAnchor(
+                    "Edge overlay factory",
+                    "tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleAuthoringSurfaceRecipe.cs",
+                    "CreateEdgeOverlay"),
+                new DemoCookbookAnchor(
+                    "Custom node presenter",
+                    "tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleNodeVisualPresenter.cs",
+                    "Create"),
+                new DemoCookbookAnchor(
+                    "Custom connection overlay",
+                    "tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleConnectionOverlay.cs",
+                    "ConnectionGeometries"),
+                new DemoCookbookAnchor(
+                    "Connection geometry query",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetConnectionGeometrySnapshots"),
+                new DemoCookbookAnchor(
+                    "Presentation option surface",
+                    "src/AsterGraph.Avalonia/Presentation/AsterGraphPresentationOptions.cs",
+                    "NodeVisualPresenter"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Customization presentation proof",
+                    "tests/AsterGraph.ConsumerSample.Tests/ConsumerSampleAuthoringPresentationTests.cs",
+                    "AuthoringSurfaceRecipe_CreatePresentationOptions_ProvidesCustomNodeAndEditorSeams"),
+                new DemoCookbookAnchor(
+                    "ConsumerSample custom extension proof",
+                    "tests/AsterGraph.ConsumerSample.Tests/ConsumerSampleProofTests.cs",
+                    "CUSTOM_EXTENSION_SURFACE_OK:True"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Authoring surface customization docs",
+                    "docs/en/authoring-surface-recipe.md",
+                    "ConsumerSampleNodeVisualPresenter"),
+                new DemoCookbookAnchor(
+                    "Parameter editor registry docs",
+                    "docs/en/authoring-surface-recipe.md",
+                    "INodeParameterEditorRegistry"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.HostCodeExample,
+                    "ConsumerSample wires custom presentation through options instead of Demo internals.",
+                    "CreatePresentationOptions"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.NodeMetadata,
+                    "Node-side editors keep using the parameter editor registry and definition metadata.",
+                    "INodeParameterEditorRegistry"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Custom edge overlays read connection geometry snapshots without replacing the stock edge renderer.",
+                    "GetConnectionGeometrySnapshots"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "ConsumerSample proof markers bind presenter, anchor, overlay, inspector, and scope boundaries together.",
+                    "CUSTOM_EXTENSION_SURFACE_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Custom presenter lifecycle proof stays tied to selected node visuals and anchor affordances.",
+                    "CUSTOM_EXTENSION_NODE_PRESENTER_LIFECYCLE_OK"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Host-owned edge overlays remain separate from stock connection rendering.",
+                    "CUSTOM_EXTENSION_EDGE_OVERLAY_OK"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "Anchor and scope-boundary proof keeps custom chrome aligned with existing graph layout.",
+                    "CUSTOM_EXTENSION_ANCHOR_SURFACE_OK"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Runtime inspector customization remains proof-backed and local to ConsumerSample.",
+                    "CUSTOM_EXTENSION_RUNTIME_INSPECTOR_OK"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Customization scope proof prevents the sample from widening runtime contracts.",
+                    "CUSTOM_EXTENSION_SCOPE_BOUNDARY_OK"),
+            ],
+            [
+                "CUSTOM_EXTENSION_NODE_PRESENTER_LIFECYCLE_OK",
+                "CUSTOM_EXTENSION_ANCHOR_SURFACE_OK",
+                "CUSTOM_EXTENSION_EDGE_OVERLAY_OK",
+                "CUSTOM_EXTENSION_RUNTIME_INSPECTOR_OK",
+                "CUSTOM_EXTENSION_SCOPE_BOUNDARY_OK",
+                "CUSTOM_EXTENSION_SURFACE_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "v0.78 customization route: AsterGraphPresentationOptions with custom node presenters, parameter editor registries, and host-owned edge overlays.",
+                "Supported seams live in `AsterGraph.Avalonia` presentation options and `AsterGraph.Editor` query snapshots consumed by ConsumerSample.",
+                "Demo cookbook treats ConsumerSample as the copyable customization recipe; Demo remains visual proof only."),
+            "Customization coverage stays on ConsumerSample presentation seams and proof markers; it does not widen the runtime model or sample boundary."),
+        new DemoCookbookRecipe(
+            "v078-spatial-authoring-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "v0.78 spatial authoring route",
+            "Trace node surface sizing, composite scopes, scope navigation, and route-vertex geometry through shared session contracts.",
+            [
+                new DemoCookbookAnchor(
+                    "Node surface snapshots",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetNodeSurfaceSnapshots"),
+                new DemoCookbookAnchor(
+                    "Node surface resize command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TrySetNodeSize"),
+                new DemoCookbookAnchor(
+                    "Composite scope command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryWrapSelectionToComposite"),
+                new DemoCookbookAnchor(
+                    "Composite port exposure command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryExposeCompositePort"),
+                new DemoCookbookAnchor(
+                    "Composite node snapshots",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetCompositeNodeSnapshots"),
+                new DemoCookbookAnchor(
+                    "Scope navigation snapshots",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetScopeNavigationSnapshot"),
+                new DemoCookbookAnchor(
+                    "Connection route vertex command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryInsertConnectionRouteVertex"),
+                new DemoCookbookAnchor(
+                    "Connection geometry snapshots",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetConnectionGeometrySnapshots"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Demo spatial surface cue",
+                    "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.Showcase.cs",
+                    "TIERED_NODE_SURFACE_OK / FIXED_GROUP_FRAME_OK / HIERARCHY_SEMANTICS_OK / NON_OBSCURING_EDITING_OK / VISUAL_SEMANTICS_OK"),
+                new DemoCookbookAnchor(
+                    "Demo composite and edge cue",
+                    "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.Showcase.cs",
+                    "COMPOSITE_SCOPE_OK / EDGE_NOTE_OK / EDGE_GEOMETRY_OK / DISCONNECT_FLOW_OK"),
+                new DemoCookbookAnchor(
+                    "Node surface mutation proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorNodeSurfaceContractsTests.cs",
+                    "SessionCommands_TrySetNodeSize_PersistsUndoableTierDrivenMutation"),
+                new DemoCookbookAnchor(
+                    "Composite scope proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorNodeSurfaceContractsTests.cs",
+                    "SessionCommands_NodeGroups_PromoteToComposite_AndExposeBoundaryPorts"),
+                new DemoCookbookAnchor(
+                    "Connection geometry proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorConnectionGeometryContractsTests.cs",
+                    "SessionQueries_GetConnectionGeometrySnapshots_ProjectPersistedRouteVertices_IntoSceneContracts"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Advanced editing node surface docs",
+                    "docs/en/advanced-editing.md",
+                    "TIERED_NODE_SURFACE_OK"),
+                new DemoCookbookAnchor(
+                    "Advanced editing composite scope docs",
+                    "docs/en/advanced-editing.md",
+                    "COMPOSITE_SCOPE_OK"),
+                new DemoCookbookAnchor(
+                    "Advanced editing edge geometry docs",
+                    "docs/en/advanced-editing.md",
+                    "EDGE_GEOMETRY_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Node surface size and disclosure changes move through undoable session commands.",
+                    "TrySetNodeSize"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.NodeMetadata,
+                    "Composite nodes expose child-scope and boundary-port metadata through session snapshots.",
+                    "GetCompositeNodeSnapshots"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "Scope navigation snapshots keep spatial authoring anchored to the active graph scope.",
+                    "GetScopeNavigationSnapshot"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Route-vertex editing and geometry snapshots keep edge authoring spatially inspectable.",
+                    "TryInsertConnectionRouteVertex"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Advanced editing markers bind node surfaces, composites, and edge geometry to proof evidence.",
+                    "TIERED_NODE_SURFACE_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Node-side editors stay non-obscuring while selected surfaces are resized or expanded.",
+                    "NON_OBSCURING_EDITING_OK"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Route-vertex tools keep edge geometry explicit instead of UI-local.",
+                    "EDGE_GEOMETRY_OK"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "Visual semantics proof keeps tiered nodes and spatial chrome readable.",
+                    "VISUAL_SEMANTICS_OK"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Node surface snapshots expose size and tier state for host inspection.",
+                    "GetNodeSurfaceSnapshots"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Composite scope proof keeps navigation and boundary-port feedback source-backed.",
+                    "COMPOSITE_SCOPE_OK"),
+            ],
+            [
+                "TIERED_NODE_SURFACE_OK",
+                "NON_OBSCURING_EDITING_OK",
+                "VISUAL_SEMANTICS_OK",
+                "COMPOSITE_SCOPE_OK",
+                "EDGE_GEOMETRY_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "v0.78 spatial authoring route: IGraphEditorSession.Commands and Queries drive node surfaces, composite scopes, scope navigation, and connection route vertices.",
+                "Supported seams live in `AsterGraph.Editor` spatial authoring commands/query snapshots and `AsterGraph.Avalonia` hosted projection controls.",
+                "Demo cookbook points at proof cues only; Demo does not become the copyable spatial authoring implementation."),
+            "Spatial authoring coverage is limited to existing session contracts, Demo proof cues, and editor tests; it does not add executable sample promises."),
+        new DemoCookbookRecipe(
             "performance-viewport-route",
             DemoCookbookRecipeCategory.PerformanceViewport,
             "Performance and viewport route",
