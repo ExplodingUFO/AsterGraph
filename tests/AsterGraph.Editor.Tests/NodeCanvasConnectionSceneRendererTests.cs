@@ -15,6 +15,7 @@ using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
+using AsterGraph.Editor.Viewport;
 using Xunit;
 
 namespace AsterGraph.Editor.Tests;
@@ -562,6 +563,51 @@ public sealed class NodeCanvasConnectionSceneRendererTests
         }
     }
 
+    [AvaloniaFact]
+    public void RenderConnections_VisibleSceneBudgetScopesCommittedConnectionsButPreservesPendingPreview()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var editor = CreateCadenceEditor(hiddenConnectionCount: 12);
+        editor.UpdateViewportSize(640d, 420d);
+        editor.StartConnection("visible-source", SourcePortId);
+        var hostedScene = CreateHostedScene(editor);
+
+        try
+        {
+            var projection = ViewportVisibleSceneProjector.Project(
+                editor.CreateDocumentSnapshot(),
+                editor.Session.Queries.GetViewportSnapshot());
+            var context = CreateSceneContext(
+                editor,
+                hostedScene.ConnectionLayer,
+                hostedScene.NodeLayer,
+                hostedScene.CoordinateRoot,
+                hostedScene.NodeVisuals,
+                pointerScreenPosition: new Point(520, 220),
+                visibleSceneProjection: projection,
+                applyVisibleSceneBudget: true);
+
+            renderer.RenderConnections(context);
+
+            var paths = hostedScene.ConnectionLayer.Children
+                .OfType<global::Avalonia.Controls.Shapes.Path>()
+                .ToList();
+            var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
+            var label = Assert.IsType<TextBlock>(chip.Child);
+
+            Assert.Equal(1, projection.VisibleConnections);
+            Assert.Equal(13, projection.TotalConnections);
+            Assert.Equal(2, paths.Count);
+            Assert.Equal(3, hostedScene.ConnectionLayer.Children.Count);
+            Assert.Equal("FLOAT", label.Text);
+            Assert.True(editor.HasPendingConnection);
+        }
+        finally
+        {
+            hostedScene.Window.Close();
+        }
+    }
+
     private static NodeCanvasConnectionSceneContext CreateSceneContext(
         GraphEditorViewModel editor,
         Canvas connectionLayer,
@@ -571,7 +617,9 @@ public sealed class NodeCanvasConnectionSceneRendererTests
         Point? pointerScreenPosition = null,
         Func<Control, ContextMenuContext, bool>? openContextMenu = null,
         Func<NodeViewModel, GraphSize?>? resolveNodePreviewSize = null,
-        Func<ConnectionViewModel, ConnectionStyleOptions>? resolveConnectionStyle = null)
+        Func<ConnectionViewModel, ConnectionStyleOptions>? resolveConnectionStyle = null,
+        ViewportVisibleSceneProjection? visibleSceneProjection = null,
+        bool applyVisibleSceneBudget = false)
         => new(
             editor,
             connectionLayer,
@@ -581,6 +629,8 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             editor.Session.Queries.GetConnectionGeometrySnapshots()
                 .ToDictionary(snapshot => snapshot.ConnectionId, StringComparer.Ordinal),
             editor.Session.Queries.GetHierarchyStateSnapshot(),
+            visibleSceneProjection,
+            applyVisibleSceneBudget,
             pointerScreenPosition,
             resolveConnectionStyle ?? (_ => GraphEditorStyleOptions.Default.Connection),
             () => new NodeCanvasContextMenuSnapshot(
@@ -653,37 +703,57 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             new GraphNodeVisual(root, portAnchors));
     }
 
+    private static GraphEditorViewModel CreateCadenceEditor(int hiddenConnectionCount)
+    {
+        var catalog = CreateConnectionCatalog();
+        var nodes = new List<GraphNode>
+        {
+            CreateConnectionNode("visible-source", SourceDefinitionId, new GraphPoint(120d, 160d), hasInput: false, hasOutput: true),
+            CreateConnectionNode("visible-target", TargetDefinitionId, new GraphPoint(420d, 160d), hasInput: true, hasOutput: false),
+        };
+        var connections = new List<GraphConnection>
+        {
+            new(
+                "visible-connection",
+                "visible-source",
+                SourcePortId,
+                "visible-target",
+                TargetPortId,
+                "Visible Flow",
+                "#6AD5C4"),
+        };
+
+        for (var index = 0; index < hiddenConnectionCount; index++)
+        {
+            var sourceId = $"hidden-source-{index:00}";
+            var targetId = $"hidden-target-{index:00}";
+            var offset = index * 220d;
+            nodes.Add(CreateConnectionNode(sourceId, SourceDefinitionId, new GraphPoint(2200d + offset, 1800d), hasInput: false, hasOutput: true));
+            nodes.Add(CreateConnectionNode(targetId, TargetDefinitionId, new GraphPoint(2320d + offset, 1800d), hasInput: true, hasOutput: false));
+            connections.Add(new GraphConnection(
+                $"hidden-connection-{index:00}",
+                sourceId,
+                SourcePortId,
+                targetId,
+                TargetPortId,
+                $"Hidden Flow {index:00}",
+                "#6AD5C4"));
+        }
+
+        return new GraphEditorViewModel(
+            new GraphDocument(
+                "Connection Cadence Graph",
+                "Regression coverage for visible-scene connection rendering cadence.",
+                nodes,
+                connections),
+            catalog,
+            new DefaultPortCompatibilityService(),
+            styleOptions: GraphEditorStyleOptions.Default);
+    }
+
     private static GraphEditorViewModel CreateEditor(bool includeConnection, string? noteText = null, GraphConnectionRoute? route = null)
     {
-        var catalog = new NodeCatalog();
-        catalog.RegisterDefinition(
-            new NodeDefinition(
-                SourceDefinitionId,
-                "Renderer Source",
-                "Tests",
-                "Connection renderer source node.",
-                [],
-                [
-                    new PortDefinition(
-                        SourcePortId,
-                        "Result",
-                        new PortTypeId("float"),
-                        "#6AD5C4"),
-                ]));
-        catalog.RegisterDefinition(
-            new NodeDefinition(
-                TargetDefinitionId,
-                "Renderer Target",
-                "Tests",
-                "Connection renderer target node.",
-                [
-                    new PortDefinition(
-                        TargetPortId,
-                        "Input",
-                        new PortTypeId("float"),
-                        "#F3B36B"),
-                ],
-                []));
+        var catalog = CreateConnectionCatalog();
 
         var connections = includeConnection
             ? new[]
@@ -753,6 +823,81 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             new DefaultPortCompatibilityService(),
             styleOptions: GraphEditorStyleOptions.Default);
     }
+
+    private static NodeCatalog CreateConnectionCatalog()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                SourceDefinitionId,
+                "Renderer Source",
+                "Tests",
+                "Connection renderer source node.",
+                [],
+                [
+                    new PortDefinition(
+                        SourcePortId,
+                        "Result",
+                        new PortTypeId("float"),
+                        "#6AD5C4"),
+                ]));
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                TargetDefinitionId,
+                "Renderer Target",
+                "Tests",
+                "Connection renderer target node.",
+                [
+                    new PortDefinition(
+                        TargetPortId,
+                        "Input",
+                        new PortTypeId("float"),
+                        "#F3B36B"),
+                ],
+                []));
+        return catalog;
+    }
+
+    private static GraphNode CreateConnectionNode(
+        string id,
+        NodeDefinitionId definitionId,
+        GraphPoint position,
+        bool hasInput,
+        bool hasOutput)
+        => new(
+            id,
+            id,
+            "Tests",
+            "Connection Cadence",
+            "Connection cadence proof node.",
+            position,
+            new GraphSize(240d, 160d),
+            hasInput
+                ?
+                [
+                    new GraphPort(
+                        TargetPortId,
+                        "Input",
+                        PortDirection.Input,
+                        "float",
+                        "#F3B36B",
+                        new PortTypeId("float")),
+                ]
+                : [],
+            hasOutput
+                ?
+                [
+                    new GraphPort(
+                        SourcePortId,
+                        "Result",
+                        PortDirection.Output,
+                        "float",
+                        "#6AD5C4",
+                        new PortTypeId("float")),
+                ]
+                : [],
+            "#6AD5C4",
+            definitionId);
 
     private sealed record HostedScene(
         Window Window,

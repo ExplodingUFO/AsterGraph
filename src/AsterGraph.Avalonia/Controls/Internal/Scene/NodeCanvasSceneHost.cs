@@ -568,6 +568,8 @@ internal sealed class NodeCanvasSceneHost
                 ?? new Dictionary<string, GraphEditorConnectionGeometrySnapshot>(StringComparer.Ordinal),
             _host.ViewModel?.Session.Queries.GetHierarchyStateSnapshot()
                 ?? CreateEmptyHierarchyState(),
+            LastVisibleSceneProjection,
+            ShouldApplyVisibleSceneBudget() && LastVisibleSceneProjection is not null,
             _host.InteractionSession.PointerScreenPosition,
             GetConnectionStyle,
             _host.ContextMenuCoordinator.CreateContextMenuSnapshot,

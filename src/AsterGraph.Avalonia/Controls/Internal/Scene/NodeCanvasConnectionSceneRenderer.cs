@@ -11,6 +11,7 @@ using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
+using AsterGraph.Editor.Viewport;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
 
@@ -22,6 +23,8 @@ internal readonly record struct NodeCanvasConnectionSceneContext(
     IReadOnlyDictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> NodeVisuals,
     IReadOnlyDictionary<string, GraphEditorConnectionGeometrySnapshot> ConnectionGeometries,
     GraphEditorHierarchyStateSnapshot HierarchyState,
+    ViewportVisibleSceneProjection? VisibleSceneProjection,
+    bool ApplyVisibleSceneBudget,
     Point? PointerScreenPosition,
     Func<ConnectionViewModel, ConnectionStyleOptions> ResolveConnectionStyle,
     Func<NodeCanvasContextMenuSnapshot> CreateContextMenuSnapshot,
@@ -55,6 +58,11 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             }
 
             if (!context.ConnectionGeometries.TryGetValue(connection.Id, out var geometry))
+            {
+                continue;
+            }
+
+            if (!IntersectsVisibleSceneBudget(context, geometry))
             {
                 continue;
             }
@@ -278,6 +286,53 @@ internal sealed class NodeCanvasConnectionSceneRenderer
     private static bool ShouldPreferPreviewAnchor(Control root, GraphSize previewSize)
         => Math.Abs(root.Bounds.Width - previewSize.Width) > 0.5d
            || Math.Abs(root.Bounds.Height - previewSize.Height) > 0.5d;
+
+    private static bool IntersectsVisibleSceneBudget(
+        NodeCanvasConnectionSceneContext context,
+        GraphEditorConnectionGeometrySnapshot geometry)
+    {
+        if (!context.ApplyVisibleSceneBudget || context.VisibleSceneProjection is not ViewportVisibleSceneProjection projection)
+        {
+            return true;
+        }
+
+        var bounds = ResolveRouteBounds(geometry.Source.Position, geometry.Route, geometry.RouteStyle, geometry.Target.Position);
+        return bounds.Left <= projection.WorldBottomRight.X
+               && bounds.Right >= projection.WorldTopLeft.X
+               && bounds.Top <= projection.WorldBottomRight.Y
+               && bounds.Bottom >= projection.WorldTopLeft.Y;
+    }
+
+    private static RouteBounds ResolveRouteBounds(
+        GraphPoint start,
+        GraphConnectionRoute route,
+        GraphEditorConnectionRouteStyle routeStyle,
+        GraphPoint end)
+    {
+        var minX = Math.Min(start.X, end.X);
+        var minY = Math.Min(start.Y, end.Y);
+        var maxX = Math.Max(start.X, end.X);
+        var maxY = Math.Max(start.Y, end.Y);
+
+        foreach (var segment in ConnectionPathBuilder.BuildRoute(start, route, end, routeStyle))
+        {
+            Include(segment.Control1);
+            Include(segment.Control2);
+            Include(segment.End);
+        }
+
+        return new RouteBounds(minX, minY, maxX, maxY);
+
+        void Include(GraphPoint point)
+        {
+            minX = Math.Min(minX, point.X);
+            minY = Math.Min(minY, point.Y);
+            maxX = Math.Max(maxX, point.X);
+            maxY = Math.Max(maxY, point.Y);
+        }
+    }
+
+    private readonly record struct RouteBounds(double Left, double Top, double Right, double Bottom);
 
     private void DrawConnection(
         NodeCanvasConnectionSceneContext context,
