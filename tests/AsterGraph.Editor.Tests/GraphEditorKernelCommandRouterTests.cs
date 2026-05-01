@@ -513,6 +513,84 @@ public sealed class GraphEditorKernelCommandRouterTests
     }
 
     [Fact]
+    public void GraphEditorKernel_SpatialAuthoringCommands_RunThroughCanonicalCommandRoute()
+    {
+        var kernel = CreateKernel();
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "nodes.add",
+                ("definitionId", DefinitionId.Value),
+                ("worldX", "790"),
+                ("worldY", "260"))));
+        var thirdNodeId = Assert.Single(
+            kernel.CreateDocumentSnapshot().Nodes,
+            node =>
+                !string.Equals(node.Id, SourceNodeId, StringComparison.Ordinal)
+                && !string.Equals(node.Id, TargetNodeId, StringComparison.Ordinal)).Id;
+
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "selection.set",
+                ("nodeId", SourceNodeId),
+                ("nodeId", TargetNodeId),
+                ("nodeId", thirdNodeId),
+                ("primaryNodeId", SourceNodeId),
+                ("updateStatus", "false"))));
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        foreach (var commandId in new[]
+        {
+            "selection.transform.move",
+            "groups.create",
+            "layout.align-left",
+            "layout.distribute-horizontal",
+            "layout.snap-selection",
+        })
+        {
+            Assert.True(descriptors[commandId].IsEnabled);
+            Assert.Equal(GraphEditorCommandSourceKind.Kernel, descriptors[commandId].Source);
+        }
+
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("layout.distribute-horizontal", ("updateStatus", "false"))));
+        Assert.Equal("Distributed selection horizontally.", kernel.CurrentStatusMessage);
+        Assert.NotEqual(
+            new GraphPoint(420, 160),
+            Assert.Single(kernel.GetNodePositions(), position => position.NodeId == TargetNodeId).Position);
+
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("layout.align-left", ("updateStatus", "false"))));
+        Assert.Equal("Aligned selection left.", kernel.CurrentStatusMessage);
+        var selectedNodeIds = new HashSet<string>([SourceNodeId, TargetNodeId, thirdNodeId], StringComparer.Ordinal);
+        Assert.All(
+            kernel.GetNodePositions().Where(position => selectedNodeIds.Contains(position.NodeId)),
+            position => Assert.Equal(120, position.Position.X));
+
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "selection.transform.move",
+                ("deltaX", "12"),
+                ("deltaY", "4"),
+                ("constrainToPrimaryAxis", "true"),
+                ("updateStatus", "false"))));
+        Assert.Equal(
+            new GraphPoint(132, 160),
+            Assert.Single(kernel.GetNodePositions(), position => position.NodeId == SourceNodeId).Position);
+
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "layout.snap-selection",
+                ("gridSize", "25"),
+                ("updateStatus", "false"))));
+        Assert.Equal("Snapped selected nodes to grid.", kernel.CurrentStatusMessage);
+        Assert.Equal(
+            new GraphPoint(125, 150),
+            Assert.Single(kernel.GetNodePositions(), position => position.NodeId == SourceNodeId).Position);
+
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("groups.create", ("title", "Spatial Cluster"))));
+        var group = Assert.Single(kernel.CreateDocumentSnapshot().Groups!);
+        Assert.Equal("Spatial Cluster", group.Title);
+        Assert.Equal([SourceNodeId, TargetNodeId, thirdNodeId], group.NodeIds);
+    }
+
+    [Fact]
     public void GraphEditorKernel_TryExecuteCommand_AcceptsTypedParameterTargets()
     {
         var kernel = CreateParameterEndpointKernel();

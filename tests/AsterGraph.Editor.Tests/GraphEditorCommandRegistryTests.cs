@@ -176,6 +176,76 @@ public sealed class GraphEditorCommandRegistryTests
             placement => placement.SurfaceKind == GraphEditorCommandSurfaceKind.Tool);
     }
 
+    [Fact]
+    public void CommandRegistry_SpatialAuthoringCommandsExposeCanonicalRouteMenuAndToolPlacements()
+    {
+        var session = CreateSession();
+        session.Commands.SetSelection([SourceNodeId, TargetNodeId], SourceNodeId, updateStatus: false);
+
+        var descriptors = session.Queries.GetCommandDescriptors()
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        var registry = session.Queries.GetCommandRegistry()
+            .ToDictionary(entry => entry.CommandId, StringComparer.Ordinal);
+        var selectionMenuCommands = Flatten(session.Queries.BuildContextMenuDescriptors(
+                new ContextMenuContext(
+                    ContextMenuTargetKind.Selection,
+                    new GraphPoint(160, 90),
+                    selectedNodeId: SourceNodeId,
+                    selectedNodeIds: [SourceNodeId, TargetNodeId])))
+            .Where(item => item.Command is not null)
+            .ToDictionary(item => item.Command!.CommandId, item => item, StringComparer.Ordinal);
+        var selectionTools = session.Queries.GetToolDescriptors(
+                GraphEditorToolContextSnapshot.ForSelection([SourceNodeId, TargetNodeId], SourceNodeId))
+            .ToDictionary(tool => tool.Invocation.CommandId, tool => tool, StringComparer.Ordinal);
+        var spatialCommands = new[]
+        {
+            ("groups.create", "selection-create-group"),
+            ("layout.align-left", "selection-align-left"),
+            ("layout.align-center", "selection-align-center"),
+            ("layout.align-right", "selection-align-right"),
+            ("layout.align-top", "selection-align-top"),
+            ("layout.align-middle", "selection-align-middle"),
+            ("layout.align-bottom", "selection-align-bottom"),
+            ("layout.distribute-horizontal", "selection-distribute-horizontal"),
+            ("layout.distribute-vertical", "selection-distribute-vertical"),
+            ("layout.snap-selection", "selection-snap-grid"),
+        };
+
+        foreach (var (commandId, placementId) in spatialCommands)
+        {
+            Assert.Equal(commandId.StartsWith("layout.", StringComparison.Ordinal) ? "layout" : "groups", descriptors[commandId].Group);
+            Assert.Equal(GraphEditorCommandSourceKind.Kernel, descriptors[commandId].Source);
+            Assert.Equal(descriptors[commandId].Id, registry[commandId].Descriptor.Id);
+            AssertPlacement(
+                registry[commandId],
+                GraphEditorCommandSurfaceKind.CommandRoute,
+                "runtime.session.commands",
+                commandId,
+                null);
+            AssertPlacement(
+                registry[commandId],
+                GraphEditorCommandSurfaceKind.ContextMenu,
+                "context-menu.selection",
+                placementId,
+                "selection");
+            AssertPlacement(
+                registry[commandId],
+                GraphEditorCommandSurfaceKind.Tool,
+                "tool.selection",
+                placementId,
+                "selection");
+            Assert.Equal(commandId, selectionMenuCommands[commandId].Command!.CommandId);
+            Assert.Equal(commandId, selectionTools[commandId].Invocation.CommandId);
+        }
+
+        Assert.Contains(
+            selectionMenuCommands["groups.create"].Command!.Arguments,
+            argument => argument.Name == "title" && argument.Value == "Group");
+        Assert.Contains(
+            selectionTools["layout.snap-selection"].Invocation.Arguments,
+            argument => argument.Name == "gridSize" && argument.Value == "20");
+    }
+
     private static void AssertPlacement(
         GraphEditorCommandRegistryEntrySnapshot entry,
         GraphEditorCommandSurfaceKind surfaceKind,
