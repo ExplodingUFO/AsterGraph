@@ -1054,9 +1054,10 @@ public sealed class GraphEditorKernelCommandRouterTests
 
     private static GraphEditorKernel CreateKernel(
         IGraphWorkspaceService? workspaceService = null,
-        GraphEditorBehaviorOptions? behaviorOptions = null)
+        GraphEditorBehaviorOptions? behaviorOptions = null,
+        GraphDocument? document = null)
         => new(
-            CreateDocument(),
+            document ?? CreateDocument(),
             CreateCatalog(),
             new DefaultPortCompatibilityService(),
             workspaceService ?? new EmptyWorkspaceService(),
@@ -1457,6 +1458,135 @@ public sealed class GraphEditorKernelCommandRouterTests
 
         public bool Exists()
             => throw new InvalidOperationException("exists boom");
+    }
+
+    [Fact]
+    public void GraphEditorKernel_SelectionCommands_AreRegisteredWithDescriptorsAndShortcuts()
+    {
+        var kernel = CreateKernel();
+        kernel.UpdateViewportSize(1280, 720);
+
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.True(descriptors.ContainsKey("selection.select-all"));
+        Assert.True(descriptors.ContainsKey("selection.select-none"));
+        Assert.True(descriptors.ContainsKey("selection.invert"));
+
+        Assert.Equal("Ctrl+A", descriptors["selection.select-all"].DefaultShortcut);
+        Assert.Equal("Ctrl+Shift+A", descriptors["selection.select-none"].DefaultShortcut);
+        Assert.Equal("Ctrl+I", descriptors["selection.invert"].DefaultShortcut);
+
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, descriptors["selection.select-all"].Source);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, descriptors["selection.select-none"].Source);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, descriptors["selection.invert"].Source);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_SelectionCommandDescriptors_TrackSelectionAndNodeCardinality()
+    {
+        var kernel = CreateKernel();
+        kernel.UpdateViewportSize(1280, 720);
+
+        var initial = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        Assert.True(initial["selection.select-all"].IsEnabled);
+        Assert.False(initial["selection.select-none"].IsEnabled);
+        Assert.True(initial["selection.invert"].IsEnabled);
+
+        kernel.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        var selected = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        Assert.True(selected["selection.select-all"].IsEnabled);
+        Assert.True(selected["selection.select-none"].IsEnabled);
+        Assert.True(selected["selection.invert"].IsEnabled);
+
+        kernel.SelectAll(updateStatus: false);
+        var allSelected = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        Assert.True(allSelected["selection.select-all"].IsEnabled);
+        Assert.True(allSelected["selection.select-none"].IsEnabled);
+        Assert.True(allSelected["selection.invert"].IsEnabled);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_SelectAll_SelectsAllNodesInActiveScope()
+    {
+        var kernel = CreateKernel();
+
+        kernel.SelectAll(updateStatus: false);
+
+        var snapshot = kernel.GetSelectionSnapshot();
+        Assert.Equal(2, snapshot.SelectedNodeIds.Count);
+        Assert.Contains(SourceNodeId, snapshot.SelectedNodeIds);
+        Assert.Contains(TargetNodeId, snapshot.SelectedNodeIds);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_SelectNone_ClearsSelection()
+    {
+        var kernel = CreateKernel();
+        kernel.SetSelection([SourceNodeId, TargetNodeId], SourceNodeId, updateStatus: false);
+
+        kernel.SelectNone(updateStatus: false);
+
+        var snapshot = kernel.GetSelectionSnapshot();
+        Assert.Empty(snapshot.SelectedNodeIds);
+        Assert.Null(snapshot.PrimarySelectedNodeId);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_InvertSelection_FlipsSelectedState()
+    {
+        var kernel = CreateKernel();
+
+        kernel.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        kernel.InvertSelection(updateStatus: false);
+
+        var snapshot = kernel.GetSelectionSnapshot();
+        Assert.Single(snapshot.SelectedNodeIds);
+        Assert.Equal(TargetNodeId, snapshot.PrimarySelectedNodeId);
+
+        kernel.InvertSelection(updateStatus: false);
+        snapshot = kernel.GetSelectionSnapshot();
+        Assert.Single(snapshot.SelectedNodeIds);
+        Assert.Equal(SourceNodeId, snapshot.PrimarySelectedNodeId);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_SelectAllNoneInvert_ExecuteViaCommandInvocation()
+    {
+        var kernel = CreateKernel();
+
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("selection.select-all", ("updateStatus", "false"))));
+        Assert.Equal(2, kernel.GetSelectionSnapshot().SelectedNodeIds.Count);
+
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("selection.select-none", ("updateStatus", "false"))));
+        Assert.Empty(kernel.GetSelectionSnapshot().SelectedNodeIds);
+
+        kernel.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("selection.invert", ("updateStatus", "false"))));
+        Assert.Equal(TargetNodeId, kernel.GetSelectionSnapshot().PrimarySelectedNodeId);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_SelectionCommands_OnEmptyGraph_AreDisabledOrNoOp()
+    {
+        var emptyKernel = CreateKernel(document: new GraphDocument(
+            "Empty",
+            "Empty",
+            [],
+            [],
+            null,
+            GraphDocument.DefaultRootGraphId));
+        emptyKernel.UpdateViewportSize(1280, 720);
+
+        var descriptors = emptyKernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        Assert.False(descriptors["selection.select-all"].IsEnabled);
+        Assert.False(descriptors["selection.select-none"].IsEnabled);
+        Assert.False(descriptors["selection.invert"].IsEnabled);
+
+        emptyKernel.SelectAll(updateStatus: false);
+        Assert.Empty(emptyKernel.GetSelectionSnapshot().SelectedNodeIds);
+
+        emptyKernel.InvertSelection(updateStatus: false);
+        Assert.Empty(emptyKernel.GetSelectionSnapshot().SelectedNodeIds);
     }
 
     private sealed class ThrowingLoadWorkspaceService : IGraphWorkspaceService

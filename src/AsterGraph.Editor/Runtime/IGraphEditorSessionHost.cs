@@ -25,6 +25,9 @@ internal interface IGraphEditorSessionHost
     void Undo();
     void Redo();
     void ClearSelection(bool updateStatus);
+    void SelectAll(bool updateStatus);
+    void SelectNone(bool updateStatus);
+    void InvertSelection(bool updateStatus);
     void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus);
     void SetConnectionSelection(IReadOnlyList<string> connectionIds, string? primaryConnectionId, bool updateStatus);
     void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition);

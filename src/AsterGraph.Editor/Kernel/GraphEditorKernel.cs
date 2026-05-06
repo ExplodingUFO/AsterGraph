@@ -167,6 +167,15 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public void ClearSelection(bool updateStatus)
         => _selectionCoordinator.ClearSelection(updateStatus);
 
+    public void SelectAll(bool updateStatus)
+        => _selectionCoordinator.SelectAll(updateStatus);
+
+    public void SelectNone(bool updateStatus)
+        => _selectionCoordinator.SelectNone(updateStatus);
+
+    public void InvertSelection(bool updateStatus)
+        => _selectionCoordinator.InvertSelection(updateStatus);
+
     public void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
         => _selectionCoordinator.SetSelection(nodeIds, primaryNodeId, updateStatus);
 

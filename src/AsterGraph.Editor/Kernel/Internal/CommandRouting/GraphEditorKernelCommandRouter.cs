@@ -70,6 +70,12 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus);
 
+    void SelectAll(bool updateStatus);
+
+    void SelectNone(bool updateStatus);
+
+    void InvertSelection(bool updateStatus);
+
     void SetConnectionSelection(IReadOnlyList<string> connectionIds, string? primaryConnectionId, bool updateStatus);
 
     void DeleteNodeById(string nodeId);
@@ -246,6 +252,27 @@ internal sealed class GraphEditorKernelCommandRouter
                 hasSelection ? null : "Select one or more nodes before clearing selection.",
                 hasSelection ? null : "Select nodes first, then retry.",
                 hasSelection ? null : "nodes.add"),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "selection.select-all",
+                GraphEditorCommandSourceKind.Kernel,
+                hasNodes,
+                hasNodes ? null : "Add nodes before selecting all.",
+                hasNodes ? null : "Add nodes first, then retry.",
+                hasNodes ? null : "nodes.add"),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "selection.select-none",
+                GraphEditorCommandSourceKind.Kernel,
+                hasSelection,
+                hasSelection ? null : "Select one or more nodes before selecting none.",
+                hasSelection ? null : "Select nodes first, then retry.",
+                hasSelection ? null : "nodes.add"),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "selection.invert",
+                GraphEditorCommandSourceKind.Kernel,
+                hasNodes,
+                hasNodes ? null : "Add nodes before inverting selection.",
+                hasNodes ? null : "Add nodes first, then retry.",
+                hasNodes ? null : "nodes.add"),
             GraphEditorCommandDescriptorCatalog.Create(
                 "selection.delete",
                 GraphEditorCommandSourceKind.Kernel,
@@ -887,6 +914,9 @@ internal sealed class GraphEditorKernelCommandRouter
         => commandId switch
         {
             "selection.clear"
+                or "selection.select-all"
+                or "selection.select-none"
+                or "selection.invert"
                 or "selection.delete"
                 or "selection.delete-reconnect"
                 or "selection.detach-connections"
@@ -977,6 +1007,18 @@ internal sealed class GraphEditorKernelCommandRouter
 
                 command.TryGetArgument("primaryConnectionId", out var primaryConnectionId);
                 _host.SetConnectionSelection(connectionIds, primaryConnectionId, ResolveOptionalUpdateStatus(command, "updateStatus"));
+                return true;
+
+            case "selection.select-all":
+                _host.SelectAll(ResolveOptionalUpdateStatus(command, "updateStatus"));
+                return true;
+
+            case "selection.select-none":
+                _host.SelectNone(ResolveOptionalUpdateStatus(command, "updateStatus"));
+                return true;
+
+            case "selection.invert":
+                _host.InvertSelection(ResolveOptionalUpdateStatus(command, "updateStatus"));
                 return true;
 
             case "selection.delete":

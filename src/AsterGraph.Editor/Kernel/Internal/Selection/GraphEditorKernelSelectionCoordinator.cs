@@ -18,6 +18,29 @@ internal sealed partial class GraphEditorKernel
         public void ClearSelection(bool updateStatus)
             => SetSelection([], null, updateStatus);
 
+        public void SelectAll(bool updateStatus)
+        {
+            var allNodeIds = _owner.GetActiveGraphScope()
+                .Nodes
+                .Select(node => node.Id)
+                .ToList();
+            SetSelection(allNodeIds, allNodeIds.LastOrDefault(), updateStatus);
+        }
+
+        public void SelectNone(bool updateStatus)
+            => SetSelection([], null, updateStatus);
+
+        public void InvertSelection(bool updateStatus)
+        {
+            var activeNodes = _owner.GetActiveGraphScope().Nodes;
+            var selectedIds = _owner._selectedNodeIds.ToHashSet(StringComparer.Ordinal);
+            var invertedIds = activeNodes
+                .Where(node => !selectedIds.Contains(node.Id))
+                .Select(node => node.Id)
+                .ToList();
+            SetSelection(invertedIds, invertedIds.LastOrDefault(), updateStatus);
+        }
+
         public void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
         {
             var existingIds = _owner.GetActiveGraphScope().Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);

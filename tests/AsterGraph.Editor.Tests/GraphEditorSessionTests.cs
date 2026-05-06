@@ -246,6 +246,9 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.Undo));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.Redo));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.ClearSelection), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.SelectAll), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.SelectNone), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.InvertSelection), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SetSelection), typeof(IReadOnlyList<string>), typeof(string), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SetConnectionSelection), typeof(IReadOnlyList<string>), typeof(string), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.AddNode), typeof(NodeDefinitionId), typeof(GraphPoint?));

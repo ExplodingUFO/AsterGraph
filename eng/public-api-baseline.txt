@@ -1593,6 +1593,9 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.CaptureInspectionSnapshot():Aster
 M:AsterGraph.Editor.Runtime.GraphEditorSession.CenterViewAt(AsterGraph.Core.Models.GraphPoint,System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.CenterViewOnNode(System.String):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.ClearSelection(System.Boolean):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorSession.InvertSelection(System.Boolean):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorSession.SelectAll(System.Boolean):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorSession.SelectNone(System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.CompleteConnection(AsterGraph.Core.Models.GraphConnectionTargetRef):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.CompleteConnection(System.String,System.String):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.CreateDocumentSnapshot():AsterGraph.Core.Models.GraphDocument
@@ -1832,6 +1835,9 @@ M:AsterGraph.Editor.Runtime.IGraphEditorCommands.CancelPendingConnection():Syste
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.CenterViewAt(AsterGraph.Core.Models.GraphPoint,System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.CenterViewOnNode(System.String):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.ClearSelection(System.Boolean):System.Void
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.InvertSelection(System.Boolean):System.Void
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.SelectAll(System.Boolean):System.Void
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.SelectNone(System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.CompleteConnection(AsterGraph.Core.Models.GraphConnectionTargetRef):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.CompleteConnection(System.String,System.String):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.DeleteConnection(System.String):System.Void

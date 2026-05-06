@@ -59,6 +59,12 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public void ClearSelection(bool updateStatus) => _kernel.ClearSelection(updateStatus);
 
+    public void SelectAll(bool updateStatus) => _kernel.SelectAll(updateStatus);
+
+    public void SelectNone(bool updateStatus) => _kernel.SelectNone(updateStatus);
+
+    public void InvertSelection(bool updateStatus) => _kernel.InvertSelection(updateStatus);
+
     public void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
         => _kernel.SetSelection(nodeIds, primaryNodeId, updateStatus);
 

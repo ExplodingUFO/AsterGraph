@@ -19,6 +19,9 @@ public sealed partial class GraphEditorSession
         "selection.set",
         "selection.connections.set",
         "selection.clear",
+        "selection.select-all",
+        "selection.select-none",
+        "selection.invert",
         "selection.delete",
         "selection.delete-reconnect",
         "selection.detach-connections",
@@ -102,6 +105,15 @@ public sealed partial class GraphEditorSession
 
     public void ClearSelection(bool updateStatus = false)
         => Execute("selection.clear", () => _host.ClearSelection(updateStatus));
+
+    public void SelectAll(bool updateStatus = true)
+        => Execute("selection.select-all", () => _host.SelectAll(updateStatus));
+
+    public void SelectNone(bool updateStatus = true)
+        => Execute("selection.select-none", () => _host.SelectNone(updateStatus));
+
+    public void InvertSelection(bool updateStatus = true)
+        => Execute("selection.invert", () => _host.InvertSelection(updateStatus));
 
     public void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId = null, bool updateStatus = true)
     {

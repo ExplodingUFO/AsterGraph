@@ -28,6 +28,27 @@ public interface IGraphEditorCommands
     void ClearSelection(bool updateStatus = false);
 
     /// <summary>
+    /// 选择当前作用域内的全部节点。
+    /// </summary>
+    /// <param name="updateStatus">是否更新状态文本。</param>
+    void SelectAll(bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// 取消全部选择。
+    /// </summary>
+    /// <param name="updateStatus">是否更新状态文本。</param>
+    void SelectNone(bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// 反选当前作用域内的节点。
+    /// </summary>
+    /// <param name="updateStatus">是否更新状态文本。</param>
+    void InvertSelection(bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 直接设置当前选择集合及主选中节点。
     /// </summary>
     /// <param name="nodeIds">新的选择节点标识集合。</param>

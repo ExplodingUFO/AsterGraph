@@ -101,6 +101,15 @@ internal sealed partial class GraphEditorKernel
         void IGraphEditorKernelCommandRouterHost.SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
             => _owner.SetSelection(nodeIds, primaryNodeId, updateStatus);
 
+        void IGraphEditorKernelCommandRouterHost.SelectAll(bool updateStatus)
+            => _owner.SelectAll(updateStatus);
+
+        void IGraphEditorKernelCommandRouterHost.SelectNone(bool updateStatus)
+            => _owner.SelectNone(updateStatus);
+
+        void IGraphEditorKernelCommandRouterHost.InvertSelection(bool updateStatus)
+            => _owner.InvertSelection(updateStatus);
+
         void IGraphEditorKernelCommandRouterHost.SetConnectionSelection(IReadOnlyList<string> connectionIds, string? primaryConnectionId, bool updateStatus)
             => _owner.SetConnectionSelection(connectionIds, primaryConnectionId, updateStatus);
 
