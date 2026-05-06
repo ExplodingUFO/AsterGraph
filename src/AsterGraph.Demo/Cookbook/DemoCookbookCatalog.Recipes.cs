@@ -1025,5 +1025,285 @@ public static partial class DemoCookbookCatalog
                 "Supported seams stay in `AsterGraph.Editor` session validation, repair, and support evidence contracts.",
                 "Demo proof panels are review evidence only; they do not add a workflow engine or macro scheduler."),
             "Review/help evidence stays bounded to existing validation and support-bundle proof; it is not a new workflow engine."),
+        new DemoCookbookRecipe(
+            "v079-selection-rectangle-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "v0.79 selection rectangle route",
+            "Trace selection rectangle queries, marquee drag interaction, and bulk selection commands through the canonical session route.",
+            [
+                new DemoCookbookAnchor(
+                    "Selection rectangle snapshot",
+                    "src/AsterGraph.Editor/Runtime/GraphEditorSelectionRectangleSnapshot.cs",
+                    "GraphEditorSelectionRectangleSnapshot"),
+                new DemoCookbookAnchor(
+                    "Selection rectangle query",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetSelectionRectangleSnapshot"),
+                new DemoCookbookAnchor(
+                    "Marquee overlay coordinator",
+                    "src/AsterGraph.Avalonia/Controls/Internal/Overlay/NodeCanvasOverlayCoordinator.cs",
+                    "UpdateMarqueeSelection"),
+                new DemoCookbookAnchor(
+                    "Bulk selection commands",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "SelectAll"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Selection rectangle query proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSelectionTransformContractsTests.cs",
+                    "Queries_GetSelectionRectangleSnapshot_ReturnsNodesAndConnectionsInRectangle"),
+                new DemoCookbookAnchor(
+                    "Selection rectangle overlap proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSelectionTransformContractsTests.cs",
+                    "Queries_GetSelectionRectangleSnapshot_WithPartialOverlap_ReturnsIntersectingNodesOnly"),
+                new DemoCookbookAnchor(
+                    "Marquee selection finalize proof",
+                    "tests/AsterGraph.Editor.Tests/NodeCanvasOverlayCoordinatorTests.cs",
+                    "UpdateMarqueeSelection_WithFinalizeTrue_UsesBackendSelectionRectangleQuery"),
+                new DemoCookbookAnchor(
+                    "Bulk selection command proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorKernelCommandRouterTests.cs",
+                    "GraphEditorKernel_SelectAllNoneInvert_ExecuteViaCommandInvocation"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "v0.79 cookbook proof docs",
+                    "docs/en/demo-cookbook.md",
+                    "DEMO_COOKBOOK_V079_PROOF_DOCS_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Selection rectangle query returns intersecting nodes and connections.",
+                    "GetSelectionRectangleSnapshot"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Marquee drag uses backend query on finalize and frontend hit-test during drag.",
+                    "UpdateMarqueeSelection"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Select-all, select-none, and invert run through canonical command route.",
+                    "SelectAll"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Selection rectangle proof markers back query and marquee behavior.",
+                    "SELECTION_RECTANGLE_QUERY_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Marquee selection supports union and toggle modes through modifier keys.",
+                    "UpdateMarqueeSelection"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "Rectangle query keeps selection scoped to explicit bounds.",
+                    "GetSelectionRectangleSnapshot"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "GetSelectionRectangleSnapshot exposes intersecting node and connection ids.",
+                    "Queries_GetSelectionRectangleSnapshot_ReturnsNodesAndConnectionsInRectangle"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Bulk selection commands carry disabled-state recovery metadata.",
+                    "GraphEditorKernel_SelectAllNoneInvert_ExecuteViaCommandInvocation"),
+            ],
+            [
+                "SELECTION_RECTANGLE_QUERY_OK",
+                "SELECTION_RECTANGLE_MARQUEE_OK",
+                "SELECTION_INVERT_ALL_NONE_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "v0.79 selection rectangle route: IGraphEditorSession.Queries.GetSelectionRectangleSnapshot(...) and INodeCanvasOverlayHost drag gestures feed the marquee selection surface.",
+                "Supported seams live in `AsterGraph.Editor` query snapshots and `AsterGraph.Avalonia` overlay coordinator controls.",
+                "Demo cookbook references selection evidence only; Demo does not claim another selection model or alternate hit-test path."),
+            "Selection rectangle coverage is limited to existing session query contracts and Avalonia overlay controls; it does not add a spatial index, alternate selection model, or executable sample promise."),
+        new DemoCookbookRecipe(
+            "v079-keyboard-navigation-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "v0.79 keyboard navigation route",
+            "Trace arrow-key node nudge and nearest-node selection, viewport zoom/pan shortcuts, and automation peers for canvas accessibility.",
+            [
+                new DemoCookbookAnchor(
+                    "Canvas key down handler",
+                    "src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs",
+                    "HandleCanvasKeyDown"),
+                new DemoCookbookAnchor(
+                    "Canvas arrow key handler",
+                    "src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs",
+                    "TryHandleCanvasArrowKey"),
+                new DemoCookbookAnchor(
+                    "Canvas automation peer",
+                    "src/AsterGraph.Avalonia/Controls/Internal/Automation/NodeCanvasAutomationPeer.cs",
+                    "NodeCanvasAutomationPeer"),
+                new DemoCookbookAnchor(
+                    "Node automation peer",
+                    "src/AsterGraph.Avalonia/Controls/Internal/Automation/GraphNodeAutomationPeer.cs",
+                    "GraphNodeAutomationPeer"),
+                new DemoCookbookAnchor(
+                    "Viewport zoom shortcuts",
+                    "src/AsterGraph.Editor/Runtime/Internal/GraphEditorCommandDescriptorCatalog.cs",
+                    "viewport.zoom-in"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Arrow key nudge proof",
+                    "tests/AsterGraph.Editor.Tests/NodeCanvasStandaloneTests.cs",
+                    "ArrowKey_Nudge_MovesSelectedNodesWhenNodesAreSelected"),
+                new DemoCookbookAnchor(
+                    "Arrow key navigate proof",
+                    "tests/AsterGraph.Editor.Tests/NodeCanvasStandaloneTests.cs",
+                    "ArrowKey_Navigate_SelectsNearestNodeWhenNoSelection"),
+                new DemoCookbookAnchor(
+                    "Automation peer surface proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorViewTests.cs",
+                    "DefaultChromeMode_ExposesCanvasAndNodeAutomationPeers"),
+                new DemoCookbookAnchor(
+                    "Canvas focus restore proof",
+                    "tests/AsterGraph.Editor.Tests/NodeCanvasStandaloneTests.cs",
+                    "CanvasContextRequest_RestoresCanvasFocusForKeyboardRecovery"),
+                new DemoCookbookAnchor(
+                    "Viewport pan command proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorKernelCommandRouterTests.cs",
+                    "GraphEditorKernel_PanLeft_UpdatesViewportPanX"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "v0.79 cookbook proof docs",
+                    "docs/en/demo-cookbook.md",
+                    "DEMO_COOKBOOK_V079_PROOF_DOCS_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Arrow keys nudge selected nodes by 10px (50px with Shift).",
+                    "ArrowKey_Nudge_MovesSelectedNodesWhenNodesAreSelected"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Arrow keys select the nearest node when no selection exists.",
+                    "ArrowKey_Navigate_SelectsNearestNodeWhenNoSelection"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "Automation peers expose canvas and node titles to accessibility tools.",
+                    "DefaultChromeMode_ExposesCanvasAndNodeAutomationPeers"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Keyboard navigation proof markers back nudge, navigation, and peer behavior.",
+                    "CANVAS_KEYBOARD_NAVIGATION_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Arrow-key nudge moves selected nodes with shift for larger steps.",
+                    "ArrowKey_Nudge_MovesSelectedNodesWhenNodesAreSelected"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "Zoom and pan shortcuts keep viewport navigable without pointer.",
+                    "viewport.zoom-in"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Automation peers expose node titles and canvas group structure.",
+                    "DefaultChromeMode_ExposesCanvasAndNodeAutomationPeers"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Canvas focus restoration keeps keyboard routing intact after menus.",
+                    "CanvasContextRequest_RestoresCanvasFocusForKeyboardRecovery"),
+            ],
+            [
+                "CANVAS_KEYBOARD_NAVIGATION_OK",
+                "ARROW_KEY_NUDGE_OK",
+                "ARROW_KEY_NEAREST_NODE_OK",
+                "AUTOMATION_PEER_SURFACE_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "v0.79 keyboard navigation route: NodeCanvas arrow-key handling, command router viewport shortcuts, and Avalonia automation peers.",
+                "Supported seams live in `AsterGraph.Avalonia` canvas controls and `AsterGraph.Editor` command descriptor/shortcut contracts.",
+                "Demo cookbook references keyboard navigation evidence only; Demo does not add a separate input model or accessibility framework."),
+            "Keyboard navigation coverage is limited to existing Avalonia canvas controls and command shortcut contracts; it does not add a custom input framework, full a11y provider suite, or executable sample promise."),
+        new DemoCookbookRecipe(
+            "v079-host-event-route",
+            DemoCookbookRecipeCategory.DiagnosticsSupport,
+            "v0.79 host event route",
+            "Trace IGraphEditorEvents subscription surface, mutation batching for bounded event cadence, and memory-leak-free lifecycle.",
+            [
+                new DemoCookbookAnchor(
+                    "Host event subscription surface",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorEvents.cs",
+                    "IGraphEditorEvents"),
+                new DemoCookbookAnchor(
+                    "Mutation batching entry",
+                    "src/AsterGraph.Editor/Runtime/Mutation/GraphEditorSessionMutation.cs",
+                    "BeginMutation"),
+                new DemoCookbookAnchor(
+                    "Pending event flush",
+                    "src/AsterGraph.Editor/Runtime/Mutation/GraphEditorSessionMutation.cs",
+                    "FlushPendingEvents"),
+                new DemoCookbookAnchor(
+                    "Viewport change notification",
+                    "src/AsterGraph.Editor/ViewModels/Facade/GraphEditorViewModel.Infrastructure.cs",
+                    "NotifyViewportChanged"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Event memory leak proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionTests.cs",
+                    "SessionEvents_SubscribeAndUnsubscribe_DoNotLeakMemory"),
+                new DemoCookbookAnchor(
+                    "Viewport event cadence proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionTests.cs",
+                    "SessionEvents_ViewportChanges_AreThrottledToBoundedCadence"),
+                new DemoCookbookAnchor(
+                    "Selection event cadence proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionTests.cs",
+                    "SessionEvents_SelectionChanges_AreThrottledToBoundedCadence"),
+                new DemoCookbookAnchor(
+                    "Typed event args contract proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionTests.cs",
+                    "IGraphEditorEvents_ReusesExistingTypedEventArgs"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "v0.79 cookbook proof docs",
+                    "docs/en/demo-cookbook.md",
+                    "DEMO_COOKBOOK_V079_PROOF_DOCS_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "IGraphEditorEvents exposes typed DocumentChanged, SelectionChanged, ViewportChanged, and CommandExecuted events.",
+                    "IGraphEditorEvents"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Mutation batching provides bounded event cadence without time-based throttling.",
+                    "EVENT_BATCHING_CADENCE_OK"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Event subscription and unsubscription do not leak memory.",
+                    "SessionEvents_SubscribeAndUnsubscribe_DoNotLeakMemory"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "IGraphEditorEvents exposes document, selection, viewport, and command event surfaces.",
+                    "IGraphEditorEvents"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "FlushPendingEvents deduplicates and raises pending events when mutation scope ends.",
+                    "FlushPendingEvents"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "CommandExecuted events keep command effects observable for support review.",
+                    "IGraphEditorEvents_ReusesExistingTypedEventArgs"),
+            ],
+            [
+                "HOST_EVENT_SUBSCRIPTION_OK",
+                "EVENT_BATCHING_CADENCE_OK",
+                "EVENT_MEMORY_LEAK_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "v0.79 host event route: IGraphEditorEvents subscription surface with BeginMutation/FlushPendingEvents batching for bounded cadence.",
+                "Supported seams live in `AsterGraph.Editor` session event contracts and mutation batching internals.",
+                "Demo cookbook references event lifecycle evidence only; Demo does not add telemetry, remote sync, or a new event broker."),
+            "Host event coverage is bounded to existing session event contracts and mutation batching; it does not add telemetry, remote sync, time-based throttling, or a separate event broker."),
     ];
 }
