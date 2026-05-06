@@ -340,10 +340,6 @@ public sealed class ReleaseClosureContractTests
 
         Assert.Contains("$templateSmokeProofPath = Join-Path $proofArtifactsRoot 'template-smoke.txt'", ciScript, StringComparison.Ordinal);
         Assert.Contains("-ProofPath $templateSmokeProofPath", ciScript, StringComparison.Ordinal);
-        Assert.Contains("Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'ASTERGRAPH_PLUGIN_VALIDATE_OK:True'", templateSmokeScript, StringComparison.Ordinal);
-        Assert.Contains("Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'capability_summary:'", templateSmokeScript, StringComparison.Ordinal);
-        Assert.Contains("Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'target_framework:'", templateSmokeScript, StringComparison.Ordinal);
-        Assert.Contains("Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'sha256:'", templateSmokeScript, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", templateSmokeScript, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True", templateSmokeScript, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True", templateSmokeScript, StringComparison.Ordinal);

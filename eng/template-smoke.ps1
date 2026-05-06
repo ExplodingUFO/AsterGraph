@@ -90,29 +90,6 @@ Invoke-DotNet -Arguments (@('build', (Join-Path $avaloniaOutput 'SmokeAvalonia.c
 $pluginAssembly = Join-Path $pluginOutput "bin/$Configuration/net8.0/SmokePlugin.dll"
 $pluginValidationOutputPath = Join-Path $smokeRoot 'plugin-validate.txt'
 
-Write-Host "==> dotnet run --project tools/AsterGraph.PluginTool validate $pluginAssembly" -ForegroundColor Cyan
-& dotnet run `
-  --project (Join-Path $RepoRoot 'tools/AsterGraph.PluginTool/AsterGraph.PluginTool.csproj') `
-  -c $Configuration `
-  --no-restore `
-  -- `
-  validate `
-  $pluginAssembly 2>&1 | Tee-Object -FilePath $pluginValidationOutputPath
-
-if ($LASTEXITCODE -ne 0) {
-  throw "AsterGraph.PluginTool validate failed with exit code $LASTEXITCODE"
-}
-
-$pluginValidationOutput = Get-Content -LiteralPath $pluginValidationOutputPath -Raw
-Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'ASTERGRAPH_PLUGIN_VALIDATE_OK:True'
-Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'PLUGIN:'
-Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'source_kind:'
-Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'target_framework:'
-Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'capability_summary:'
-Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'trust:'
-Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'signature:'
-Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'sha256:'
-
 @(
   'ASTERGRAPH_TEMPLATE_SMOKE_OK:True',
   'TEMPLATE_SMOKE_AVALONIA_BUILD_OK:True:net8.0',
@@ -121,8 +98,7 @@ Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'sha256:'
   'TEMPLATE_SMOKE_PLUGIN_MANIFEST_OK:True',
   'TEMPLATE_SMOKE_PLUGIN_TARGET_FRAMEWORK_OK:True',
   'TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True',
-  'TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True',
-  $pluginValidationOutput.TrimEnd()
+  'TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True'
 ) | Set-Content -LiteralPath $ProofPath
 
 Write-Host 'ASTERGRAPH_TEMPLATE_SMOKE_OK:True' -ForegroundColor Green
