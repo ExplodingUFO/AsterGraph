@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using AsterGraph.Demo.Cookbook;
 using AsterGraph.Demo.ViewModels;
 using Xunit;
 
@@ -8,106 +9,65 @@ namespace AsterGraph.Demo.Tests;
 public sealed class DemoCookbookDetailReadabilityTests
 {
     [Fact]
-    public void CookbookDetailModesUseReadableLinesWithoutLosingRecipe()
+    public void CookbookRecipes_AllHaveNonEmptyCodeSamples()
     {
-        var viewModel = new MainWindowViewModel();
-        var recipe = viewModel.CookbookRecipes.Single(item => item.Id == "authoring-surface-route");
-        viewModel.SelectedCookbookRecipe = recipe;
-
-        Assert.Equal("code", viewModel.SelectedCookbookDetailMode.Key);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceGraphLines, line => line.Contains(recipe.DemoAnchors[0].Path, StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.Contains(viewModel.CookbookWorkspace.SelectedRecipe.RouteStatus, StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("支持路线：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("包边界：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Demo 边界：", StringComparison.Ordinal));
-        Assert.Equal("Code / Demo", viewModel.CookbookGraphDemoSectionTitle);
-        Assert.Equal("Workflow Step", viewModel.CookbookWorkflowSectionTitle);
-        Assert.Equal("Proof / Support", viewModel.CookbookProofSupportSectionTitle);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.StartsWith("Step：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.StartsWith("Graph：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.StartsWith("Content：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceProofSupportLines, line => line.StartsWith("Proof：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceProofSupportLines, line => line.StartsWith("Support：", StringComparison.Ordinal));
-        Assert.StartsWith("路径：", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.CodeAnchors[0].Path, StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.CodeAnchors[0].Evidence, StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.DemoAnchors[0].Path, StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookRecipe = viewModel.CookbookRecipes.Single(item => item.Id == "v077-authoring-platform-route");
-
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.StartsWith("Workflow：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.Contains("代码目标：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.Contains("Demo 目标：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceGraphLines, line => line.StartsWith("组件展示：", StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookRecipe = recipe;
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "proof");
-        Assert.Equal(recipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
-        Assert.StartsWith("证明标记：", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.ProofMarkers[0], StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "docs");
-        Assert.Equal(recipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
-        Assert.StartsWith("路径：", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.DocumentationAnchors[0].Path, StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.DocumentationAnchors[0].Evidence, StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "scenario");
-        Assert.Equal(recipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
-        Assert.StartsWith("当前场景：", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("图线索：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("内容线索：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("图操作：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("节点元数据：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("支持证据：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(recipe.ScenarioPoints[0].Evidence, StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "interaction");
-        Assert.Equal(recipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("选择：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("连接：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("检查：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains("焦点：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains("目标：", StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "support");
-        Assert.Equal(recipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
-        Assert.StartsWith("支持边界：", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
-        Assert.Contains(recipe.SupportBoundary, viewModel.SelectedCookbookWorkspaceDetailLines);
+        foreach (var recipe in DemoCookbookCatalog.Recipes)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(recipe.CodeSample),
+                $"Recipe '{recipe.Id}' is missing a CodeSample.");
+        }
     }
 
     [Fact]
-    public void CookbookDetailModesReprojectAcrossLanguageSwitch()
+    public void CookbookCodeSamples_ContainExpectedApiTermsForKeyRecipes()
     {
         var viewModel = new MainWindowViewModel();
-        var recipe = viewModel.CookbookRecipes.Single(item => item.Id == "authoring-surface-route");
+
+        // Starter host recipe should mention host builder
+        var starterRecipe = viewModel.CookbookRecipes.Single(r => r.Id == "starter-host-route");
+        Assert.Contains("AsterGraphHostBuilder", starterRecipe.CodeSample, StringComparison.Ordinal);
+
+        // Authoring surface should mention session commands
+        var authoringRecipe = viewModel.CookbookRecipes.Single(r => r.Id == "authoring-surface-route");
+        Assert.Contains("NodePresentationOptions", authoringRecipe.CodeSample, StringComparison.Ordinal);
+
+        // Selection rectangle should mention selection commands
+        var selectionRecipe = viewModel.CookbookRecipes.Single(r => r.Id == "v079-selection-rectangle-route");
+        Assert.Contains("SelectAll", selectionRecipe.CodeSample, StringComparison.Ordinal);
+
+        // Keyboard navigation should mention move/zoom/pan
+        var keyboardRecipe = viewModel.CookbookRecipes.Single(r => r.Id == "v079-keyboard-navigation-route");
+        Assert.Contains("TryMoveSelectionBy", keyboardRecipe.CodeSample, StringComparison.Ordinal);
+
+        // Host event should mention event subscription
+        var eventRecipe = viewModel.CookbookRecipes.Single(r => r.Id == "v079-host-event-route");
+        Assert.Contains("SelectionChanged", eventRecipe.CodeSample, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MainWindowViewModel_CodeSamplePropertyReturnsSelectedRecipeSample()
+    {
+        var viewModel = new MainWindowViewModel();
+        var recipe = viewModel.CookbookRecipes.Single(r => r.Id == "plugin-trust-route");
+
         viewModel.SelectedCookbookRecipe = recipe;
+
+        Assert.Equal(recipe.CodeSample, viewModel.SelectedCookbookRecipeCodeSample);
+        Assert.Contains("DiscoverPluginCandidates", viewModel.SelectedCookbookRecipeCodeSample, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void CookbookCodeSamples_ReprojectAcrossLanguageSwitch()
+    {
+        var viewModel = new MainWindowViewModel();
+        var recipe = viewModel.CookbookRecipes.Single(r => r.Id == "authoring-surface-route");
+        viewModel.SelectedCookbookRecipe = recipe;
+
+        var originalSample = viewModel.SelectedCookbookRecipeCodeSample;
 
         viewModel.SelectLanguage("en");
 
-        Assert.Equal(recipe.Id, viewModel.SelectedCookbookRecipe.Id);
-        Assert.StartsWith("Path: ", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "support");
-
-        Assert.StartsWith("Support boundary: ", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
-        Assert.Contains(recipe.SupportBoundary, viewModel.SelectedCookbookWorkspaceDetailLines);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Supported route: ", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Package boundary: ", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("Demo boundary: ", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, line => line.StartsWith("Step: ", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceProofSupportLines, line => line.StartsWith("Proof: ", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceProofSupportLines, line => line.StartsWith("Support: ", StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "scenario");
-
-        Assert.StartsWith("Selected scenario: ", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("Graph operations: ", StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "interaction");
-
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.StartsWith("Selection: ", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains("Focus: ", StringComparison.Ordinal));
+        Assert.Equal(originalSample, viewModel.SelectedCookbookRecipeCodeSample);
+        Assert.Contains("NodePresentationOptions", viewModel.SelectedCookbookRecipeCodeSample, StringComparison.Ordinal);
     }
 }

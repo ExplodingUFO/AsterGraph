@@ -52,6 +52,7 @@ public static partial class DemoCookbookCatalog
             AddIfMissing(issues, recipe.Id, nameof(recipe.InteractionFacets), recipe.InteractionFacets);
             AddIfMissing(issues, recipe.Id, nameof(recipe.ProofMarkers), recipe.ProofMarkers);
             AddIfMissing(issues, recipe.Id, nameof(recipe.SupportBoundary), recipe.SupportBoundary);
+            AddIfMissing(issues, recipe.Id, nameof(recipe.CodeSample), recipe.CodeSample);
 
             AddAnchorIssues(issues, recipe.Id, nameof(recipe.CodeAnchors), recipe.CodeAnchors);
             AddAnchorIssues(issues, recipe.Id, nameof(recipe.DemoAnchors), recipe.DemoAnchors);

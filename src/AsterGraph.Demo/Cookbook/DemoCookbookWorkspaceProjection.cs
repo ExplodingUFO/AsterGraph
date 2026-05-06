@@ -1,5 +1,4 @@
 namespace AsterGraph.Demo.Cookbook;
-
 public sealed record DemoCookbookWorkspaceSnapshot(
     IReadOnlyList<DemoCookbookWorkspaceNavigationGroup> NavigationGroups,
     DemoCookbookWorkspaceRecipeContent SelectedRecipe);
@@ -30,7 +29,8 @@ public sealed record DemoCookbookWorkspaceRecipeContent(
     IReadOnlyList<string> ProofMarkers,
     IReadOnlyList<string> DeferredGaps,
     DemoCookbookRouteClarity RouteClarity,
-    string SupportBoundary);
+    string SupportBoundary,
+    string CodeSample);
 public sealed record DemoCookbookWorkspaceAnchor(
     string Label,
     string Path,
@@ -109,7 +109,8 @@ public static partial class DemoCookbookWorkspaceProjection
             recipe.ProofMarkers.ToArray(),
             posture.DeferredGaps,
             recipe.RouteClarity,
-            recipe.SupportBoundary);
+            recipe.SupportBoundary,
+            recipe.CodeSample);
     }
 
     private static DemoCookbookRoutePosture CreateRoutePosture(DemoCookbookRecipeCategory category)

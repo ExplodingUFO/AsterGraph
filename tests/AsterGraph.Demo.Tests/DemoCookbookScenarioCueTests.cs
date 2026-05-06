@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using AsterGraph.Demo.Cookbook;
 using AsterGraph.Demo.ViewModels;
 using AsterGraph.Demo.Views;
 using Xunit;
@@ -11,7 +12,7 @@ namespace AsterGraph.Demo.Tests;
 public sealed class DemoCookbookScenarioCueTests
 {
     [Fact]
-    public void MainWindowViewModel_CookbookScenarioSelectionUpdatesGraphAndContentCues()
+    public void MainWindowViewModel_CookbookScenarioSelectionUpdatesState()
     {
         var viewModel = new MainWindowViewModel();
         var recipe = viewModel.CookbookRecipes.Single(item => item.Id == "authoring-surface-route");
@@ -24,13 +25,6 @@ public sealed class DemoCookbookScenarioCueTests
         viewModel.SelectCookbookScenarioPointCommand.Execute(nextScenario);
 
         Assert.Equal(nextScenario.Key, viewModel.SelectedCookbookScenarioPoint.Key);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceGraphLines, line => line.Contains(nextScenario.GraphCueTarget, StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.Contains(nextScenario.ContentCue, StringComparison.Ordinal));
-
-        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "scenario");
-
-        Assert.Contains(nextScenario.Label, viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceDetailLines, line => line.Contains(nextScenario.GraphCueTarget, StringComparison.Ordinal));
 
         viewModel.SelectedCookbookRecipe = viewModel.CookbookRecipes.Single(item => item.Id == "plugin-trust-route");
 
@@ -59,7 +53,5 @@ public sealed class DemoCookbookScenarioCueTests
 
         Assert.Equal(nextScenario.Key, viewModel.SelectedCookbookScenarioPoint.Key);
         Assert.Equal(viewModel.SelectedCookbookScenarioPoint, scenarioCueList.SelectedItem);
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceGraphLines, line => line.Contains(nextScenario.GraphCueTarget, StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.Contains(nextScenario.ContentCue, StringComparison.Ordinal));
     }
 }

@@ -55,6 +55,8 @@ public sealed class DemoCookbookWorkspaceProjectionTests
             Assert.NotEmpty(content.DeferredGaps);
             Assert.Equal(recipe.RouteClarity, content.RouteClarity);
             Assert.Equal(recipe.SupportBoundary, content.SupportBoundary);
+            Assert.Equal(recipe.CodeSample, content.CodeSample);
+            Assert.False(string.IsNullOrWhiteSpace(content.CodeSample));
         }
     }
 

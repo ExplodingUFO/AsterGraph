@@ -12,21 +12,6 @@ namespace AsterGraph.Demo.Tests;
 
 public sealed class DemoCookbookInteractionStateTests
 {
-    [Fact]
-    public void CookbookCoverageLinesIncludeBoundedUnavailableAndDeferredState()
-    {
-        var viewModel = new MainWindowViewModel();
-        var recipe = viewModel.CookbookRecipes.Single(item => item.Id == "plugin-trust-route");
-        viewModel.SelectedCookbookRecipe = recipe;
-
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("路线状态：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("路线说明：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("不可用操作：", StringComparison.Ordinal));
-        Assert.Contains(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.StartsWith("延后缺口：", StringComparison.Ordinal));
-        Assert.DoesNotContain(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.Contains("enabled fallback", StringComparison.OrdinalIgnoreCase));
-        Assert.DoesNotContain(viewModel.SelectedCookbookWorkspaceCoverageLines, line => line.Contains("marketplace is enabled", StringComparison.OrdinalIgnoreCase));
-    }
-
     [AvaloniaFact]
     public void MainWindow_CookbookEmptyFilterDisablesNavigationAndKeepsStateBounded()
     {

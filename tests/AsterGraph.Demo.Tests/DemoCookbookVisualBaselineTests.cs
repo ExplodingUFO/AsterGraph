@@ -40,11 +40,10 @@ public sealed class DemoCookbookVisualBaselineTests
         Assert.Contains("Classes.selected=\"{Binding IsSelected}\"", xaml, StringComparison.Ordinal);
         Assert.Contains("PART_CookbookWorkspaceScenarioCueList", xaml, StringComparison.Ordinal);
         Assert.Contains("SelectedItem=\"{Binding SelectedCookbookScenarioPoint, Mode=TwoWay}\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("PART_CookbookWorkspaceCodeDemoSection", xaml, StringComparison.Ordinal);
-        Assert.Contains("PART_CookbookWorkspaceWorkflowSection", xaml, StringComparison.Ordinal);
-        Assert.Contains("PART_CookbookWorkspaceProofSupportSection", xaml, StringComparison.Ordinal);
-        Assert.Contains("SelectedCookbookWorkspaceWorkflowStepLines", xaml, StringComparison.Ordinal);
-        Assert.Contains("SelectedCookbookWorkspaceProofSupportLines", xaml, StringComparison.Ordinal);
+        Assert.Contains("PART_CookbookWorkspaceCodeSampleTextBox", xaml, StringComparison.Ordinal);
+        Assert.Contains("IsReadOnly=\"True\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("FontFamily=\"Consolas, monospace\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("SelectedCookbookRecipeCodeSample", xaml, StringComparison.Ordinal);
         Assert.Contains("MaxHeight=\"260\"", xaml, StringComparison.Ordinal);
     }
 
@@ -59,14 +58,8 @@ public sealed class DemoCookbookVisualBaselineTests
         "PART_CookbookWorkspaceContentShell",
         "PART_MainGraphEditorHost",
         "PART_CookbookWorkspaceRecipeContentPanel",
-        "PART_CookbookWorkspaceCodeDemoSection",
-        "PART_CookbookWorkspaceWorkflowSection",
-        "PART_CookbookWorkspaceProofSupportSection",
         "PART_CookbookWorkspaceScenarioCueList",
-        "PART_CookbookWorkspaceWorkflowStepLines",
-        "PART_CookbookWorkspaceProofSupportLines",
-        "PART_CookbookWorkspaceDetailModeSelector",
-        "PART_CookbookWorkspaceDetailLines",
+        "PART_CookbookWorkspaceCodeSampleTextBox",
     ];
 
     private static readonly string[] OwnedFiles =
@@ -86,7 +79,7 @@ public sealed class DemoCookbookVisualBaselineTests
     [
         "Selected grouped navigation must visibly bind projected recipe selection.",
         "The bottom detail panel must stay height-bounded so the graph remains the primary workspace.",
-        "Path-heavy code, proof, docs, and support lines must wrap inside local line cards.",
+        "Code samples must render in monospace and stay scrollable within the bounded panel.",
         "Cookbook polish must stay in narrow cookbook files instead of broad shell or showcase aggregation.",
     ];
 

@@ -72,7 +72,21 @@ public static partial class DemoCookbookCatalog
                 "Shipped Avalonia route: AsterGraphHostBuilder.Create(...).BuildAvaloniaView() via StarterAvaloniaAppBuilder.",
                 "`AsterGraph.Avalonia` composes the hosted UI on top of `AsterGraph.Editor` session/runtime surfaces.",
                 "Demo scenario launch is inspection/proof only; copy the starter host code instead of Demo ViewModel code."),
-            "Avalonia is the shipped hosted route; WPF remains validation-only and Demo remains sample/proof surface."),
+            "Avalonia is the shipped hosted route; WPF remains validation-only and Demo remains sample/proof surface.",
+            CodeSample: """
+            // Build a hosted Avalonia graph editor
+            var builder = AsterGraphHostBuilder.Create()
+                .WithCatalog(catalog)
+                .WithStyle(style);
+
+            // Compose the full editor view (shell + canvas + panels)
+            var view = builder.BuildAvaloniaView();
+
+            // Add it to your Window.Content
+            var window = new Window { Content = view };
+            window.Show();
+            """
+            ),
         new DemoCookbookRecipe(
             "authoring-surface-route",
             DemoCookbookRecipeCategory.Authoring,
@@ -161,7 +175,27 @@ public static partial class DemoCookbookCatalog
                 "Hosted Avalonia authoring route: AsterGraphHostBuilder.UsePresentation(...) with IGraphEditorSession.Queries.GetCommandDescriptors() and GetNavigatorOutlineSnapshot().",
                 "Supported seams live in `AsterGraph.Avalonia` hosting and `AsterGraph.Editor` session/query/command/navigation contracts.",
                 "ConsumerSample is the copyable recipe; Demo presenters are visual proof only and do not define package contracts."),
-            "Authoring samples reuse public seams, source-backed outline projection, and command recovery metadata without creating a second editor/runtime model."),
+            "Authoring samples reuse public seams, source-backed outline projection, and command recovery metadata without creating a second editor/runtime model.",
+            CodeSample: """
+            // Create custom presentation options for a node type
+            var options = new NodePresentationOptions
+            {
+                HeaderHex = "#7FE7D7",
+                ShowParameterEditor = true,
+            };
+
+            // Register a custom edge overlay
+            var overlay = new EdgeOverlayFactory()
+                .CreateEdgeOverlay(connectionStyle);
+
+            // Project commands into the host toolbar
+            var commands = editor.Session.Commands.GetCommandRegistry();
+            foreach (var descriptor in commands)
+            {
+                hostToolBar.AddCommand(descriptor);
+            }
+            """
+            ),
         new DemoCookbookRecipe(
             "v077-authoring-platform-route",
             DemoCookbookRecipeCategory.Authoring,
@@ -321,7 +355,22 @@ public static partial class DemoCookbookCatalog
                     "SearchGraphItems",
                     "Commands_ViewportBookmarksCaptureActivateAndRemoveCurrentScopeViewport",
                     "Queries_SearchGraphItemsReturnsStableNodeGroupConnectionScopeAndIssueResults"),
-            ]),
+            ],
+            """
+            // Discover all available commands
+            var registry = editor.Session.Queries.GetCommandRegistry();
+            var descriptors = registry.GetDescriptors();
+
+            // Run semantic delete and reconnect
+            editor.Session.Commands.TryDeleteSelectionAndReconnect();
+
+            // Apply a fragment template preset
+            editor.Session.Commands.ApplyFragmentTemplatePreset(presetKey, dropPosition);
+
+            // Move selected items via canonical command
+            editor.Session.Commands.TryMoveSelectionBy(offsetX, offsetY);
+            """
+            ),
         new DemoCookbookRecipe(
             "v078-rendering-viewport-route",
             DemoCookbookRecipeCategory.PerformanceViewport,
@@ -420,7 +469,20 @@ public static partial class DemoCookbookCatalog
                 "v0.78 rendering route: IGraphEditorSession.Queries.GetSceneSnapshot(), GetViewportSnapshot(), and ViewportVisibleSceneProjector feed the Avalonia scene renderer.",
                 "Supported seams live in `AsterGraph.Editor` scene/viewport snapshots and `AsterGraph.Avalonia` scene rendering controls.",
                 "Demo cookbook references rendering evidence only; Demo does not claim another renderer or alternate runtime path."),
-            "Rendering and viewport coverage is code/demo/docs proof over existing scene contracts, not a new renderer, virtualizer, or executable sample promise."),
+            "Rendering and viewport coverage is code/demo/docs proof over existing scene contracts, not a new renderer, virtualizer, or executable sample promise.",
+            CodeSample: """
+            // Query the current scene snapshot
+            var scene = editor.Session.Queries.GetSceneSnapshot();
+
+            // Get viewport projection for visible area
+            var viewport = editor.Session.Queries.GetViewportSnapshot();
+            var visibleBounds = viewport.VisibleWorldBounds;
+
+            // Budget connections for large graphs
+            var budget = ViewportVisibleSceneProjection.ToBudgetMarker(
+                visibleBounds, connectionCount);
+            """
+            ),
         new DemoCookbookRecipe(
             "v078-customization-route",
             DemoCookbookRecipeCategory.Authoring,
@@ -524,7 +586,21 @@ public static partial class DemoCookbookCatalog
                 "v0.78 customization route: AsterGraphPresentationOptions with custom node presenters, parameter editor registries, and host-owned edge overlays.",
                 "Supported seams live in `AsterGraph.Avalonia` presentation options and `AsterGraph.Editor` query snapshots consumed by ConsumerSample.",
                 "Demo cookbook treats ConsumerSample as the copyable customization recipe; Demo remains visual proof only."),
-            "Customization coverage stays on ConsumerSample presentation seams and proof markers; it does not widen the runtime model or sample boundary."),
+            "Customization coverage stays on ConsumerSample presentation seams and proof markers; it does not widen the runtime model or sample boundary.",
+            CodeSample: """
+            // Register a custom node presenter
+            var presenter = new CustomNodePresenter();
+            editor.Style.RegisterNodePresenter(nodeType, presenter);
+
+            // Create an edge overlay for connections
+            var edgeOverlay = new EdgeOverlayFactory()
+                .CreateEdgeOverlay(editor.Style.Connection);
+
+            // Wire parameter editor registry
+            var parameterEditor = new ParameterEditorFactory();
+            editor.Style.RegisterParameterEditor(portType, parameterEditor);
+            """
+            ),
         new DemoCookbookRecipe(
             "v078-spatial-authoring-route",
             DemoCookbookRecipeCategory.Authoring,
@@ -655,7 +731,21 @@ public static partial class DemoCookbookCatalog
                 "v0.78 spatial authoring route: IGraphEditorSession.Commands and Queries drive node surfaces, composite scopes, scope navigation, and connection route vertices.",
                 "Supported seams live in `AsterGraph.Editor` spatial authoring commands/query snapshots and `AsterGraph.Avalonia` hosted projection controls.",
                 "Demo cookbook points at proof cues only; Demo does not become the copyable spatial authoring implementation."),
-            "Spatial authoring coverage is limited to existing session contracts, Demo proof cues, and editor tests; it does not add executable sample promises."),
+            "Spatial authoring coverage is limited to existing session contracts, Demo proof cues, and editor tests; it does not add executable sample promises.",
+            CodeSample: """
+            // Resize a node surface
+            editor.Session.Commands.TrySetNodeSize(nodeId, width, height);
+
+            // Query node surface snapshots
+            var surfaces = editor.Session.Queries.GetNodeSurfaceSnapshots();
+
+            // Navigate into a composite scope
+            editor.Session.Commands.TryEnterScope(nodeId);
+
+            // Navigate back to parent scope
+            editor.Session.Commands.TryExitScope();
+            """
+            ),
         new DemoCookbookRecipe(
             "performance-viewport-route",
             DemoCookbookRecipeCategory.PerformanceViewport,
@@ -752,7 +842,22 @@ public static partial class DemoCookbookCatalog
                 "Performance route: ViewportVisibleSceneProjector.Project(...) plus AsterGraphWorkbenchPerformancePolicy.FromMode(...) and IGraphEditorSession layout preview/apply and snap commands.",
                 "Supported seams live in `AsterGraph.Editor` viewport projection, layout command contracts, and `AsterGraph.Avalonia` hosted workbench policy contracts.",
                 "Demo cookbook projection is a graph-above-code teaching surface only; ScaleSmoke, Editor tests, and ConsumerSample remain the proof sources."),
-            "Performance and layout proof reports projection, layout command, and budget evidence; it does not add a background graph index, second renderer, or runtime execution mode."),
+            "Performance and layout proof reports projection, layout command, and budget evidence; it does not add a background graph index, second renderer, or runtime execution mode.",
+            CodeSample: """
+            // Project visible scene with budget limits
+            var projection = editor.Session.Queries.GetViewportSnapshot();
+            var budgetMarker = AsterGraphWorkbenchPerformancePolicy
+                .ToMiniMapBudgetMarker(projection);
+
+            // Configure large-graph performance policy
+            var policy = new WorkbenchPerformancePolicy
+            {
+                MaxVisibleNodes = 500,
+                MinimapUpdateCadenceMs = 100,
+            };
+            editor.Session.ApplyPerformancePolicy(policy);
+            """
+            ),
         new DemoCookbookRecipe(
             "groups-subgraphs-route",
             DemoCookbookRecipeCategory.GroupsSubgraphs,
@@ -821,7 +926,19 @@ public static partial class DemoCookbookCatalog
                 "Groups route: persisted GraphNodeGroup and GraphScope snapshots plus IGraphEditorSession.Queries.GetHierarchyStateSnapshot().",
                 "Supported seams live in `AsterGraph.Core` serialization and `AsterGraph.Editor` hierarchy query contracts.",
                 "Demo cookbook projection is proof/navigation only; it does not add generated demo code or a workflow engine."),
-            "Group/subgraph proof is limited to persisted snapshots, hierarchy queries, and stock Avalonia projection; nested group mutation and specialized boundary-edge styling remain deferred."),
+            "Group/subgraph proof is limited to persisted snapshots, hierarchy queries, and stock Avalonia projection; nested group mutation and specialized boundary-edge styling remain deferred.",
+            CodeSample: """
+            // Create a group from selected nodes
+            editor.Session.Commands.TryCreateGroupFromSelection();
+
+            // Toggle collapsed state
+            editor.Session.Commands.TryToggleGroupCollapse(groupId);
+
+            // Query hierarchy state with collapsed boundaries
+            var hierarchy = editor.Session.Queries.GetHierarchyStateSnapshot();
+            var boundaryEdges = hierarchy.BoundaryEdges;
+            """
+            ),
         new DemoCookbookRecipe(
             "plugin-trust-route",
             DemoCookbookRecipeCategory.PluginTrust,
@@ -894,7 +1011,19 @@ public static partial class DemoCookbookCatalog
                 "Plugin route: AsterGraphEditorFactory.DiscoverPluginCandidates(...) with host-owned PluginTrustPolicy before loading.",
                 "Supported APIs live in `AsterGraph.Editor` plugin discovery, trust, and registration contracts.",
                 "Demo trust workspace is an evidence surface only; it does not sandbox or isolate untrusted plugin code."),
-            "Plugins are trusted in-process extensions; the recipe does not imply sandboxing or untrusted-code isolation."),
+            "Plugins are trusted in-process extensions; the recipe does not imply sandboxing or untrusted-code isolation.",
+            CodeSample: """
+            // Discover plugin candidates in a folder
+            var candidates = AsterGraphEditorFactory.DiscoverPluginCandidates(pluginsPath);
+
+            // Stage a plugin package for loading
+            var package = AsterGraphEditorFactory.StagePluginPackage(candidate);
+
+            // Validate manifest against allowlist
+            var manifest = package.ReadManifest();
+            var isTrusted = allowlist.Contains(manifest.Id);
+            """
+            ),
         new DemoCookbookRecipe(
             "diagnostics-support-route",
             DemoCookbookRecipeCategory.DiagnosticsSupport,
@@ -963,7 +1092,22 @@ public static partial class DemoCookbookCatalog
                 "Runtime diagnostics route: AsterGraphEditorOptions.RuntimeOverlayProvider plus IGraphEditorSession.Queries.GetRuntimeOverlaySnapshot().",
                 "Supported APIs live in `AsterGraph.Editor` runtime overlay/query contracts and ConsumerSample local support-bundle code.",
                 "Demo runtime timeline is a local projection only; it does not add telemetry or remote sync."),
-            "Support bundles are local handoff evidence, not telemetry, remote sync, or support-scope expansion."),
+            "Support bundles are local handoff evidence, not telemetry, remote sync, or support-scope expansion.",
+            CodeSample: """
+            // Configure runtime overlay provider
+            var options = new AsterGraphEditorOptions
+            {
+                RuntimeOverlayProvider = () => new DemoRuntimeOverlay(),
+            };
+
+            // Capture a runtime snapshot
+            var snapshot = host.GetRuntimeOverlaySnapshot();
+
+            // Emit a support bundle
+            var bundle = SupportBundle.Create(snapshot);
+            bundle.WriteToFile("support-bundle.json");
+            """
+            ),
         new DemoCookbookRecipe(
             "review-help-route",
             DemoCookbookRecipeCategory.ReviewHelp,
@@ -1024,7 +1168,19 @@ public static partial class DemoCookbookCatalog
                 "Review/help route: IGraphEditorSession validation feedback and ConsumerSample support-bundle proof.",
                 "Supported seams stay in `AsterGraph.Editor` session validation, repair, and support evidence contracts.",
                 "Demo proof panels are review evidence only; they do not add a workflow engine or macro scheduler."),
-            "Review/help evidence stays bounded to existing validation and support-bundle proof; it is not a new workflow engine."),
+            "Review/help evidence stays bounded to existing validation and support-bundle proof; it is not a new workflow engine.",
+            CodeSample: """
+            // Run validation and collect feedback
+            var feedback = editor.Session.Diagnostics.Validate();
+
+            // Trigger contextual help for selected node
+            var help = editor.Session.Queries.GetContextualHelp(selectedNodeId);
+
+            // Review-loop: export validation report
+            var report = new ValidationReport(feedback);
+            report.Export("validation-report.md");
+            """
+            ),
         new DemoCookbookRecipe(
             "v079-selection-rectangle-route",
             DemoCookbookRecipeCategory.Authoring,
@@ -1117,7 +1273,21 @@ public static partial class DemoCookbookCatalog
                 "v0.79 selection rectangle route: IGraphEditorSession.Queries.GetSelectionRectangleSnapshot(...) and INodeCanvasOverlayHost drag gestures feed the marquee selection surface.",
                 "Supported seams live in `AsterGraph.Editor` query snapshots and `AsterGraph.Avalonia` overlay coordinator controls.",
                 "Demo cookbook references selection evidence only; Demo does not claim another selection model or alternate hit-test path."),
-            "Selection rectangle coverage is limited to existing session query contracts and Avalonia overlay controls; it does not add a spatial index, alternate selection model, or executable sample promise."),
+            "Selection rectangle coverage is limited to existing session query contracts and Avalonia overlay controls; it does not add a spatial index, alternate selection model, or executable sample promise.",
+            CodeSample: """
+            // Get the current selection rectangle snapshot
+            var rect = editor.Session.Queries.GetSelectionRectangleSnapshot();
+
+            // Select all nodes
+            editor.Session.Commands.SelectAll();
+
+            // Invert current selection
+            editor.Session.Commands.InvertSelection();
+
+            // Clear selection
+            editor.Session.Commands.SelectNone();
+            """
+            ),
         new DemoCookbookRecipe(
             "v079-keyboard-navigation-route",
             DemoCookbookRecipeCategory.Authoring,
@@ -1219,7 +1389,23 @@ public static partial class DemoCookbookCatalog
                 "v0.79 keyboard navigation route: NodeCanvas arrow-key handling, command router viewport shortcuts, and Avalonia automation peers.",
                 "Supported seams live in `AsterGraph.Avalonia` canvas controls and `AsterGraph.Editor` command descriptor/shortcut contracts.",
                 "Demo cookbook references keyboard navigation evidence only; Demo does not add a separate input model or accessibility framework."),
-            "Keyboard navigation coverage is limited to existing Avalonia canvas controls and command shortcut contracts; it does not add a custom input framework, full a11y provider suite, or executable sample promise."),
+            "Keyboard navigation coverage is limited to existing Avalonia canvas controls and command shortcut contracts; it does not add a custom input framework, full a11y provider suite, or executable sample promise.",
+            CodeSample: """
+            // Handle arrow-key nudge (10px default, 50px with Shift)
+            editor.Session.Commands.TryMoveSelectionBy(10, 0); // right
+
+            // Zoom in/out via command
+            editor.Session.Commands.ZoomIn();
+            editor.Session.Commands.ZoomOut();
+
+            // Pan viewport
+            editor.Session.Commands.PanBy(100, 0); // right
+
+            // Automation peer for accessibility testing
+            var peer = new NodeCanvasAutomationPeer(canvas);
+            var children = peer.GetChildren();
+            """
+            ),
         new DemoCookbookRecipe(
             "v079-host-event-route",
             DemoCookbookRecipeCategory.ReviewHelp,
@@ -1304,6 +1490,24 @@ public static partial class DemoCookbookCatalog
                 "v0.79 host event route: IGraphEditorEvents subscription surface with BeginMutation/FlushPendingEvents batching for bounded cadence.",
                 "Supported seams live in `AsterGraph.Editor` session event contracts and mutation batching internals.",
                 "Demo cookbook references event lifecycle evidence only; Demo does not add telemetry, remote sync, or a new event broker."),
-            "Host event coverage is bounded to existing session event contracts and mutation batching; it does not add telemetry, remote sync, time-based throttling, or a separate event broker."),
+            "Host event coverage is bounded to existing session event contracts and mutation batching; it does not add telemetry, remote sync, time-based throttling, or a separate event broker.",
+            CodeSample: """
+            // Subscribe to editor events
+            editor.Events.SelectionChanged += (s, e) =>
+                Console.WriteLine($"Selected {e.NodeIds.Count} nodes");
+
+            editor.Events.ViewportChanged += (s, e) =>
+                Console.WriteLine($"Zoom: {e.Zoom}, Pan: {e.Pan}");
+
+            // Batch mutations for bounded event cadence
+            using (editor.Session.BeginMutation())
+            {
+                editor.Session.Commands.AddNode(node);
+                editor.Session.Commands.AddNode(node2);
+                editor.Session.Commands.Connect(output, input);
+            }
+            // Events flushed when mutation scope exits
+            """
+            ),
     ];
 }

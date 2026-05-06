@@ -13,7 +13,8 @@ public sealed record DemoCookbookRecipe(
     IReadOnlyList<string> ProofMarkers,
     DemoCookbookRouteClarity RouteClarity,
     string SupportBoundary,
-    IReadOnlyList<DemoCookbookWorkflowStep>? WorkflowSteps = null)
+    IReadOnlyList<DemoCookbookWorkflowStep>? WorkflowSteps = null,
+    string CodeSample = "")
 {
     public IReadOnlyList<DemoCookbookWorkflowStep> WorkflowSteps { get; } = WorkflowSteps ?? [];
 }

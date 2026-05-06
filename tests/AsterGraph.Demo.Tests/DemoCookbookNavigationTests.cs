@@ -31,6 +31,7 @@ public sealed class DemoCookbookNavigationTests
             viewModel.SelectedCookbookRecipe.SupportBoundary,
             viewModel.SelectedCookbookRecipeSupportBoundary,
             StringComparison.Ordinal);
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.SelectedCookbookRecipeCodeSample));
     }
 
     [Fact]
@@ -147,13 +148,8 @@ public sealed class DemoCookbookNavigationTests
         var navigationGroups = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceNavigationGroups"));
         var contentPanel = Assert.IsType<Border>(window.FindControl<Border>("PART_CookbookWorkspaceRecipeContentPanel"));
         var editorFrame = Assert.IsType<Border>(window.FindControl<Border>("MainEditorFrame"));
-        var graphLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceGraphLines"));
-        var coverageLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceCoverageLines"));
-        var workflowStepLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceWorkflowStepLines"));
-        var proofSupportLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceProofSupportLines"));
         var scenarioCueList = Assert.IsType<ListBox>(window.FindControl<ListBox>("PART_CookbookWorkspaceScenarioCueList"));
-        var detailModeSelector = Assert.IsType<ComboBox>(window.FindControl<ComboBox>("PART_CookbookWorkspaceDetailModeSelector"));
-        var detailLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceDetailLines"));
+        var codeSampleTextBox = Assert.IsType<TextBox>(window.FindControl<TextBox>("PART_CookbookWorkspaceCodeSampleTextBox"));
         var recipeList = Assert.IsType<ListBox>(window.FindControl<ListBox>("PART_CookbookWorkspaceRecipeList"));
         var graphHost = Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost"));
         var graphEditorView = Assert.IsType<GraphEditorView>(graphHost.Content);
@@ -171,34 +167,14 @@ public sealed class DemoCookbookNavigationTests
         Assert.Equal(1, Grid.GetColumn(contentShell));
         Assert.Equal(1, Grid.GetRow(editorFrame));
         Assert.Equal(2, Grid.GetRow(contentPanel));
-        var boundGraphLines = Assert.IsAssignableFrom<System.Collections.IEnumerable>(graphLines.ItemsSource)
-            .Cast<string>()
-            .ToArray();
-        Assert.Equal(viewModel.SelectedCookbookWorkspaceGraphLines, boundGraphLines);
-        var boundCoverageLines = Assert.IsAssignableFrom<System.Collections.IEnumerable>(coverageLines.ItemsSource)
-            .Cast<string>()
-            .ToArray();
-        Assert.Equal(viewModel.SelectedCookbookWorkspaceCoverageLines, boundCoverageLines);
-        var boundWorkflowStepLines = Assert.IsAssignableFrom<System.Collections.IEnumerable>(workflowStepLines.ItemsSource)
-            .Cast<string>()
-            .ToArray();
-        Assert.Equal(viewModel.SelectedCookbookWorkspaceWorkflowStepLines, boundWorkflowStepLines);
-        var boundProofSupportLines = Assert.IsAssignableFrom<System.Collections.IEnumerable>(proofSupportLines.ItemsSource)
-            .Cast<string>()
-            .ToArray();
-        Assert.Equal(viewModel.SelectedCookbookWorkspaceProofSupportLines, boundProofSupportLines);
         Assert.Equal(viewModel.CookbookWorkspace.SelectedRecipe.ScenarioPoints, scenarioCueList.ItemsSource);
         Assert.Equal(viewModel.SelectedCookbookScenarioPoint, scenarioCueList.SelectedItem);
+        Assert.Equal(viewModel.SelectedCookbookRecipeCodeSample, codeSampleTextBox.Text);
+        Assert.True(codeSampleTextBox.IsReadOnly);
         var boundGroups = Assert.IsAssignableFrom<System.Collections.IEnumerable>(navigationGroups.ItemsSource)
             .Cast<DemoCookbookWorkspaceNavigationGroup>()
             .ToArray();
         Assert.Equal(viewModel.CookbookWorkspace.NavigationGroups.Select(group => group.Category), boundGroups.Select(group => group.Category));
-        Assert.Same(viewModel.CookbookDetailModes, detailModeSelector.ItemsSource);
-        Assert.Same(viewModel.SelectedCookbookDetailMode, detailModeSelector.SelectedItem);
-        var boundDetailLines = Assert.IsAssignableFrom<System.Collections.IEnumerable>(detailLines.ItemsSource)
-            .Cast<string>()
-            .ToArray();
-        Assert.Equal(viewModel.SelectedCookbookWorkspaceDetailLines, boundDetailLines);
         Assert.Same(viewModel.FilteredCookbookRecipes, recipeList.ItemsSource);
         Assert.Same(viewModel.SelectedCookbookRecipe, recipeList.SelectedItem);
         Assert.Same(graphEditorView, graphHost.Content);

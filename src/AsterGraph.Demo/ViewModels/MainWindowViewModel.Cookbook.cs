@@ -98,7 +98,6 @@ public partial class MainWindowViewModel
     {
         _cookbookRecipes = DemoCookbookCatalog.Recipes.ToArray();
         RebuildCookbookCategoryFilters(null);
-        RebuildCookbookDetailModes(null);
         SelectedCookbookRecipe = _cookbookRecipes[0];
         LastCookbookNavigationStatus = T("请选择一个 cookbook 配方。", "Select a cookbook recipe.");
         RefreshFilteredCookbookRecipes();
@@ -112,7 +111,6 @@ public partial class MainWindowViewModel
         }
 
         RebuildCookbookCategoryFilters(SelectedCookbookCategoryFilter?.Category);
-        RebuildCookbookDetailModes(SelectedCookbookDetailMode?.Key);
         if (string.IsNullOrWhiteSpace(LastCookbookNavigationStatus)
             || LastCookbookNavigationStatus.StartsWith("请选择", StringComparison.Ordinal)
             || LastCookbookNavigationStatus.StartsWith("Select", StringComparison.Ordinal)
@@ -180,7 +178,6 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(CookbookRecipes));
         OnPropertyChanged(nameof(FilteredCookbookRecipes));
         OnPropertyChanged(nameof(CookbookCategoryFilters));
-        OnPropertyChanged(nameof(CookbookDetailModes));
         OnPropertyChanged(nameof(CookbookWorkspace));
         OnPropertyChanged(nameof(IsCookbookHostGroupSelected));
         OnPropertyChanged(nameof(CookbookSummary));
@@ -191,26 +188,13 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(SelectedCookbookRecipeCodeLines));
         OnPropertyChanged(nameof(SelectedCookbookRecipeProofLines));
         OnPropertyChanged(nameof(SelectedCookbookRecipeSupportBoundary));
+        OnPropertyChanged(nameof(SelectedCookbookRecipeCodeSample));
         OnPropertyChanged(nameof(SelectedCookbookScenarioPoint));
-        OnPropertyChanged(nameof(CookbookGraphDemoSectionTitle));
-        OnPropertyChanged(nameof(CookbookWorkflowSectionTitle));
-        OnPropertyChanged(nameof(CookbookProofSupportSectionTitle));
-        OnPropertyChanged(nameof(CookbookDetailSectionTitle));
-        OnPropertyChanged(nameof(SelectedCookbookWorkspaceGraphLines));
-        OnPropertyChanged(nameof(SelectedCookbookWorkspaceCoverageLines));
-        OnPropertyChanged(nameof(SelectedCookbookWorkspaceWorkflowStepLines));
-        OnPropertyChanged(nameof(SelectedCookbookWorkspaceProofSupportLines));
-        OnPropertyChanged(nameof(SelectedCookbookWorkspaceDetailLines));
     }
 
     private void RefreshCookbookScenarioProjection()
     {
         OnPropertyChanged(nameof(SelectedCookbookScenarioPoint));
-        OnPropertyChanged(nameof(SelectedCookbookWorkspaceGraphLines));
-        OnPropertyChanged(nameof(SelectedCookbookWorkspaceCoverageLines));
-        OnPropertyChanged(nameof(SelectedCookbookWorkspaceWorkflowStepLines));
-        OnPropertyChanged(nameof(SelectedCookbookWorkspaceProofSupportLines));
-        OnPropertyChanged(nameof(SelectedCookbookWorkspaceDetailLines));
     }
 
     private static IEnumerable<string> FormatCookbookAnchors(string prefix, IReadOnlyList<DemoCookbookAnchor> anchors)

@@ -74,7 +74,8 @@ public static class DemoCookbookProof
             && snapshot.SelectedRecipe.DocumentationLinks.Count > 0
             && snapshot.SelectedRecipe.InteractionFacets.Count > 0
             && snapshot.SelectedRecipe.ProofMarkers.Count > 0
-            && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.SupportBoundary));
+            && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.SupportBoundary)
+            && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.CodeSample));
         var routeCoverageOk = workspaceSnapshots.All(snapshot =>
             !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.RouteStatus)
             && !string.IsNullOrWhiteSpace(snapshot.SelectedRecipe.RouteStatusDescription)

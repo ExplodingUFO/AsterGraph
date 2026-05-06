@@ -64,8 +64,6 @@ public sealed class DemoCookbookNavigationPolishTests
 
         var graphHost = Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost"));
         var graphEditorView = Assert.IsType<GraphEditorView>(graphHost.Content);
-        var detailModeSelector = Assert.IsType<ComboBox>(window.FindControl<ComboBox>("PART_CookbookWorkspaceDetailModeSelector"));
-        var activeDetailModeText = Assert.IsType<TextBlock>(window.FindControl<TextBlock>("PART_CookbookWorkspaceActiveDetailModeText"));
         Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceNavigationFeedbackLines"));
         var emptyFeedback = Assert.IsType<Border>(window.FindControl<Border>("PART_CookbookWorkspaceEmptyFilterFeedback"));
 
@@ -77,9 +75,6 @@ public sealed class DemoCookbookNavigationPolishTests
         Dispatcher.UIThread.RunJobs();
 
         Assert.True(emptyFeedback.IsVisible);
-        Assert.Same(viewModel.SelectedCookbookDetailMode, detailModeSelector.SelectedItem);
-        Assert.Equal(viewModel.SelectedCookbookDetailMode.DisplayName, activeDetailModeText.Text);
-        Assert.StartsWith("路径：", viewModel.SelectedCookbookWorkspaceDetailLines[0], StringComparison.Ordinal);
         Assert.Contains(
             viewModel.CookbookLandingLines,
             line => line.Contains("筛选结果", StringComparison.Ordinal)
