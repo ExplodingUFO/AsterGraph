@@ -10,6 +10,7 @@ using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Controls.Internal;
+using AsterGraph.Avalonia.Controls.Internal.Automation;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.ViewModels;
@@ -40,7 +41,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         var bodyVisual = bodyPresenter.Create(context);
         var connectionTargetAnchors = bodyVisual.ConnectionTargetAnchors;
 
-        var border = new Border
+        var border = new GraphNodeBorder
         {
             Width = renderedSize.Width,
             Height = ResolveRenderedNodeHeight(node, renderedSize.Height, hasStatusBar: false),

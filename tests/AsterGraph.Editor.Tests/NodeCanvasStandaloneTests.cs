@@ -327,6 +327,99 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void ArrowKey_Nudge_MovesSelectedNodesWhenNodesAreSelected()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var initialX = editor.Nodes[0].X;
+            var initialY = editor.Nodes[0].Y;
+
+            var rightArgs = new KeyEventArgs
+            {
+                Key = Key.Right,
+                KeyModifiers = KeyModifiers.None,
+            };
+            InvokeCanvasKeyDown(canvas, rightArgs);
+
+            Assert.True(rightArgs.Handled);
+            Assert.Equal(initialX + 10, editor.Nodes[0].X);
+            Assert.Equal(initialY, editor.Nodes[0].Y);
+
+            var shiftDownArgs = new KeyEventArgs
+            {
+                Key = Key.Down,
+                KeyModifiers = KeyModifiers.Shift,
+            };
+            InvokeCanvasKeyDown(canvas, shiftDownArgs);
+
+            Assert.True(shiftDownArgs.Handled);
+            Assert.Equal(initialX + 10, editor.Nodes[0].X);
+            Assert.Equal(initialY + 50, editor.Nodes[0].Y);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void ArrowKey_Navigate_SelectsNearestNodeWhenNoSelection()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            Assert.Null(editor.SelectedNode);
+
+            var leftArgs = new KeyEventArgs
+            {
+                Key = Key.Left,
+                KeyModifiers = KeyModifiers.None,
+            };
+            InvokeCanvasKeyDown(canvas, leftArgs);
+
+            Assert.True(leftArgs.Handled);
+            Assert.NotNull(editor.SelectedNode);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void ArrowKey_WithCtrlModifier_FallsThroughToCommandRouter()
+    {
+        var editor = CreateEditor();
+        editor.UpdateViewportSize(1280, 720);
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var initialPanX = editor.Session.Queries.GetViewportSnapshot().PanX;
+
+            var ctrlRightArgs = new KeyEventArgs
+            {
+                Key = Key.Right,
+                KeyModifiers = KeyModifiers.Control,
+            };
+            InvokeCanvasKeyDown(canvas, ctrlRightArgs);
+
+            Assert.True(ctrlRightArgs.Handled);
+            Assert.NotEqual(initialPanX, editor.Session.Queries.GetViewportSnapshot().PanX);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void ManualPortClick_CanReconnectSameEndpointsAfterDisconnectingConnection()
     {
         var editor = CreateEditor();

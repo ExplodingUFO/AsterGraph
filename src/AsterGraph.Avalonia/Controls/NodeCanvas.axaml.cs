@@ -1,11 +1,13 @@
 using Avalonia;
 using Avalonia.Automation;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls.Internal;
+using AsterGraph.Avalonia.Controls.Internal.Automation;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Menus;
 using AsterGraph.Avalonia.Presentation;
@@ -140,6 +142,10 @@ public partial class NodeCanvas : UserControl
         PointerWheelChanged += HandlePointerWheelChanged;
         AddHandler(InputElement.PointerCaptureLostEvent, HandlePointerCaptureLost);
     }
+
+    /// <inheritdoc />
+    protected override AutomationPeer OnCreateAutomationPeer()
+        => new NodeCanvasAutomationPeer(this);
 
     /// <inheritdoc />
     protected override Size ArrangeOverride(Size finalSize)
@@ -482,6 +488,12 @@ public partial class NodeCanvas : UserControl
 
     private void HandleCanvasKeyDown(object? sender, KeyEventArgs args)
     {
+        if (TryHandleCanvasArrowKey(args))
+        {
+            args.Handled = true;
+            return;
+        }
+
         if (GraphEditorDefaultCommandShortcutRouter.TryHandle(
             ViewModel,
             args.Source,
@@ -491,6 +503,96 @@ public partial class NodeCanvas : UserControl
         {
             args.Handled = true;
         }
+    }
+
+    private bool TryHandleCanvasArrowKey(KeyEventArgs args)
+    {
+        if (args.Key is not (Key.Left or Key.Right or Key.Up or Key.Down))
+        {
+            return false;
+        }
+
+        if (args.KeyModifiers is not (KeyModifiers.None or KeyModifiers.Shift))
+        {
+            return false;
+        }
+
+        var commands = ViewModel?.Session.Commands;
+        if (commands is null)
+        {
+            return false;
+        }
+
+        var selectedNodes = ViewModel?.SelectedNodes;
+        if (selectedNodes is not null && selectedNodes.Count > 0)
+        {
+            var step = args.KeyModifiers.HasFlag(KeyModifiers.Shift) ? 50d : 10d;
+            var (deltaX, deltaY) = args.Key switch
+            {
+                Key.Left => (-step, 0d),
+                Key.Right => (step, 0d),
+                Key.Up => (0d, -step),
+                Key.Down => (0d, step),
+                _ => (0d, 0d),
+            };
+
+            if (deltaX != 0d || deltaY != 0d)
+            {
+                commands.TryMoveSelectionBy(deltaX, deltaY, updateStatus: false);
+                return true;
+            }
+        }
+        else if (ViewModel?.Nodes is { Count: > 0 } allNodes)
+        {
+            var reference = ViewModel.ScreenToWorld(
+                new GraphPoint(Bounds.Width / 2d, Bounds.Height / 2d));
+            var targetNode = FindNearestNodeInDirection(allNodes, reference, args.Key);
+            if (targetNode is not null)
+            {
+                commands.SetSelection([targetNode.Id], targetNode.Id, updateStatus: false);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static NodeViewModel? FindNearestNodeInDirection(
+        IEnumerable<NodeViewModel> nodes,
+        GraphPoint reference,
+        Key direction)
+    {
+        NodeViewModel? best = null;
+        var bestScore = double.MaxValue;
+
+        foreach (var node in nodes)
+        {
+            var dx = node.X - reference.X;
+            var dy = node.Y - reference.Y;
+
+            var inDirection = direction switch
+            {
+                Key.Left => dx < 0,
+                Key.Right => dx > 0,
+                Key.Up => dy < 0,
+                Key.Down => dy > 0,
+                _ => false,
+            };
+
+            if (!inDirection)
+            {
+                continue;
+            }
+
+            var distance = Math.Sqrt(dx * dx + dy * dy);
+            if (distance < bestScore)
+            {
+                bestScore = distance;
+                best = node;
+            }
+        }
+
+        return best;
     }
 
     private void HandleCanvasContextRequested(object? sender, ContextRequestedEventArgs args)

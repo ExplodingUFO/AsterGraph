@@ -284,6 +284,9 @@ internal sealed partial class GraphEditorKernel
         void IGraphEditorKernelCommandRouterHost.PanBy(double deltaX, double deltaY)
             => _owner.PanBy(deltaX, deltaY);
 
+        void IGraphEditorKernelCommandRouterHost.ZoomAt(double factor, GraphPoint screenAnchor)
+            => _owner.ZoomAt(factor, screenAnchor);
+
         void IGraphEditorKernelCommandRouterHost.UpdateViewportSize(double width, double height)
             => _owner.UpdateViewportSize(width, height);
 

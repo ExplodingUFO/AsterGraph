@@ -190,6 +190,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     void PanBy(double deltaX, double deltaY);
 
+    void ZoomAt(double factor, GraphPoint screenAnchor);
+
     void UpdateViewportSize(double width, double height);
 
     void ResetView(bool updateStatus);
@@ -757,6 +759,30 @@ internal sealed class GraphEditorKernelCommandRouter
                 GraphEditorCommandSourceKind.Kernel,
                 true),
             GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.zoom-in",
+                GraphEditorCommandSourceKind.Kernel,
+                hasViewport),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.zoom-out",
+                GraphEditorCommandSourceKind.Kernel,
+                hasViewport),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.pan-left",
+                GraphEditorCommandSourceKind.Kernel,
+                hasViewport),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.pan-right",
+                GraphEditorCommandSourceKind.Kernel,
+                hasViewport),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.pan-up",
+                GraphEditorCommandSourceKind.Kernel,
+                hasViewport),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.pan-down",
+                GraphEditorCommandSourceKind.Kernel,
+                hasViewport),
+            GraphEditorCommandDescriptorCatalog.Create(
                 "viewport.resize",
                 GraphEditorCommandSourceKind.Kernel,
                 true),
@@ -943,6 +969,12 @@ internal sealed class GraphEditorKernelCommandRouter
                 or "viewport.fit-selection"
                 or "viewport.focus-selection"
                 or "viewport.focus-current-scope"
+                or "viewport.zoom-in"
+                or "viewport.zoom-out"
+                or "viewport.pan-left"
+                or "viewport.pan-right"
+                or "viewport.pan-up"
+                or "viewport.pan-down"
                 or "workspace.save"
                 or "workspace.load" => true,
             _ => false,
@@ -1604,6 +1636,30 @@ internal sealed class GraphEditorKernelCommandRouter
                 }
 
                 _host.PanBy(deltaX, deltaY);
+                return true;
+
+            case "viewport.zoom-in":
+                _host.ZoomAt(1.15, new GraphPoint(_host.ViewportWidth / 2d, _host.ViewportHeight / 2d));
+                return true;
+
+            case "viewport.zoom-out":
+                _host.ZoomAt(0.87, new GraphPoint(_host.ViewportWidth / 2d, _host.ViewportHeight / 2d));
+                return true;
+
+            case "viewport.pan-left":
+                _host.PanBy(80d, 0d);
+                return true;
+
+            case "viewport.pan-right":
+                _host.PanBy(-80d, 0d);
+                return true;
+
+            case "viewport.pan-up":
+                _host.PanBy(0d, 80d);
+                return true;
+
+            case "viewport.pan-down":
+                _host.PanBy(0d, -80d);
                 return true;
 
             case "viewport.resize":

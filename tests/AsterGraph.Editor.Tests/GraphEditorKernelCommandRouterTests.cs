@@ -1506,6 +1506,48 @@ public sealed class GraphEditorKernelCommandRouterTests
     }
 
     [Fact]
+    public void GraphEditorKernel_ViewportZoomPanCommands_AreRegisteredWithDescriptorsAndShortcuts()
+    {
+        var kernel = CreateKernel();
+        kernel.UpdateViewportSize(1280, 720);
+
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.True(descriptors.ContainsKey("viewport.zoom-in"));
+        Assert.True(descriptors.ContainsKey("viewport.zoom-out"));
+        Assert.True(descriptors.ContainsKey("viewport.pan-left"));
+        Assert.True(descriptors.ContainsKey("viewport.pan-right"));
+        Assert.True(descriptors.ContainsKey("viewport.pan-up"));
+        Assert.True(descriptors.ContainsKey("viewport.pan-down"));
+
+        Assert.Equal("Ctrl+OemPlus", descriptors["viewport.zoom-in"].DefaultShortcut);
+        Assert.Equal("Ctrl+OemMinus", descriptors["viewport.zoom-out"].DefaultShortcut);
+        Assert.Equal("Ctrl+Left", descriptors["viewport.pan-left"].DefaultShortcut);
+        Assert.Equal("Ctrl+Right", descriptors["viewport.pan-right"].DefaultShortcut);
+        Assert.Equal("Ctrl+Up", descriptors["viewport.pan-up"].DefaultShortcut);
+        Assert.Equal("Ctrl+Down", descriptors["viewport.pan-down"].DefaultShortcut);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_ViewportZoomPanCommands_ExecuteViaCommandInvocation()
+    {
+        var kernel = CreateKernel();
+        kernel.UpdateViewportSize(1280, 720);
+
+        var initialZoom = kernel.GetViewportSnapshot().Zoom;
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("viewport.zoom-in")));
+        var zoomedIn = kernel.GetViewportSnapshot().Zoom;
+        Assert.True(zoomedIn > initialZoom);
+
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("viewport.zoom-out")));
+        Assert.True(kernel.GetViewportSnapshot().Zoom < zoomedIn);
+
+        var initialPanX = kernel.GetViewportSnapshot().PanX;
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("viewport.pan-left")));
+        Assert.True(kernel.GetViewportSnapshot().PanX != initialPanX);
+    }
+
+    [Fact]
     public void GraphEditorKernel_SelectAll_SelectsAllNodesInActiveScope()
     {
         var kernel = CreateKernel();

@@ -119,6 +119,33 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void DefaultChromeMode_ExposesCanvasAndNodeAutomationPeers()
+    {
+        var editor = CreateEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var canvas = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas");
+
+        var canvasPeer = global::Avalonia.Automation.Peers.ControlAutomationPeer.CreatePeerForElement(canvas);
+        Assert.NotNull(canvasPeer);
+        Assert.Equal(global::Avalonia.Automation.Peers.AutomationControlType.Group, canvasPeer.GetAutomationControlType());
+
+        var nodeSurface = canvas.GetVisualDescendants()
+            .OfType<Control>()
+            .FirstOrDefault(control =>
+                control.Focusable
+                && AutomationProperties.GetName(control)?.EndsWith(" node", StringComparison.Ordinal) == true);
+
+        Assert.NotNull(nodeSurface);
+        var nodePeer = global::Avalonia.Automation.Peers.ControlAutomationPeer.CreatePeerForElement(nodeSurface);
+        Assert.NotNull(nodePeer);
+        Assert.Equal(global::Avalonia.Automation.Peers.AutomationControlType.Group, nodePeer.GetAutomationControlType());
+    }
+
+    [AvaloniaFact]
     public void HeaderCommandSurface_UsesSharedDescriptorsForToolbarAndPalette()
     {
         var editor = CreateEditor();
