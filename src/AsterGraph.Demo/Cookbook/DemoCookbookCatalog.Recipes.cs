@@ -897,7 +897,7 @@ public static partial class DemoCookbookCatalog
             "Plugins are trusted in-process extensions; the recipe does not imply sandboxing or untrusted-code isolation."),
         new DemoCookbookRecipe(
             "diagnostics-support-route",
-            DemoCookbookRecipeCategory.DiagnosticsSupport,
+            DemoCookbookRecipeCategory.ReviewHelp,
             "Diagnostics and support route",
             "Capture support-bundle and runtime diagnostics evidence from ConsumerSample and Demo runtime projections.",
             [
