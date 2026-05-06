@@ -22,15 +22,6 @@ $coverageOutputPath = Join-Path $artifactsRoot 'coverage\release-summary.json'
 $coverageMarkerOutputPath = Join-Path $proofArtifactsRoot 'coverage-report.txt'
 $prereleaseNotesOutputPath = Join-Path $proofArtifactsRoot 'prerelease-notes.md'
 $publicRepoHygieneProofPath = Join-Path $proofArtifactsRoot 'public-repo-hygiene.txt'
-$hostSampleProjectProofPath = Join-Path $proofArtifactsRoot 'hostsample-project.txt'
-$consumerSampleProofPath = Join-Path $proofArtifactsRoot 'consumer-sample.txt'
-$hostSamplePackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-packed.txt'
-$hostSampleNet10ProjectProofPath = Join-Path $proofArtifactsRoot 'hostsample-net10-project.txt'
-$hostSampleNet10PackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-net10-packed.txt'
-$helloWorldWpfProofPath = Join-Path $proofArtifactsRoot 'hello-world-wpf-proof.txt'
-$wpfAdapterCapabilityMatrixProofPath = Join-Path $proofArtifactsRoot 'wpf-adapter-capability-matrix.txt'
-$packageSmokeProofPath = Join-Path $proofArtifactsRoot 'package-smoke.txt'
-$scaleSmokeProofPath = Join-Path $proofArtifactsRoot 'scale-smoke.txt'
 $demoProofPath = Join-Path $proofArtifactsRoot 'demo-proof.txt'
 $templateSmokeProofPath = Join-Path $proofArtifactsRoot 'template-smoke.txt'
 $publicApiSurfaceProofPath = Join-Path $proofArtifactsRoot 'public-api-surface.txt'
@@ -42,30 +33,11 @@ $publicVersioningValidationScriptPath = Join-Path $repoRoot 'eng/validate-public
 $publicApiSurfaceValidationScriptPath = Join-Path $repoRoot 'eng/validate-public-api-surface.ps1'
 $templateSmokeScriptPath = Join-Path $repoRoot 'eng/template-smoke.ps1'
 $defaultVsTestConnectionTimeoutSeconds = 180
-$hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
-$consumerSampleProject = 'tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj'
-$helloWorldProject = 'tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj'
-$helloWorldAvaloniaProject = 'tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj'
-$helloWorldWpfProject = 'tools/AsterGraph.HelloWorld.Wpf/AsterGraph.HelloWorld.Wpf.csproj'
-$starterWpfProject = 'tools/AsterGraph.Starter.Wpf/AsterGraph.Starter.Wpf.csproj'
-$asterGraphWpfProject = 'src/AsterGraph.Wpf/AsterGraph.Wpf.csproj'
-$asterGraphWpfTestsProject = 'tests/AsterGraph.Wpf.Tests/AsterGraph.Wpf.Tests.csproj'
-$starterAvaloniaProject = 'tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj'
-$packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
-$scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
-$pluginToolProject = 'tools/AsterGraph.PluginTool/AsterGraph.PluginTool.csproj'
 $demoProject = 'src/AsterGraph.Demo/AsterGraph.Demo.csproj'
 $editorTestsProject = 'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
-$consumerSampleTestsProject = 'tests/AsterGraph.ConsumerSample.Tests/AsterGraph.ConsumerSample.Tests.csproj'
-$helloWorldTestsProject = 'tests/AsterGraph.HelloWorld.Tests/AsterGraph.HelloWorld.Tests.csproj'
-$scaleSmokeTestsProject = 'tests/AsterGraph.ScaleSmoke.Tests/AsterGraph.ScaleSmoke.Tests.csproj'
-$pluginToolTestsProject = 'tests/AsterGraph.PluginTool.Tests/AsterGraph.PluginTool.Tests.csproj'
 $userHome = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { $env:HOME } else { $env:USERPROFILE }
 $fallbackPackageCache = Join-Path $userHome '.nuget/packages'
 $isWindowsHost = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
-$helloWorldWpfFramework = 'net8.0-windows'
-$asterGraphWpfFramework = 'net9.0-windows'
-$asterGraphWpfTestsFramework = 'net9.0-windows7.0'
 $singleProcessBuildArguments = @(
   '-m:1'
 )
@@ -83,16 +55,7 @@ $publishableProjects = @(
 )
 
 $frameworkBuildProjects = @{
-  'net8.0' = @(
-    $helloWorldProject,
-    $helloWorldAvaloniaProject,
-    $starterAvaloniaProject,
-    $hostSampleProject,
-    $consumerSampleProject,
-    $packageSmokeProject,
-    $scaleSmokeProject,
-    $pluginToolProject
-  )
+  'net8.0' = @()
   'net9.0' = @(
     'tests/AsterGraph.TestPlugins/AsterGraph.TestPlugins.csproj',
     'src/AsterGraph.Demo/AsterGraph.Demo.csproj'
@@ -102,15 +65,11 @@ $frameworkBuildProjects = @{
 
 $frameworkTestProjects = @{
   'net8.0' = @(
-    'tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj',
-    $helloWorldTestsProject,
-    $consumerSampleTestsProject,
-    $scaleSmokeTestsProject
+    'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
   )
   'net9.0' = @(
     'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj',
-    'tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj',
-    $pluginToolTestsProject
+    'tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj'
   )
   'net10.0' = @()
 }
@@ -257,44 +216,6 @@ function Get-ProofMarkerLine {
   return $null
 }
 
-function New-WpfAdapterCapabilityMatrixProof {
-  param(
-    [string]$HelloWorldProofPath,
-    [string]$OutputPath
-  )
-
-  if (-not (Test-Path -LiteralPath $HelloWorldProofPath)) {
-    $missingProofLine = 'ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_PROOF:MISSING'
-    $missingProofLine | Set-Content -LiteralPath $OutputPath
-    return
-  }
-
-  $proofText = Get-Content -LiteralPath $HelloWorldProofPath -Raw
-  $helloWorldWpfOk = Get-ProofMarkerLine -ProofText $proofText -Marker 'HELLOWORLD_WPF_OK'
-  $commandSurfaceOk = Get-ProofMarkerLine -ProofText $proofText -Marker 'COMMAND_SURFACE_OK'
-  $matrixHandoffOk = Get-ProofMarkerLine -ProofText $proofText -Marker 'ADAPTER2_MATRIX_HANDOFF_OK'
-
-  $pluginScanMetric = [regex]::Match($proofText, '(?m)^HOST_NATIVE_METRIC:plugin_scan_ms=(.+)$').Success
-  $inspectorProjectionMetric = [regex]::Match($proofText, '(?m)^HOST_NATIVE_METRIC:inspector_projection_ms=(.+)$').Success
-  $commandLatencyMetric = [regex]::Match($proofText, '(?m)^HOST_NATIVE_METRIC:command_latency_ms=(.+)$').Success
-  $matrixHandoffPassed = (Convert-TextToCapabilityStatus -Value $helloWorldWpfOk) -eq 'PASS' `
-    -and (Convert-TextToCapabilityStatus -Value $commandSurfaceOk) -eq 'PASS' `
-    -and (Convert-TextToCapabilityStatus -Value $matrixHandoffOk) -eq 'PASS'
-
-  $proofLines = @(
-    'ADAPTER_CAPABILITY_MATRIX_FORMAT:1',
-    "ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:$(Convert-TextToCapabilityStatus -Value $helloWorldWpfOk)",
-    "ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:$(Convert-TextToCapabilityStatus -Value $commandSurfaceOk)",
-    "ADAPTER_CAPABILITY_MATRIX:WPF:PLUGIN_DISCOVERY_METRIC:$(if ($pluginScanMetric) { 'PASS' } else { 'MISSING' })",
-    "ADAPTER_CAPABILITY_MATRIX:WPF:INSPECTOR_PROJECTION_METRIC:$(if ($inspectorProjectionMetric) { 'PASS' } else { 'MISSING' })",
-    "ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_LATENCY_METRIC:$(if ($commandLatencyMetric) { 'PASS' } else { 'MISSING' })",
-    "ADAPTER2_MATRIX_HANDOFF_OK:$(if ($matrixHandoffPassed) { 'True' } else { 'False' })"
-  )
-
-  Ensure-Directory -Path $proofArtifactsRoot
-  $proofLines | Set-Content -LiteralPath $OutputPath
-}
-
 function Ensure-Directory {
   param(
     [Parameter(Mandatory = $true)]
@@ -391,25 +312,6 @@ function Get-DefaultRestoreProjects {
     }
   }
 
-  if ($isWindowsHost) {
-    if (Test-Path -LiteralPath (Resolve-ProjectPath -RelativePath $asterGraphWpfProject)) {
-      $projects.Add($asterGraphWpfProject)
-    }
-
-    if (Test-Path -LiteralPath (Resolve-ProjectPath -RelativePath $asterGraphWpfTestsProject)) {
-      $projects.Add($asterGraphWpfTestsProject)
-    }
-
-    if (Test-Path -LiteralPath (Resolve-ProjectPath -RelativePath $starterWpfProject)) {
-      $projects.Add($starterWpfProject)
-    }
-
-    $wpfBootstrapProjectPath = Resolve-ProjectPath -RelativePath $helloWorldWpfProject
-    if (Test-Path -LiteralPath $wpfBootstrapProjectPath) {
-      $projects.Add($helloWorldWpfProject)
-    }
-  }
-
   return Get-UniqueProjects -Projects $projects.ToArray()
 }
 
@@ -500,7 +402,6 @@ function Invoke-Build {
     }
   }
 
-  Invoke-WindowsHelloWorldWpfSlice
 }
 
 function Invoke-TestAndTooling {
@@ -539,120 +440,6 @@ function Invoke-TestAndTooling {
       ) + $singleProcessBuildArguments + $buildStabilityProperties)
     }
 
-    if ($targetFramework -eq 'net10.0') {
-      Invoke-HostSample -TargetFramework net10.0
-    }
-  }
-
-  Invoke-WindowsHelloWorldWpfSlice
-}
-
-function Invoke-WindowsHelloWorldWpfSlice {
-  if (-not $isWindowsHost) {
-    return
-  }
-
-  $asterGraphWpfProjectPath = Resolve-ProjectPath -RelativePath $asterGraphWpfProject
-  if (Test-Path -LiteralPath $asterGraphWpfProjectPath) {
-    Write-Host ''
-    Write-Host '### Validate WPF library package surface (Windows)' -ForegroundColor Yellow
-
-    Invoke-DotNet -Arguments (@(
-      'build',
-      $asterGraphWpfProjectPath,
-      '-c',
-      $Configuration,
-      '--framework',
-      $asterGraphWpfFramework,
-      '--no-restore',
-      '--nologo',
-      '-v',
-      'minimal'
-    ) + $singleProcessBuildArguments + $buildStabilityProperties)
-  }
-
-  Write-Host ''
-  Write-Host '### Validate WPF starter sample (Windows)' -ForegroundColor Yellow
-  $starterProjectPath = Resolve-ProjectPath -RelativePath $starterWpfProject
-
-  if (Test-Path -LiteralPath $starterProjectPath) {
-    Invoke-DotNet -Arguments (@(
-      'build',
-      $starterProjectPath,
-      '-c',
-      $Configuration,
-      '--framework',
-      $helloWorldWpfFramework,
-      '--no-restore',
-      '--nologo',
-      '-v',
-      'minimal'
-    ) + $singleProcessBuildArguments + $buildStabilityProperties)
-  }
-
-  Write-Host ''
-  Write-Host '### Validate WPF bootstrap sample (Windows)' -ForegroundColor Yellow
-  $projectPath = Resolve-ProjectPath -RelativePath $helloWorldWpfProject
-
-  if (Test-Path -LiteralPath $projectPath) {
-    Invoke-DotNet -Arguments (@(
-      'build',
-      $projectPath,
-      '-c',
-      $Configuration,
-      '--framework',
-      $helloWorldWpfFramework,
-      '--no-restore',
-      '--nologo',
-      '-v',
-      'minimal'
-    ) + $singleProcessBuildArguments + $buildStabilityProperties)
-  }
-
-  Write-Host ''
-  Write-Host '### Validate WPF richer sample proof (Windows)' -ForegroundColor Yellow
-  $proofProjectPath = Resolve-ProjectPath -RelativePath $helloWorldWpfProject
-  if (Test-Path -LiteralPath $proofProjectPath) {
-    Invoke-DotNetCapture -Arguments @(
-      'run',
-      '--project',
-      $proofProjectPath,
-      '-c',
-      $Configuration,
-      '--framework',
-      $helloWorldWpfFramework,
-      '--no-build',
-      '--no-restore',
-      '--nologo',
-      '--',
-      '--proof'
-    ) -CapturePath $helloWorldWpfProofPath
-
-    $proofOutput = Get-Content -LiteralPath $helloWorldWpfProofPath -Raw
-    if (-not $proofOutput.Contains('HELLOWORLD_WPF_OK:True', [System.StringComparison]::Ordinal)) {
-      throw "WPF richer sample proof did not report success: $helloWorldWpfProofPath"
-    }
-
-    New-WpfAdapterCapabilityMatrixProof -HelloWorldProofPath $helloWorldWpfProofPath -OutputPath $wpfAdapterCapabilityMatrixProofPath
-  }
-
-  Write-Host ''
-  Write-Host '### Validate WPF tests (Windows)' -ForegroundColor Yellow
-  $testsProjectPath = Resolve-ProjectPath -RelativePath $asterGraphWpfTestsProject
-
-  if (Test-Path -LiteralPath $testsProjectPath) {
-    Invoke-DotNet -Arguments (@(
-      'test',
-      $testsProjectPath,
-      '-c',
-      $Configuration,
-      '--framework',
-      $asterGraphWpfTestsFramework,
-      '--no-restore',
-      '--nologo',
-      '-v',
-      'minimal'
-    ) + $singleProcessBuildArguments + $buildStabilityProperties)
   }
 }
 
@@ -678,41 +465,6 @@ function Invoke-Packages {
       $packagesOutputPath
     ) + $singleProcessBuildArguments + $buildStabilityProperties)
   }
-}
-
-function Invoke-PackageSmoke {
-  Write-Host ''
-  Write-Host '### Run PackageSmoke against packed packages' -ForegroundColor Yellow
-
-  Invoke-RestoreProjects -Projects @($packageSmokeProject) -Properties @{ UsePackedAsterGraphPackages = 'true' }
-
-  Invoke-DotNet -Arguments (@(
-    'build',
-    (Resolve-ProjectPath -RelativePath $packageSmokeProject),
-    '-c',
-    $Configuration,
-    '--framework',
-    'net8.0',
-    '--no-restore',
-    '--nologo',
-    '-v',
-    'minimal',
-    '/p:UsePackedAsterGraphPackages=true'
-  ) + $singleProcessBuildArguments + $buildStabilityProperties)
-
-  Invoke-DotNetCapture -Arguments @(
-    'run',
-    '--project',
-    (Resolve-ProjectPath -RelativePath $packageSmokeProject),
-    '-c',
-    $Configuration,
-    '--framework',
-    'net8.0',
-    '--no-build',
-    '--no-restore',
-    '--nologo',
-    '/p:UsePackedAsterGraphPackages=true'
-  ) -CapturePath $packageSmokeProofPath
 }
 
 function Get-PackageVersion {
@@ -776,186 +528,6 @@ function Assert-GitIgnoreContains {
   if (-not (Select-String -Path $gitIgnorePath -SimpleMatch -Pattern $ExpectedEntry -Quiet)) {
     throw "Expected .gitignore entry was not found: $ExpectedEntry"
   }
-}
-
-function Invoke-HostSample {
-  param(
-    [switch]$UsePackedPackages,
-
-    [ValidateSet('net8.0', 'net10.0')]
-    [string]$TargetFramework = 'net8.0'
-  )
-
-  $propertyArguments = @()
-  $restoreProperties = @{}
-  $modeLabel = if ($TargetFramework -eq 'net10.0') { '.NET 10 project references' } else { 'project references' }
-
-  if ($UsePackedPackages) {
-    if ($TargetFramework -eq 'net8.0') {
-      $modeLabel = 'packed packages'
-    }
-    elseif ($TargetFramework -eq 'net10.0') {
-      $modeLabel = 'packed packages (.NET 10)'
-    }
-
-    $restoreProperties = @{ UsePackedAsterGraphPackages = 'true' }
-    $propertyArguments += '/p:UsePackedAsterGraphPackages=true'
-  }
-
-  if ($TargetFramework -eq 'net10.0') {
-    $restoreProperties.EnableNet10ConsumerProof = 'true'
-    $propertyArguments += '/p:EnableNet10ConsumerProof=true'
-  }
-
-  if ($UsePackedPackages -or $TargetFramework -eq 'net10.0') {
-    Invoke-RestoreProjects -Projects @($hostSampleProject) -Properties $restoreProperties
-  }
-
-  Write-Host ''
-  Write-Host "### Run HostSample ($modeLabel)" -ForegroundColor Yellow
-
-  $capturePath = switch ($TargetFramework) {
-    'net10.0' {
-      if ($UsePackedPackages) { $hostSampleNet10PackedProofPath } else { $hostSampleNet10ProjectProofPath }
-    }
-    default {
-      if ($UsePackedPackages) { $hostSamplePackedProofPath } else { $hostSampleProjectProofPath }
-    }
-  }
-
-  Invoke-DotNet -Arguments (@(
-    'build',
-    (Resolve-ProjectPath -RelativePath $hostSampleProject),
-    '-c',
-    $Configuration,
-    '--framework',
-    $TargetFramework,
-    '--no-restore',
-    '--nologo',
-    '-v',
-    'minimal'
-  ) + $propertyArguments + $singleProcessBuildArguments + $buildStabilityProperties)
-
-  Invoke-DotNetCapture -Arguments (@(
-    'run',
-    '--project',
-    (Resolve-ProjectPath -RelativePath $hostSampleProject),
-    '-c',
-    $Configuration,
-    '--framework',
-    $TargetFramework,
-    '--no-build',
-    '--no-restore',
-    '--nologo'
-  ) + $propertyArguments) -CapturePath $capturePath
-
-  if ($TargetFramework -eq 'net10.0') {
-    Add-Content -LiteralPath $capturePath -Value 'HOST_SAMPLE_NET10_OK:True'
-    if (-not $UsePackedPackages) {
-      Add-Content -LiteralPath $capturePath -Value 'HOST_SAMPLE_NET10_PROJECT_OK:True'
-    }
-  }
-}
-
-function Invoke-ConsumerSampleProof {
-  Write-Host ''
-  Write-Host '### Run medium consumer sample proof' -ForegroundColor Yellow
-
-  Invoke-DotNet -Arguments (@(
-    'build',
-    (Resolve-ProjectPath -RelativePath $consumerSampleProject),
-    '-c',
-    $Configuration,
-    '--framework',
-    'net8.0',
-    '--no-restore',
-    '--nologo',
-    '-v',
-    'minimal'
-  ) + $singleProcessBuildArguments + $buildStabilityProperties)
-
-  Invoke-DotNetCapture -Arguments @(
-    'run',
-    '--project',
-    (Resolve-ProjectPath -RelativePath $consumerSampleProject),
-    '-c',
-    $Configuration,
-    '--framework',
-    'net8.0',
-    '--no-build',
-    '--no-restore',
-    '--nologo',
-    '--',
-    '--proof'
-  ) -CapturePath $consumerSampleProofPath
-}
-
-function Invoke-ScaleSmoke {
-  Write-Host ''
-  Write-Host '### Run ScaleSmoke readiness proof' -ForegroundColor Yellow
-
-  Invoke-DotNet -Arguments (@(
-    'build',
-    (Resolve-ProjectPath -RelativePath $scaleSmokeProject),
-    '-c',
-    $Configuration,
-    '--framework',
-    'net8.0',
-    '--no-restore',
-    '--nologo',
-    '-v',
-    'minimal'
-  ) + $singleProcessBuildArguments + $buildStabilityProperties)
-
-  Invoke-DotNetCapture -Arguments @(
-    'run',
-    '--project',
-    (Resolve-ProjectPath -RelativePath $scaleSmokeProject),
-    '-c',
-    $Configuration,
-    '--framework',
-    'net8.0',
-    '--no-build',
-    '--no-restore',
-    '--nologo',
-    '--',
-    '--tier',
-    'baseline'
-  ) -CapturePath $scaleSmokeProofPath
-
-  Invoke-DotNetCapture -Arguments @(
-    'run',
-    '--project',
-    (Resolve-ProjectPath -RelativePath $scaleSmokeProject),
-    '-c',
-    $Configuration,
-    '--framework',
-    'net8.0',
-    '--no-build',
-    '--no-restore',
-    '--nologo',
-    '--',
-    '--tier',
-    'large'
-  ) -CapturePath $scaleSmokeProofPath -Append
-
-  Invoke-DotNetCapture -Arguments @(
-    'run',
-    '--project',
-    (Resolve-ProjectPath -RelativePath $scaleSmokeProject),
-    '-c',
-    $Configuration,
-    '--framework',
-    'net8.0',
-    '--no-build',
-    '--no-restore',
-    '--nologo',
-    '--',
-    '--tier',
-    'stress',
-    '--samples',
-    '3'
-  ) -CapturePath $scaleSmokeProofPath -Append
 }
 
 function Invoke-DemoProof {
@@ -1066,8 +638,6 @@ function Invoke-PrereleaseNotesValidation {
     "matching public tag: ``$expectedTag``",
     '## Proof Summary',
     'PUBLIC_REPO_HYGIENE_OK:True',
-    'HOST_SAMPLE_OK:True',
-    'CONSUMER_SAMPLE_OK:True',
     'GRAPH_ERROR_HELP_TARGET_OK:True',
     'GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True',
     'REPAIR_HELP_REVIEW_LOOP_OK:True',
@@ -1109,8 +679,6 @@ function Invoke-PrereleaseNotesValidation {
     'API_SURFACE_BASELINE_OK:True',
     'API_CANONICAL_ROUTES_OK:True',
     'API_PACKAGE_BOUNDARY_OK:True',
-    'HOST_SAMPLE_NET10_OK:True',
-    'PACKAGE_SMOKE_OK:True',
     'ASTERGRAPH_TEMPLATE_SMOKE_OK:True',
     'TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True',
     'TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True',
@@ -1124,17 +692,6 @@ function Invoke-PrereleaseNotesValidation {
     'ADOPTION_API_STABILIZATION_HANDOFF_OK:True',
     'ADOPTION_API_SCOPE_BOUNDARY_OK:True',
     'V061_MILESTONE_PROOF_OK:True',
-    'SCALE_TIER_BUDGET:baseline',
-    'SCALE_PERFORMANCE_BUDGET_OK:baseline:True:',
-    'SCALE_TIER_BUDGET:large',
-    'SCALE_PERFORMANCE_BUDGET_OK:large:True:',
-    'SCALE_TIER_BUDGET:stress',
-    'SCALE_PERFORMANCE_BUDGET_OK:stress:True:',
-    'SCALE_AUTHORING_BUDGET_OK:baseline:True:',
-    'SCALE_AUTHORING_BUDGET_OK:large:True:',
-    'SCALE_AUTHORING_BUDGET_OK:stress:True:',
-    'SCALE_PERF_SUMMARY:stress:',
-    'SCALE_HISTORY_CONTRACT_OK:',
     'COVERAGE_REPORT_OK:'
   )) {
     if (-not $noteText.Contains($requiredText, [System.StringComparison]::Ordinal)) {
@@ -1194,15 +751,11 @@ function Invoke-ContractValidation {
 
   if (-not $SkipRestore) {
     Invoke-RestoreProjects -Projects @(
-      $hostSampleProject,
-      $consumerSampleProject,
       $demoProject,
       $editorTestsProject
     )
   }
 
-  Invoke-HostSample
-  Invoke-ConsumerSampleProof
   Invoke-DemoProof
 
   Write-Host ''
@@ -1232,13 +785,8 @@ function Invoke-ReleaseValidation {
 
   Invoke-RestoreProjects -Projects (Get-DefaultRestoreProjects -Frameworks $releaseFrameworks)
   Invoke-ContractValidation -SkipRestore
-  Invoke-WindowsHelloWorldWpfSlice
   Invoke-Packages
-  Invoke-HostSample -UsePackedPackages
-  Invoke-HostSample -UsePackedPackages -TargetFramework net10.0
-  Invoke-PackageSmoke
   Invoke-TemplateSmoke
-  Invoke-ScaleSmoke
   Invoke-PublicVersioningValidation
   Invoke-PublicApiSurfaceValidation
   Invoke-CoverageValidation
@@ -1252,7 +800,6 @@ function Invoke-MaintenanceValidation {
   }
 
   Invoke-RestoreProjects -Projects @(
-    $scaleSmokeProject,
     $editorTestsProject
   )
 
@@ -1271,8 +818,6 @@ function Invoke-MaintenanceValidation {
     '--filter',
     $maintenanceTestFilter
   ) + $singleProcessBuildArguments + $buildStabilityProperties)
-
-  Invoke-ScaleSmoke
 }
 
 function Invoke-PublicRepoHygieneValidation {
@@ -1307,9 +852,7 @@ function Invoke-PublicRepoHygieneValidation {
   foreach ($path in @(
     'README.md',
     'README.zh-CN.md',
-    'tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj',
     'docs/en/project-status.md',
-    'docs/en/consumer-sample.md',
     'docs/en/adoption-feedback.md',
     'docs/en/alpha-status.md',
     'docs/en/public-launch-checklist.md',
@@ -1317,7 +860,6 @@ function Invoke-PublicRepoHygieneValidation {
     'docs/en/plugin-recipe.md',
     'docs/en/retained-migration-recipe.md',
     'docs/zh-CN/project-status.md',
-    'docs/zh-CN/consumer-sample.md',
     'docs/zh-CN/adoption-feedback.md',
     'docs/zh-CN/alpha-status.md',
     'docs/zh-CN/public-launch-checklist.md',

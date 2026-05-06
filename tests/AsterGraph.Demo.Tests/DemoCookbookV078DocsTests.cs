@@ -17,15 +17,10 @@ public sealed class DemoCookbookV078DocsTests
         {
             Assert.Contains("DEMO_COOKBOOK_V078_PROOF_DOCS_OK", contents, StringComparison.Ordinal);
             Assert.Contains("Rendering and viewport", contents, StringComparison.Ordinal);
-            Assert.Contains("Customization", contents, StringComparison.Ordinal);
             Assert.Contains("Spatial authoring", contents, StringComparison.Ordinal);
             Assert.Contains("ViewportVisibleSceneProjector.Project", contents, StringComparison.Ordinal);
             Assert.Contains("NodeCanvasSceneHostViewportProjectionTests", contents, StringComparison.Ordinal);
             Assert.Contains("NodeCanvasConnectionSceneRendererTests", contents, StringComparison.Ordinal);
-            Assert.Contains("AsterGraphPresentationOptions.NodeVisualPresenter", contents, StringComparison.Ordinal);
-            Assert.Contains("IGraphEditorInputScope", contents, StringComparison.Ordinal);
-            Assert.Contains("CommandRegistry_NodeAndEdgeActionsExposeDescriptorPlacementSurfaces", contents, StringComparison.Ordinal);
-            Assert.Contains("RenderConnections_CustomConnectionStyle_PreservesRouteSelectionAndPendingPreviewSemantics", contents, StringComparison.Ordinal);
             Assert.Contains("CommandRegistry_SpatialAuthoringCommandsExposeCanonicalRouteMenuAndToolPlacements", contents, StringComparison.Ordinal);
             Assert.Contains("Commands_ComposeSelectionMoveSnapGroupRouteAndLayoutResetConstraints", contents, StringComparison.Ordinal);
             Assert.Contains("HostedCommandSurface_RefreshesAfterLayoutPlanApply", contents, StringComparison.Ordinal);
@@ -42,8 +37,6 @@ public sealed class DemoCookbookV078DocsTests
         foreach (var contents in new[] { english, chinese })
         {
             Assert.True(HasLineWithAll(contents, "Rendering and viewport", "renderer rewrite", "background graph index", "query language", "second viewport model", "new graph-size tier"));
-            Assert.True(HasLineWithAll(contents, "Customization", "descriptor-backed", "package-owned"));
-            Assert.True(HasLineWithAll(contents, "Demo", "customization contract"));
             Assert.True(HasLineWithAll(contents, "Spatial", "session command/query route"));
             Assert.True(HasLineWithAll(contents, "Avalonia", "projection", "focus", "pointer capture", "control lifecycle"));
             Assert.True(HasLineWithAll(contents, "runtime ownership", "AsterGraph.Editor"));

@@ -88,12 +88,6 @@ public sealed class PackageDryRunClosureTests
         Assert.Contains("$packagesOutputPath", packFunction, StringComparison.Ordinal);
         Assert.DoesNotContain("nuget push", packFunction, StringComparison.OrdinalIgnoreCase);
 
-        var wpfSlice = ExtractPowerShellFunction(ciScript, "Invoke-WindowsHelloWorldWpfSlice");
-        Assert.Contains("$asterGraphWpfProject", wpfSlice, StringComparison.Ordinal);
-        Assert.Contains("$helloWorldWpfProject", wpfSlice, StringComparison.Ordinal);
-        Assert.Contains("'build'", wpfSlice, StringComparison.Ordinal);
-        Assert.DoesNotContain("'pack'", wpfSlice, StringComparison.Ordinal);
-
         var releaseLane = ExtractSwitchCase(ciScript, "'release'");
         Assert.Contains("Invoke-ReleaseValidation", releaseLane, StringComparison.Ordinal);
         Assert.DoesNotContain("nuget push", releaseLane, StringComparison.OrdinalIgnoreCase);

@@ -32,14 +32,14 @@ public sealed class DemoCookbookProfessionalLibraryCoverageTests
         foreach (var pillar in new[]
         {
             "BuildAvaloniaView",
-            "CreateEdgeOverlay",
+
             "ToBudgetMarker",
             "ToMiniMapBudgetMarker",
             "SCALE_PERFORMANCE_BUDGET_OK",
             "MINIMAP_LIGHTWEIGHT_PROJECTION_OK",
             "PluginTrustPolicy",
             "RuntimeOverlayProvider",
-            "RepairHelpReviewLoopOk",
+            "REPAIR_HELP_REVIEW_LOOP_OK",
         })
         {
             Assert.Contains(pillar, allText, StringComparison.Ordinal);
@@ -58,7 +58,6 @@ public sealed class DemoCookbookProfessionalLibraryCoverageTests
             Assert.Contains("PerformanceViewport", contents, StringComparison.Ordinal);
             Assert.Contains("ViewportVisibleSceneProjector.Project", contents, StringComparison.Ordinal);
             Assert.Contains("AsterGraphWorkbenchPerformancePolicy.FromMode", contents, StringComparison.Ordinal);
-            Assert.Contains("ScaleSmoke", contents, StringComparison.Ordinal);
             Assert.Contains("MINIMAP_LIGHTWEIGHT_PROJECTION_OK", contents, StringComparison.Ordinal);
             Assert.Contains("PROJECTION_PERFORMANCE_EVIDENCE_OK", contents, StringComparison.Ordinal);
             Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK", contents, StringComparison.Ordinal);

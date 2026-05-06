@@ -6,7 +6,7 @@ using AsterGraph.Core.Serialization;
 using AsterGraph.Editor.Services;
 using Xunit;
 
-namespace AsterGraph.Serialization.Tests;
+namespace AsterGraph.Editor.Tests;
 
 public sealed class SerializationCompatibilityTests
 {

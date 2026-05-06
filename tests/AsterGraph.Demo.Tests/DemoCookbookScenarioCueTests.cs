@@ -15,7 +15,7 @@ public sealed class DemoCookbookScenarioCueTests
     public void MainWindowViewModel_CookbookScenarioSelectionUpdatesState()
     {
         var viewModel = new MainWindowViewModel();
-        var recipe = viewModel.CookbookRecipes.Single(item => item.Id == "authoring-surface-route");
+        var recipe = viewModel.CookbookRecipes.Single(item => item.Id == "v077-authoring-platform-route");
         viewModel.SelectedCookbookRecipe = recipe;
 
         var initialScenario = viewModel.SelectedCookbookScenarioPoint;

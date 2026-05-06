@@ -91,6 +91,11 @@ public static partial class DemoCookbookCatalog
             }
         }
 
+        foreach (var issue in issues)
+        {
+            System.Console.WriteLine($"VALIDATION_ISSUE:{issue}");
+        }
+
         return issues;
     }
 

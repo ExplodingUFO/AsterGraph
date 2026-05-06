@@ -27,9 +27,9 @@ public sealed class DemoCookbookDetailReadabilityTests
         var starterRecipe = viewModel.CookbookRecipes.Single(r => r.Id == "starter-host-route");
         Assert.Contains("AsterGraphHostBuilder", starterRecipe.CodeSample, StringComparison.Ordinal);
 
-        // Authoring surface should mention session commands
-        var authoringRecipe = viewModel.CookbookRecipes.Single(r => r.Id == "authoring-surface-route");
-        Assert.Contains("NodePresentationOptions", authoringRecipe.CodeSample, StringComparison.Ordinal);
+        // Authoring platform should mention session commands
+        var authoringRecipe = viewModel.CookbookRecipes.Single(r => r.Id == "v077-authoring-platform-route");
+        Assert.Contains("GetCommandRegistry", authoringRecipe.CodeSample, StringComparison.Ordinal);
 
         // Selection rectangle should mention selection commands
         var selectionRecipe = viewModel.CookbookRecipes.Single(r => r.Id == "v079-selection-rectangle-route");
@@ -60,7 +60,7 @@ public sealed class DemoCookbookDetailReadabilityTests
     public void CookbookCodeSamples_ReprojectAcrossLanguageSwitch()
     {
         var viewModel = new MainWindowViewModel();
-        var recipe = viewModel.CookbookRecipes.Single(r => r.Id == "authoring-surface-route");
+        var recipe = viewModel.CookbookRecipes.Single(r => r.Id == "v077-authoring-platform-route");
         viewModel.SelectedCookbookRecipe = recipe;
 
         var originalSample = viewModel.SelectedCookbookRecipeCodeSample;
@@ -68,6 +68,6 @@ public sealed class DemoCookbookDetailReadabilityTests
         viewModel.SelectLanguage("en");
 
         Assert.Equal(originalSample, viewModel.SelectedCookbookRecipeCodeSample);
-        Assert.Contains("NodePresentationOptions", viewModel.SelectedCookbookRecipeCodeSample, StringComparison.Ordinal);
+        Assert.Contains("GetCommandRegistry", viewModel.SelectedCookbookRecipeCodeSample, StringComparison.Ordinal);
     }
 }

@@ -11,7 +11,7 @@ public sealed class DemoCookbookWorkspaceProjectionRouteTests
     public void WorkspaceProjection_ProjectsV078ComponentShowcaseLanes()
     {
         var performance = DemoCookbookWorkspaceProjection.Create("performance-viewport-route").SelectedRecipe;
-        var authoring = DemoCookbookWorkspaceProjection.Create("authoring-surface-route").SelectedRecipe;
+        var spatial = DemoCookbookWorkspaceProjection.Create("v078-spatial-authoring-route").SelectedRecipe;
         var v077Workflow = DemoCookbookWorkspaceProjection.Create("v077-authoring-platform-route").SelectedRecipe;
         var performanceGroup = DemoCookbookWorkspaceProjection.Create("performance-viewport-route")
             .NavigationGroups
@@ -24,9 +24,9 @@ public sealed class DemoCookbookWorkspaceProjectionRouteTests
         Assert.Contains(performance.ComponentShowcaseLines, line =>
             line.StartsWith("Spatial code: Layout apply and snap commands -> ", StringComparison.Ordinal)
             && line.Contains("IGraphEditorCommands.cs#TryApplyLayoutRequest", StringComparison.Ordinal));
-        Assert.Contains(authoring.ComponentShowcaseLines, line =>
-            line.StartsWith("Customization code: ", StringComparison.Ordinal)
-            && line.Contains("ConsumerSample", StringComparison.Ordinal));
+        Assert.Contains(spatial.ComponentShowcaseLines, line =>
+            line.StartsWith("Spatial code: ", StringComparison.Ordinal)
+            && line.Contains("IGraphEditorQueries.cs#GetNodeSurfaceSnapshots", StringComparison.Ordinal));
         Assert.Contains(v077Workflow.ComponentShowcaseLines, line =>
             line.StartsWith("Spatial workflow: ", StringComparison.Ordinal)
             && line.Contains("viewport.focus-search-result", StringComparison.Ordinal));

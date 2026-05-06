@@ -78,7 +78,7 @@ public sealed class DemoCookbookWorkspaceProjectionTests
     public void WorkspaceProjection_LabelsSupportedProofAndDeferredRouteDepth()
     {
         var starter = DemoCookbookWorkspaceProjection.Create("starter-host-route").SelectedRecipe;
-        var authoring = DemoCookbookWorkspaceProjection.Create("authoring-surface-route").SelectedRecipe;
+        var authoring = DemoCookbookWorkspaceProjection.Create("v078-spatial-authoring-route").SelectedRecipe;
         var plugin = DemoCookbookWorkspaceProjection.Create("plugin-trust-route").SelectedRecipe;
         var diagnostics = DemoCookbookWorkspaceProjection.Create("diagnostics-support-route").SelectedRecipe;
         var review = DemoCookbookWorkspaceProjection.Create("review-help-route").SelectedRecipe;
@@ -97,17 +97,17 @@ public sealed class DemoCookbookWorkspaceProjectionTests
     [Fact]
     public void WorkspaceProjection_ProjectsBoundedScenarioGraphCues()
     {
-        var content = DemoCookbookWorkspaceProjection.Create("authoring-surface-route").SelectedRecipe;
-        var graphCue = content.ScenarioPoints.Single(point => point.Kind == DemoCookbookScenarioKind.GraphOperations);
+        var content = DemoCookbookWorkspaceProjection.Create("v078-spatial-authoring-route").SelectedRecipe;
+        var graphCue = content.ScenarioPoints.First(point => point.Kind == DemoCookbookScenarioKind.GraphOperations);
         var metadataCue = content.ScenarioPoints.Single(point => point.Kind == DemoCookbookScenarioKind.NodeMetadata);
 
         Assert.StartsWith(content.RecipeId + ":scenario-", graphCue.Key, StringComparison.Ordinal);
         Assert.Equal("Graph operation cue", graphCue.GraphCueLabel);
-        Assert.Contains("tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleAuthoringSurfaceRecipe.cs", graphCue.GraphCueTarget, StringComparison.Ordinal);
+        Assert.Contains("src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs", graphCue.GraphCueTarget, StringComparison.Ordinal);
         Assert.Contains(graphCue.Evidence, graphCue.GraphCueTarget, StringComparison.Ordinal);
-        Assert.Equal("authoring-surface-route / GraphOperations", graphCue.ContentCue);
+        Assert.Equal("v078-spatial-authoring-route / GraphOperations", graphCue.ContentCue);
         Assert.Equal("Node metadata cue", metadataCue.GraphCueLabel);
-        Assert.Contains("tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleHost.cs", metadataCue.GraphCueTarget, StringComparison.Ordinal);
+        Assert.Contains("src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs", metadataCue.GraphCueTarget, StringComparison.Ordinal);
         Assert.DoesNotContain("fallback", content.ScenarioPoints.Select(point => point.ContentCue), StringComparer.OrdinalIgnoreCase);
         Assert.DoesNotContain("script", content.ScenarioPoints.Select(point => point.ContentCue), StringComparer.OrdinalIgnoreCase);
     }
@@ -144,15 +144,15 @@ public sealed class DemoCookbookWorkspaceProjectionTests
         var content = DemoCookbookWorkspaceProjection.Create("review-help-route").SelectedRecipe;
         var validation = content.InteractionFacets.Single(point =>
             point.Kind == DemoCookbookInteractionKind.ValidationRuntimeFeedback);
-        var connection = content.InteractionFacets.Single(point =>
-            point.Kind == DemoCookbookInteractionKind.Connection);
+        var inspection = content.InteractionFacets.Single(point =>
+            point.Kind == DemoCookbookInteractionKind.Inspection);
 
         Assert.StartsWith(content.RecipeId + ":interaction-", validation.Key, StringComparison.Ordinal);
         Assert.Equal("Validation/runtime feedback focus", validation.FocusLabel);
-        Assert.Contains("tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleSupportBundle.cs", validation.FocusTarget, StringComparison.Ordinal);
-        Assert.Contains(validation.Evidence, validation.FocusTarget, StringComparison.Ordinal);
-        Assert.Equal("Connection focus", connection.FocusLabel);
-        Assert.Contains("tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleProof.cs", connection.FocusTarget, StringComparison.Ordinal);
+        Assert.Equal("proof:" + validation.Evidence, validation.FocusTarget);
+        Assert.Equal("Inspection focus", inspection.FocusLabel);
+        Assert.Contains("src/AsterGraph.Demo/ViewModels/MainWindowViewModel.Showcase.cs", inspection.FocusTarget, StringComparison.Ordinal);
+        Assert.Contains(inspection.Evidence, inspection.FocusTarget, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -139,7 +139,6 @@ public sealed class DemoCookbookCatalogTests
         var evidenceText = string.Join(
             Environment.NewLine,
             ReadAllText(repositoryRoot, "src/AsterGraph.Demo"),
-            ReadAllText(repositoryRoot, "tools/AsterGraph.ConsumerSample.Avalonia"),
             ReadAllText(repositoryRoot, "tests"),
             ReadAllText(repositoryRoot, "docs/en"),
             ReadAllText(repositoryRoot, "docs/zh-CN"));

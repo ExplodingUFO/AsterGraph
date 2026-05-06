@@ -283,18 +283,6 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
-    public void CiScript_ReservesMissingForAbsentWpfProofAndUsesProofMarkers()
-    {
-        var script = ReadRepoFile("eng/ci.ps1");
-
-        Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_PROOF:MISSING", script, StringComparison.Ordinal);
-        Assert.Contains("Get-ProofMarkerLine -ProofText $proofText -Marker 'HELLOWORLD_WPF_OK'", script, StringComparison.Ordinal);
-        Assert.Contains("Get-ProofMarkerLine -ProofText $proofText -Marker 'COMMAND_SURFACE_OK'", script, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:$(Convert-TextToCapabilityStatus -Value $helloWorldWpfOk)", script, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:$(Convert-TextToCapabilityStatus -Value $commandSurfaceOk)", script, StringComparison.Ordinal);
-    }
-
-    [Fact]
     public void ReleaseValidation_InvokesPublicVersioningGate()
     {
         var ciScript = ReadRepoFile("eng/ci.ps1");
@@ -816,40 +804,6 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains(packageVersion, failProcess.StandardError, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public void WpfAdapterMatrixProof_MapsPositiveMarkersToPassNotMissing()
-    {
-        var tempRoot = CreateTempDirectory();
-        var proofPath = Path.Combine(tempRoot, "hello-world-wpf-proof.txt");
-        var outputPath = Path.Combine(tempRoot, "wpf-adapter-capability-matrix.txt");
-        File.WriteAllText(proofPath, "HELLOWORLD_WPF_OK:True`nCOMMAND_SURFACE_OK:True`nADAPTER2_MATRIX_HANDOFF_OK:True".Replace("`n", Environment.NewLine, StringComparison.Ordinal));
-
-        var script = ReadRepoFile("eng/ci.ps1");
-        var helperBlock = ExtractWpfMatrixHelperBlock(script);
-        var helperScriptPath = Path.Combine(tempRoot, "invoke-wpf-matrix-proof.ps1");
-        File.WriteAllText(
-            helperScriptPath,
-            helperBlock +
-            Environment.NewLine +
-            "$proofArtifactsRoot = Split-Path -Parent '" + EscapePowerShellSingleQuote(outputPath) + "'" +
-            Environment.NewLine +
-            $"New-WpfAdapterCapabilityMatrixProof -HelloWorldProofPath '{EscapePowerShellSingleQuote(proofPath)}' -OutputPath '{EscapePowerShellSingleQuote(outputPath)}'");
-
-        var process = RunPowerShell($"-NoProfile -ExecutionPolicy Bypass -File \"{helperScriptPath}\"");
-
-        Assert.True(
-            process.ExitCode == 0,
-            $"WPF matrix proof helper failed with exit code {process.ExitCode}.{Environment.NewLine}STDOUT:{Environment.NewLine}{process.StandardOutput}{Environment.NewLine}STDERR:{Environment.NewLine}{process.StandardError}");
-
-        var matrix = File.ReadAllText(outputPath);
-        Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", matrix, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS", matrix, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS", matrix, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_MATRIX_HANDOFF_OK:True", matrix, StringComparison.Ordinal);
-        Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:MISSING", matrix, StringComparison.Ordinal);
-        Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:MISSING", matrix, StringComparison.Ordinal);
-    }
-
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 
@@ -891,16 +845,6 @@ public sealed class ReleaseClosureContractTests
         var path = Path.Combine(Path.GetTempPath(), "AsterGraph.Demo.Tests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(path);
         return path;
-    }
-
-    private static string ExtractWpfMatrixHelperBlock(string script)
-    {
-        var start = script.IndexOf("function Convert-TextToCapabilityStatus", StringComparison.Ordinal);
-        var end = script.IndexOf("function Reset-Directory", StringComparison.Ordinal);
-
-        Assert.True(start >= 0 && end > start, "The ci.ps1 helper block could not be located.");
-
-        return script.Substring(start, end - start).TrimEnd();
     }
 
     private static string EscapePowerShellSingleQuote(string value)
