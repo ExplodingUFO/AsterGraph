@@ -1163,9 +1163,9 @@ public static partial class DemoCookbookCatalog
                     "tests/AsterGraph.Editor.Tests/NodeCanvasStandaloneTests.cs",
                     "CanvasContextRequest_RestoresCanvasFocusForKeyboardRecovery"),
                 new DemoCookbookAnchor(
-                    "Viewport pan command proof",
+                    "Viewport zoom pan command proof",
                     "tests/AsterGraph.Editor.Tests/GraphEditorKernelCommandRouterTests.cs",
-                    "GraphEditorKernel_PanLeft_UpdatesViewportPanX"),
+                    "GraphEditorKernel_ViewportZoomPanCommands_ExecuteViaCommandInvocation"),
             ],
             [
                 new DemoCookbookAnchor(
@@ -1273,7 +1273,7 @@ public static partial class DemoCookbookCatalog
                     "IGraphEditorEvents exposes typed DocumentChanged, SelectionChanged, ViewportChanged, and CommandExecuted events.",
                     "IGraphEditorEvents"),
                 new DemoCookbookScenarioPoint(
-                    DemoCookbookScenarioKind.SupportEvidence,
+                    DemoCookbookScenarioKind.GraphOperations,
                     "Mutation batching provides bounded event cadence without time-based throttling.",
                     "EVENT_BATCHING_CADENCE_OK"),
                 new DemoCookbookScenarioPoint(
