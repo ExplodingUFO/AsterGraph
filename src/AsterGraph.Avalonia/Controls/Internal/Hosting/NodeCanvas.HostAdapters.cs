@@ -215,6 +215,18 @@ public partial class NodeCanvas
         public IReadOnlyList<NodeViewModel> GetNodesInRectangle(GraphPoint firstCorner, GraphPoint secondCorner)
             => _owner.GetVisibleNodesInRectangle(firstCorner, secondCorner);
 
+        public GraphEditorSelectionRectangleSnapshot GetSelectionRectangleSnapshot(GraphPoint firstCorner, GraphPoint secondCorner)
+        {
+            var left = Math.Min(firstCorner.X, secondCorner.X);
+            var top = Math.Min(firstCorner.Y, secondCorner.Y);
+            var width = Math.Abs(secondCorner.X - firstCorner.X);
+            var height = Math.Abs(secondCorner.Y - firstCorner.Y);
+            return _owner.ViewModel?.Session.Queries.GetSelectionRectangleSnapshot(
+                new GraphPoint(left, top),
+                new GraphSize(width, height))
+                ?? new GraphEditorSelectionRectangleSnapshot([], []);
+        }
+
         public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
 
         public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode, string? status = null)

@@ -107,6 +107,7 @@ public sealed class NodeCanvasOverlayCoordinatorTests
         var first = CreateNode("node-001", 10, 20, 180, 160);
         var second = CreateNode("node-002", 240, 120, 180, 160);
         host.HitNodes = [first, second];
+        host.Nodes = [first, second];
         host.InteractionSession.BeginCanvasSelection(new Point(10, 15), KeyModifiers.Control, [first]);
 
         coordinator.UpdateMarqueeSelection(new Point(70, 55), finalize: true);
@@ -120,6 +121,40 @@ public sealed class NodeCanvasOverlayCoordinatorTests
         Assert.Same(second, selection);
         Assert.Same(second, host.LastPrimaryNode);
         Assert.Equal($"Selected {second.Title}.", host.LastStatus);
+    }
+
+    [AvaloniaFact]
+    public void UpdateMarqueeSelection_WithFinalizeTrue_UsesBackendSelectionRectangleQuery()
+    {
+        var host = new TestOverlayHost();
+        var coordinator = new NodeCanvasOverlayCoordinator(host);
+        var first = CreateNode("node-020", 10, 20, 180, 160);
+        var second = CreateNode("node-021", 240, 120, 180, 160);
+        host.HitNodes = [first, second];
+        host.Nodes = [first, second];
+        host.InteractionSession.BeginCanvasSelection(new Point(10, 15), KeyModifiers.None, []);
+
+        coordinator.UpdateMarqueeSelection(new Point(70, 55), finalize: true);
+
+        Assert.Equal(1, host.GetSelectionRectangleSnapshotCalls);
+        Assert.Equal(2, host.LastSelection!.Count);
+        Assert.Equal("Selected 2 nodes.", host.LastStatus);
+    }
+
+    [AvaloniaFact]
+    public void UpdateMarqueeSelection_WithFinalizeFalse_UsesFastFrontendPath()
+    {
+        var host = new TestOverlayHost();
+        var coordinator = new NodeCanvasOverlayCoordinator(host);
+        var first = CreateNode("node-030", 10, 20, 180, 160);
+        host.HitNodes = [first];
+        host.Nodes = [first];
+        host.InteractionSession.BeginCanvasSelection(new Point(10, 15), KeyModifiers.None, []);
+
+        coordinator.UpdateMarqueeSelection(new Point(70, 55), finalize: false);
+
+        Assert.Equal(0, host.GetSelectionRectangleSnapshotCalls);
+        Assert.Single(host.LastSelection!);
     }
 
     [AvaloniaFact]
@@ -203,6 +238,14 @@ public sealed class NodeCanvasOverlayCoordinatorTests
 
         public IReadOnlyList<NodeViewModel> GetNodesInRectangle(GraphPoint firstCorner, GraphPoint secondCorner)
             => HitNodes;
+
+        public int GetSelectionRectangleSnapshotCalls { get; private set; }
+
+        public GraphEditorSelectionRectangleSnapshot GetSelectionRectangleSnapshot(GraphPoint firstCorner, GraphPoint secondCorner)
+        {
+            GetSelectionRectangleSnapshotCalls++;
+            return new(Nodes.Select(n => n.Id).ToList(), []);
+        }
 
         public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode, string? status = null)
         {

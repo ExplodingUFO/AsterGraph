@@ -30,6 +30,9 @@ public interface IGraphEditorQueries
     GraphEditorSelectionTransformSnapshot GetSelectionTransformSnapshot(GraphEditorSelectionTransformQuery? query = null)
         => throw new NotSupportedException();
 
+    GraphEditorSelectionRectangleSnapshot GetSelectionRectangleSnapshot(GraphPoint position, GraphSize size)
+        => throw new NotSupportedException();
+
     GraphEditorSnapGuideSnapshot GetSnapGuideSnapshot(GraphEditorSnapGuideQuery? query = null)
         => throw new NotSupportedException();
 

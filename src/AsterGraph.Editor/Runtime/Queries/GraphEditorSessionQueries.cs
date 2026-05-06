@@ -88,6 +88,16 @@ public sealed partial class GraphEditorSession
             emptyReason);
     }
 
+    public GraphEditorSelectionRectangleSnapshot GetSelectionRectangleSnapshot(GraphPoint position, GraphSize size)
+    {
+        var document = _host.CreateActiveScopeDocumentSnapshot();
+        var query = new GraphEditorSelectionTransformQuery(
+            SelectionRectanglePosition: position,
+            SelectionRectangleSize: size);
+        var (nodeIds, connectionIds) = ProjectSelectionRectangle(document, query);
+        return new GraphEditorSelectionRectangleSnapshot(nodeIds, connectionIds);
+    }
+
     public GraphEditorSnapGuideSnapshot GetSnapGuideSnapshot(GraphEditorSnapGuideQuery? query = null)
     {
         query ??= new GraphEditorSnapGuideQuery();

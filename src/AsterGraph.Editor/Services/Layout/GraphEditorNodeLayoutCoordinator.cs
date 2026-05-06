@@ -190,8 +190,8 @@ internal sealed class GraphEditorNodeLayoutCoordinator
     }
 
     private static bool Intersects(NodeBounds bounds, double left, double top, double right, double bottom)
-        => bounds.X < right
-           && (bounds.X + bounds.Width) > left
-           && bounds.Y < bottom
-           && (bounds.Y + bounds.Height) > top;
+        => bounds.X <= right
+           && (bounds.X + bounds.Width) >= left
+           && bounds.Y <= bottom
+           && (bounds.Y + bounds.Height) >= top;
 }

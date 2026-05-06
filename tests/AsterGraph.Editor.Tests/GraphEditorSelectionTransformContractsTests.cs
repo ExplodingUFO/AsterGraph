@@ -15,6 +15,45 @@ public sealed class GraphEditorSelectionTransformContractsTests
     private static readonly NodeDefinitionId TargetDefinitionId = new("tests.transform.target");
 
     [Fact]
+    public void Queries_GetSelectionRectangleSnapshot_ReturnsNodesAndConnectionsInRectangle()
+    {
+        var session = CreateSession();
+
+        var snapshot = session.Queries.GetSelectionRectangleSnapshot(
+            new GraphPoint(100, 100),
+            new GraphSize(600, 240));
+
+        Assert.Equal(["source-001", "target-001"], snapshot.NodeIds);
+        Assert.Equal(["connection-001"], snapshot.ConnectionIds);
+    }
+
+    [Fact]
+    public void Queries_GetSelectionRectangleSnapshot_WithEmptyRectangle_ReturnsEmptyLists()
+    {
+        var session = CreateSession();
+
+        var snapshot = session.Queries.GetSelectionRectangleSnapshot(
+            new GraphPoint(0, 0),
+            new GraphSize(10, 10));
+
+        Assert.Empty(snapshot.NodeIds);
+        Assert.Empty(snapshot.ConnectionIds);
+    }
+
+    [Fact]
+    public void Queries_GetSelectionRectangleSnapshot_WithPartialOverlap_ReturnsIntersectingNodesOnly()
+    {
+        var session = CreateSession();
+
+        var snapshot = session.Queries.GetSelectionRectangleSnapshot(
+            new GraphPoint(100, 100),
+            new GraphSize(200, 200));
+
+        Assert.Equal(["source-001"], snapshot.NodeIds);
+        Assert.Empty(snapshot.ConnectionIds);
+    }
+
+    [Fact]
     public void Queries_ProjectSelectionTransformBoundsPreviewAndRectangleHits()
     {
         var session = CreateSession();

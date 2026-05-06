@@ -41,6 +41,8 @@ internal interface INodeCanvasOverlayHost
 
     IReadOnlyList<NodeViewModel> GetNodesInRectangle(GraphPoint firstCorner, GraphPoint secondCorner);
 
+    GraphEditorSelectionRectangleSnapshot GetSelectionRectangleSnapshot(GraphPoint firstCorner, GraphPoint secondCorner);
+
     NodeCanvasInteractionSession InteractionSession { get; }
 
     void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode, string? status = null);
@@ -119,7 +121,15 @@ internal sealed class NodeCanvasOverlayCoordinator
 
         var worldStart = _host.ScreenToWorld(new GraphPoint(start.X, start.Y));
         var worldEnd = _host.ScreenToWorld(new GraphPoint(currentScreenPosition.X, currentScreenPosition.Y));
+
         var hitNodes = _host.GetNodesInRectangle(worldStart, worldEnd).ToList();
+        if (finalize)
+        {
+            var snapshot = _host.GetSelectionRectangleSnapshot(worldStart, worldEnd);
+            var nodeIdSet = snapshot.NodeIds.ToHashSet(StringComparer.Ordinal);
+            hitNodes = hitNodes.Where(node => nodeIdSet.Contains(node.Id)).ToList();
+        }
+
         var nodes = ApplySelectionModifiers(hitNodes);
         var primaryNode = nodes.LastOrDefault();
 
