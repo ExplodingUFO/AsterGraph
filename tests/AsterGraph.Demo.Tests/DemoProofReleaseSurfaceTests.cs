@@ -11,19 +11,6 @@ public sealed class DemoProofReleaseSurfaceTests
 {
     private static readonly string[] AdapterMatrixProofMarkerLines =
     [
-        "ADAPTER2_VALIDATION_SCOPE_OK:True",
-        "ADAPTER2_MATRIX_HANDOFF_OK:True",
-        "ADAPTER2_SCOPE_BOUNDARY_OK:True",
-        "ADAPTER2_WPF_SAMPLE_PROOF_OK:True",
-        "ADAPTER2_CANONICAL_ROUTE_OK:True",
-        "ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True",
-        "ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True",
-        "ADAPTER2_RECIPE_ALIGNMENT_OK:True",
-        "ADAPTER2_PROOF_BUDGET_OK:True",
-        "ADAPTER2_VALIDATION_HANDOFF_OK:True",
-        "ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True",
-        "V060_MILESTONE_PROOF_OK:True",
-        "HELLOWORLD_WPF_OK:True",
     ];
 
     private static readonly string[] OfficialCapabilityModules =
@@ -889,7 +876,6 @@ public sealed class DemoProofReleaseSurfaceTests
         var releaseWorkflow = ReadRepoFile(".github/workflows/release.yml");
 
         Assert.Contains("artifacts/proof/demo-proof.txt", ciWorkflow, StringComparison.Ordinal);
-        Assert.Contains("artifacts/proof/consumer-sample.txt", ciWorkflow, StringComparison.Ordinal);
         Assert.Contains("DEMO_OK", ciWorkflow, StringComparison.Ordinal);
         foreach (var markerId in DemoProofContract.PublicSuccessMarkerIds)
         {
@@ -901,7 +887,6 @@ public sealed class DemoProofReleaseSurfaceTests
         }
 
         Assert.Contains("artifacts/proof/demo-proof.txt", releaseWorkflow, StringComparison.Ordinal);
-        Assert.Contains("artifacts/proof/consumer-sample.txt", releaseWorkflow, StringComparison.Ordinal);
         Assert.Contains("DEMO_OK", releaseWorkflow, StringComparison.Ordinal);
         foreach (var markerId in DemoProofContract.PublicSuccessMarkerIds)
         {

@@ -242,20 +242,6 @@ jobs:
             }
           }
 
-          if (Test-Path -LiteralPath 'artifacts/proof/consumer-sample.txt') {
-            foreach ($markerId in @(
-              'CONSUMER_SAMPLE_OK',
-              'GRAPH_ERROR_HELP_TARGET_OK',
-              'GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK',
-              'REPAIR_HELP_REVIEW_LOOP_OK'
-            )) {
-              $consumerSampleLine = Select-String -Path 'artifacts/proof/consumer-sample.txt' -Pattern $markerId | Select-Object -First 1
-              if ($consumerSampleLine) {
-                $summaryLines.Add("- $($consumerSampleLine.Line)")
-              }
-            }
-          }
-
           if (Test-Path -LiteralPath 'artifacts/proof/demo-proof.txt') {
             foreach ($markerId in @(
               'DEMO_OK',
@@ -295,7 +281,10 @@ jobs:
               'V065_MILESTONE_PROOF_OK',
               'API_SURFACE_BASELINE_OK',
               'API_CANONICAL_ROUTES_OK',
-              'API_PACKAGE_BOUNDARY_OK'
+              'API_PACKAGE_BOUNDARY_OK',
+              'GRAPH_ERROR_HELP_TARGET_OK',
+              'GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK',
+              'REPAIR_HELP_REVIEW_LOOP_OK'
             )) {
               $markerLine = Select-String -Path 'artifacts/proof/demo-proof.txt' -Pattern $markerId | Select-Object -First 1
               if ($markerLine) {
@@ -304,38 +293,7 @@ jobs:
             }
           }
 
-          if (Test-Path -LiteralPath 'artifacts/proof/hostsample-net10-packed.txt') {
-            $hostNet10Line = Select-String -Path 'artifacts/proof/hostsample-net10-packed.txt' -Pattern 'HOST_SAMPLE_NET10_OK' | Select-Object -First 1
-            if ($hostNet10Line) {
-              $summaryLines.Add("- $($hostNet10Line.Line)")
-            }
-          }
 
-          if (Test-Path -LiteralPath 'artifacts/proof/package-smoke.txt') {
-            $packageLine = Select-String -Path 'artifacts/proof/package-smoke.txt' -Pattern 'PACKAGE_SMOKE_OK' | Select-Object -First 1
-            if ($packageLine) {
-              $summaryLines.Add("- $($packageLine.Line)")
-            }
-          }
-
-          if (Test-Path -LiteralPath 'artifacts/proof/wpf-adapter-capability-matrix.txt') {
-            foreach ($matrixLine in Select-String -Path 'artifacts/proof/wpf-adapter-capability-matrix.txt' -Pattern 'ADAPTER_CAPABILITY_MATRIX' | Select-Object -ExpandProperty Line) {
-              $summaryLines.Add("- $matrixLine")
-            }
-          }
-
-          if (Test-Path -LiteralPath 'artifacts/proof/hello-world-wpf-proof.txt') {
-            $helloWorldWpfLine = Select-String -Path 'artifacts/proof/hello-world-wpf-proof.txt' -Pattern '^HELLOWORLD_WPF_OK:True$' | Select-Object -First 1
-            if ($helloWorldWpfLine) {
-              $summaryLines.Add("- $($helloWorldWpfLine.Line)")
-            }
-            foreach ($adapter2Marker in @('ADAPTER2_VALIDATION_SCOPE_OK:True', 'ADAPTER2_MATRIX_HANDOFF_OK:True', 'ADAPTER2_SCOPE_BOUNDARY_OK:True', 'ADAPTER2_WPF_SAMPLE_PROOF_OK:True', 'ADAPTER2_CANONICAL_ROUTE_OK:True', 'ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True', 'ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True', 'ADAPTER2_RECIPE_ALIGNMENT_OK:True', 'ADAPTER2_PROOF_BUDGET_OK:True', 'ADAPTER2_VALIDATION_HANDOFF_OK:True', 'ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True', 'V060_MILESTONE_PROOF_OK:True')) {
-              $adapter2Line = Select-String -Path 'artifacts/proof/hello-world-wpf-proof.txt' -Pattern "^$([regex]::Escape($adapter2Marker))$" | Select-Object -First 1
-              if ($adapter2Line) {
-                $summaryLines.Add("- $($adapter2Line.Line)")
-              }
-            }
-          }
 
           if (Test-Path -LiteralPath 'artifacts/proof/scale-smoke.txt') {
             $scaleBudgetLine = Select-String -Path 'artifacts/proof/scale-smoke.txt' -Pattern 'SCALE_PERFORMANCE_BUDGET_OK' | Select-Object -First 1
