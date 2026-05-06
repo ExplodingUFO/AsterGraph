@@ -201,6 +201,7 @@ C:AsterGraph.Editor.Runtime.GraphEditorRuntimeOverlaySnapshot(System.Boolean,Sys
 C:AsterGraph.Editor.Runtime.GraphEditorSceneSnapshot(AsterGraph.Core.Models.GraphDocument,AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot,AsterGraph.Editor.Runtime.GraphEditorViewportSnapshot,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot>,AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot)
 C:AsterGraph.Editor.Runtime.GraphEditorScopeBreadcrumbSnapshot(System.String,System.String)
 C:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot(System.String,System.String,System.Boolean,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorScopeBreadcrumbSnapshot>)
+C:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot(System.Collections.Generic.IReadOnlyList<System.String>,System.Collections.Generic.IReadOnlyList<System.String>)
 C:AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot(System.Collections.Generic.IReadOnlyList<System.String>,System.String)
 C:AsterGraph.Editor.Runtime.GraphEditorSelectionTransformItemSnapshot(System.String,AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize,AsterGraph.Core.Models.GraphPoint)
 C:AsterGraph.Editor.Runtime.GraphEditorSelectionTransformQuery(System.Nullable<AsterGraph.Core.Models.GraphPoint>,System.Nullable<AsterGraph.Core.Models.GraphSize>,System.Nullable<AsterGraph.Core.Models.GraphPoint>,System.Boolean)
@@ -1552,6 +1553,12 @@ M:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.Equals(AsterGraph
 M:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.Equals(System.Object):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.GetHashCode():System.Int32
 M:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.ToString():System.String
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.Deconstruct(out System.Collections.Generic.IReadOnlyList<System.String>&,out System.Collections.Generic.IReadOnlyList<System.String>&):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.Equals(System.Object):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.GetHashCode():System.Int32
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.ToString():System.String
 M:AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot.Deconstruct(out System.Collections.Generic.IReadOnlyList<System.String>&,out System.String&):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot):System.Boolean
@@ -1626,6 +1633,7 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSceneSnapshot():AsterGraph.Edi
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetScopeNavigationSnapshot():AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSelectedNodeConnectionIds():System.Collections.Generic.IReadOnlyList<System.String>
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSelectedNodeParameterSnapshots():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot>
+M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSelectionRectangleSnapshot(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize):AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSelectionSnapshot():AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSelectionTransformSnapshot(AsterGraph.Editor.Runtime.GraphEditorSelectionTransformQuery):AsterGraph.Editor.Runtime.GraphEditorSelectionTransformSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSharedSelectionDefinition():AsterGraph.Abstractions.Definitions.INodeDefinition
@@ -1931,6 +1939,7 @@ M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSceneSnapshot():AsterGraph.Ed
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetScopeNavigationSnapshot():AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSelectedNodeConnectionIds():System.Collections.Generic.IReadOnlyList<System.String>
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSelectedNodeParameterSnapshots():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot>
+M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSelectionRectangleSnapshot(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize):AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSelectionSnapshot():AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSelectionTransformSnapshot(AsterGraph.Editor.Runtime.GraphEditorSelectionTransformQuery):AsterGraph.Editor.Runtime.GraphEditorSelectionTransformSnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSharedSelectionDefinition():AsterGraph.Abstractions.Definitions.INodeDefinition
@@ -3322,6 +3331,8 @@ P:AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot.PrimarySelectedConnecti
 P:AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot.PrimarySelectedNodeId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot.SelectedConnectionIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot.SelectedNodeIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.ConnectionIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.NodeIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorSelectionTransformItemSnapshot.NodeId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorSelectionTransformItemSnapshot.Position:AsterGraph.Core.Models.GraphPoint:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorSelectionTransformItemSnapshot.PreviewPosition:AsterGraph.Core.Models.GraphPoint:get,set
@@ -3956,6 +3967,7 @@ T:class AsterGraph.Editor.Runtime.GraphEditorSceneSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorScopeBreadcrumbSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot
+T:class AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorSelectionTransformItemSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorSelectionTransformQuery
 T:class AsterGraph.Editor.Runtime.GraphEditorSelectionTransformSnapshot
