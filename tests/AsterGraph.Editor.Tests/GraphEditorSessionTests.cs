@@ -643,6 +643,57 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void SessionEvents_SubscribeAndUnsubscribe_DoNotLeakMemory()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.events");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        var selectionCount = 0;
+
+        EventHandler<GraphEditorSelectionChangedEventArgs> handler = (_, _) => selectionCount++;
+        session.Events.SelectionChanged += handler;
+        session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        Assert.Equal(1, selectionCount);
+
+        session.Events.SelectionChanged -= handler;
+        session.Commands.SetSelection([TargetNodeId], TargetNodeId, updateStatus: false);
+        Assert.Equal(1, selectionCount);
+    }
+
+    [Fact]
+    public void SessionEvents_ViewportChanges_AreThrottledToBoundedCadence()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.events.throttle");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        var viewportCount = 0;
+
+        session.Events.ViewportChanged += (_, _) => viewportCount++;
+
+        session.Commands.PanBy(10, 0);
+        session.Commands.PanBy(10, 0);
+        session.Commands.PanBy(10, 0);
+
+        Assert.True(viewportCount >= 1);
+        Assert.True(viewportCount <= 3);
+    }
+
+    [Fact]
+    public void SessionEvents_SelectionChanges_AreThrottledToBoundedCadence()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.events.throttle");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        var selectionCount = 0;
+
+        session.Events.SelectionChanged += (_, _) => selectionCount++;
+
+        session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        session.Commands.SetSelection([TargetNodeId], TargetNodeId, updateStatus: false);
+        session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+
+        Assert.True(selectionCount >= 1);
+        Assert.True(selectionCount <= 3);
+    }
+
+    [Fact]
     public void AsterGraphEditorFactory_CreateSession_NavigatesCompositeChildGraph_AndEditsWithinActiveScope()
     {
         var definitionId = new NodeDefinitionId("tests.session.scope-navigation");

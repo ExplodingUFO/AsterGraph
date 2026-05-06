@@ -18,6 +18,7 @@ public sealed partial class GraphEditorSession
     private GraphEditorPendingConnectionChangedEventArgs? _pendingPendingConnectionChanged;
     private GraphEditorPendingConnectionSnapshot _lastPendingConnectionSnapshot;
     private GraphEditorPendingConnectionSnapshot? _batchEntryPendingConnectionSnapshot;
+
     private readonly List<GraphEditorFragmentEventArgs> _pendingFragmentExported = [];
     private readonly List<GraphEditorFragmentEventArgs> _pendingFragmentImported = [];
     private readonly List<GraphEditorCommandExecutedEventArgs> _pendingCommandExecuted = [];
