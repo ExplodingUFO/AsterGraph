@@ -204,7 +204,6 @@ Runtime feedback 是宿主自管的展示证据。`AsterGraph.Editor` 暴露 ove
 - [Versioning](./docs/zh-CN/versioning.md)
 - [稳定化支持矩阵](./docs/zh-CN/stabilization-support-matrix.md)
 - [Quick Start](./docs/zh-CN/quick-start.md)
-- [Consumer Sample](./docs/zh-CN/consumer-sample.md)
 - [Host Integration](./docs/zh-CN/host-integration.md)
 - [Adapter Capability Matrix](./docs/zh-CN/adapter-capability-matrix.md)
 - [Advanced Editing Guide](./docs/zh-CN/advanced-editing.md)

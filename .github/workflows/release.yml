@@ -132,13 +132,6 @@ jobs:
           $summaryLines.Add('## Prerelease Validation Summary')
           $summaryLines.Add('')
 
-          if (Test-Path -LiteralPath 'artifacts/proof/hostsample-packed.txt') {
-            $hostLine = Select-String -Path 'artifacts/proof/hostsample-packed.txt' -Pattern 'HOST_SAMPLE_OK' | Select-Object -First 1
-            if ($hostLine) {
-              $summaryLines.Add("- $($hostLine.Line)")
-            }
-          }
-
           if (Test-Path -LiteralPath 'artifacts/proof/demo-proof.txt') {
             foreach ($markerId in @(
               'DEMO_OK',
@@ -191,17 +184,6 @@ jobs:
           }
 
 
-
-          if (Test-Path -LiteralPath 'artifacts/proof/scale-smoke.txt') {
-            $scaleBudgetLine = Select-String -Path 'artifacts/proof/scale-smoke.txt' -Pattern 'SCALE_PERFORMANCE_BUDGET_OK' | Select-Object -First 1
-            if ($scaleBudgetLine) {
-              $summaryLines.Add("- $($scaleBudgetLine.Line)")
-            }
-            $scaleLine = Select-String -Path 'artifacts/proof/scale-smoke.txt' -Pattern 'SCALE_HISTORY_CONTRACT_OK' | Select-Object -First 1
-            if ($scaleLine) {
-              $summaryLines.Add("- $($scaleLine.Line)")
-            }
-          }
 
           if (Test-Path -LiteralPath 'artifacts/coverage/release-summary.json') {
             $coverage = Get-Content 'artifacts/coverage/release-summary.json' -Raw | ConvertFrom-Json

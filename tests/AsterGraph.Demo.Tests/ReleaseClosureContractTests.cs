@@ -17,40 +17,15 @@ public sealed class ReleaseClosureContractTests
         Directory.CreateDirectory(proofRoot);
 
         WriteProofFile(proofRoot, "public-repo-hygiene.txt", "PUBLIC_REPO_HYGIENE_OK:True");
-        WriteProofFile(proofRoot, "hostsample-packed.txt", "HOST_SAMPLE_OK:True");
-        WriteProofFile(
-            proofRoot,
-            "consumer-sample.txt",
-            "CONSUMER_SAMPLE_OK:True`nGRAPH_ERROR_HELP_TARGET_OK:True`nGRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True`nREPAIR_HELP_REVIEW_LOOP_OK:True");
         WriteProofFile(proofRoot, "demo-proof.txt", "DEMO_OK:True");
-        WriteProofFile(proofRoot, "hostsample-net10-packed.txt", "HOST_SAMPLE_NET10_OK:True");
-        WriteProofFile(proofRoot, "package-smoke.txt", "PACKAGE_SMOKE_OK:True");
         WriteProofFile(
             proofRoot,
             "template-smoke.txt",
-            "ASTERGRAPH_TEMPLATE_SMOKE_OK:True`nTEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`nTEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True`nTEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True");
+            "ASTERGRAPH_TEMPLATE_SMOKE_OK:True`nTEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True`nTEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True");
         WriteProofFile(
             proofRoot,
             "public-api-surface.txt",
             "PUBLIC_API_SURFACE_OK:3407:net9.0`nPUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia`nPUBLIC_API_GUIDANCE_OK:True`nPUBLIC_API_DIFF_GATE_OK:True`nPUBLIC_API_USAGE_GUIDANCE_OK:True`nPUBLIC_API_STABILITY_SCOPE_OK:True");
-        WriteProofFile(
-            proofRoot,
-            "scale-smoke.txt",
-            "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_AUTHORING_BUDGET_OK:baseline:True:none`nSCALE_EXPORT_BUDGET_OK:baseline:True:none`nEXPORT_PROGRESS_OK:True`nEXPORT_CANCEL_OK:True`nEXPORT_SCOPE_OK:True`nEXPORT_SELECTION_SCOPE_OK:True`nSCALE_HISTORY_CONTRACT_OK:True");
-        WriteProofFile(
-            proofRoot,
-            "hello-world-wpf-proof.txt",
-            "HOSTED_ACCESSIBILITY_BASELINE_OK:True`nHOSTED_ACCESSIBILITY_FOCUS_OK:True`nHOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_OK:True`nADAPTER2_PERFORMANCE_BASELINE_OK:True`nADAPTER2_EXPORT_BREADTH_OK:True`nADAPTER2_PROJECTION_BUDGET_OK:True:none`nADAPTER2_COMMAND_BUDGET_OK:True:none`nADAPTER2_SCENE_BUDGET_OK:True:none`nADAPTER2_VALIDATION_SCOPE_OK:True`nADAPTER2_MATRIX_HANDOFF_OK:True`nADAPTER2_SCOPE_BOUNDARY_OK:True`nADAPTER2_WPF_SAMPLE_PROOF_OK:True`nADAPTER2_CANONICAL_ROUTE_OK:True`nADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`nADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`nADAPTER2_RECIPE_ALIGNMENT_OK:True`nADAPTER2_PROOF_BUDGET_OK:True`nADAPTER2_VALIDATION_HANDOFF_OK:True`nADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True`nV060_MILESTONE_PROOF_OK:True`nHELLOWORLD_WPF_OK:True");
-        WriteProofFile(
-            proofRoot,
-            "wpf-adapter-capability-matrix.txt",
-            string.Join(
-                Environment.NewLine,
-                [
-                    "ADAPTER_CAPABILITY_MATRIX_FORMAT:1",
-                    "ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS",
-                    "ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS",
-                ]));
 
         var packageVersion = GetPackageVersion();
         var publicTag = $"v{packageVersion}";
@@ -90,10 +65,6 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("[Project Status](./docs/en/project-status.md)", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "externally proven", "validation-only", "bounded", "deferred"));
         Assert.True(HasLineWithAll(notes, "Repairability, Help, and Review UX", "validation repair", "support boundary", "release proof"));
-        Assert.True(HasLineWithAll(notes, "repair/help review proof source", "ConsumerSample.Avalonia", "v0.67"));
-        Assert.Contains("GRAPH_ERROR_HELP_TARGET_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("REPAIR_HELP_REVIEW_LOOP_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("RELEASE_READINESS_GATE_OK:True", notes, StringComparison.Ordinal);
@@ -110,37 +81,11 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("API_RELEASE_CANDIDATE_PROOF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_GUIDANCE_HANDOFF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("RELEASE_BOUNDARY_STABILITY_OK:True", notes, StringComparison.Ordinal);
-        Assert.True(HasLineWithAll(notes, "trusted plugin proof", "CONSUMER_SAMPLE_TRUST_OK", "ASTERGRAPH_PLUGIN_VALIDATE_OK", "plugin trust contract"));
         Assert.Contains("[Beta Support Bundle](./docs/en/support-bundle.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adoption Feedback Loop](./docs/en/adoption-feedback.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adopter Triage Checklist](./docs/en/adopter-triage.md)", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
-        Assert.Contains("SCALE_EXPORT_BUDGET_OK:baseline:True:none", notes, StringComparison.Ordinal);
-        Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("HOSTED_ACCESSIBILITY_FOCUS_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK:True:none", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK:True:none", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_VALIDATION_SCOPE_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_MATRIX_HANDOFF_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_SCOPE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_WPF_SAMPLE_PROOF_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_CANONICAL_ROUTE_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_RECIPE_ALIGNMENT_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_PROOF_BUDGET_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_VALIDATION_HANDOFF_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("V060_MILESTONE_PROOF_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("HELLOWORLD_WPF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_TEMPLATE_SMOKE_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_SURFACE_OK:3407:net9.0", notes, StringComparison.Ordinal);
@@ -149,19 +94,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("PUBLIC_API_DIFF_GATE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_USAGE_GUIDANCE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_STABILITY_SCOPE_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("adapter-2 validation only", notes, StringComparison.Ordinal);
-        Assert.Contains("does not widen the public publish/package boundary", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS", notes, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS", notes, StringComparison.Ordinal);
-        Assert.Contains("SCALE_AUTHORING_BUDGET_OK:baseline:True:none", notes, StringComparison.Ordinal);
-        Assert.Contains("SCALE_EXPORT_BUDGET_OK:baseline:True:none", notes, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_PROGRESS_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_CANCEL_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_SCOPE_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_SELECTION_SCOPE_OK:True", notes, StringComparison.Ordinal);
-        Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:MISSING", notes, StringComparison.Ordinal);
-        Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:MISSING", notes, StringComparison.Ordinal);
+
     }
 
     [Fact]
@@ -171,7 +104,6 @@ public sealed class ReleaseClosureContractTests
         var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
         Assert.Contains("frozen support boundary story", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("adapter matrix story", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("`HELLOWORLD_WPF_OK` as adapter-2 validation only", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("historical alpha reference for the current beta support story", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("external capability readiness gate", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(englishChecklist, "externally proven", "validation-only", "bounded", "deferred"));
@@ -182,19 +114,11 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("SUPPORT_BOUNDARY_GATE_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "xlarge", "telemetry-only", "10000-node support", "virtualization"));
-        Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("v0.67 `Repairability, Help, and Review UX` as completed evidence", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
-        Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_PROGRESS_OK:True", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_CANCEL_OK:True", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_SCOPE_OK:True", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_SELECTION_SCOPE_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("artifacts/proof/template-smoke.txt", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("artifacts/proof/public-api-surface.txt", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_TEMPLATE_SMOKE_OK:True", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_SURFACE_OK:...:net9.0", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_GUIDANCE_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_DIFF_GATE_OK:True", englishChecklist, StringComparison.Ordinal);
@@ -204,19 +128,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("PUBLIC_API_GUIDANCE_HANDOFF_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("RELEASE_BOUNDARY_STABILITY_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "public API guidance proof", "template/plugin proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK"));
-        Assert.Contains("[Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("AsterGraph.Starter.Wpf", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("AsterGraph.HelloWorld.Wpf", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("[Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)", englishChecklist, StringComparison.Ordinal);
-        Assert.DoesNotContain("HELLOWORLD_WPF_OK is Avalonia/WPF parity", englishChecklist, StringComparison.Ordinal);
-        Assert.DoesNotContain("HELLOWORLD_WPF_OK is public WPF support", englishChecklist, StringComparison.Ordinal);
 
         Assert.Contains("冻结的 support boundary 叙事", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("adapter matrix 叙事", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("`HELLOWORLD_WPF_OK` 只当成 adapter-2 验证通过", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("历史 alpha 参考，服务于当前 beta support story", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("外部能力就绪闸门", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "已被外部证据证明", "仅验证通过", "受边界约束", "继续延后"));
@@ -227,19 +141,11 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("SUPPORT_BOUNDARY_GATE_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "xlarge", "telemetry-only", "10000 节点支持", "virtualization"));
-        Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("v0.67 `Repairability, Help, and Review UX` 写成完成证据", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));
-        Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_PROGRESS_OK:True", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_CANCEL_OK:True", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_SCOPE_OK:True", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("EXPORT_SELECTION_SCOPE_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("artifacts/proof/template-smoke.txt", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("artifacts/proof/public-api-surface.txt", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_TEMPLATE_SMOKE_OK:True", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_SURFACE_OK:...:net9.0", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_GUIDANCE_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_DIFF_GATE_OK:True", chineseChecklist, StringComparison.Ordinal);
@@ -249,15 +155,6 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("PUBLIC_API_GUIDANCE_HANDOFF_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("RELEASE_BOUNDARY_STABILITY_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "public API guidance proof", "template/plugin proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK"));
-        Assert.Contains("[Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("AsterGraph.Starter.Wpf", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("AsterGraph.HelloWorld.Wpf", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("[Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)", chineseChecklist, StringComparison.Ordinal);
-        Assert.DoesNotContain("HELLOWORLD_WPF_OK 是 Avalonia/WPF parity", chineseChecklist, StringComparison.Ordinal);
-        Assert.DoesNotContain("HELLOWORLD_WPF_OK 是公开 WPF support", chineseChecklist, StringComparison.Ordinal);
     }
 
     [Theory]
@@ -730,12 +627,10 @@ public sealed class ReleaseClosureContractTests
         var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
         var englishStatus = ReadRepoFile("docs/en/project-status.md");
         var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
-        var englishConsumerSample = ReadRepoFile("docs/en/consumer-sample.md");
-        var chineseConsumerSample = ReadRepoFile("docs/zh-CN/consumer-sample.md");
         var englishFeatureCatalog = ReadRepoFile("docs/en/feature-catalog.md");
         var chineseFeatureCatalog = ReadRepoFile("docs/zh-CN/feature-catalog.md");
 
-        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus, englishConsumerSample, chineseConsumerSample, englishFeatureCatalog, chineseFeatureCatalog })
+        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus, englishFeatureCatalog, chineseFeatureCatalog })
         {
             Assert.Contains("INTERACTION_RELIABILITY_HANDOFF_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("INTERACTION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
@@ -747,14 +642,10 @@ public sealed class ReleaseClosureContractTests
 
         Assert.True(HasLineWithAll(englishStatus, "v0.62 interaction reliability handoff proof", "phases 384-386", "existing hosted workbench evidence", "runtime renderer contract"));
         Assert.True(HasLineWithAll(chineseStatus, "v0.62 interaction reliability handoff proof", "phases 384-386", "hosted workbench", "runtime renderer contract"));
-        Assert.True(HasLineWithAll(englishConsumerSample, "v0.62 interaction reliability handoff markers", "live canvas refresh", "interaction feedback", "Demo/Consumer gesture proof"));
-        Assert.True(HasLineWithAll(chineseConsumerSample, "v0.62 interaction reliability handoff marker", "live canvas refresh", "interaction feedback", "Demo/Consumer gesture proof"));
         Assert.True(HasLineWithAll(englishStatus, "v0.63 workbench discoverability handoff proof", "phases 388-390", "hosted workbench evidence", "macro/query system"));
         Assert.True(HasLineWithAll(chineseStatus, "v0.63 workbench discoverability handoff proof", "phases 388-390", "hosted workbench", "macro/query system"));
-        Assert.True(HasLineWithAll(englishConsumerSample, "v0.63 workbench discoverability handoff markers", "layout presets", "unified discovery", "recents/favorites proof"));
-        Assert.True(HasLineWithAll(chineseConsumerSample, "v0.63 workbench discoverability handoff marker", "layout presets", "unified discovery", "recents/favorites proof"));
-        Assert.True(HasLineWithAll(englishStatus, "v0.67 Repairability, Help, and Review UX proof", "completed evidence", "ConsumerSample.Avalonia"));
-        Assert.True(HasLineWithAll(chineseStatus, "v0.67 Repairability, Help, and Review UX proof", "完成证据", "ConsumerSample.Avalonia"));
+        Assert.True(HasLineWithAll(englishStatus, "v0.67 Repairability, Help, and Review UX proof", "completed evidence"));
+        Assert.True(HasLineWithAll(chineseStatus, "v0.67 Repairability, Help, and Review UX proof", "完成证据"));
         Assert.True(HasLineWithAll(englishStatus, "next recommended action", "v0.68 release packaging/readiness", "adopter-evidence review"));
         Assert.True(HasLineWithAll(chineseStatus, "下一步推荐动作", "v0.68 release packaging/readiness", "adopter-evidence review"));
     }

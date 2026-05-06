@@ -204,7 +204,6 @@ Consumer-facing guides:
 - [Versioning](./docs/en/versioning.md)
 - [Quick Start](./docs/en/quick-start.md)
 - [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)
-- [Consumer Sample](./docs/en/consumer-sample.md)
 - [Host Integration](./docs/en/host-integration.md)
 - [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)
 - [Advanced Editing Guide](./docs/en/advanced-editing.md)

@@ -499,124 +499,6 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
-    public void IntakeHandoffDocs_UseOneBoundedIntakeVocabularyAndKeepQuickReferenceSummaryOnly()
-    {
-        var evaluationPath = ReadRepoFile("docs/en/evaluation-path.md");
-        var evaluationPathZh = ReadRepoFile("docs/zh-CN/evaluation-path.md");
-        var consumerSample = ReadRepoFile("docs/en/consumer-sample.md");
-        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
-        var supportBundle = ReadRepoFile("docs/en/support-bundle.md");
-        var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
-        var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
-        var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
-        var adoptionTemplate = ReadRepoFile(".github/ISSUE_TEMPLATE/adoption_feedback.yml");
-        var quickReferenceEn = ExtractSection(
-            consumerSample,
-            "## Trust and proof quick reference",
-            "## Run It");
-        var quickReferenceZh = ExtractSection(
-            consumerSampleZh,
-            "## 信任与证明速查",
-            "## 如何运行");
-        var proofHandoffEn = ExtractSection(
-            consumerSample,
-            "## Proof Handoff",
-            "## When To Use This Sample");
-        var proofHandoffZh = ExtractSection(
-            consumerSampleZh,
-            "## Proof Handoff",
-            "## 什么时候看它");
-        var supportBundleBlock = ExtractIssueTemplateBlock(adoptionTemplate, "support_bundle");
-
-        Assert.Contains("Boundary First", evaluationPath, StringComparison.Ordinal);
-        Assert.Contains("先锁边界", evaluationPathZh, StringComparison.Ordinal);
-        Assert.Contains("defended route", evaluationPath, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("bounded intake record", evaluationPath, StringComparison.OrdinalIgnoreCase);
-        Assert.True(HasLineWithOrderedTerms(evaluationPath, "defended route", "bounded intake record"));
-        Assert.Contains("受防守路线", evaluationPathZh, StringComparison.Ordinal);
-        Assert.Contains("受限 intake 记录", evaluationPathZh, StringComparison.Ordinal);
-        Assert.True(HasLineWithOrderedTerms(evaluationPathZh, "受防守路线", "受限 intake 记录"));
-        Assert.Contains("summary-only", quickReferenceEn, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("summary-only", quickReferenceZh, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Beta Support Bundle", quickReferenceEn, StringComparison.Ordinal);
-        Assert.Contains("Adoption Feedback Loop", quickReferenceEn, StringComparison.Ordinal);
-        Assert.Contains("Beta Support Bundle", quickReferenceZh, StringComparison.Ordinal);
-        Assert.Contains("Adoption Feedback Loop", quickReferenceZh, StringComparison.Ordinal);
-        Assert.True(quickReferenceEn.IndexOf("Beta Support Bundle", StringComparison.Ordinal) < quickReferenceEn.IndexOf("Adoption Feedback Loop", StringComparison.Ordinal));
-        Assert.True(quickReferenceZh.IndexOf("Beta Support Bundle", StringComparison.Ordinal) < quickReferenceZh.IndexOf("Adoption Feedback Loop", StringComparison.Ordinal));
-        Assert.DoesNotContain("Public Launch Checklist", quickReferenceEn, StringComparison.Ordinal);
-        Assert.DoesNotContain("Public Launch Checklist", quickReferenceZh, StringComparison.Ordinal);
-        Assert.Contains("Proof Handoff", proofHandoffEn, StringComparison.Ordinal);
-        Assert.Contains("Proof Handoff", proofHandoffZh, StringComparison.Ordinal);
-        Assert.Contains("--support-bundle", proofHandoffEn, StringComparison.Ordinal);
-        Assert.Contains("--support-bundle", proofHandoffZh, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_PATH:...", proofHandoffEn, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_PATH:...", proofHandoffZh, StringComparison.Ordinal);
-        Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", proofHandoffEn, StringComparison.Ordinal);
-        Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", proofHandoffZh, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK", proofHandoffEn, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK", proofHandoffEn, StringComparison.Ordinal);
-        Assert.Contains("parameterSnapshots", proofHandoffEn, StringComparison.Ordinal);
-        Assert.Contains("failed proof-marker", proofHandoffEn, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK", proofHandoffZh, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK", proofHandoffZh, StringComparison.Ordinal);
-        Assert.Contains("parameterSnapshots", proofHandoffZh, StringComparison.Ordinal);
-        Assert.Contains("失败的 proof-marker", proofHandoffZh, StringComparison.OrdinalIgnoreCase);
-        Assert.True(proofHandoffEn.IndexOf("AsterGraph.ConsumerSample.Avalonia -- --proof", StringComparison.Ordinal) < proofHandoffEn.IndexOf("SUPPORT_BUNDLE_PATH:...", StringComparison.Ordinal));
-        Assert.True(proofHandoffEn.IndexOf("SUPPORT_BUNDLE_PATH:...", StringComparison.Ordinal) < proofHandoffEn.IndexOf("NO_SUPPORT_BUNDLE:route-cannot-produce-one", StringComparison.Ordinal));
-        Assert.True(proofHandoffZh.IndexOf("AsterGraph.ConsumerSample.Avalonia -- --proof", StringComparison.Ordinal) < proofHandoffZh.IndexOf("SUPPORT_BUNDLE_PATH:...", StringComparison.Ordinal));
-        Assert.True(proofHandoffZh.IndexOf("SUPPORT_BUNDLE_PATH:...", StringComparison.Ordinal) < proofHandoffZh.IndexOf("NO_SUPPORT_BUNDLE:route-cannot-produce-one", StringComparison.Ordinal));
-        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK", evaluationPath, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK", evaluationPath, StringComparison.Ordinal);
-        Assert.Contains("parameterSnapshots", evaluationPath, StringComparison.Ordinal);
-        Assert.Contains("failed proof-marker", evaluationPath, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK", evaluationPathZh, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK", evaluationPathZh, StringComparison.Ordinal);
-        Assert.Contains("parameterSnapshots", evaluationPathZh, StringComparison.Ordinal);
-        Assert.Contains("失败的 proof-marker", evaluationPathZh, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("bounded intake record", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("attachment note", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("bounded intake record", supportBundle, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("受限 intake 记录", supportBundleZh, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK", supportBundle, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK", supportBundle, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK", supportBundle, StringComparison.Ordinal);
-        Assert.Contains("parameterSnapshots", supportBundle, StringComparison.Ordinal);
-        Assert.Contains("status", supportBundle, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("owner", supportBundle, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("priority", supportBundle, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("parameterSnapshots", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("status", supportBundleZh, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("owner", supportBundleZh, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("priority", supportBundleZh, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("bounded intake vocabulary", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("受限 intake 词汇", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", adoptionFeedback, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", adoptionFeedback, StringComparison.Ordinal);
-        Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", adoptionFeedback, StringComparison.Ordinal);
-        Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
-        Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
-        Assert.Contains("proof markers", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("proof 标记", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("screenshot reference", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("截图", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("screenshot reference", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("bounded intake record", adoptionTemplate, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("ADOPTER_INTAKE_REFRESH_OK:True", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("ADOPTER_CLAIM_EXPANSION_GATE_OK:True", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_PATH:...", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", adoptionTemplate, StringComparison.Ordinal);
-    }
-
-    [Fact]
     public void IssueTemplates_AndTriageDocs_ShareOneBetaEvidenceContract()
     {
         var packageVersion = GetPackageVersion();
@@ -1289,8 +1171,6 @@ public sealed class DemoProofReleaseSurfaceTests
     {
         var readme = ReadRepoFile("README.md");
         var readmeZh = ReadRepoFile("README.zh-CN.md");
-        var consumerSample = ReadRepoFile("docs/en/consumer-sample.md");
-        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
         var quickStart = ReadRepoFile("docs/en/quick-start.md");
         var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
         var supportBundle = ReadRepoFile("docs/en/support-bundle.md");
@@ -1300,7 +1180,7 @@ public sealed class DemoProofReleaseSurfaceTests
         var launchChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
         var launchChecklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
 
-        foreach (var contents in new[] { readme, readmeZh, consumerSample, consumerSampleZh, quickStart, quickStartZh, supportBundle, supportBundleZh, projectStatus, projectStatusZh, launchChecklist, launchChecklistZh })
+        foreach (var contents in new[] { readme, readmeZh, quickStart, quickStartZh, supportBundle, supportBundleZh, projectStatus, projectStatusZh, launchChecklist, launchChecklistZh })
         {
             Assert.Contains("RUNTIME_DEBUG_PANEL_INTERACTION_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("RUNTIME_LOG_LOCATE_OK:True", contents, StringComparison.Ordinal);

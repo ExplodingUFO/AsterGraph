@@ -127,11 +127,6 @@ $generatedNotes = if (-not [string]::IsNullOrWhiteSpace($GeneratedNotesPath) -an
 
 $proofLines = @()
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'public-repo-hygiene.txt') -Pattern 'PUBLIC_REPO_HYGIENE_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hostsample-packed.txt') -Pattern 'HOST_SAMPLE_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'consumer-sample.txt') -Pattern 'CONSUMER_SAMPLE_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'consumer-sample.txt') -Pattern 'GRAPH_ERROR_HELP_TARGET_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'consumer-sample.txt') -Pattern 'GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'consumer-sample.txt') -Pattern 'REPAIR_HELP_REVIEW_LOOP_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'DEMO_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'COMMAND_SURFACE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'TIERED_NODE_SURFACE_OK'
@@ -170,8 +165,6 @@ $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'de
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'API_SURFACE_BASELINE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'API_CANONICAL_ROUTES_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'API_PACKAGE_BOUNDARY_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hostsample-net10-packed.txt') -Pattern 'HOST_SAMPLE_NET10_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'package-smoke.txt') -Pattern 'PACKAGE_SMOKE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'template-smoke.txt') -Pattern 'ASTERGRAPH_TEMPLATE_SMOKE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'template-smoke.txt') -Pattern 'TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'template-smoke.txt') -Pattern 'TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK'
@@ -182,53 +175,13 @@ $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'pu
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'public-api-surface.txt') -Pattern 'PUBLIC_API_DIFF_GATE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'public-api-surface.txt') -Pattern 'PUBLIC_API_USAGE_GUIDANCE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'public-api-surface.txt') -Pattern 'PUBLIC_API_STABILITY_SCOPE_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_BASELINE_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_FOCUS_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_PERFORMANCE_BASELINE_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_EXPORT_BREADTH_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_PROJECTION_BUDGET_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_COMMAND_BUDGET_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_SCENE_BUDGET_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_VALIDATION_SCOPE_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_MATRIX_HANDOFF_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_SCOPE_BOUNDARY_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_WPF_SAMPLE_PROOF_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_CANONICAL_ROUTE_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_RECIPE_ALIGNMENT_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_PROOF_BUDGET_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_VALIDATION_HANDOFF_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'V060_MILESTONE_PROOF_OK'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HELLOWORLD_WPF_OK'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'wpf-adapter-capability-matrix.txt') -Pattern 'ADAPTER_CAPABILITY_MATRIX'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_TIER_BUDGET'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_EXPORT_BUDGET:'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_PERFORMANCE_BUDGET_OK'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_AUTHORING_BUDGET_OK'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_EXPORT_BUDGET_OK'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_RASTER_EXPORT_STRESS_OK'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'EXPORT_PROGRESS_OK'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'EXPORT_CANCEL_OK'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'EXPORT_SCOPE_OK'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'EXPORT_SELECTION_SCOPE_OK'
-$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_PERF_SUMMARY'
-$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_HISTORY_CONTRACT_OK'
 $proofLines += Get-CoverageMarker -CoverageSummaryJsonPath $CoverageSummaryPath -ProofRootPath $resolvedProofRoot
 $proofLines = $proofLines | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 
 $environmentLines = @(
   '- validation lanes: GitHub-hosted Windows release validation plus GitHub-hosted Linux matrix validation',
-  '- medium host proof: `AsterGraph.ConsumerSample.Avalonia` on the hosted-UI route with host actions, parameter editing, and one trusted plugin',
-  '- trusted plugin proof: pair `CONSUMER_SAMPLE_TRUST_OK` with `ASTERGRAPH_PLUGIN_VALIDATE_OK` and the plugin trust contract before treating a third-party plugin artifact as loadable',
   '- showcase proof: `AsterGraph.Demo --proof` for host-native shell workflows, non-obscuring editing, and graph-surface visual semantics',
-  '- packed consumer proofs: `HostSample`, `.NET 10` packed consumer path, `PackageSmoke`, and generated template/plugin validation',
-  '- API adoption proof: `validate-public-api-surface.ps1` pairs `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, `PUBLIC_API_GUIDANCE_OK`, `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, and `PUBLIC_API_STABILITY_SCOPE_OK:True` near generated template/plugin validation in the release proof story; `API_RELEASE_CANDIDATE_PROOF_OK:True`, `PUBLIC_API_GUIDANCE_HANDOFF_OK:True`, and `RELEASE_BOUNDARY_STABILITY_OK:True` keep release-candidate wording tied to the current package boundary',
-  '- scale proof source: `ScaleSmoke` defended `baseline`/`large` tiers plus `stress` performance/authoring/raster-export gates; `stress` SVG export remains telemetry-only while PNG/JPEG export uses conservative defended redlines'
+  '- API adoption proof: `validate-public-api-surface.ps1` pairs `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, `PUBLIC_API_GUIDANCE_OK`, `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, and `PUBLIC_API_STABILITY_SCOPE_OK:True` near generated template/plugin validation in the release proof story; `API_RELEASE_CANDIDATE_PROOF_OK:True`, `PUBLIC_API_GUIDANCE_HANDOFF_OK:True`, and `RELEASE_BOUNDARY_STABILITY_OK:True` keep release-candidate wording tied to the current package boundary'
 )
 
 $builder = [System.Text.StringBuilder]::new()
@@ -254,9 +207,7 @@ foreach ($line in $proofLines) {
 [void]$builder.AppendLine("- adapter matrix story: [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)")
 [void]$builder.AppendLine("- external capability readiness gate: [Project Status](./docs/en/project-status.md) for externally proven now, validation-only or bounded claims, and deferred until more adopter evidence")
 [void]$builder.AppendLine("- current 0.xx alpha/beta hardening line: `Repairability, Help, and Review UX` means validation repair, contextual help, support-bundle evidence, support boundary, and release proof gates stay aligned before release-candidate, GA, or `1.0` language; `ADOPTION_RECOMMENDATION_CURRENT_OK:True`, `CLAIM_HYGIENE_BOUNDARY_OK:True`, `RELEASE_READINESS_GATE_OK:True`, `SUPPORT_BOUNDARY_GATE_OK:True`, `BETA_CLAIM_ALIGNMENT_OK:True`, `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`, `ADOPTION_API_SCOPE_BOUNDARY_OK:True`, and `V061_MILESTONE_PROOF_OK:True` remain the boundary proof handoff markers; `xlarge` remains telemetry-only, not a 10000-node support or virtualization claim")
-[void]$builder.AppendLine("- repair/help review proof source: `ConsumerSample.Avalonia` carries `GRAPH_ERROR_HELP_TARGET_OK:True`, `GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True`, and `REPAIR_HELP_REVIEW_LOOP_OK:True` as the current v0.67 repairability, contextual help, and review-loop release evidence")
 [void]$builder.AppendLine("- release evidence contract: route, version, proof markers, friction, and support-bundle attachment note")
-[void]$builder.AppendLine("- `HELLOWORLD_WPF_OK` remains adapter-2 validation only and does not widen the public publish/package boundary")
 [void]$builder.AppendLine("- support-bundle attachment note: [Beta Support Bundle](./docs/en/support-bundle.md)")
 [void]$builder.AppendLine("- [Adoption Feedback Loop](./docs/en/adoption-feedback.md)")
 [void]$builder.AppendLine("- [Adopter Triage Checklist](./docs/en/adopter-triage.md)")
@@ -274,7 +225,6 @@ foreach ($line in $environmentLines) {
 [void]$builder.AppendLine("- [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)")
 [void]$builder.AppendLine("- [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)")
 [void]$builder.AppendLine("- [Demo Guide](./docs/en/demo-guide.md)")
-[void]$builder.AppendLine("- [ScaleSmoke Baseline](./docs/en/scale-baseline.md)")
 [void]$builder.AppendLine("- [Public Launch Checklist](./docs/en/public-launch-checklist.md)")
 
 if (-not [string]::IsNullOrWhiteSpace($generatedNotes)) {
