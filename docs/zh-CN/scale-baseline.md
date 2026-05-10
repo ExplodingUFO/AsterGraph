@@ -1,6 +1,6 @@
-# ScaleSmoke 基线
+# 规模基线
 
-`tools/AsterGraph.ScaleSmoke` 是 AsterGraph 对外公开的“大图信心样例”。
+`release validation lane` 是 AsterGraph 对外公开的“大图信心样例”。
 
 它现在有两层用途：
 
@@ -73,7 +73,7 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 | save | 700 ms |
 | reload | 500 ms |
 
-只要任一 defended 指标超过这些数字，`ScaleSmoke` 就会输出 `SCALE_PERFORMANCE_BUDGET_OK:<tier>:False:...`，release gate 会失败。
+只要任一 defended 指标超过这些数字，`Scale Baseline` 就会输出 `SCALE_PERFORMANCE_BUDGET_OK:<tier>:False:...`，release gate 会失败。
 
 ### authoring 红线
 
@@ -83,7 +83,7 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 | `large` | 150 ms | 400 ms | 250 ms | 300 ms | 100 ms | 60 ms | 100 ms |
 | `stress` | 150 ms | 900 ms | 1000 ms | 1200 ms | 100 ms | 200 ms | 350 ms |
 
-`ScaleSmoke` 会为这些 defended 层级输出 `SCALE_AUTHORING_BUDGET:...`、`SCALE_AUTHORING_METRICS:...`、`SCALE_AUTHORING_BUDGET_OK:...` 和 `SCALE_AUTHORING_SUMMARY:...`。
+`Scale Baseline` 会为这些 defended 层级输出 `SCALE_AUTHORING_BUDGET:...`、`SCALE_AUTHORING_METRICS:...`、`SCALE_AUTHORING_BUDGET_OK:...` 和 `SCALE_AUTHORING_SUMMARY:...`。
 
 ### export 红线
 
@@ -93,9 +93,9 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 | `large` | 600 ms | 16000 ms | 12000 ms | 400 ms |
 | `stress` | telemetry | 120000 ms | 100000 ms | 800 ms |
 
-`ScaleSmoke` 会为这些 defended 层级输出 `SCALE_EXPORT_BUDGET:...`、`SCALE_EXPORT_METRICS:...`、`SCALE_EXPORT_BUDGET_OK:...`、`EXPORT_PROGRESS_OK:...`、`EXPORT_CANCEL_OK:...`、`EXPORT_SCOPE_OK:...`、`EXPORT_SELECTION_SCOPE_OK:...` 和 `SCALE_EXPORT_SUMMARY:...`。
+`Scale Baseline` 会为这些 defended 层级输出 `SCALE_EXPORT_BUDGET:...`、`SCALE_EXPORT_METRICS:...`、`SCALE_EXPORT_BUDGET_OK:...`、`EXPORT_PROGRESS_OK:...`、`EXPORT_CANCEL_OK:...`、`EXPORT_SCOPE_OK:...`、`EXPORT_SELECTION_SCOPE_OK:...` 和 `SCALE_EXPORT_SUMMARY:...`。
 
-如果你想把 `ConsumerSample.Avalonia` 的宿主指标和这些 defended `ScaleSmoke` 预算收成同一条可复制路线，就配合 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) 一起看。
+如果你想把 `src/AsterGraph.Demo` 的宿主指标和这些 defended `Scale Baseline` 预算收成同一条可复制路线，就配合 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) 一起看。
 
 ## Stress Raster Export
 
@@ -105,16 +105,16 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 
 ```powershell
 # release lane 使用的防回归 baseline
-dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier baseline
+.\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 
 # release lane 守住的大图预算
-dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier large
+.\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 
 # 带保守 raster 红线的 defended 5000 节点 stress gate
-dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier stress --samples 3
+.\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 
 # telemetry-only 10000 节点探针；不属于 release gate
-dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier xlarge --samples 1
+.\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 ```
 
 ## 怎么看输出

@@ -8,10 +8,10 @@
 
 ## Canonical 生成入口
 
-当前推荐从 `ConsumerSample.Avalonia` 生成 support bundle，因为它是这条 beta 路线里已经防守住的真实宿主 proof。
+当前推荐从 `src/AsterGraph.Demo` 生成 support bundle，因为它是这条 beta 路线里已经防守住的真实宿主 proof。
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle <support-bundle-path> --support-note "what you were trying to validate"
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof --support-note "what you were trying to validate"
 ```
 
 额外会输出这些 proof marker：
@@ -27,13 +27,13 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 可复制的本地证据参考：
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle <support-bundle-path> --support-note "what you were trying to validate"
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof --support-note "what you were trying to validate"
 ```
 
 这个证据包只保留本地证据，仍然绑定在受防守的 hosted route 上，不会扩大 support 边界。把 proof 输出里的 `SUPPORT_BUNDLE_PATH:...` 这一行作为受限 intake 记录里的附件备注；如果某条 route 不能产出 bundle，就记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
 当 `CONSUMER_SAMPLE_PARAMETER_OK` 或 `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` 失败时，把失败的 proof-marker 行和 bundle 的 `parameterSnapshots` 行一起保留，这样同一套证据就能支持 `status`、`owner` 和 `priority` 分类。
 当失败区域是 graph readiness、connection 或 parameter validity 时，保留 `readinessStatus`、`validationSummary` 和 `validationFeedback`；这些字段来自 canonical session validation snapshot。
-如果你在做 screen-reader-ready 的本地评估，就把这份 bundle 和 route ladder 之后 `HostSample` 输出的 `HOST_SAMPLE_AUTOMATION_OK:True`、`HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`、`HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True` 一起放在同一条受限 intake 记录里。
+如果你在做 screen-reader-ready 的本地评估，就把这份 bundle 和 route ladder 之后 `Demo proof` 输出的 `HOST_SAMPLE_AUTOMATION_OK:True`、`HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`、`HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True` 一起放在同一条受限 intake 记录里。
 
 ## 合同字段
 
@@ -134,7 +134,7 @@ export panel proof 仍然是 canonical session route 上的 hosted projection：
 ## 相关文档
 
 - [公开 Beta 评估路径](./evaluation-path.md)
-- [Consumer Sample](./consumer-sample.md)
+- `src/AsterGraph.Demo`
 - [Project Status](./project-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Adoption Feedback Loop](./adoption-feedback.md)

@@ -13,7 +13,7 @@
 | 时间 | 路径 | 什么时候停 |
 | --- | --- | --- |
 | 30 秒 | 运行 `src/AsterGraph.Demo -- --scenario ai-pipeline`，或先看 README 场景图。 | 已经能判断应该选哪条接入路线，并且 proof mode 可以输出 `DEMO_SCENARIO_PRESETS_OK:True`。 |
-| 5 分钟 | 生成 `dotnet new astergraph-avalonia`，运行 starter，再验证 `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`。 | 已经拿到 `FIVE_MINUTE_ONBOARDING_OK:True`、`ONBOARDING_CONFIGURATION_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True`、`EXPERIENCE_SCOPE_BOUNDARY_OK:True`、`AUTHORING_DEPTH_HANDOFF_OK:True`、`AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`、`V058_MILESTONE_PROOF_OK:True`、`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`、`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True`、`VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`、`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True`、`EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`、`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True`、`PROJECTION_PERFORMANCE_EVIDENCE_OK:True`、`LARGE_GRAPH_UX_HANDOFF_OK:True` 和 `V059_MILESTONE_PROOF_OK:True`。 |
+| 5 分钟 | 生成 `dotnet new astergraph-avalonia`，运行 starter，再验证 `src/AsterGraph.Demo -- --proof`。 | 已经拿到 `FIVE_MINUTE_ONBOARDING_OK:True`、`ONBOARDING_CONFIGURATION_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True`、`EXPERIENCE_SCOPE_BOUNDARY_OK:True`、`AUTHORING_DEPTH_HANDOFF_OK:True`、`AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`、`V058_MILESTONE_PROOF_OK:True`、`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`、`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True`、`VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`、`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True`、`EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`、`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True`、`PROJECTION_PERFORMANCE_EVIDENCE_OK:True`、`LARGE_GRAPH_UX_HANDOFF_OK:True` 和 `V059_MILESTONE_PROOF_OK:True`。 |
 | 30 分钟 | 继续按下面的包、路线、参数、插件和 support-bundle 小节走完。 | 已经知道自己的宿主该复制 hosted UI、runtime-only、plugin，还是 retained migration 指引。 |
 
 最快的项目自有入口现在是模板路线：
@@ -28,7 +28,7 @@ dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
 
 | 宿主目标 | 起始包 | 原因 |
 | --- | --- | --- |
-| hosted starter 脚手架 | `AsterGraph.Starter.Avalonia` | 最小端到端 Avalonia 脚手架；cookbook 里的第一个 hosted 跳板 |
+| hosted starter 脚手架 | `templates/astergraph-avalonia` | 最小端到端 Avalonia 脚手架；cookbook 里的第一个 hosted 跳板 |
 | 原生生成宿主 | `dotnet new astergraph-avalonia` | 由你的项目拥有的跨平台 Avalonia 桌面宿主 |
 | 可信插件 starter | `dotnet new astergraph-plugin` | 面向 in-process 可信扩展的最小插件作者项目 |
 | 默认 Avalonia UI 宿主 | `AsterGraph.Avalonia` | 主 UI 入口，包含默认壳层和 view factory |
@@ -36,7 +36,7 @@ dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
 | 契约优先集成 | `AsterGraph.Abstractions` | 稳定的标识符、定义和 provider 契约 |
 
 只有当宿主还需要直接处理 `GraphDocument`、序列化或兼容性 API 时，再额外加 `AsterGraph.Core`。
-把 `AsterGraph.Starter.Avalonia` 当作 starter recipe。保留/复制 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions`，以及 document/catalog/editor/view 的组合流程。替换宿主自己的 top-level window 和它的 title/size，并随着宿主成长逐步替换 sample graph/catalog definitions。复制宿主自管 seam，不复制样例自有展示层。下一步 hosted step 是 `AsterGraph.HelloWorld.Avalonia`。升级到 `AsterGraph.ConsumerSample.Avalonia` 时，继续把 action projection、trust workflow 和选中节点参数读写 seam 放在宿主里。
+把 `templates/astergraph-avalonia` 当作 starter recipe。保留/复制 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions`，以及 document/catalog/editor/view 的组合流程。替换宿主自己的 top-level window 和它的 title/size，并随着宿主成长逐步替换 sample graph/catalog definitions。复制宿主自管 seam，不复制样例自有展示层。下一步 hosted step 是 `src/AsterGraph.Demo`。升级到 `src/AsterGraph.Demo` 时，继续把 action projection、trust workflow 和选中节点参数读写 seam 放在宿主里。
 
 复制这个 starter scaffold：
 
@@ -54,12 +54,12 @@ dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
 
 按每个 bounded source 复制它负责的那一部分：
 
-- 从 `AsterGraph.Starter.Avalonia` 复制：保留 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions` 和 document/catalog/editor/view 的组合流程，然后替换 top-level window、它的 title/size，以及随着宿主成长逐步替换 sample graph/catalog definitions。
-- 从 `AsterGraph.ConsumerSample.Avalonia` 复制：继续把 action projection、trust workflow、选中节点参数读写 seam 和 snippet catalog 插入 seam 放在宿主里，但把样例自有的展示、snippet id 和 proof labels 保持在本地。
+- 从 `templates/astergraph-avalonia` 复制：保留 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions` 和 document/catalog/editor/view 的组合流程，然后替换 top-level window、它的 title/size，以及随着宿主成长逐步替换 sample graph/catalog definitions。
+- 从 `src/AsterGraph.Demo` 复制：继续把 action projection、trust workflow、选中节点参数读写 seam 和 snippet catalog 插入 seam 放在宿主里，但把样例自有的展示、snippet id 和 proof labels 保持在本地。
 - 从 [Host Integration](./host-integration.md) 复制：用 route matrix 和 canonical session/runtime 选择来决定哪一层宿主 surface 负责这条 seam。
 - 从 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 复制：用 definition-driven 的元数据词汇（`defaultValue`、`isAdvanced`、`helpText`、`placeholderText`、`constraints.IsReadOnly`）来完成宿主自管参数与元数据工作。
 
-Consumer Sample 证明 seam 分工；Authoring Inspector Recipe 承载元数据词汇。
+当前 Demo 路线证明 seam 分工；Authoring Inspector Recipe 承载元数据词汇。
 ## 2. 从 NuGet 安装
 
 公开 beta 包已经发到 nuget.org，所以默认的 `dotnet restore` 加 `--prerelease` 就够了。
@@ -82,7 +82,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 如果你想先看第一个 hosted 入口，直接运行：
 
 ```powershell
-dotnet run --project tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj --nologo
+dotnet new astergraph-avalonia -n MyGraphHost
 ```
 
 如果你想生成项目自有的原生 Avalonia 脚手架，运行：
@@ -96,48 +96,48 @@ dotnet run --project MyGraphHost/MyGraphHost.csproj
 如果你只想先看到最小仅运行时路径，直接运行：
 
 ```powershell
-dotnet run --project tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj --nologo
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof
 ```
 
 如果你想先跑最小默认 UI 路线，执行：
 
 ```powershell
-dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj --nologo
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --scenario ai-pipeline
 ```
 
 如果你想先看一个更真实的宿主集成，带宿主动作、选中节点参数读写 seam 和一个可信插件，可以运行：
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo
 ```
 
-Proof handoff 时先跑 `AsterGraph.ConsumerSample.Avalonia -- --proof`；`HostSample` 只作为这条 ladder 之后的 proof harness 使用。
+视觉路线确认后，再运行 `src/AsterGraph.Demo -- --proof` 做 proof handoff。
 
-如果你要评估插件能力，受防守的 hosted trust hop 是 `AsterGraph.ConsumerSample.Avalonia`。先看 [插件信任契约 v1](./plugin-trust-contracts.md) 和 [Plugin 与自定义节点 Recipe](./plugin-recipe.md)，再把这条路线当作已经看完。
+如果你要评估插件能力，受防守的 hosted trust hop 是 `src/AsterGraph.Demo`。先看 [插件信任契约 v1](./plugin-trust-contracts.md) 和 [Plugin 与自定义节点 Recipe](./plugin-recipe.md)，再把这条路线当作已经看完。
 
 如果你在写插件，先生成并验证 starter 插件：
 
 ```powershell
 dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
 dotnet build MyGraphPlugin/MyGraphPlugin.csproj
-dotnet run --project tools/AsterGraph.PluginTool -- validate MyGraphPlugin/bin/Debug/net8.0/MyGraphPlugin.dll
+dotnet build MyGraphPlugin/MyGraphPlugin.csproj
 ```
 
-`Starter.Avalonia` 适合第一个 hosted 入口和最小端到端 Avalonia 脚手架；`HelloWorld` 适合最简单的 runtime-only 第一跑；`HelloWorld.Avalonia` 适合在 starter 之后看的最小默认 UI 第一跑；`ConsumerSample.Avalonia` 适合在跳到 `Demo` 之前先看一个真实宿主；`HostSample` 只适合做推荐路线验证，不是上手入口。
+`templates/astergraph-avalonia` 适合第一个 hosted 入口和最小端到端 Avalonia 脚手架；`src/AsterGraph.Demo -- --proof` 适合 proof-mode 验证；`src/AsterGraph.Demo` 适合看默认 UI，也适合看真实宿主动作、参数、插件和 support 证据。
 
-这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
+这条 hosted route ladder 是 `templates/astergraph-avalonia -> src/AsterGraph.Demo -> src/AsterGraph.Demo -- --proof`。
 
-这个样例自己的 README 是 [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md)。
+当前样例路线是 `src/AsterGraph.Demo`。
 
 ### 五分钟 hosted 路径
 
 当你想复制一个 Avalonia 宿主，而不是直接研究完整 showcase 时，按这条路径走：
 
-1. 安装 `AsterGraph.Avalonia --prerelease`，或者从源码运行 `tools/AsterGraph.Starter.Avalonia`。
+1. 安装 `AsterGraph.Avalonia --prerelease`，或者从源码运行 `templates/astergraph-avalonia`。
 2. 默认够用时，通过 `AsterGraphHostBuilder.Create().UseDocument(document).UseCatalog(catalog).UseDefaultCompatibility().BuildAvaloniaView()` 复制 starter 组合；当每个服务都需要显式接线时，再降到 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions`，以及 document/catalog/editor/view 流程。
 3. 添加第一个自定义节点定义：把 starter 的 sample definition 换成你自己的 `NodeDefinition` id、标题、端口和参数定义。
-4. 运行 `tools/AsterGraph.ConsumerSample.Avalonia`，用 hosted action rail 验证图保存/加载、选中节点参数编辑和可信插件路径。
-5. 运行 `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，期待 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`、`CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`、`GRAPH_SNIPPET_CATALOG_OK:True`、`GRAPH_SNIPPET_INSERT_OK:True`、`FRAGMENT_LIBRARY_SEARCH_OK:True`、`FRAGMENT_LIBRARY_PREVIEW_OK:True`、`FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True`、`FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True`、`FIVE_MINUTE_ONBOARDING_OK:True`、`ONBOARDING_CONFIGURATION_OK:True`、`AUTHORING_FLOW_PROOF_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True`、`AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`、`EXPERIENCE_POLISH_HANDOFF_OK:True`、`FEATURE_ENHANCEMENT_PROOF_OK:True`、`EXPERIENCE_SCOPE_BOUNDARY_OK:True`、`AUTHORING_DEPTH_HANDOFF_OK:True`、`AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`、`V058_MILESTONE_PROOF_OK:True`、`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`、`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True`、`VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`、`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True`、`EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`、`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True`、`PROJECTION_PERFORMANCE_EVIDENCE_OK:True`、`LARGE_GRAPH_UX_HANDOFF_OK:True` 和 `V059_MILESTONE_PROOF_OK:True`。
+4. 运行 `src/AsterGraph.Demo`，用 hosted action rail 验证图保存/加载、选中节点参数编辑和可信插件路径。
+5. 运行 `src/AsterGraph.Demo -- --proof`，期待 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`、`CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`、`GRAPH_SNIPPET_CATALOG_OK:True`、`GRAPH_SNIPPET_INSERT_OK:True`、`FRAGMENT_LIBRARY_SEARCH_OK:True`、`FRAGMENT_LIBRARY_PREVIEW_OK:True`、`FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True`、`FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True`、`FIVE_MINUTE_ONBOARDING_OK:True`、`ONBOARDING_CONFIGURATION_OK:True`、`AUTHORING_FLOW_PROOF_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True`、`AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`、`EXPERIENCE_POLISH_HANDOFF_OK:True`、`FEATURE_ENHANCEMENT_PROOF_OK:True`、`EXPERIENCE_SCOPE_BOUNDARY_OK:True`、`AUTHORING_DEPTH_HANDOFF_OK:True`、`AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`、`V058_MILESTONE_PROOF_OK:True`、`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`、`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True`、`VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`、`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True`、`EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`、`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True`、`PROJECTION_PERFORMANCE_EVIDENCE_OK:True`、`LARGE_GRAPH_UX_HANDOFF_OK:True` 和 `V059_MILESTONE_PROOF_OK:True`。
 
 Runtime feedback proof 仍然是宿主自管：ConsumerSample 应继续保持 `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`、`RUNTIME_LOG_LOCATE_OK:True` 和 `RUNTIME_LOG_EXPORT_OK:True`；Demo 应继续保持 `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`、`AI_PIPELINE_PAYLOAD_PREVIEW_OK:True` 和 `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True`。这些都不是 execution-engine、workflow scripting UI、marketplace、sandbox、WPF parity 或 GA 声明。
 
@@ -146,11 +146,11 @@ Command palette proof 继续走同一条 shared command/session route：期待 `
 Workbench discoverability proof 把 v0.63 收口在 hosted layout/discovery/recents-favorites evidence 上：期待 `WORKBENCH_DISCOVERABILITY_HANDOFF_OK:True`、`WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:True` 和 `V063_MILESTONE_PROOF_OK:True`，不新增 runtime route、macro/query system、remote sync、marketplace state、WPF parity 或 GA claim。
 Navigation proof 继续作为宿主自管层叠在已有 selection、scope 和 viewport command 上：期待 `NAVIGATION_HISTORY_OK:True`、`SCOPE_BREADCRUMB_NAVIGATION_OK:True`、`FOCUS_RESTORE_OK:True`、`NAVIGATION_PRODUCTIVITY_PROOF_OK:True`、`NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True` 和 `NAVIGATION_SCOPE_BOUNDARY_OK:True`，不新增 runtime navigation API。
 
-release lane 的 template smoke 会验证 `astergraph-avalonia` 和 `astergraph-plugin` 能生成可 build 的 `net8.0` 项目，并且生成的插件能通过 `AsterGraph.PluginTool validate`。
+release lane 的 template smoke 会验证 `astergraph-avalonia` 和 `astergraph-plugin` 能生成可 build 的 `net8.0` 项目，并且生成的插件能通过 `generated plugin build validation`。
 
-cross-platform packaging proof 保留在 CI 中，不放进复制出来的宿主：Windows 验证 `net8.0`、`net9.0` 和 `net10.0`；Linux 和 macOS 跑 all-framework lane；release validation 会 pack 公开包、运行 template smoke，并检查 packed HostSample 路线，包括 `HOST_SAMPLE_NET10_OK:True`。
+cross-platform packaging proof 保留在 CI 中，不放进复制出来的宿主：Windows 验证 `net8.0`、`net9.0` 和 `net10.0`；Linux 和 macOS 跑 all-framework lane；release validation 会 pack 公开包、运行 template smoke，并检查下游消费，包括 `HOST_SAMPLE_NET10_OK:True`。
 
-从 `Starter.Avalonia` 复制组合方式，从 `HelloWorld` 看 runtime-only 形状，从 `HelloWorld.Avalonia` 看最小 hosted UI，从 `ConsumerSample.Avalonia` 复制真实宿主动作/参数/插件/support proof，从 `Demo` 查看完整能力 showcase。
+从 `templates/astergraph-avalonia` 复制组合方式，从 `src/AsterGraph.Demo` 看 hosted UI、真实宿主动作、参数、插件和 support proof；用 `src/AsterGraph.Demo -- --proof` 做 proof-mode 验证。
 
 ## 4. 推荐接入路线
 
@@ -158,10 +158,10 @@ cross-platform packaging proof 保留在 CI 中，不放进复制出来的宿主
 
 | 宿主需要什么 | 从哪里开始 | 第一个样例 |
 | --- | --- | --- |
-| hosted starter 脚手架 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.Starter.Avalonia` |
-| 只要运行时 / 自定义 UI | `AsterGraphEditorFactory.CreateSession(...)` | `tools/AsterGraph.HelloWorld` |
-| 默认 Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
-| plugin trust / discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | [`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/) |
+| hosted starter 脚手架 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `templates/astergraph-avalonia` |
+| 只要运行时 / 自定义 UI | `AsterGraphEditorFactory.CreateSession(...)` | `src/AsterGraph.Demo -- --proof` |
+| 默认 Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `src/AsterGraph.Demo` |
+| plugin trust / discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | `src/AsterGraph.Demo` |
 | automation | `IGraphEditorSession.Automation.Execute(...)` | [Host Integration](./host-integration.md) |
 | retained 兼容桥接 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
 
@@ -229,12 +229,12 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - [Architecture](./architecture.md) = editor-kernel / scene-interaction / adapter split 与公开 stability level
 - [Feature Catalog](./feature-catalog.md) = 治理后的 feature record、pack 分组、adapter projection 状态、proof marker 和 performance budget
 - [Adapter Capability Matrix](./adapter-capability-matrix.md) = 锁定的 `WPF` adapter-2 合同，以及 `supported` / `partial` / `fallback`
-- [Consumer Sample](./consumer-sample.md) = 介于 HelloWorld 和 Demo 之间的真实宿主样例
+- `src/AsterGraph.Demo` = 真实宿主样例和完整 showcase host
 - [Alpha Status](./alpha-status.md) = 当前范围、非目标、已知限制
 - [Demo Guide](./demo-guide.md) = 完整展示宿主
 - [Demo Cookbook](./demo-cookbook.md) = 带 proof marker 和支持边界的代码 + Demo recipe 索引
-- [HostSample](../../tools/AsterGraph.HostSample/) = 这条 ladder 之后的路线验证用 proof harness，不是上手入口
-- [ScaleSmoke 基线](./scale-baseline.md) = 公开的规模分层与防回归红线
+- `src/AsterGraph.Demo -- --proof` = 路线验证用 proof mode，不是上手入口
+- [规模基线](./scale-baseline.md) = 公开的规模分层与防回归红线
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md) = definition-driven 参数、分组、校验与 shipped inspector editor
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md) = 最小可复制 plugin/custom-node 路线
 - [Plugin Host Recipe](./plugin-host-recipe.md) = 宿主视角的插件发现、信任与注册
@@ -249,6 +249,6 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - 维护流程与 lane 说明：[CONTRIBUTING.md](../../CONTRIBUTING.md)
 - release sign-off 与手动 NuGet 发布流程：[Public Launch Checklist](./public-launch-checklist.md)
 - 历史 tag 与包版本的关系：[Versioning](./versioning.md)
-- proof harness：[`tools/AsterGraph.HostSample`](../../tools/AsterGraph.HostSample/)、[`tools/AsterGraph.PackageSmoke`](../../tools/AsterGraph.PackageSmoke/)、[`tools/AsterGraph.ScaleSmoke`](../../tools/AsterGraph.ScaleSmoke/)
-- 中等样例：[`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/)
+- proof harness：`src/AsterGraph.Demo -- --proof`、`release validation lane`、`release validation lane`
+- 中等样例：`src/AsterGraph.Demo`
 

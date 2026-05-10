@@ -2,7 +2,7 @@
 
 当你想在 canonical session 路线上，把自定义节点、端口、参数编辑器和边展示收成一条可复制的宿主自管路径时，就看这份 recipe。
 
-真正承载这条 recipe 代码的是 `ConsumerSample.Avalonia`。元数据词汇仍由 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 负责，而宿主边界和 proof 位置仍由 [Consumer Sample](./consumer-sample.md) 负责。
+真正承载这条 recipe 代码的是 `src/AsterGraph.Demo`。元数据词汇仍由 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 负责，而宿主边界和 proof 位置仍由 [Demo Guide](./demo-guide.md) 负责。
 
 ## 可复制的自定义 authoring presentation
 
@@ -80,7 +80,7 @@
 3. 然后用 `GetNodeParameterSnapshots(nodeId)` 投影节点旁路状态，让 `NodeParameterEditorHost` 和 `INodeParameterEditorRegistry` 在自定义节点表面上继续复用同一份 metadata 和 validation 合同。
 4. 写回时继续走 `TrySetSelectedNodeParameterValue(...)` 或 `TrySetNodeParameterValue(...)`，把 validation 保留在共享 session command 路线上，不再引入第二套 editor model。
 5. 宿主命令继续从 `GetCommandDescriptors()` 投影，这样 toolbar、menu、shortcut 和 palette action 都停留在同一条共享 command route 上。
-6. 最后用 `AsterGraph.ConsumerSample.Avalonia -- --proof` 收口，并期待看到 `PORT_HANDLE_ID_OK:True`、`PORT_GROUP_AUTHORING_OK:True`、`PORT_CONNECTION_HINT_OK:True`、`PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`、`CUSTOM_EXTENSION_SURFACE_OK:True` 和 `AUTHORING_SURFACE_OK:True`。
+6. 最后用 `src/AsterGraph.Demo -- --proof` 收口，并期待看到 `PORT_HANDLE_ID_OK:True`、`PORT_GROUP_AUTHORING_OK:True`、`PORT_CONNECTION_HINT_OK:True`、`PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`、`CUSTOM_EXTENSION_SURFACE_OK:True` 和 `AUTHORING_SURFACE_OK:True`。
 
 ## 复制顺序
 
@@ -94,6 +94,6 @@
 ## 相关文档
 
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md)
-- [Consumer Sample](./consumer-sample.md)
+- [Demo Guide](./demo-guide.md)
 - [Host Integration](./host-integration.md)
 - [Advanced Editing Guide](./advanced-editing.md)

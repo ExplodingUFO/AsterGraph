@@ -8,10 +8,10 @@ This recipe is the sole owner of the metadata vocabulary.
 Copy this recipe when you need the canonical metadata vocabulary and stock inspector behavior:
 
 - Copy this recipe when you need `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, `constraints.IsReadOnly`, `editorKind`, `constraints`, and `groupName`.
-- Copy from `ConsumerSample.Avalonia` for the selected-node parameter read/write seam and the host-owned proof boundary.
+- Copy from `src/AsterGraph.Demo` for the selected-node parameter read/write seam and the host-owned proof boundary.
 - Keep the sample and this recipe separate: the sample proves the seam and the recipe carries the metadata vocabulary.
 
-Step 1 is metadata in this recipe; Step 2 is `ConsumerSample.Avalonia` for the selected-node seam; Step 3 is support-bundle `parameterSnapshots` evidence.
+Step 1 is metadata in this recipe; Step 2 is `src/AsterGraph.Demo` for the selected-node seam; Step 3 is support-bundle `parameterSnapshots` evidence.
 
 ## Canonical Recipe Vocabulary
 
@@ -144,10 +144,10 @@ Use `defaultValue` for the seeded value, `helpText` for inline guidance, `placeh
 
 ## Where To See It Running
 
-- smallest hosted sample: [`tools/AsterGraph.HelloWorld.Avalonia`](../../tools/AsterGraph.HelloWorld.Avalonia/)
+- smallest hosted sample: `src/AsterGraph.Demo`
 - full showcase host: [`src/AsterGraph.Demo`](../../src/AsterGraph.Demo/)
-- realistic hosted integration: [Consumer Sample](./consumer-sample.md)
-- sample guidance that complements this recipe: [Consumer Sample](./consumer-sample.md)
+- realistic hosted integration: [Demo Guide](./demo-guide.md)
+- sample guidance that complements this recipe: [Demo Guide](./demo-guide.md)
 
 ## When To Extend It Yourself
 

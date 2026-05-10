@@ -184,7 +184,7 @@ The supported custom edge path is stock edge styling plus an optional host-owned
 Close the custom-node handoff with the defended proof run:
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof
 ```
 
 Expect:
@@ -209,7 +209,7 @@ Expect:
 5. Populate `GraphNodeVisual.ConnectionTargetAnchors` for typed parameter endpoints when needed
 6. Render custom edge badges or labels from `GetConnectionGeometrySnapshots()` if stock styling is not enough
 7. Wire the presenter into `AsterGraphPresentationOptions.NodeVisualPresenter`
-8. Validate with `ConsumerSample.Avalonia -- --proof` and expect `AUTHORING_SURFACE_OK:True` plus `CUSTOM_EXTENSION_SURFACE_OK:True`
+8. Validate with `src/AsterGraph.Demo -- --proof` and expect `AUTHORING_SURFACE_OK:True` plus `CUSTOM_EXTENSION_SURFACE_OK:True`
 
 ## Related Docs
 

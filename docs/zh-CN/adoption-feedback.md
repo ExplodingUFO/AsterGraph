@@ -13,7 +13,7 @@
 
 - 报告类型（`Real external adoption report` 或 `Maintainer-seeded rehearsal / synthetic dry-run`）
 - 采用者上下文（公开项目、公司、个人 handle，或 `private adopter`，并说明尝试的宿主上下文）
-- route（`HelloWorld`、`AsterGraph.Starter.Avalonia`、`HelloWorld.Avalonia`、`ConsumerSample.Avalonia`、`HostSample`、`PackageSmoke`、`ScaleSmoke`、`Demo`）
+- route（`templates/astergraph-avalonia`、`templates/astergraph-plugin`、`src/AsterGraph.Demo`、`src/AsterGraph.Demo -- --proof`、`release validation lane`、`CI/test lane` 或 `Host Integration / retained migration`）
 - version
 - proof 标记
 - 摩擦点
@@ -25,7 +25,7 @@
 真实外部报告必须来自维护者预演之外、正在评估或嵌入 AsterGraph 的采用者。维护者种子预演和 synthetic dry-run 仍可用于检查 intake 路径，但不计入扩大 support 或 capability 声明所需的 3 到 5 条真实外部报告。单条报告不会扩大公开声明；它最多成为维护者分诊的候选信号。
 
 公开反馈建议使用 GitHub 上的 `Adoption feedback` issue template。
-如果你已经能跑到 `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，优先把 [Beta Support Bundle](./support-bundle.md) 里定义的本地证据包附上，并把 proof 输出里的 `SUPPORT_BUNDLE_PATH:...` 这一行当作 support bundle 附件备注。如果 route 不能产出 bundle，就记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
+如果你已经能跑到 `src/AsterGraph.Demo -- --proof --support-bundle <support-bundle-path>`，优先把 [Beta Support Bundle](./support-bundle.md) 里定义的本地证据包附上，并把 proof 输出里的 `SUPPORT_BUNDLE_PATH:...` 这一行当作 support bundle 附件备注。如果 route 不能产出 bundle，就记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
 
 ## 当前种子试用综合
 
@@ -33,10 +33,10 @@
 
 | 画像 | 尝试路线 | 主要摩擦 | 希望下一步补什么 |
 | --- | --- | --- | --- |
-| Avalonia 宿主集成人员 | `AsterGraph.Starter.Avalonia` -> `HelloWorld.Avalonia` -> `ConsumerSample.Avalonia` | 第一跑很顺，但在没有中等样例时，从最小样例跳到完整宿主接线跨度较大 | 更多可复制的 hosted-UI 模板和 recipe |
-| 需要插件能力的 SDK 评估者 | `ConsumerSample.Avalonia` | 不往后读文档的话，trust boundary 还不够醒目 | 更前置的 trust-policy 示例和 plugin-host recipe |
+| Avalonia 宿主集成人员 | `templates/astergraph-avalonia` -> `src/AsterGraph.Demo` -> `src/AsterGraph.Demo -- --proof` | 第一跑很顺，但从模板跳到真实宿主接线仍需要清晰阶梯 | 更多可复制的 hosted-UI 模板和 recipe |
+| 需要插件能力的 SDK 评估者 | `src/AsterGraph.Demo` + `templates/astergraph-plugin` | 不往后读文档的话，trust boundary 还不够醒目 | 更前置的 trust-policy 示例和 plugin-host recipe |
 | 现有 retained 宿主维护者 | `Host Integration` + retained migration 文档 | 路线选择和迁移阶段仍需要仔细阅读 | 更多 migration recipe 和路线对照示例 |
-| 关注性能的评估者 | `ScaleSmoke` baseline | marker 已有，但预算数字的含义还要结合单独文档理解 | 先持续公开 baseline 数字，再决定是否升级大图 defended budget |
+| 关注性能的评估者 | release validation lane + [规模基线](./scale-baseline.md) | marker 已有，但预算数字的含义还要结合单独文档理解 | 先持续公开 baseline 数字，再决定是否升级大图 defended budget |
 
 ## 当前建议
 
@@ -60,7 +60,7 @@ v0.61 handoff proof：`ADOPTION_API_STABILIZATION_HANDOFF_OK:True` 汇总 refres
 
 - [Beta Support Bundle](./support-bundle.md)
 - [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md)
-- [Consumer Sample](./consumer-sample.md)
+- [Demo Guide](./demo-guide.md)
 - [Quick Start](./quick-start.md)
 - [Project Status](./project-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)

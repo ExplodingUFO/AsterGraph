@@ -82,7 +82,7 @@
 
 retained 迁移的证据也走和其他 public 文档一样的 defended hosted beta 路线：
 
-- 运行 `AsterGraph.ConsumerSample.Avalonia -- --proof`
+- 运行 `src/AsterGraph.Demo -- --proof`
 - 如果需要本地产物，就按 [Beta Support Bundle](./support-bundle.md) 的合同附上 `artifacts/consumer-support-bundle.json`
 - 复查同一组公开 proof marker：`CONSUMER_SAMPLE_OK:True`、`COMMAND_SURFACE_OK:True`、`HOST_NATIVE_METRIC:*`，以及 support-bundle marker `SUPPORT_BUNDLE_OK:True` 和 `SUPPORT_BUNDLE_PATH:...`
 

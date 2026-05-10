@@ -184,7 +184,7 @@ var geometries = session.Queries.GetConnectionGeometrySnapshots();
 用受防守的 proof run 收口自定义节点 handoff：
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof
 ```
 
 期待：
@@ -209,7 +209,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 5. 需要 typed parameter endpoints 时，在 `GraphNodeVisual.ConnectionTargetAnchors` 里填入目标锚点
 6. 当 stock styling 不够时，用 `GetConnectionGeometrySnapshots()` 渲染自定义 edge badge 或 label
 7. 把 presenter 接入 `AsterGraphPresentationOptions.NodeVisualPresenter`
-8. 用 `ConsumerSample.Avalonia -- --proof` 验证，期待 `AUTHORING_SURFACE_OK:True` 和 `CUSTOM_EXTENSION_SURFACE_OK:True`
+8. 用 `src/AsterGraph.Demo -- --proof` 验证，期待 `AUTHORING_SURFACE_OK:True` 和 `CUSTOM_EXTENSION_SURFACE_OK:True`
 
 ## 相关文档
 

@@ -27,12 +27,12 @@ Drop down to explicit `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAval
 
 ## Proof handoff
 
-Use the template smoke path to validate the generated app still opens as a hosted Avalonia scaffold. If the host adds plugins, validate plugin artifacts with:
+Use the template smoke path to validate the generated app still opens as a hosted Avalonia scaffold. If the host adds plugins, build those plugin projects and review the manifest/trust metadata through your host-owned policy:
 
 ```powershell
-dotnet run --project tools/AsterGraph.PluginTool -- validate <plugin-path>
+dotnet build <plugin-project>.csproj
 ```
 
-Expect PluginTool validation to report `ASTERGRAPH_PLUGIN_VALIDATE_OK:True` before loading third-party plugin artifacts in a copied host.
+Expect release template-smoke evidence such as `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True` before treating generated plugin artifacts as validated.
 
-For cross-platform packaging proof, keep the generated host aligned with the repository CI lanes: Windows validates `net8.0`, `net9.0`, and `net10.0`; Linux and macOS run the all-framework lane; release validation packs the public packages, runs template smoke, and checks the packed HostSample route including `HOST_SAMPLE_NET10_OK:True`.
+For cross-platform packaging proof, keep the generated host aligned with the repository CI lanes: Windows validates `net8.0`, `net9.0`, and `net10.0`; Linux and macOS run the all-framework lane; release validation packs the public packages, runs template smoke, and checks downstream consumption including `HOST_SAMPLE_NET10_OK:True`.

@@ -15,22 +15,14 @@ Build it with:
 dotnet build
 ```
 
-Validate the built assembly with:
+Validate the built assembly through the host or release template-smoke lane. The local starter check is:
 
 ```powershell
-dotnet run --project ../path/to/AsterGraph.PluginTool -- validate ./bin/Debug/net8.0/AsterGraphPlugin.dll
+dotnet build
 ```
 
-PluginTool also accepts a `.nupkg` plugin package or a directory containing plugin `.dll` or `.nupkg` artifacts:
+The repository release lane validates generated plugin artifacts, manifest shape, capability summary, trust metadata, and hash evidence.
 
-```powershell
-dotnet run --project ../path/to/AsterGraph.PluginTool -- validate ./bin/Debug/net8.0/AsterGraphPlugin.dll
-dotnet run --project ../path/to/AsterGraph.PluginTool -- validate ./artifacts/AsterGraphPlugin.1.0.0.nupkg
-dotnet run --project ../path/to/AsterGraph.PluginTool -- validate ./artifacts/plugins
-dotnet run --project ../path/to/AsterGraph.PluginTool -- inspect ./bin/Debug/net8.0/AsterGraphPlugin.dll --host-version 0.15.0-beta --json
-dotnet run --project ../path/to/AsterGraph.PluginTool -- hash ./bin/Debug/net8.0/AsterGraphPlugin.dll
-```
-
-Expected validation evidence includes `ASTERGRAPH_PLUGIN_VALIDATE_OK:True`, `PLUGIN_COMPATIBILITY_OK:True`, `PLUGIN_MANIFEST_OK:True`, `PLUGIN_NODE_DEFINITIONS_OK:True`, `PLUGIN_PARAMETER_METADATA_OK:True`, `PLUGIN_TRUST_EVIDENCE_OK:True`, `PLUGIN:<id>`, `target_framework:`, `capability_summary:`, `host_compatibility:`, `trust:`, `signature:`, and `sha256:`.
+Expected validation evidence includes `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`, `TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True`, and `TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True`.
 
 AsterGraph plugins are trusted, in-process extensions. Use host-owned allowlists, hashes, or publisher checks before loading third-party code. This template does not add marketplace distribution, sandboxing, unload/reload, or untrusted-code isolation.

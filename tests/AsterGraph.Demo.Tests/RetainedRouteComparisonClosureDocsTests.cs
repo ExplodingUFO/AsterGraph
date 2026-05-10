@@ -58,7 +58,7 @@ public sealed class RetainedRouteComparisonClosureDocsTests
         Assert.Contains("Ownership after this stage:", retainedRecipeEn, StringComparison.Ordinal);
         Assert.Contains("migration-only, not the preferred long-term extension path", retainedRecipeEn, StringComparison.Ordinal);
         Assert.Contains("## Proof and Evidence Handoff", retainedRecipeEn, StringComparison.Ordinal);
-        Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("src/AsterGraph.Demo -- --proof", retainedRecipeEn, StringComparison.Ordinal);
         Assert.Contains("[Beta Support Bundle](./support-bundle.md)", retainedRecipeEn, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", retainedRecipeEn, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_OK:True", retainedRecipeEn, StringComparison.Ordinal);
@@ -78,7 +78,7 @@ public sealed class RetainedRouteComparisonClosureDocsTests
         Assert.Contains("这个阶段之后的归属：", retainedRecipeZh, StringComparison.Ordinal);
         Assert.Contains("迁移期专用", retainedRecipeZh, StringComparison.Ordinal);
         Assert.Contains("## 证据交接", retainedRecipeZh, StringComparison.Ordinal);
-        Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("src/AsterGraph.Demo -- --proof", retainedRecipeZh, StringComparison.Ordinal);
         Assert.Contains("[Beta Support Bundle](./support-bundle.md)", retainedRecipeZh, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", retainedRecipeZh, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_OK:True", retainedRecipeZh, StringComparison.Ordinal);

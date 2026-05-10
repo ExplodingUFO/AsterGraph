@@ -90,7 +90,7 @@ Keep the allowlist host-owned:
 - Support import/export paths so the same allowlist can move between environments
 - Keep provenance snapshots alongside allowlist entries for audit
 
-`ConsumerSamplePluginAllowlistTrustPolicy` in `tools/AsterGraph.ConsumerSample.Avalonia` is the bounded sample path. Copy the shape, replace the storage format and persistence policy with your host's own.
+`ConsumerSamplePluginAllowlistTrustPolicy` in `src/AsterGraph.Demo` is the bounded sample path. Copy the shape, replace the storage format and persistence policy with your host's own.
 
 ## 4. Registration
 
@@ -193,7 +193,7 @@ For public beta hosts:
 Run the defended hosted proof:
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof
 ```
 
 Expect:
@@ -207,5 +207,5 @@ Expect:
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)
 - [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)
 - [Host Integration](./host-integration.md)
-- [Consumer Sample](./consumer-sample.md)
+- [Demo Guide](./demo-guide.md)
 - [Host Recipe Ladder](./host-recipe-ladder.md)

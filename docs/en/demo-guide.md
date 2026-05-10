@@ -86,18 +86,18 @@ Expected proof markers:
 - `Tour` walks the same scenario through node creation, typed connection, parameter edit, plugin trust, automation, runtime feedback, save/load, and SVG export.
 - `Extensions` proves candidate discovery, trust decisions, load snapshots, and persisted allowlist decisions.
 - `Automation` proves typed execution and result projection.
-- `Integration` points to `HostSample`, renders standalone surfaces, and shows presenter-replacement previews.
+- `Integration` points to the current template/Demo routes, renders standalone surfaces, and shows presenter-replacement previews.
 - `Runtime` and `Proof` keep host-owned shell state, recent workspaces, autosave cues, threshold-driven side rails, and shared runtime evidence in one place.
 - `Proof` maps the advanced-editing split onto official surfaces: `Node Surface Authoring` (`TIERED_NODE_SURFACE_OK`, `NON_OBSCURING_EDITING_OK`, `VISUAL_SEMANTICS_OK`), `Hierarchy Semantics` (`FIXED_GROUP_FRAME_OK`, `HIERARCHY_SEMANTICS_OK`), `Composite Scope Authoring` (`COMPOSITE_SCOPE_OK`), `Edge Semantics` (`EDGE_NOTE_OK`, `DISCONNECT_FLOW_OK`), and `Edge Geometry Tooling` (`EDGE_GEOMETRY_OK`).
 - `View and Proof` keep hierarchy, composite scope, edge semantics, and edge geometry visible without relying on retained-only explanations or alternate editor models.
 
 ## Demo vs Other Entry Samples
 
-- `Starter.Avalonia` = first hosted scaffold; the smallest end-to-end Avalonia entry
-- `HelloWorld` = smallest runtime-only first-run sample
-- `HelloWorld.Avalonia` = smallest hosted-UI first-run sample
-- `ConsumerSample.Avalonia` = realistic hosted-UI consumer sample on the canonical route with one host action rail, parameter editing, and one trusted plugin
-- `HostSample` = narrow proof harness for the canonical consumer routes, not the onboarding step
+- `templates/astergraph-avalonia` = first hosted scaffold; the smallest end-to-end Avalonia entry
+- `src/AsterGraph.Demo -- --proof` = smallest runtime-only first-run sample
+- `src/AsterGraph.Demo` = smallest hosted-UI first-run sample
+- `src/AsterGraph.Demo` = realistic hosted-UI consumer sample on the canonical route with one host action rail, parameter editing, and one trusted plugin
+- `release validation lane` = narrow proof harness for the canonical consumer routes, not the onboarding step
 - `Demo` = full showcase host for product surface and host boundary
 
-Use the demo when you need to inspect behavior visually. Use `Starter.Avalonia` for the first hosted entry, `HelloWorld` or `HelloWorld.Avalonia` for the quickest first run on a single route, `ConsumerSample.Avalonia` for one realistic hosted integration, and `HostSample` for proof-oriented route validation.
+Use the demo when you need to inspect behavior visually. Use `templates/astergraph-avalonia` for the first hosted entry, `src/AsterGraph.Demo -- --proof` or `src/AsterGraph.Demo` for the quickest first run on a single route, `src/AsterGraph.Demo` for one realistic hosted integration, and `release validation lane` for proof-oriented route validation.

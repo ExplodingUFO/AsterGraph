@@ -1,6 +1,6 @@
-# ScaleSmoke Baseline
+# Scale Baseline
 
-`tools/AsterGraph.ScaleSmoke` is the public larger-graph confidence harness for AsterGraph.
+`release validation lane` is the public larger-graph confidence harness for AsterGraph.
 
 It is now used in two ways:
 
@@ -73,7 +73,7 @@ These redlines are intentionally conservative and are validated on the current G
 | save | 700 ms |
 | reload | 500 ms |
 
-If any defended metric exceeds one of those numbers, `ScaleSmoke` emits `SCALE_PERFORMANCE_BUDGET_OK:<tier>:False:...` and the release gate fails.
+If any defended metric exceeds one of those numbers, `Scale Baseline` emits `SCALE_PERFORMANCE_BUDGET_OK:<tier>:False:...` and the release gate fails.
 
 ### Authoring redlines
 
@@ -83,7 +83,7 @@ If any defended metric exceeds one of those numbers, `ScaleSmoke` emits `SCALE_P
 | `large` | 150 ms | 400 ms | 250 ms | 300 ms | 100 ms | 60 ms | 100 ms |
 | `stress` | 150 ms | 900 ms | 1000 ms | 1200 ms | 100 ms | 200 ms | 350 ms |
 
-`ScaleSmoke` emits `SCALE_AUTHORING_BUDGET:...`, `SCALE_AUTHORING_METRICS:...`, `SCALE_AUTHORING_BUDGET_OK:...`, and `SCALE_AUTHORING_SUMMARY:...` for these defended tiers.
+`Scale Baseline` emits `SCALE_AUTHORING_BUDGET:...`, `SCALE_AUTHORING_METRICS:...`, `SCALE_AUTHORING_BUDGET_OK:...`, and `SCALE_AUTHORING_SUMMARY:...` for these defended tiers.
 
 ### Export redlines
 
@@ -93,9 +93,9 @@ If any defended metric exceeds one of those numbers, `ScaleSmoke` emits `SCALE_P
 | `large` | 600 ms | 16000 ms | 12000 ms | 400 ms |
 | `stress` | telemetry | 120000 ms | 100000 ms | 800 ms |
 
-`ScaleSmoke` emits `SCALE_EXPORT_BUDGET:...`, `SCALE_EXPORT_METRICS:...`, `SCALE_EXPORT_BUDGET_OK:...`, `EXPORT_PROGRESS_OK:...`, `EXPORT_CANCEL_OK:...`, `EXPORT_SCOPE_OK:...`, `EXPORT_SELECTION_SCOPE_OK:...`, and `SCALE_EXPORT_SUMMARY:...` for these defended tiers.
+`Scale Baseline` emits `SCALE_EXPORT_BUDGET:...`, `SCALE_EXPORT_METRICS:...`, `SCALE_EXPORT_BUDGET_OK:...`, `EXPORT_PROGRESS_OK:...`, `EXPORT_CANCEL_OK:...`, `EXPORT_SCOPE_OK:...`, `EXPORT_SELECTION_SCOPE_OK:...`, and `SCALE_EXPORT_SUMMARY:...` for these defended tiers.
 
-Pair the hosted tuning handoff with [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) when you want the `ConsumerSample.Avalonia` metrics and the defended `ScaleSmoke` budgets on one copyable route.
+Pair the hosted tuning handoff with [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) when you want the `src/AsterGraph.Demo` metrics and the defended `Scale Baseline` budgets on one copyable route.
 
 ## Stress Raster Export
 
@@ -105,16 +105,16 @@ The `stress` tier now defends performance, authoring, PNG/JPEG raster export, an
 
 ```powershell
 # defended release-lane baseline
-dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier baseline
+.\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 
 # defended large-graph release budget
-dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier large
+.\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 
 # defended 5000-node stress gate with conservative raster redlines
-dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier stress --samples 3
+.\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 
 # telemetry-only 10000-node probe; not part of the release gate
-dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier xlarge --samples 1
+.\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 ```
 
 ## Reading The Output

@@ -238,14 +238,14 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 
 在 release note、公告、README 里把入口说清楚：
 
-- `tools/AsterGraph.HelloWorld` = 最快的 runtime-only 第一跑样例
-- `tools/AsterGraph.HelloWorld.Avalonia` = 最快的默认 UI 第一跑样例
-- `tools/AsterGraph.ConsumerSample.Avalonia` = 真实 hosted-UI consumer 样例，带宿主动作和一个可信插件
-- `tools/AsterGraph.Starter.Wpf` = validation-only adapter-2 组合验证样例，不是上手入口
-- `tools/AsterGraph.HelloWorld.Wpf` = validation-only adapter-2 proof 样例，不代表 parity
-- `tools/AsterGraph.HostSample` = 最小接入验证
-- `tools/AsterGraph.PackageSmoke` = 打包消费验证
-- `tools/AsterGraph.ScaleSmoke` = 规模基线加历史记录与状态连续性验证
+- `src/AsterGraph.Demo -- --proof` = 最快的 runtime-only 第一跑样例
+- `src/AsterGraph.Demo` = 最快的默认 UI 第一跑样例
+- `src/AsterGraph.Demo` = 真实 hosted-UI consumer 样例，带宿主动作和一个可信插件
+- `adapter-2 validation evidence` = validation-only adapter-2 组合验证样例，不是上手入口
+- `adapter-2 validation evidence` = validation-only adapter-2 proof 样例，不代表 parity
+- `src/AsterGraph.Demo -- --proof` = 最小接入验证
+- `release validation lane` = 打包消费验证
+- `release validation lane` = 规模基线加历史记录与状态连续性验证
 - `src/AsterGraph.Demo` = 展示宿主
 - `docs/zh-CN/versioning.md` = 包版本与历史仓库 tag 的对应说明
 - `docs/zh-CN/project-status.md` = 外部能力就绪闸门，对应当前已被外部证据证明、仅验证通过或受边界约束、以及在更多采用者证据出现前继续延后的声明

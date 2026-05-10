@@ -8,10 +8,10 @@ The intake handoff is covered by `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`, `ADOPT
 
 ## Canonical Producer
 
-Generate the support bundle from `ConsumerSample.Avalonia`, because that is the defended realistic hosted proof on the current beta route.
+Generate the support bundle from `src/AsterGraph.Demo`, because that is the defended realistic hosted proof on the current beta route.
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle <support-bundle-path> --support-note "what you were trying to validate"
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof --support-note "what you were trying to validate"
 ```
 
 Expected additional proof markers:
@@ -27,13 +27,13 @@ If the write fails, the proof run emits `SUPPORT_BUNDLE_PERSISTENCE_OK:False` be
 Copyable local evidence reference:
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle <support-bundle-path> --support-note "what you were trying to validate"
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof --support-note "what you were trying to validate"
 ```
 
 Local evidence only means this bundle remains tied to the defended hosted route and does not widen the support boundary. Use the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note on the bounded intake record. If a route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
 When `CONSUMER_SAMPLE_PARAMETER_OK` or `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` fail, keep the failed proof-marker lines with the bundle's `parameterSnapshots` rows so the bounded intake record can classify `status`, `owner`, and `priority` from the same evidence set.
 When graph readiness or connection/parameter validity is the failure area, keep `readinessStatus`, `validationSummary`, and `validationFeedback`; they are serialized from the canonical session validation snapshot.
-For screen-reader-ready local evaluation, keep this bundle on the same bounded intake record as the post-ladder `HostSample` lines `HOST_SAMPLE_AUTOMATION_OK:True`, `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`, and `HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True`.
+For screen-reader-ready local evaluation, keep this bundle on the same bounded intake record as the post-ladder `Demo proof` lines `HOST_SAMPLE_AUTOMATION_OK:True`, `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`, and `HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True`.
 
 ## Contract
 
@@ -132,7 +132,7 @@ Export panel proof remains a hosted projection over the canonical session route:
 ## Related Docs
 
 - [Beta Evaluation Path](./evaluation-path.md)
-- [Consumer Sample](./consumer-sample.md)
+- `src/AsterGraph.Demo`
 - [Project Status](./project-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Adoption Feedback Loop](./adoption-feedback.md)

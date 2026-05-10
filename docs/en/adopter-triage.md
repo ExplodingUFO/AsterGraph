@@ -21,7 +21,7 @@ Use the same fields in:
 - public issue templates using the bug report form
 - the release-note evidence summary and prerelease review.
 
-This checklist keeps all intake documents on one beta evidence contract, so route selection and support readiness can be triaged consistently without blocking `HelloWorld`, `Demo`, or `ScaleSmoke` feedback when no support bundle exists yet.
+This checklist keeps all intake documents on one beta evidence contract, so route selection and support readiness can be triaged consistently without blocking `src/AsterGraph.Demo`, template, or release-lane feedback when no support bundle exists yet.
 
 Use [Project Status](./project-status.md) as the readiness gate before treating a report as a support-expansion candidate. Reports outside the proven/bounded rows are intake evidence, not automatic scope widening. A single report does not widen public claims; support or capability expansion needs 3-5 real external reports clustered on the same bounded risk. Reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note when the route can produce a bundle, or record `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it cannot.
 

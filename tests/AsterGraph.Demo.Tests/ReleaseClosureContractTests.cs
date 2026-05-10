@@ -437,10 +437,10 @@ public sealed class ReleaseClosureContractTests
             Assert.Contains("ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         }
 
-        Assert.True(HasLineWithAll(englishStatus, "WPF proof sample evidence", "AsterGraph.HelloWorld.Wpf", "canonical session/runtime route", "second onboarding path"));
-        Assert.True(HasLineWithAll(chineseStatus, "WPF proof sample evidence", "AsterGraph.HelloWorld.Wpf", "canonical session/runtime route", "second onboarding path"));
-        Assert.True(HasLineWithAll(englishMatrix, "WPF proof sample evidence", "AsterGraph.HelloWorld.Wpf", "canonical route", "second onboarding path"));
-        Assert.True(HasLineWithAll(chineseMatrix, "WPF proof sample evidence", "AsterGraph.HelloWorld.Wpf", "canonical route", "second onboarding path"));
+        Assert.True(HasLineWithAll(englishStatus, "WPF proof sample evidence", "release validation lane", "canonical session/runtime route", "second onboarding path"));
+        Assert.True(HasLineWithAll(chineseStatus, "WPF proof sample evidence", "release validation lane", "canonical session/runtime route", "second onboarding path"));
+        Assert.True(HasLineWithAll(englishMatrix, "WPF proof sample evidence", "adapter-2 release evidence", "canonical route", "second onboarding path"));
+        Assert.True(HasLineWithAll(chineseMatrix, "WPF proof sample evidence", "adapter-2 release evidence", "canonical route", "second onboarding path"));
     }
 
     [Fact]

@@ -34,13 +34,13 @@
   - `AsterGraph.Avalonia`
 - frozen support boundary: [Stabilization Support Matrix](./stabilization-support-matrix.md)
 - sample and proof tools:
-  - `tools/AsterGraph.HelloWorld` for the quickest runtime-only first run
-  - `tools/AsterGraph.Starter.Avalonia` for the shipped Avalonia starter scaffold
-  - `tools/AsterGraph.HelloWorld.Avalonia` for the quickest hosted-UI first run after the starter scaffold
-  - `tools/AsterGraph.ConsumerSample.Avalonia` for one realistic hosted integration before the full Demo shell
-  - `tools/AsterGraph.HostSample` for the post-ladder proof harness on the canonical adoption route
-  - `tools/AsterGraph.PackageSmoke` for packed-package proof
-  - `tools/AsterGraph.ScaleSmoke` for the public scale baseline and state-continuity proof
+  - `src/AsterGraph.Demo -- --proof` for the quickest runtime-only first run
+  - `templates/astergraph-avalonia` for the shipped Avalonia starter scaffold
+  - `src/AsterGraph.Demo` for the quickest hosted-UI first run after the starter scaffold
+  - `src/AsterGraph.Demo` for one realistic hosted integration before the full Demo shell
+  - `src/AsterGraph.Demo -- --proof` for the post-ladder proof harness on the canonical adoption route
+  - `release validation lane` for packed-package proof
+  - `release validation lane` for the public scale baseline and state-continuity proof
 - synthetic dry-run fixtures in [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md) are maintainer/internal rehearsal only, not external validation, and do not widen support or capability claims
 - canonical adoption path:
   - runtime-only hosts use `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
@@ -69,11 +69,11 @@
 - v0.64 bounded workbench affordance proof maps the highest-priority `layout-resume` friction row to existing hosted workbench options, without adding a runtime route, WPF parity, remote sync, macro/query system, execution engine, or GA claim: `WORKBENCH_AFFORDANCE_POLISH_OK:True`, `WORKBENCH_AFFORDANCE_ROUTE_OK:True`, `WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`
 - v0.64 workbench evidence bundle proof keeps friction and affordance evidence inside the local support bundle, without telemetry, remote sync, external validation, or GA readiness claims: `WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True`, `WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True`, `WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True`
 - v0.64 adopter polish handoff proof aggregates phases 392-394 and recommends the next line stay adopter-driven until real reports justify broader claims: `WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True`, `WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True`, `V064_MILESTONE_PROOF_OK:True`
-- v0.67 Repairability, Help, and Review UX proof is completed evidence from `ConsumerSample.Avalonia`, not the next work line: `GRAPH_ERROR_HELP_TARGET_OK:True`, `GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True`, and `REPAIR_HELP_REVIEW_LOOP_OK:True`
+- v0.67 Repairability, Help, and Review UX proof is completed evidence from `src/AsterGraph.Demo -- --proof`, not the next work line: `GRAPH_ERROR_HELP_TARGET_OK:True`, `GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True`, and `REPAIR_HELP_REVIEW_LOOP_OK:True`
 - panel projection proof summarizes mini-map lightweight projection and inspector narrow projection evidence on the hosted proof route without creating a broad graph subscription contract: `MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`, `INSPECTOR_NARROW_PROJECTION_OK:True`, `LARGE_GRAPH_PANEL_SCOPE_OK:True`, `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff proof keeps phases 371-374 tied to existing hosted workbench evidence without expanding graph-size support claims: `LARGE_GRAPH_UX_HANDOFF_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, `V059_MILESTONE_PROOF_OK:True`
 - adapter-2 validation scope proof keeps WPF on the same canonical route and matrix vocabulary without widening public WPF support or parity claims: `ADAPTER2_VALIDATION_SCOPE_OK:True`, `ADAPTER2_MATRIX_HANDOFF_OK:True`, `ADAPTER2_SCOPE_BOUNDARY_OK:True`
-- WPF proof sample evidence keeps `AsterGraph.HelloWorld.Wpf` copyable and tied to the canonical session/runtime route without creating a second onboarding path: `ADAPTER2_WPF_SAMPLE_PROOF_OK:True`, `ADAPTER2_CANONICAL_ROUTE_OK:True`, `ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`
+- WPF proof sample evidence keeps `release validation lane` copyable and tied to the canonical session/runtime route without creating a second onboarding path: `ADAPTER2_WPF_SAMPLE_PROOF_OK:True`, `ADAPTER2_CANONICAL_ROUTE_OK:True`, `ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`
 - adapter-2 performance/accessibility handoff proof ties the existing WPF proof budgets to the adapter-2 accessibility and performance recipes without widening WPF support: `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`, `ADAPTER2_RECIPE_ALIGNMENT_OK:True`, `ADAPTER2_PROOF_BUDGET_OK:True`
 - v0.60 adapter-2 validation handoff proof closes the validation-only milestone without changing the WPF support boundary: `ADAPTER2_VALIDATION_HANDOFF_OK:True`, `ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True`, `V060_MILESTONE_PROOF_OK:True`
 - graph-surface usability proof markers:
@@ -91,7 +91,7 @@
 - plugin discovery, trust policy, loading, and inspection
 - automation execution through `IGraphEditorSession.Automation`
 - contract, maintenance, and release proof lanes
-- packed `HostSample` compatibility proof under `.NET 10` in the release lane
+- `.NET 10` downstream consumption proof in the release lane
 - public API guidance proof stays with the template/plugin proof in the release story: `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, `PUBLIC_API_GUIDANCE_OK`, `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, `PUBLIC_API_STABILITY_SCOPE_OK:True`, `ASTERGRAPH_TEMPLATE_SMOKE_OK`, `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`
 - v0.75 library-grade proof maps phases 445-449 into one release gate: rendering/viewport projection, interaction contracts, extension surfaces, host packaging/template proof, and professional cookbook coverage are all documented without widening package, adapter, graph-size, marketplace, execution-engine, or GA claims.
 
@@ -127,10 +127,10 @@ Current v0.61 handoff markers: `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`, `AD
 
 | Claim | Route-level evidence |
 | --- | --- |
-| Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `tools/AsterGraph.HelloWorld`, `tools/AsterGraph.Starter.Avalonia`, `tools/AsterGraph.HelloWorld.Avalonia`, `tools/AsterGraph.ConsumerSample.Avalonia`, `tools/AsterGraph.HostSample`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK`, `GRAPH_SNIPPET_CATALOG_OK`, `GRAPH_SNIPPET_INSERT_OK`, `FRAGMENT_LIBRARY_SEARCH_OK`, `FRAGMENT_LIBRARY_PREVIEW_OK`, `FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK`, `FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK`, `AUTHORING_FLOW_PROOF_OK`, `AUTHORING_FLOW_HANDOFF_OK`, `AUTHORING_FLOW_SCOPE_BOUNDARY_OK`, `EXPERIENCE_POLISH_HANDOFF_OK`, `FEATURE_ENHANCEMENT_PROOF_OK`, `EXPERIENCE_SCOPE_BOUNDARY_OK`, `AUTHORING_DEPTH_HANDOFF_OK`, `AUTHORING_DEPTH_SCOPE_BOUNDARY_OK`, `V058_MILESTONE_PROOF_OK` |
-| The showcase authoring surface and host-owned runtime feedback are externally proven as a bounded beta host experience. | `src/AsterGraph.Demo`, `tools/AsterGraph.ConsumerSample.Avalonia`, `DEMO_OK:True`, `DEMO_SCENARIO_PRESETS_OK:True`, `DEMO_GESTURE_PROOF_OK:True`, `CONSUMER_GESTURE_PROOF_OK:True`, `INTERACTION_SUPPORT_BUNDLE_OK:True`, `COMMAND_SURFACE_OK:True`, `COMPOSITE_SCOPE_OK:True`, `EDGE_NOTE_OK:True`, `EDGE_GEOMETRY_OK:True`, `DISCONNECT_FLOW_OK:True`, `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`, `RUNTIME_LOG_LOCATE_OK:True`, `RUNTIME_LOG_EXPORT_OK:True`, `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`, `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`, `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True` |
-| Packaged consumer proof is externally proven without widening the SDK boundary. | `tools/AsterGraph.PackageSmoke`, `PACKAGE_SMOKE_OK`, `HOST_SAMPLE_NET10_OK` |
-| Scale proof is externally proven at defended `baseline`/`large` tiers and 5000-node `stress`: performance, authoring, conservative PNG/JPEG raster export, and reload are defended; stress SVG export is telemetry-only. | `tools/AsterGraph.ScaleSmoke`, `SCALE_PERFORMANCE_BUDGET_OK:baseline:True`, `SCALE_PERFORMANCE_BUDGET_OK:large:True`, `SCALE_PERFORMANCE_BUDGET_OK:stress:True`, `SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800`, `SCALE_RASTER_EXPORT_STRESS_OK:True` |
+| Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `src/AsterGraph.Demo -- --proof`, `templates/astergraph-avalonia`, `src/AsterGraph.Demo`, `src/AsterGraph.Demo`, `src/AsterGraph.Demo -- --proof`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK`, `GRAPH_SNIPPET_CATALOG_OK`, `GRAPH_SNIPPET_INSERT_OK`, `FRAGMENT_LIBRARY_SEARCH_OK`, `FRAGMENT_LIBRARY_PREVIEW_OK`, `FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK`, `FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK`, `AUTHORING_FLOW_PROOF_OK`, `AUTHORING_FLOW_HANDOFF_OK`, `AUTHORING_FLOW_SCOPE_BOUNDARY_OK`, `EXPERIENCE_POLISH_HANDOFF_OK`, `FEATURE_ENHANCEMENT_PROOF_OK`, `EXPERIENCE_SCOPE_BOUNDARY_OK`, `AUTHORING_DEPTH_HANDOFF_OK`, `AUTHORING_DEPTH_SCOPE_BOUNDARY_OK`, `V058_MILESTONE_PROOF_OK` |
+| The showcase authoring surface and host-owned runtime feedback are externally proven as a bounded beta host experience. | `src/AsterGraph.Demo`, `src/AsterGraph.Demo`, `DEMO_OK:True`, `DEMO_SCENARIO_PRESETS_OK:True`, `DEMO_GESTURE_PROOF_OK:True`, `CONSUMER_GESTURE_PROOF_OK:True`, `INTERACTION_SUPPORT_BUNDLE_OK:True`, `COMMAND_SURFACE_OK:True`, `COMPOSITE_SCOPE_OK:True`, `EDGE_NOTE_OK:True`, `EDGE_GEOMETRY_OK:True`, `DISCONNECT_FLOW_OK:True`, `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`, `RUNTIME_LOG_LOCATE_OK:True`, `RUNTIME_LOG_EXPORT_OK:True`, `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`, `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`, `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True` |
+| Packaged consumer proof is externally proven without widening the SDK boundary. | `release validation lane`, `PACKAGE_SMOKE_OK`, `HOST_SAMPLE_NET10_OK` |
+| Scale proof is externally proven at defended `baseline`/`large` tiers and 5000-node `stress`: performance, authoring, conservative PNG/JPEG raster export, and reload are defended; stress SVG export is telemetry-only. | `release validation lane`, `SCALE_PERFORMANCE_BUDGET_OK:baseline:True`, `SCALE_PERFORMANCE_BUDGET_OK:large:True`, `SCALE_PERFORMANCE_BUDGET_OK:stress:True`, `SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800`, `SCALE_RASTER_EXPORT_STRESS_OK:True` |
 
 ### Validation-only or bounded claims
 
@@ -138,8 +138,8 @@ Current v0.61 handoff markers: `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`, `AD
 | --- | --- | --- |
 | `WPF` as adapter 2 | Validation-only and not Avalonia parity or public WPF support. WPF support expansion stays blocked until 3-5 real external reports cluster on the same bounded risk. Current evidence is limited to the bounded hosted shell accessibility and performance/export-breadth paths. | `HELLOWORLD_WPF_OK`, `HOSTED_ACCESSIBILITY_BASELINE_OK`, `HOSTED_ACCESSIBILITY_FOCUS_OK`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`, `HOSTED_ACCESSIBILITY_OK`, `ADAPTER2_PERFORMANCE_BASELINE_OK`, `ADAPTER2_EXPORT_BREADTH_OK`, `ADAPTER2_PROJECTION_BUDGET_OK`, `ADAPTER2_COMMAND_BUDGET_OK`, `ADAPTER2_SCENE_BUDGET_OK`, `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK`, `ADAPTER2_RECIPE_ALIGNMENT_OK`, `ADAPTER2_PROOF_BUDGET_OK`, `ADAPTER2_VALIDATION_HANDOFF_OK`, `ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK`, `V060_MILESTONE_PROOF_OK`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`, [Adapter Capability Matrix](./adapter-capability-matrix.md) |
 | Retained route | Migration-only bridge, not a new primary host path. | [Retained-To-Session Migration Recipe](./retained-migration-recipe.md), [Stabilization Support Matrix](./stabilization-support-matrix.md) |
-| Stress raster export budget | PNG/JPEG export at 5000 nodes has conservative defended redlines; this is a regression guard, not a fast-export claim. | `SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800`, `SCALE_RASTER_EXPORT_STRESS_OK:True`, [ScaleSmoke Baseline](./scale-baseline.md) |
-| XLarge telemetry | 10000-node ScaleSmoke is telemetry-only and not a support or virtualization claim. | `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`, [ScaleSmoke Baseline](./scale-baseline.md) |
+| Stress raster export budget | PNG/JPEG export at 5000 nodes has conservative defended redlines; this is a regression guard, not a fast-export claim. | `SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800`, `SCALE_RASTER_EXPORT_STRESS_OK:True`, [Scale Baseline](./scale-baseline.md) |
+| XLarge telemetry | 10000-node scale evidence is telemetry-only and not a support or virtualization claim. | `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`, [Scale Baseline](./scale-baseline.md) |
 
 ### Deferred until more adopter evidence
 
@@ -159,17 +159,17 @@ Current v0.61 handoff markers: `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`, `AD
 
 ## Public Entry Matrix
 
-The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`; `HostSample` comes after that ladder as the proof harness.
+The hosted route ladder is `templates/astergraph-avalonia -> src/AsterGraph.Demo -> src/AsterGraph.Demo -- --proof`; release validation comes after that ladder as maintainer evidence.
 
-- `tools/AsterGraph.HelloWorld` = first-run runtime-only sample
-- `tools/AsterGraph.Starter.Avalonia` = shipped Avalonia starter scaffold
-- `tools/AsterGraph.HelloWorld.Avalonia` = first-run hosted-UI sample after the starter scaffold
-- `tools/AsterGraph.ConsumerSample.Avalonia` = realistic hosted integration sample
-- `tools/AsterGraph.Starter.Wpf` = validation-only adapter-2 composition sample
-- `tools/AsterGraph.HelloWorld.Wpf` = validation-only adapter-2 proof sample
-- `tools/AsterGraph.HostSample` = post-ladder canonical adoption proof
-- `tools/AsterGraph.PackageSmoke` = packed-package consumption proof
-- `tools/AsterGraph.ScaleSmoke` = larger-graph baseline plus history/state-continuity proof
+- `src/AsterGraph.Demo -- --proof` = first-run runtime-only sample
+- `templates/astergraph-avalonia` = shipped Avalonia starter scaffold
+- `src/AsterGraph.Demo` = first-run hosted-UI sample after the starter scaffold
+- `src/AsterGraph.Demo` = realistic hosted integration sample
+- `adapter-2 validation evidence` = validation-only adapter-2 composition sample
+- `adapter-2 validation evidence` = validation-only adapter-2 proof sample
+- `src/AsterGraph.Demo -- --proof` = post-ladder canonical adoption proof
+- `release validation lane` = packed-package consumption proof
+- `release validation lane` = larger-graph baseline plus history/state-continuity proof
 - `src/AsterGraph.Demo` = showcase host for visual/manual inspection
 
 ## Public Entry Points
@@ -177,8 +177,8 @@ The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerS
 - [Versioning](./versioning.md)
 - [Beta Evaluation Path](./evaluation-path.md) = single route ladder from first install to realistic hosted proof
 - [Quick Start](./quick-start.md)
-- [Consumer Sample](./consumer-sample.md)
-- [ScaleSmoke Baseline](./scale-baseline.md)
+- [Demo Guide](./demo-guide.md)
+- [Scale Baseline](./scale-baseline.md)
 - [Advanced Editing Guide](./advanced-editing.md)
 - [Adoption Feedback Loop](./adoption-feedback.md)
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)

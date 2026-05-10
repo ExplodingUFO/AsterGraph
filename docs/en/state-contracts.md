@@ -32,7 +32,7 @@ That lane includes:
 - `GraphEditorSaveBoundaryTests`
 - `GraphEditorHistorySemanticTests`
 
-The larger readiness proof also emits `SCALE_HISTORY_CONTRACT_OK` through `tools/AsterGraph.ScaleSmoke`.
+The larger readiness proof also emits `SCALE_HISTORY_CONTRACT_OK` through `release validation lane`.
 
 ## Consumer Guidance
 

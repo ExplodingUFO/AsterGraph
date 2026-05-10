@@ -47,14 +47,13 @@ body:
     attributes:
       label: Route or artifact tried
       options:
-        - HelloWorld
-        - AsterGraph.Starter.Avalonia
-        - HelloWorld.Avalonia
-        - ConsumerSample.Avalonia
-        - HostSample
-        - PackageSmoke
-        - ScaleSmoke
-        - Demo
+        - templates/astergraph-avalonia
+        - templates/astergraph-plugin
+        - src/AsterGraph.Demo
+        - src/AsterGraph.Demo -- --proof
+        - release validation lane
+        - CI/test lane
+        - Host Integration / retained migration
     validations:
       required: true
   - type: dropdown

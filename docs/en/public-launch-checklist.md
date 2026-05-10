@@ -231,14 +231,14 @@ For a maintainer-driven manual beta publish without pushing a new tag:
 
 Keep the consumer entry story explicit in release notes and public announcements:
 
-- `tools/AsterGraph.HelloWorld` = fastest runtime-only first-run sample
-- `tools/AsterGraph.HelloWorld.Avalonia` = fastest hosted-UI first-run sample
-- `tools/AsterGraph.ConsumerSample.Avalonia` = realistic hosted-UI consumer sample with one host action rail and one trusted plugin
-- `tools/AsterGraph.Starter.Wpf` = validation-only adapter-2 composition sample, not onboarding
-- `tools/AsterGraph.HelloWorld.Wpf` = validation-only adapter-2 proof sample, not parity
-- `tools/AsterGraph.HostSample` = minimal consumer proof
-- `tools/AsterGraph.PackageSmoke` = packaged-consumption proof
-- `tools/AsterGraph.ScaleSmoke` = scale baseline plus history/state-continuity proof
+- `src/AsterGraph.Demo -- --proof` = fastest runtime-only first-run sample
+- `src/AsterGraph.Demo` = fastest hosted-UI first-run sample
+- `src/AsterGraph.Demo` = realistic hosted-UI consumer sample with one host action rail and one trusted plugin
+- `adapter-2 validation evidence` = validation-only adapter-2 composition sample, not onboarding
+- `adapter-2 validation evidence` = validation-only adapter-2 proof sample, not parity
+- `src/AsterGraph.Demo -- --proof` = minimal consumer proof
+- `release validation lane` = packaged-consumption proof
+- `release validation lane` = scale baseline plus history/state-continuity proof
 - `src/AsterGraph.Demo` = showcase host
 - `docs/en/versioning.md` = package version versus historical repository-tag guidance
 - `docs/en/project-status.md` = external capability readiness gate for externally proven now, validation-only or bounded claims, and deferred until more adopter evidence

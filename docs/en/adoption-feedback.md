@@ -13,7 +13,7 @@ Each feedback entry should capture this bounded schema:
 
 - report type (`Real external adoption report` or `Maintainer-seeded rehearsal / synthetic dry-run`)
 - adopter context (public project, company, personal handle, or `private adopter` plus the host context)
-- route (`HelloWorld`, `AsterGraph.Starter.Avalonia`, `HelloWorld.Avalonia`, `ConsumerSample.Avalonia`, `HostSample`, `PackageSmoke`, `ScaleSmoke`, `Demo`)
+- route (`templates/astergraph-avalonia`, `templates/astergraph-plugin`, `src/AsterGraph.Demo`, `src/AsterGraph.Demo -- --proof`, `release validation lane`, `CI/test lane`, or `Host Integration / retained migration`)
 - version
 - proof markers
 - friction
@@ -25,7 +25,7 @@ Screenshots or command output can be attached as supplemental evidence, but they
 A real external report must come from someone evaluating or embedding AsterGraph outside maintainer rehearsal. Maintainer-seeded rehearsals and synthetic dry-runs stay useful for checking the intake path, but they do not count toward the 3-5 real external reports required before a support or capability claim can widen. A single report does not widen public claims; it can only become a candidate signal for maintainer triage.
 
 Use the GitHub issue template `Adoption feedback` for public reports.
-When you can reach `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`, attach the local bundle described in [Beta Support Bundle](./support-bundle.md) and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note. If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
+When you can reach `src/AsterGraph.Demo -- --proof --support-bundle <support-bundle-path>`, attach the local bundle described in [Beta Support Bundle](./support-bundle.md) and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note. If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
 
 ## Seeded Trial Synthesis
 
@@ -33,10 +33,10 @@ The current recommendation is based on four structured pre-public adoption rehea
 
 | Persona | Route tried | Main friction | Requested next capability |
 | --- | --- | --- | --- |
-| Avalonia host integrator | `AsterGraph.Starter.Avalonia` -> `HelloWorld.Avalonia` -> `ConsumerSample.Avalonia` | first-run path was clear, but the jump from the smallest sample to realistic host wiring was still large before the medium sample existed | more copyable hosted-UI templates and recipes |
-| SDK evaluator with plugin needs | `ConsumerSample.Avalonia` | trust boundary was understandable only after reading deeper docs | more prominent trust-policy examples and plugin-host recipes |
+| Avalonia host integrator | `templates/astergraph-avalonia` -> `src/AsterGraph.Demo` -> `src/AsterGraph.Demo -- --proof` | first-run path was clear, but the jump from the template to realistic host wiring still needed a focused ladder | more copyable hosted-UI templates and recipes |
+| SDK evaluator with plugin needs | `src/AsterGraph.Demo` + `templates/astergraph-plugin` | trust boundary was understandable only after reading deeper docs | more prominent trust-policy examples and plugin-host recipes |
 | Existing retained host maintainer | `Host Integration` + retained migration docs | route choice and migration staging still need careful reading | more migration recipes and route comparison examples |
-| Performance-conscious evaluator | `ScaleSmoke` baseline | proof markers were present, but budget interpretation required a separate doc | keep publishing defended baseline numbers before expanding large-tier commitments |
+| Performance-conscious evaluator | release validation lane + [Scale Baseline](./scale-baseline.md) | proof markers were present, but budget interpretation required a separate doc | keep publishing defended baseline numbers before expanding large-tier commitments |
 
 ## Current Recommendation
 
@@ -60,7 +60,7 @@ Next action is v0.68 release packaging/readiness, or adopter-evidence review if 
 
 - [Beta Support Bundle](./support-bundle.md)
 - [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md)
-- [Consumer Sample](./consumer-sample.md)
+- [Demo Guide](./demo-guide.md)
 - [Quick Start](./quick-start.md)
 - [Project Status](./project-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)

@@ -14,7 +14,7 @@ Fixture coverage marker：`ADOPTION_INTAKE_EVIDENCE_OK:True`。
 
 ## 记录 1：parameter projection 失败
 
-- route: `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`
+- route: `src/AsterGraph.Demo -- --proof --support-bundle <support-bundle-path>`
 - version: `v0.0.0-dry-run`
 - proof 标记: `CONSUMER_SAMPLE_PARAMETER_OK:False`
 - 摩擦: parameter projection 没有把预期的 host-owned 值投到选中的节点上
@@ -31,7 +31,7 @@ parameterSnapshots
 
 ## 记录 2：metadata projection 失败
 
-- route: `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`
+- route: `src/AsterGraph.Demo -- --proof --support-bundle <support-bundle-path>`
 - version: `v0.0.0-dry-run`
 - proof 标记: `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:False`
 - 摩擦: metadata projection 没有暴露选中节点需要的 inspector 字段
@@ -48,7 +48,7 @@ parameterSnapshots
 
 ## 记录 3：support-bundle persistence 失败
 
-- route: `ConsumerSample.Avalonia -- --proof`
+- route: `src/AsterGraph.Demo -- --proof`
 - version: `v0.0.0-dry-run`
 - proof 标记: `SUPPORT_BUNDLE_PERSISTENCE_OK:False`
 - 摩擦: dry-run 在 bundle 写入之前就停止了

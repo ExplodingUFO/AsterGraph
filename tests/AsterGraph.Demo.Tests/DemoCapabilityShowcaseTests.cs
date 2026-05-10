@@ -44,7 +44,7 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.Contains(viewModel.PluginCandidates, candidate => candidate.TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Blocked);
         Assert.Contains(viewModel.PluginLoadSnapshots, snapshot => snapshot.Status == GraphEditorPluginLoadStatus.Loaded);
         Assert.Contains(viewModel.PluginLoadSnapshots, snapshot => snapshot.Status == GraphEditorPluginLoadStatus.Blocked);
-        Assert.Contains(viewModel.ConsumerPathLines, line => line.Contains("HostSample", StringComparison.Ordinal));
+        Assert.Contains(viewModel.ConsumerPathLines, line => line.Contains("templates/astergraph-avalonia", StringComparison.Ordinal));
         Assert.Contains(viewModel.ConsumerPathLines, line => line.Contains("runtime owner", StringComparison.OrdinalIgnoreCase) && line.Contains("Session", StringComparison.Ordinal));
     }
 

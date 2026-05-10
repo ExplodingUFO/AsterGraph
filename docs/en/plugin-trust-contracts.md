@@ -55,15 +55,13 @@ If the host does not configure a policy, the runtime uses `GraphEditorPluginTrus
 
 Use this path when evaluating a trusted in-process plugin:
 
-1. Author or generate the plugin with [Plugin And Custom Node Recipe](./plugin-recipe.md).
-2. Validate the `.dll`, `.nupkg`, or plugin directory with `AsterGraph.PluginTool validate`.
-3. Inspect structured local evidence with `AsterGraph.PluginTool inspect <path> --host-version <version> --json` when you need manifest, host compatibility, node definition, and parameter metadata details.
-4. Generate a standalone SHA-256 evidence line with `AsterGraph.PluginTool hash <path>` for allowlist review.
-5. Review the manifest, compatibility, provenance, signature evidence, node definitions, parameter metadata, and SHA-256 hash in the PluginTool output.
-6. Apply a host-owned `IGraphEditorPluginTrustPolicy` before activation.
-7. Use [Consumer Sample](./consumer-sample.md) as the defended hosted trust hop when validating a real host flow.
+1. Author or generate the plugin with [Plugin And Custom Node Recipe](./plugin-recipe.md) or `templates/astergraph-plugin`.
+2. Build the plugin project and keep the generated manifest with the artifact.
+3. Inspect manifest, host compatibility, node definitions, parameter metadata, provenance, signature evidence, and SHA-256 hash in your host-owned review flow.
+4. Apply a host-owned `IGraphEditorPluginTrustPolicy` before activation.
+5. Use `src/AsterGraph.Demo` as the defended hosted trust hop when validating a real host flow.
 
-PluginTool validation is evidence for host policy. Treat `PLUGIN_COMPATIBILITY_OK`, `PLUGIN_MANIFEST_OK`, `PLUGIN_NODE_DEFINITIONS_OK`, `PLUGIN_PARAMETER_METADATA_OK`, and `PLUGIN_TRUST_EVIDENCE_OK` as local review markers. It is not a marketplace approval, a sandbox decision, or an automatic load authorization.
+Template-smoke and host-owned trust review are evidence for host policy. Treat `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`, `TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK`, and `TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK` as release-lane review markers. They are not marketplace approval, a sandbox decision, or automatic load authorization.
 
 ## Host Policy Examples
 
@@ -72,7 +70,7 @@ Use these patterns as host-owned policy examples, not runtime fallback modes:
 | Pattern | Typical use | Policy input |
 | --- | --- | --- |
 | Allow all local dev | Inner-loop development on a known machine. | Fixed local plugin directory plus an explicit local-dev reason string. |
-| Allow by hash | Small teams sharing known plugin binaries. | PluginTool SHA-256 hash must match the host allowlist. |
+| Allow by hash | Small teams sharing known plugin binaries. | The artifact SHA-256 hash must match the host allowlist. |
 | Allow by manifest or publisher | Organization-published plugins. | Manifest id, package id/version, publisher metadata, and signature evidence must match host policy. |
 | Block unknown source | Default prerelease or enterprise posture. | Block candidates without an allowlist, hash, or accepted signature match before activation. |
 | Enterprise fixed plugin directory | Managed desktop deployments. | Discover only from an admin-controlled directory and keep allowlist import/export records for audit. |
@@ -110,4 +108,4 @@ This v1 contract does not include:
 
 - [Host Integration](./host-integration.md)
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)
-- [Consumer Sample](./consumer-sample.md)
+- [Demo Guide](./demo-guide.md)

@@ -90,7 +90,7 @@ public sealed class MyHostTrustPolicy : IGraphEditorPluginTrustPolicy
 - 支持 import/export 路径，使同一份 allowlist 能在不同环境间迁移
 - 在 allowlist 条目旁保留 provenance snapshots，用于审计
 
-`tools/AsterGraph.ConsumerSample.Avalonia` 里的 `ConsumerSamplePluginAllowlistTrustPolicy` 是 bounded sample path。复制它的结构，但把存储格式和持久化策略换成宿主自己的。
+`src/AsterGraph.Demo` 里的 `ConsumerSamplePluginAllowlistTrustPolicy` 是 bounded sample path。复制它的结构，但把存储格式和持久化策略换成宿主自己的。
 
 ## 4. 注册
 
@@ -193,7 +193,7 @@ session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(
 运行受防守的 hosted proof：
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof
 ```
 
 期待：
@@ -207,5 +207,5 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md)
 - [插件信任契约 v1](./plugin-trust-contracts.md)
 - [Host Integration](./host-integration.md)
-- [Consumer Sample](./consumer-sample.md)
+- [Demo Guide](./demo-guide.md)
 - [Host Recipe 阶梯](./host-recipe-ladder.md)

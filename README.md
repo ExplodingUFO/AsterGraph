@@ -22,8 +22,8 @@ The scenario shows the SDK as an embeddable authoring surface: drag definition-b
 | Time | Do this | Outcome |
 | --- | --- | --- |
 | 30 seconds | Look at the AI workflow scenario above and run `src/AsterGraph.Demo -- --scenario ai-pipeline` when you want the visual tour. | You can tell what kind of graph editor SDK this is before reading maintainer proof. |
-| 5 minutes | Generate `dotnet new astergraph-avalonia`, run the starter, then validate `ConsumerSample.Avalonia -- --proof --support-bundle <path>`. | You have a copyable hosted route with host actions, selected-node parameters, trusted plugin evidence, and a local support bundle. |
-| 30 minutes | Read [Quick Start](./docs/en/quick-start.md), [Consumer Sample](./tools/AsterGraph.ConsumerSample.Avalonia/README.md), and [Host Integration](./docs/en/host-integration.md). | You can choose hosted UI, runtime-only, plugin, or migration routes without changing the runtime model. |
+| 5 minutes | Generate `dotnet new astergraph-avalonia`, run the starter, then validate `src/AsterGraph.Demo -- --proof`. | You have a copyable hosted route with host actions, selected-node parameters, trusted plugin evidence, and a local support bundle. |
+| 30 minutes | Read [Quick Start](./docs/en/quick-start.md), `src/AsterGraph.Demo`, and [Host Integration](./docs/en/host-integration.md). | You can choose hosted UI, runtime-only, plugin, or migration routes without changing the runtime model. |
 
 Maintainer and advanced proof details stay under [Public Launch Checklist](./docs/en/public-launch-checklist.md), [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md), and [Beta Support Bundle](./docs/en/support-bundle.md).
 
@@ -33,25 +33,25 @@ Generate a native Avalonia host or a plugin starter:
 dotnet new install ./templates
 dotnet new astergraph-avalonia -n MyGraphHost
 dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
-dotnet run --project tools/AsterGraph.PluginTool -- validate ./MyGraphPlugin/bin/Debug/net8.0/MyGraphPlugin.dll
+dotnet build MyGraphPlugin/MyGraphPlugin.csproj
 ```
 
 ## Start Here
 
 | I want to... | Start here | Why |
 | --- | --- | --- |
-| get the first hosted entry | [`tools/AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) | smallest end-to-end Avalonia scaffold; the first hosted hop in the cookbook |
+| get the first hosted entry | `templates/astergraph-avalonia` | smallest end-to-end Avalonia scaffold; the first hosted hop in the cookbook |
 | generate a native hosted app | [`templates/astergraph-avalonia`](./templates/astergraph-avalonia/) | `dotnet new` scaffold for a cross-platform Avalonia host |
 | generate a plugin starter | [`templates/astergraph-plugin`](./templates/astergraph-plugin/) | `dotnet new` scaffold for a trusted in-process plugin |
-| get the fastest runtime-only first run | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | smallest runtime-only sample; one canonical route for custom UI or native shells |
-| embed the shipped Avalonia UI | [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) | smallest stock hosted-UI sample after the starter scaffold |
-| try a realistic hosted integration | [Consumer Sample](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) | medium sample on the same canonical route, with host-owned actions, parameter editing, and one trusted plugin |
+| get the fastest runtime-only first run | `src/AsterGraph.Demo -- --proof` | smallest runtime-only sample; one canonical route for custom UI or native shells |
+| embed the shipped Avalonia UI | `src/AsterGraph.Demo` | smallest stock hosted-UI sample after the starter scaffold |
+| try a realistic hosted integration | `src/AsterGraph.Demo` | medium sample on the same canonical route, with host-owned actions, parameter editing, and one trusted plugin |
 | integrate into an existing host | [Host Integration](./docs/en/host-integration.md) | route matrix, package boundary, migration guidance |
 | inspect the full surface visually | [Demo Guide](./docs/en/demo-guide.md) | showcase host for plugins, automation, localization, and standalone surfaces |
 | validate packed consumption or maintain releases | [Contributing](./CONTRIBUTING.md) and [Public Launch Checklist](./docs/en/public-launch-checklist.md) | proof lanes, CI, and release flow |
 
-The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
-For a five-minute hosted copy path, run the starter scaffold first, then validate `ConsumerSample.Avalonia -- --proof --support-bundle <path>` before moving to the full Demo.
+The hosted route ladder is `templates/astergraph-avalonia -> src/AsterGraph.Demo -> src/AsterGraph.Demo -- --proof`.
+For a five-minute hosted copy path, run the starter scaffold first, then validate `src/AsterGraph.Demo -- --proof` before moving to the full Demo.
 For the shortest hosted composition code, use `AsterGraphHostBuilder.Create().UseDocument(document).UseCatalog(catalog).UseDefaultCompatibility().BuildAvaloniaView()`; drop down to `AsterGraphEditorFactory.Create(...)` and `AsterGraphAvaloniaViewFactory.Create(...)` when you need explicit per-service wiring.
 
 ## Public Beta
@@ -61,7 +61,7 @@ For the shortest hosted composition code, use `AsterGraphHostBuilder.Create().Us
 - historical legacy repository milestone tag series: `v1.x`-style pre-launch checkpoints (historical pre-launch checkpoints, not the NuGet version)
 - GitHub prerelease/Release entries must use the same SemVer as the NuGet packages; local planning milestones are not public release identifiers
 - published packages target `net8.0`, `net9.0`, and `net10.0`
-- packed `HostSample` also proves downstream `.NET 10` consumption during the release gate
+- the release validation lane also proves downstream `.NET 10` consumption
 - public prerelease tags must match the package version exactly for this package line, for example `v0.11.0-beta`
 - package version versus historical repository-tag guidance: [Versioning](./docs/en/versioning.md)
 - frozen support boundary and `v1.0.0` upgrade guidance: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)
@@ -89,24 +89,24 @@ Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, seri
 
 | Route | Use when | First API | First sample |
 | --- | --- | --- | --- |
-| Hosted starter scaffold | the host wants the smallest end-to-end Avalonia entry before a fuller app | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) |
-| Thin hosted builder | the host wants the common Avalonia route with less composition boilerplate | `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` | [`AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) |
-| Runtime-only or custom UI | the host owns its own UI and wants the canonical runtime boundary | `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` | [`AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) |
-| Shipped Avalonia UI | the host wants the stock editor shell or stock standalone Avalonia surfaces | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) |
+| Hosted starter scaffold | the host wants the smallest end-to-end Avalonia entry before a fuller app | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `templates/astergraph-avalonia` |
+| Thin hosted builder | the host wants the common Avalonia route with less composition boilerplate | `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` | `templates/astergraph-avalonia` |
+| Runtime-only or custom UI | the host owns its own UI and wants the canonical runtime boundary | `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` | `src/AsterGraph.Demo -- --proof` |
+| Shipped Avalonia UI | the host wants the stock editor shell or stock standalone Avalonia surfaces | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `src/AsterGraph.Demo` |
 | Retained migration | the host is moving off older MVVM-shaped entry points in planned batches | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/en/host-integration.md) |
 
 For new runtime-facing work, anchor on the first route. The Avalonia route is the supported hosted adapter path today, while the retained route stays migration-only. The current public beta keeps `WPF` as adapter 2 and publishes Avalonia/WPF gaps through the [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md) instead of adding adapter-specific runtime APIs or claiming parity.
 
 ## Public Entry Map
 
-- [`tools/AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) = first hosted scaffold; the smallest end-to-end Avalonia entry
-- [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) = first-run sample for the runtime-only path
-- [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) = smallest stock hosted-UI sample after the starter scaffold
-- [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) = realistic hosted-UI consumer sample between `HelloWorld.Avalonia` and `Demo`
-- [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = proof harness for runtime-only and hosted-UI validation, not the onboarding step
-- [`tools/AsterGraph.PackageSmoke`](./tools/AsterGraph.PackageSmoke/) = packed-package proof
-- [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = defended baseline/large/stress performance, authoring, SVG/raster export, reload, and history/state proof; `xlarge` remains telemetry-only
-- [`tools/AsterGraph.PluginTool`](./tools/AsterGraph.PluginTool/) = cross-platform CLI for plugin validation, trust evidence, and hash inspection
+- `templates/astergraph-avalonia` = first hosted scaffold; the smallest end-to-end Avalonia entry
+- `src/AsterGraph.Demo -- --proof` = first-run sample for the runtime-only path
+- `src/AsterGraph.Demo` = smallest stock hosted-UI sample after the starter scaffold
+- `src/AsterGraph.Demo` = realistic hosted-UI sample and full showcase host
+- `src/AsterGraph.Demo -- --proof` = proof mode for runtime-only and hosted-UI validation, not the onboarding step
+- `release validation lane` = packed-package proof
+- `release validation lane` = defended baseline/large/stress performance, authoring, SVG/raster export, reload, and history/state proof; `xlarge` remains telemetry-only
+- `templates/astergraph-plugin` = `dotnet new astergraph-plugin` trusted plugin starter
 - [`templates/astergraph-avalonia`](./templates/astergraph-avalonia/) = `dotnet new astergraph-avalonia` native Avalonia starter
 - [`templates/astergraph-plugin`](./templates/astergraph-plugin/) = `dotnet new astergraph-plugin` trusted plugin starter
 - [`src/AsterGraph.Demo`](./src/AsterGraph.Demo/) = showcase host; menu labels follow the current UI language
@@ -118,16 +118,16 @@ Use the [Feature Catalog](./docs/en/feature-catalog.md) for governed feature rec
 
 | Module | Canonical seam | First proof/sample anchor |
 | --- | --- | --- |
-| `Selection` | `IGraphEditorSession.Commands.SetSelection(...)` + `Queries.GetSelectionSnapshot()` | `tools/AsterGraph.ScaleSmoke`, `tools/AsterGraph.HelloWorld` |
-| `History` | `IGraphEditorSession.Commands.Undo()` / `Redo()` plus the save/dirty contract | `tools/AsterGraph.ScaleSmoke`, [State Contracts](./docs/en/state-contracts.md) |
-| `Clipboard` | `TryCopySelectionAsync()` / `TryPasteSelectionAsync()` through host clipboard services | `tools/AsterGraph.HostSample` |
-| `Shortcut Policy` | `AsterGraphCommandShortcutPolicy` on the hosted Avalonia route | `tools/AsterGraph.PackageSmoke`, `tools/AsterGraph.HelloWorld.Avalonia` |
+| `Selection` | `IGraphEditorSession.Commands.SetSelection(...)` + `Queries.GetSelectionSnapshot()` | `release validation lane`, `src/AsterGraph.Demo -- --proof` |
+| `History` | `IGraphEditorSession.Commands.Undo()` / `Redo()` plus the save/dirty contract | `release validation lane`, [State Contracts](./docs/en/state-contracts.md) |
+| `Clipboard` | `TryCopySelectionAsync()` / `TryPasteSelectionAsync()` through host clipboard services | `src/AsterGraph.Demo -- --proof` |
+| `Shortcut Policy` | `AsterGraphCommandShortcutPolicy` on the hosted Avalonia route | `release validation lane`, `src/AsterGraph.Demo` |
 | `Layout` | session-backed align/distribute commands | `src/AsterGraph.Demo` |
 | `MiniMap` | session snapshots projected into `AsterGraphMiniMapViewFactory.Create(...)` | `src/AsterGraph.Demo` |
 | `Stencil` | session stencil queries plus the shipped Avalonia insertion surface | `src/AsterGraph.Demo` |
 | `Fragment Library` | session fragment/template commands backed by fragment workspace/library services | `src/AsterGraph.Demo` |
-| `Export` | `IGraphSceneSvgExportService`, `TryExportSceneAsSvg()`, and raster `TryExportSceneAsImage(...)` with SVG/PNG/JPEG scope/progress/cancel evidence | `tools/AsterGraph.HostSample`, `tools/AsterGraph.ScaleSmoke` |
-| `Baseline Edge Authoring` | `StartConnection(...)`, `CompleteConnection(...)`, reconnect/disconnect commands, and the pending-connection snapshot | `tools/AsterGraph.HostSample`, `tools/AsterGraph.ScaleSmoke` |
+| `Export` | `IGraphSceneSvgExportService`, `TryExportSceneAsSvg()`, and raster `TryExportSceneAsImage(...)` with SVG/PNG/JPEG scope/progress/cancel evidence | `src/AsterGraph.Demo -- --proof`, `release validation lane` |
+| `Baseline Edge Authoring` | `StartConnection(...)`, `CompleteConnection(...)`, reconnect/disconnect commands, and the pending-connection snapshot | `src/AsterGraph.Demo -- --proof`, `release validation lane` |
 | `Node Surface Authoring` | `GetNodeSurfaceSnapshots()`, `TrySetNodeSize(...)`, and parameter edits through the shared session command path | `src/AsterGraph.Demo`, [Advanced Editing Guide](./docs/en/advanced-editing.md) |
 | `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`, `GetNodeGroups()`, `GetNodeGroupSnapshots()`, and group collapse/move/resize/membership commands | `src/AsterGraph.Demo`, [Advanced Editing Guide](./docs/en/advanced-editing.md) |
 | `Composite Scope Authoring` | wrap/promote/expose/unexpose/scope-navigation commands plus scope/composite queries | `src/AsterGraph.Demo`, [Advanced Editing Guide](./docs/en/advanced-editing.md) |
@@ -207,7 +207,7 @@ Consumer-facing guides:
 - [Host Integration](./docs/en/host-integration.md)
 - [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)
 - [Advanced Editing Guide](./docs/en/advanced-editing.md)
-- [ScaleSmoke Baseline](./docs/en/scale-baseline.md)
+- [Scale Baseline](./docs/en/scale-baseline.md)
 - [Authoring Inspector Recipe](./docs/en/authoring-inspector-recipe.md)
 - [Adoption Feedback Loop](./docs/en/adoption-feedback.md)
 - [Plugin And Custom Node Recipe](./docs/en/plugin-recipe.md)

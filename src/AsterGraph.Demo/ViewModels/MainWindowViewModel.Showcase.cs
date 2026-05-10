@@ -139,8 +139,8 @@ public partial class MainWindowViewModel
             "The scenario tour ties the AI pipeline nodes, parameters, connections, plugin trust, automation, save, and export evidence into one runnable flow."),
         DemoHostMenuGroups.Cookbook => CookbookSummary,
         DemoHostMenuGroups.Integration => T(
-            "集成面板同时说明 HostSample 的最小 consumer path，并展示独立表面、presenter replacement 和本地化证明。",
-            "The integration panel explains HostSample as the minimal consumer path and shows standalone surfaces, presenter replacement, and localization proof together."),
+            "集成面板同时说明当前 template/Demo 路线，并展示独立表面、presenter replacement 和本地化证明。",
+            "The integration panel explains the current template/Demo route and shows standalone surfaces, presenter replacement, and localization proof together."),
         DemoHostMenuGroups.Proof => T(
             "证明面板把宿主壳层控制与共享运行时证据并排展示，用来确认当前窗口没有第二个编辑器实例，只有同一个 Session。",
             "The proof panel shows host-shell controls next to shared runtime evidence to confirm the window owns no second editor instance, only the same Session."),
@@ -402,18 +402,18 @@ public partial class MainWindowViewModel
             new CapabilityShowcaseItem(
                 "consumer-host-path",
                 T("Consumer Path", "Consumer Path"),
-                T("把 HostSample 和 Demo 的职责分开，让最小接入路径与 showcase host 各司其职。", "Separate HostSample and Demo so the minimal adoption path and the showcase host keep distinct responsibilities."),
+                T("把模板路线和 Demo 路线分开，让最小生成宿主与 showcase host 各司其职。", "Separate the template route from the Demo route so the minimal generated host and showcase host keep distinct responsibilities."),
                 T(
-                    "HostSample 证明最小 consumer path；Demo 负责展示完整能力和宿主边界，不再兼任最小样例。",
-                    "HostSample proves the minimal consumer path; Demo shows the full capability surface and host boundary instead of acting as the minimal sample."),
+                    "templates/astergraph-avalonia 证明最小 consumer path；src/AsterGraph.Demo 展示完整能力和宿主边界。",
+                    "templates/astergraph-avalonia proves the minimal consumer path; src/AsterGraph.Demo shows the full capability surface and host boundary."),
                 [
                     T("所属层：consumer onboarding。", "Layer: consumer onboarding."),
-                    T("宿主入口：CreateSession(...)、Create(...)、AsterGraphAvaloniaViewFactory、HostSample。", "Host entry: CreateSession(...), Create(...), AsterGraphAvaloniaViewFactory, and HostSample."),
+                    T("宿主入口：CreateSession(...)、Create(...)、AsterGraphAvaloniaViewFactory、templates/astergraph-avalonia。", "Host entry: CreateSession(...), Create(...), AsterGraphAvaloniaViewFactory, and templates/astergraph-avalonia."),
                     T("可替换点：宿主可只采用 runtime、完整壳层或独立表面。", "Seams: hosts can adopt only runtime, the full shell, or standalone surfaces."),
                 ],
                 [
-                    T("HostSample 明确作为最小 consumer path。", "HostSample is explicitly the minimal consumer path."),
-                    T("Demo 明确作为 showcase host。", "Demo is explicitly the showcase host."),
+                    T("templates/astergraph-avalonia 明确作为最小 consumer path。", "templates/astergraph-avalonia is explicitly the minimal consumer path."),
+                    T("src/AsterGraph.Demo 明确作为 showcase host 和 proof mode。", "src/AsterGraph.Demo is explicitly the showcase host and proof mode."),
                 ]),
             new CapabilityShowcaseItem(
                 "history-save-contract",
@@ -424,7 +424,7 @@ public partial class MainWindowViewModel
                     "The demo's automation, diagnostics, and consumer docs now organize around the same state contract so runtime semantics do not live only in internal memory."),
                 [
                     T("所属层：state contract / proof ring。", "Layer: state contract / proof ring."),
-                    T("宿主入口：state-contracts.md、contract lane、ScaleSmoke markers。", "Host entry: state-contracts.md, the contract lane, and ScaleSmoke markers."),
+                    T("宿主入口：state-contracts.md、contract lane、Scale Baseline markers。", "Host entry: state-contracts.md, the contract lane, and Scale Baseline markers."),
                     T("可替换点：宿主可以依赖 contract，而不是猜 retained facade 的行为。", "Seams: hosts can rely on the contract instead of guessing retained-facade behavior."),
                 ],
                 [
