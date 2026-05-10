@@ -1462,6 +1462,284 @@ public static partial class DemoCookbookCatalog
             """
             ),
         new DemoCookbookRecipe(
+            "lifecycle-workspace-save-restore-route",
+            DemoCookbookRecipeCategory.DiagnosticsSupport,
+            "Lifecycle workspace save/restore route",
+            "Launch a lifecycle fixture for save/load command affordances, workspace diagnostics, and restore review.",
+            [
+                new DemoCookbookAnchor(
+                    "Workspace save command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "SaveWorkspace"),
+                new DemoCookbookAnchor(
+                    "Workspace load command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "LoadWorkspace"),
+                new DemoCookbookAnchor(
+                    "Workspace command descriptors",
+                    "src/AsterGraph.Editor/Runtime/Internal/GraphEditorCommandDescriptorCatalog.cs",
+                    "workspace.save"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Workspace save/restore graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "workspace-save-restore"),
+                new DemoCookbookAnchor(
+                    "Workspace diagnostics proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorDiagnosticsInspectionTests.cs",
+                    "workspace.save.succeeded"),
+                new DemoCookbookAnchor(
+                    "Workspace load proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorServiceSeamsTests.cs",
+                    "workspace.load.succeeded"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Lifecycle fixture cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "LIFECYCLE_WORKSPACE_SAVE_RESTORE_FIXTURE_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The workspace-save-restore fixture keeps save/load command effects visible as a stable graph lifecycle scene.",
+                    "workspace-save-restore"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "Workspace diagnostics emit succeeded load/save events through existing diagnostics surfaces.",
+                    "workspace.save.succeeded"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Lifecycle fixture coverage is tied to the narrow Phase 6d marker.",
+                    "LIFECYCLE_WORKSPACE_SAVE_RESTORE_FIXTURE_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "The fixture leaves restore targets grouped for quick support review.",
+                    "workspace-save-restore"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Host-visible command descriptors keep save/load affordances inspectable.",
+                    "workspace.save"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Save/load diagnostics stay on the existing workspace command route.",
+                    "workspace.save.succeeded"),
+            ],
+            [
+                "LIFECYCLE_WORKSPACE_SAVE_RESTORE_FIXTURE_OK",
+                "WORKSPACE_SAVE_LOAD_DIAGNOSTICS_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "Lifecycle workspace save/restore route: launch `workspace-save-restore` and inspect SaveWorkspace, LoadWorkspace, and workspace diagnostics evidence.",
+                "Supported seams live in `AsterGraph.Editor` workspace command contracts, command descriptors, and diagnostics surfaces.",
+                "Demo cookbook provides a save/restore fixture and screenshot-gate coverage only; Demo does not add a persistence engine or storage policy."),
+            "Workspace lifecycle fixture coverage is limited to existing save/load commands, command descriptors, and diagnostics; it does not add a persistence engine, cloud sync, storage policy, or migration runtime.",
+            CodeSample: """
+            // Keep workspace lifecycle actions on the shared session command route.
+            editor.Session.Commands.SaveWorkspace();
+            var loaded = editor.Session.Commands.LoadWorkspace();
+
+            // Inspect diagnostics rather than adding Demo-local persistence state.
+            var inspection = editor.Session.Diagnostics.CaptureInspectionSnapshot();
+            """
+            ),
+        new DemoCookbookRecipe(
+            "lifecycle-clipboard-fragment-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Lifecycle clipboard fragment route",
+            "Launch a lifecycle fixture for copy/paste, fragment export/import, and serializer proof evidence.",
+            [
+                new DemoCookbookAnchor(
+                    "Copy selection command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryCopySelectionAsync"),
+                new DemoCookbookAnchor(
+                    "Paste selection command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryPasteSelectionAsync"),
+                new DemoCookbookAnchor(
+                    "Clipboard payload serializer",
+                    "src/AsterGraph.Editor/Services/Persistence/Clipboard/GraphClipboardPayloadSerializer.cs",
+                    "astergraph.clipboard/v1"),
+                new DemoCookbookAnchor(
+                    "Fragment export command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryExportSelectionFragment"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Clipboard fragment graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "clipboard-fragment-roundtrip"),
+                new DemoCookbookAnchor(
+                    "Clipboard serializer proof",
+                    "tests/AsterGraph.Editor.Tests/EditorClipboardAndFragmentCompatibilityTests.cs",
+                    "ClipboardPayloadSerializer_RoundTripsSourceBackedSelectionShape"),
+                new DemoCookbookAnchor(
+                    "Fragment roundtrip proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionFragmentContractsTests.cs",
+                    "SessionCommands_RoundTripFragmentWorkspaceAndTemplateLibrary"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Lifecycle fixture cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "LIFECYCLE_CLIPBOARD_FRAGMENT_FIXTURE_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The clipboard-fragment-roundtrip fixture presents source and pasted groups as one screenshot route.",
+                    "clipboard-fragment-roundtrip"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.NodeMetadata,
+                    "Clipboard payloads remain versioned with the canonical serializer format.",
+                    "astergraph.clipboard/v1"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Fragment roundtrip proof keeps the recipe tied to existing export/import behavior.",
+                    "SessionCommands_RoundTripFragmentWorkspaceAndTemplateLibrary"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Copy/export starts from current selection and keeps pasted fragments selected for review.",
+                    "TryCopySelectionAsync"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Fragment paste remaps copied connections instead of reusing stale ids.",
+                    "SessionCommands_RoundTripFragmentWorkspaceAndTemplateLibrary"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "The serializer format is inspectable in tests and host clipboard services.",
+                    "astergraph.clipboard/v1"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Clipboard and fragment commands publish through existing command descriptors.",
+                    "LIFECYCLE_CLIPBOARD_FRAGMENT_FIXTURE_OK"),
+            ],
+            [
+                "LIFECYCLE_CLIPBOARD_FRAGMENT_FIXTURE_OK",
+                "CLIPBOARD_FRAGMENT_ROUNDTRIP_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "Lifecycle clipboard fragment route: launch `clipboard-fragment-roundtrip` and inspect TryCopySelectionAsync, TryPasteSelectionAsync, and fragment export/import evidence.",
+                "Supported seams live in `AsterGraph.Editor` clipboard commands, fragment workspace services, and GraphClipboardPayloadSerializer.",
+                "Demo cookbook provides a copy/paste fixture and screenshot-gate coverage only; Demo does not add a clipboard service or fragment storage engine."),
+            "Clipboard lifecycle fixture coverage is limited to existing clipboard commands, fragment export/import commands, and serializer contracts; it does not add a clipboard bridge, storage engine, sandbox, or remote sync.",
+            CodeSample: """
+            // Copy and paste through the canonical session commands.
+            await editor.Session.Commands.TryCopySelectionAsync();
+            await editor.Session.Commands.TryPasteSelectionAsync();
+
+            // Use fragment export/import when hosts want a file-backed handoff.
+            editor.Session.Commands.TryExportSelectionFragment();
+            editor.Session.Commands.TryImportFragment();
+            """
+            ),
+        new DemoCookbookRecipe(
+            "lifecycle-validation-helper-route",
+            DemoCookbookRecipeCategory.ReviewHelp,
+            "Lifecycle validation helper route",
+            "Launch a lifecycle fixture for validation focus, helper-line feedback, and invalid-route repair review.",
+            [
+                new DemoCookbookAnchor(
+                    "Validation snapshot query",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetValidationSnapshot"),
+                new DemoCookbookAnchor(
+                    "Validation issue focus command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryFocusValidationIssue"),
+                new DemoCookbookAnchor(
+                    "Pending connection helper query",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetPendingConnectionSnapshot"),
+                new DemoCookbookAnchor(
+                    "Validation repair command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryApplyValidationRepair"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Validation helper graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "validation-prevent-cycle"),
+                new DemoCookbookAnchor(
+                    "Validation focus proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorValidationSnapshotTests.cs",
+                    "Commands_FocusValidationIssue_SelectsAndCentersAffectedConnection"),
+                new DemoCookbookAnchor(
+                    "Pending connection invalid-target proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionTests.cs",
+                    "RuntimeSession_PendingConnectionSnapshot_CapturesInvalidTargetFeedback"),
+                new DemoCookbookAnchor(
+                    "Route reset repair proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorValidationSnapshotTests.cs",
+                    "validation.connection.route.reset"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Lifecycle fixture cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "LIFECYCLE_VALIDATION_HELPER_FIXTURE_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The validation-prevent-cycle fixture makes accepted and rejected routes visible in one graph.",
+                    "validation-prevent-cycle"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "Validation snapshots and repair actions stay on the shared query/command route.",
+                    "GetValidationSnapshot"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Pending connection invalid-target feedback backs helper-line review.",
+                    "RuntimeSession_PendingConnectionSnapshot_CapturesInvalidTargetFeedback"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Pending connection snapshots expose invalid target feedback for helper-line UI.",
+                    "GetPendingConnectionSnapshot"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Validation focus centers the affected connection or node for review.",
+                    "TryFocusValidationIssue"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Validation repair applies through previewable repair actions.",
+                    "TryApplyValidationRepair"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "Persisted route vertices make reset-repair feedback visible in screenshots.",
+                    "validation.connection.route.reset"),
+            ],
+            [
+                "LIFECYCLE_VALIDATION_HELPER_FIXTURE_OK",
+                "VALIDATION_HELPER_ROUTE_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "Lifecycle validation helper route: launch `validation-prevent-cycle` and inspect validation snapshots, pending connection feedback, and repair action evidence.",
+                "Supported seams live in `AsterGraph.Editor` validation queries, pending connection snapshots, and validation repair commands.",
+                "Demo cookbook provides a validation helper fixture and screenshot-gate coverage only; Demo does not add a cycle-prevention engine or alternate connection validator."),
+            "Validation lifecycle fixture coverage is limited to existing validation queries, pending connection feedback, and repair commands; it does not add a cycle-prevention engine, alternate validator, workflow engine, or rule DSL.",
+            CodeSample: """
+            // Inspect validation and helper-line state from the session.
+            var validation = editor.Session.Queries.GetValidationSnapshot();
+            var pending = editor.Session.Queries.GetPendingConnectionSnapshot();
+
+            // Keep focus and repair actions on the supported command route.
+            editor.Session.Commands.TryFocusValidationIssue(validation.Issues[0]);
+            editor.Session.Commands.TryApplyValidationRepair(
+                editor.Session.Queries.GetValidationIssueRepairActions(validation.Issues[0])[0]);
+            """
+            ),
+        new DemoCookbookRecipe(
             "builtin-minimap-workbench-route",
             DemoCookbookRecipeCategory.PerformanceViewport,
             "Built-in MiniMap workbench route",
