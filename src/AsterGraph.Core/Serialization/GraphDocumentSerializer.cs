@@ -5,7 +5,7 @@ using AsterGraph.Core.Models;
 namespace AsterGraph.Core.Serialization;
 
 /// <summary>
-/// 图文档序列化器，负责稳定的文件契约和版本兼容读取。
+/// 图文档序列化器，负责稳定的当前版本文件契约。
 /// </summary>
 public static class GraphDocumentSerializer
 {
@@ -32,12 +32,20 @@ public static class GraphDocumentSerializer
     }
 
     /// <summary>
-    /// 从 JSON 文本反序列化图文档，同时兼容旧的无版本文件格式。
+    /// 从当前版本 JSON 文本反序列化图文档。
     /// </summary>
     /// <param name="json">图文档 JSON 文本。</param>
     /// <returns>反序列化后的图文档。</returns>
     public static GraphDocument Deserialize(string json)
         => GraphDocumentCompatibility.Deserialize(json, JsonOptions);
+
+    /// <summary>
+    /// Imports an older graph document payload into the current normalized document model.
+    /// </summary>
+    /// <param name="json">Legacy or older-version graph document JSON text.</param>
+    /// <returns>The imported graph document normalized to the current document model.</returns>
+    public static GraphDocument ImportLegacy(string json)
+        => GraphDocumentCompatibility.ImportLegacy(json, JsonOptions);
 
     /// <summary>
     /// 将图文档保存到指定文件路径。

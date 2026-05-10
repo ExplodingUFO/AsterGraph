@@ -50,8 +50,7 @@ Replace with canonical seams:
 
 Compatibility bridges that can stay only during this stage:
 
-- retained connection discovery: `GetCompatibleTargets(...)` and `CompatiblePortTarget`
-- canonical replacement: `GetCompatiblePortTargets(...)` and `GraphEditorCompatiblePortTargetSnapshot`
+- canonical connection discovery: `GetCompatiblePortTargets(...)` and `GraphEditorCompatiblePortTargetSnapshot`
 - temporary node-group helpers: `TrySetNodeExpansionState(...)` and `TrySetNodeGroupExtraPadding(...)`
 - canonical connection control: `connections.disconnect-*`, especially `connections.disconnect-all`
 
@@ -70,7 +69,7 @@ Keep temporarily:
 Replace with canonical seams:
 
 - `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` for shipped Avalonia UI
-- `GetCompatiblePortTargets(...)` and snapshot APIs for compatibility projection
+- `GetCompatiblePortTargets(...)` and snapshot APIs for compatible-target projection
 - the session/runtime route for new work
 
 Ownership after this stage:

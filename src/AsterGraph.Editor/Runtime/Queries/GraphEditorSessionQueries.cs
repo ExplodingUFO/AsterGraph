@@ -3,7 +3,6 @@ using AsterGraph.Editor;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Plugins;
-using AsterGraph.Editor.ViewModels;
 using AsterGraph.Core.Models;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -586,27 +585,6 @@ public sealed partial class GraphEditorSession
         return new(true, pending.SourceNodeId, pending.SourcePortId, results, emptyReason);
     }
 
-#pragma warning disable CS0618
-    public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
-    {
-        var compatibleTargets = _host.GetCompatiblePortTargets(sourceNodeId, sourcePortId);
-        if (compatibleTargets.Count == 0)
-        {
-            return [];
-        }
-
-        var nodesById = _host.CreateActiveScopeDocumentSnapshot()
-            .Nodes
-            .ToDictionary(node => node.Id, StringComparer.Ordinal);
-
-        return compatibleTargets
-            .Select(target => CreateCompatibilityShimTarget(target, nodesById))
-            .Where(target => target is not null)
-            .Select(target => target!)
-            .ToList();
-    }
-#pragma warning restore CS0618
-
     public GraphEditorInspectionSnapshot CaptureInspectionSnapshot()
     {
         var pendingConnection = CreatePendingConnectionSnapshot();
@@ -961,24 +939,6 @@ public sealed partial class GraphEditorSession
     private static bool Contains(string? value, string searchText)
         => !string.IsNullOrWhiteSpace(value)
            && value.Contains(searchText, StringComparison.OrdinalIgnoreCase);
-
-#pragma warning disable CS0618
-    private static CompatiblePortTarget? CreateCompatibilityShimTarget(
-        GraphEditorCompatiblePortTargetSnapshot target,
-        IReadOnlyDictionary<string, GraphNode> nodesById)
-    {
-        if (!nodesById.TryGetValue(target.NodeId, out var nodeModel))
-        {
-            return null;
-        }
-
-        var node = new NodeViewModel(nodeModel);
-        var port = node.GetPort(target.PortId);
-        return port is null
-            ? null
-            : new CompatiblePortTarget(node, port, target.Compatibility);
-    }
-#pragma warning restore CS0618
 
     private static IEnumerable<GraphEditorCompatibleNodeDefinitionSnapshot> EnumerateCompatibleNodeDefinitionTargets(
         GraphEditorSessionDescriptorSupport descriptorSupport,

@@ -271,8 +271,7 @@ public sealed class GraphEditorProofRingTests
     }
 
     [Fact]
-#pragma warning disable CS0618
-    public void RetainedCompatibilityProof_ProjectsCompatibleTargetsBackToRetainedFacadeInstances()
+    public void RetainedCompatibilityProof_ProjectsCompatibleTargetsThroughCanonicalSessionSnapshots()
     {
         var legacyEditor = new GraphEditorViewModel(
             CreateDocument(),
@@ -285,19 +284,18 @@ public sealed class GraphEditorProofRingTests
             CompatibilityService = new ExactCompatibilityService(),
         });
 
-        var legacyTarget = Assert.Single(legacyEditor.GetCompatibleTargets(SourceNodeId, SourcePortId));
-        var factoryTarget = Assert.Single(factoryEditor.GetCompatibleTargets(SourceNodeId, SourcePortId));
+        var legacyTarget = Assert.Single(legacyEditor.Session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId));
+        var factoryTarget = Assert.Single(factoryEditor.Session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId));
         var legacyRetainedNode = Assert.IsType<NodeViewModel>(legacyEditor.FindNode(TargetNodeId));
         var factoryRetainedNode = Assert.IsType<NodeViewModel>(factoryEditor.FindNode(TargetNodeId));
         var legacyRetainedPort = Assert.IsType<PortViewModel>(legacyRetainedNode.GetPort(TargetPortId));
         var factoryRetainedPort = Assert.IsType<PortViewModel>(factoryRetainedNode.GetPort(TargetPortId));
 
-        Assert.Same(legacyRetainedNode, legacyTarget.Node);
-        Assert.Same(factoryRetainedNode, factoryTarget.Node);
-        Assert.Same(legacyRetainedPort, legacyTarget.Port);
-        Assert.Same(factoryRetainedPort, factoryTarget.Port);
+        Assert.Equal(legacyRetainedNode.Id, legacyTarget.NodeId);
+        Assert.Equal(factoryRetainedNode.Id, factoryTarget.NodeId);
+        Assert.Equal(legacyRetainedPort.Id, legacyTarget.PortId);
+        Assert.Equal(factoryRetainedPort.Id, factoryTarget.PortId);
     }
-#pragma warning restore CS0618
 
     [Fact]
     public void RuntimeAndRetainedProof_StayAlignedOnSharedDescriptorSignatures()

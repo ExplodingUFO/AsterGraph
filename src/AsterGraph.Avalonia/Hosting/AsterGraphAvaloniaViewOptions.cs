@@ -9,12 +9,12 @@ namespace AsterGraph.Avalonia.Hosting;
 /// </summary>
 /// <remarks>
 /// This options contract is the canonical hosted-UI entry point for the stock Avalonia shell.
-/// Direct <c>new GraphEditorView { Editor = ... }</c> usage is still supported as a retained compatibility path.
+/// Direct <c>new GraphEditorView { Editor = ... }</c> usage is retained migration only.
 /// </remarks>
 public sealed record AsterGraphAvaloniaViewOptions
 {
     /// <summary>
-    /// The editor view model that should be bound to the view.
+    /// The hosted editor facade that owns the shared runtime session bound to the view.
     /// </summary>
     public GraphEditorViewModel? Editor { get; init; }
 

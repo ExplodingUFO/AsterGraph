@@ -14,13 +14,25 @@
 | Compatibility-only | 已有 canonical 替代路线的 obsolete 或旧形状 helper。 | 新工作不要使用；按 replacement guidance 迁移。 |
 | Internal-only | implementation detail、internal namespace、测试、样例和 proof tool。 | 不是公开支持契约。 |
 
+## V1 compatibility removal policy
+
+| Surface | V1 decision | Replacement / boundary |
+| --- | --- | --- |
+| `GraphDocument root-only constructor/deconstruct` | 从 public metadata surface 移除。canonical constructor 携带 `RootGraphId` 和可选 scoped graph payload；位置解构改为直接读属性。 | 直接构造时使用 canonical `GraphDocument(...)` constructor 并明确 `RootGraphId`，scoped document 使用 `GraphDocument.CreateScoped(...)`。 |
+| `GraphDocumentSerializer.Deserialize(...)` 里的隐藏 legacy 读取 | 从正常 save / restore 路径移除。`Deserialize(...)` 只接受当前 schema。 | legacy payload 先通过 `GraphDocumentSerializer.ImportLegacy(...)` 显式导入 / 迁移，再用 `Serialize(...)` 回存当前格式。 |
+| `IGraphEditorCommands.BeginConnection(...)` | 移除。 | 使用 `IGraphEditorCommands.StartConnection(...)`。 |
+| `IGraphEditorQueries.GetCompatibleTargets(...)` | 移除。 | 使用 `IGraphEditorQueries.GetCompatiblePortTargets(...)`。 |
+| `CompatiblePortTarget` | 移除。 | 使用 `GraphEditorCompatiblePortTargetSnapshot`。 |
+| `GraphEditorCapabilitySnapshot obsolete constructor/deconstruct` | 移除。 | 使用六参数 constructor 加 `init` property；读取时直接访问 property，不再做位置解构。 |
+| `AsterGraphAvaloniaViewFactory.Create(...)` 和 `AsterGraphAvaloniaViewOptions` 的 retained-facade wording | 作为 supported hosted helper 保留，但不再作为 compatibility-only 路线宣传。 | `AsterGraphEditorFactory.CreateSession(...)` 仍是 runtime authority；editor / view factory 只是这条路线上的 hosted composition。直接 `GraphEditorView` 构造只属于 retained migration。 |
+
 ## 包级清单
 
 | 包 | Stable canonical | Supported hosted helper | Retained migration | Compatibility-only | Internal-only boundary |
 | --- | --- | --- | --- | --- | --- |
 | `AsterGraph.Abstractions` | 节点定义、端口定义、provider / plugin-facing contract、identifier、metadata DTO，以及只产出这些 DTO 的 thin definition builder。 | 无。 | 无。 | 当前不作为主支持层级发布。 | 未通过 package docs 暴露的实现 helper。 |
-| `AsterGraph.Core` | 图文档、序列化模型契约、group container/collapse semantics、兼容规则输入、thin implicit-conversion rule builder，以及 editor/session 组合使用的共享数据类型。 | 无。 | 无。 | 只有在已有 runtime-first 路线时保留旧 conversion / compatibility helper。 | Core internals 与持久化实现细节。 |
-| `AsterGraph.Editor` | `AsterGraphEditorFactory.CreateSession(...)`、`IGraphEditorSession`、`IGraphEditorCommands`、`IGraphEditorQueries`、DTO / snapshot 查询、diagnostics、automation、validation snapshots、runtime overlay snapshots/providers、layout plan snapshots/providers、viewport visible scene projection snapshots/projector、hierarchy/group snapshots，包括 collapsed-boundary connection projection、navigator/outline snapshots、plugin discovery / inspection、export services，包括 raster export progress/cancel options。 | `AsterGraphEditorFactory.Create(...)` 是 hosted 组合 helper，但仍返回 retained facade。 | `GraphEditorViewModel`、`GraphEditorViewModel.Session`、迁移宿主使用的 retained menu / context-menu hook。 | `IGraphEditorQueries.GetCompatibleTargets(...)`、`CompatiblePortTarget`，以及已有 `GetCompatiblePortTargets(...)` 或 command/query snapshot 替代物的旧 MVVM 形状 helper。 | `Runtime.Internal`、`Kernel.Internal`、projection/apply internals、proof-only helper。 |
+| `AsterGraph.Core` | 图文档、当前 schema 的序列化模型契约、显式 legacy import、group container/collapse semantics、兼容规则输入、thin implicit-conversion rule builder，以及 editor/session 组合使用的共享数据类型。 | 无。 | `GraphDocumentSerializer.ImportLegacy(...)` 是旧 payload 的 bounded import / migration 入口。 | v1 primary surface 中没有。已退役 surface 见 v1 removal policy。 | Core internals 与持久化实现细节。 |
+| `AsterGraph.Editor` | `AsterGraphEditorFactory.CreateSession(...)`、`IGraphEditorSession`、`IGraphEditorCommands`、`IGraphEditorQueries`、DTO / snapshot 查询、diagnostics、automation、validation snapshots、runtime overlay snapshots/providers、layout plan snapshots/providers、viewport visible scene projection snapshots/projector、hierarchy/group snapshots，包括 collapsed-boundary connection projection、navigator/outline snapshots、plugin discovery / inspection、export services，包括 raster export progress/cancel options。 | `AsterGraphEditorFactory.Create(...)` 是 hosted 组合 helper，但仍返回 retained facade。 | `GraphEditorViewModel`、`GraphEditorViewModel.Session`、迁移宿主使用的 retained menu / context-menu hook。 | v1 primary surface 中没有。已退役 surface 见 v1 removal policy。 | `Runtime.Internal`、`Kernel.Internal`、projection/apply internals、proof-only helper。 |
 | `AsterGraph.Avalonia` | canonical editor/session route 上的 adapter 投影，以及复用同一 runtime owner 的 hosted factory。 | `AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphCanvasViewFactory`、`AsterGraphInspectorViewFactory`、`AsterGraphMiniMapViewFactory`、`AsterGraphHostBuilder`、`AsterGraphWorkbenchOptions`、hosted workbench layout / panel-state options，以及 hosted performance policy budget markers。 | 仍使用 retained editor facade 的宿主可嵌入 `GraphEditorView`。 | 仅限把现有宿主桥接到 canonical route 的 adapter-specific compatibility glue。 | Control internals、templates、interaction session internals、visual-only implementation details。 |
 
 ## 路线映射
@@ -38,11 +50,9 @@
 | Hierarchy and group projection | Stable canonical | `GraphNodeGroup.IsContainer`、`GraphNodeGroup.ProjectsMemberNodes`、`GraphEditorNodeGroupSnapshot.IsContainer`、`GraphEditorNodeGroupSnapshot.ProjectsMemberNodes`、`GraphEditorHierarchyStateSnapshot.Connections`、`GraphEditorHierarchyConnectionSnapshot` | 为基于 session route 自建 UI 的宿主发布 collapsed-container visibility 和 boundary-connection projection。它不新增第二套 group model，也不新增 adapter-specific runtime API。 |
 | Thin definition builders | Stable canonical | `NodeDefinitionBuilder`、`PortDefinitionBuilder`、`PortDefinition.HandleId`、`PortDefinition.ConnectionHint`、`GraphPort.HandleId`、`GraphPort.ConnectionHint`、`NodeParameterDefinitionBuilder`、`ImplicitConversionRuleBuilder` | 只是 convenience constructor 和稳定 port/handle metadata；每个 builder 都落到现有 DTO，不创建第二套 authoring schema 或 runtime model。 |
 | Retained migration bridge | Retained migration | `GraphEditorViewModel`、`GraphEditorView`、`GraphEditorViewModel.Session` | 只给旧宿主分批迁移使用。 |
-| 旧 compatible-target query | Compatibility-only | `IGraphEditorQueries.GetCompatibleTargets(...)`、`CompatiblePortTarget` | 优先使用 `GetCompatiblePortTargets(...)` 和 `GraphEditorCompatiblePortTargetSnapshot`。 |
-
 ## Release Handoff
 
-- release handoff：Stable canonical surface 是默认路线，Retained migration surface 只作为迁移桥，Compatibility-only 或 obsolete surface 必须继续带 replacement guidance。
+- release handoff：Stable canonical surface 是默认路线，Retained migration surface 只作为迁移桥，obsolete 已退役 compatibility-only surface 必须继续在 v1 removal policy 中带 replacement guidance。
 - 在同一个 release proof block 中同时保留 `PUBLIC_API_SURFACE_OK`、`PUBLIC_API_SCOPE_OK`、`PUBLIC_API_GUIDANCE_OK`、`ASTERGRAPH_TEMPLATE_SMOKE_OK` 和 `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`。
 - Release-candidate proof markers：`API_RELEASE_CANDIDATE_PROOF_OK:True`、`PUBLIC_API_GUIDANCE_HANDOFF_OK:True` 和 `RELEASE_BOUNDARY_STABILITY_OK:True`。
 - v0.61 API stabilization markers：`PUBLIC_API_DIFF_GATE_OK:True`、`PUBLIC_API_USAGE_GUIDANCE_OK:True` 和 `PUBLIC_API_STABILITY_SCOPE_OK:True`。
@@ -56,8 +66,8 @@
 - 新增 public host-facing symbol 必须在发布前进入这份 inventory 分类。
 - Public API 变化必须有意更新 `eng/public-api-baseline.txt`；未分类 drift 会让 release gate 失败。
 - 新增 Stable canonical surface 必须同步到 [Host Integration](./host-integration.md) 或 [Extension Contracts](./extension-contracts.md)。
-- 新增 retained migration 或 compatibility-only surface 必须带 replacement guidance。
-- 当 canonical replacement 已存在时，compatibility-only API 必须标记 obsolete。
+- 新增 retained migration surface 必须带 replacement guidance 和 migration boundary。
+- v1 primary surface 不允许新增 compatibility-only API，除非同时在 v1 compatibility removal policy 中明确退役计划。
 - README、quick-start 和 release notes 不应宣传 internal implementation details。
 
 ## Baseline Gate
@@ -83,6 +93,6 @@ Release proof 必须在 `PUBLIC_API_SURFACE_OK`、`PUBLIC_API_GUIDANCE_OK`、`PU
 发布前：
 
 1. 检查 package docs、README、quick-start 和 release notes 是否使用同一套路由命名。
-2. 检查 retained 与 compatibility-only API 是否仍指向 canonical replacement。
+2. 检查 retained API 和已退役 compatibility-only API 是否仍指向 canonical replacement。
 3. 检查 `AsterGraphHostBuilder` 是否仍被描述为 thin hosted helper，而不是 runtime model。
 4. 检查 WPF wording 是否仍保持 validation-only，除非 adapter support matrix 明确改变。

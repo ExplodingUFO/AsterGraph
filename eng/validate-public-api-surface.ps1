@@ -539,41 +539,75 @@ function Assert-WarningGuidance {
   $extensionContracts = Join-Path $RepoRoot 'docs/en/extension-contracts.md'
 
   Assert-ContainsText -Path $englishInventory -ExpectedText @(
-    'Retained migration',
-    'Compatibility-only',
-    'GraphEditorViewModel',
+    'V1 compatibility removal policy',
+    'GraphDocument root-only constructor/deconstruct',
+    'GraphDocumentSerializer.ImportLegacy(...)',
+    'IGraphEditorCommands.BeginConnection(...)',
     'IGraphEditorQueries.GetCompatibleTargets(...)',
     'CompatiblePortTarget',
     'GetCompatiblePortTargets(...)',
     'GraphEditorCompatiblePortTargetSnapshot',
-    'Compatibility-only APIs must be marked obsolete when a canonical replacement exists.'
+    'GraphEditorCapabilitySnapshot obsolete constructor/deconstruct'
   )
 
   Assert-ContainsText -Path $chineseInventory -ExpectedText @(
-    'Retained migration',
-    'Compatibility-only',
-    'GraphEditorViewModel',
+    'V1 compatibility removal policy',
+    'GraphDocument root-only constructor/deconstruct',
+    'GraphDocumentSerializer.ImportLegacy(...)',
+    'IGraphEditorCommands.BeginConnection(...)',
     'IGraphEditorQueries.GetCompatibleTargets(...)',
     'CompatiblePortTarget',
     'GetCompatiblePortTargets(...)',
     'GraphEditorCompatiblePortTargetSnapshot',
-    'compatibility-only API 必须标记 obsolete'
+    'GraphEditorCapabilitySnapshot obsolete constructor/deconstruct'
   )
 
   Assert-ContainsText -Path $extensionContracts -ExpectedText @(
+    'v1 removal policy',
     'GraphEditorViewModel',
-    'IGraphEditorQueries.GetCompatibleTargets(...)',
-    'CompatiblePortTarget',
-    'Compatibility-only APIs',
-    'replacement guidance',
+    'retired compatible-target shim',
+    'retired MVVM target shape',
     'GetCompatiblePortTargets(...)'
   )
 
   $assemblyPaths = $publishableAssemblies | ForEach-Object { Resolve-AssemblyPath -AssemblyName $_ }
   $metadataContext = New-PublicApiMetadataContext -AssemblyPaths $assemblyPaths
   try {
+    $coreAssemblyPath = Resolve-AssemblyPath -AssemblyName 'AsterGraph.Core'
+    $coreAssembly = $metadataContext.LoadFromAssemblyPath($coreAssemblyPath)
     $editorAssemblyPath = Resolve-AssemblyPath -AssemblyName 'AsterGraph.Editor'
     $editorAssembly = $metadataContext.LoadFromAssemblyPath($editorAssemblyPath)
+
+    $documentType = $coreAssembly.GetType('AsterGraph.Core.Models.GraphDocument', $true)
+    $rootOnlyConstructor = $documentType.GetConstructors() |
+      Where-Object { $_.GetParameters().Count -eq 5 } |
+      Select-Object -First 1
+    if ($rootOnlyConstructor) {
+      throw 'GraphDocument root-only constructor must not be present in the v1 public API surface.'
+    }
+
+    $rootOnlyDeconstruct = $documentType.GetMethods() |
+      Where-Object { $_.Name -eq 'Deconstruct' -and $_.GetParameters().Count -eq 5 } |
+      Select-Object -First 1
+    if ($rootOnlyDeconstruct) {
+      throw 'GraphDocument root-only deconstruct must not be present in the v1 public API surface.'
+    }
+
+    $serializerType = $coreAssembly.GetType('AsterGraph.Core.Serialization.GraphDocumentSerializer', $true)
+    if (-not ($serializerType.GetMethods() | Where-Object { $_.Name -eq 'ImportLegacy' -and $_.GetParameters().Count -eq 1 } | Select-Object -First 1)) {
+      throw 'GraphDocumentSerializer.ImportLegacy(string) must publish the explicit legacy import path.'
+    }
+
+    $commandsType = $editorAssembly.GetType('AsterGraph.Editor.Runtime.IGraphEditorCommands', $true)
+    if ($commandsType.GetMethods() | Where-Object { $_.Name -eq 'BeginConnection' } | Select-Object -First 1) {
+      throw 'IGraphEditorCommands.BeginConnection must not be present in the v1 public API surface.'
+    }
+
+    $sessionType = $editorAssembly.GetType('AsterGraph.Editor.Runtime.GraphEditorSession', $true)
+    if ($sessionType.GetMethods() | Where-Object { $_.Name -eq 'BeginConnection' } | Select-Object -First 1) {
+      throw 'GraphEditorSession.BeginConnection must not be present in the v1 public API surface.'
+    }
+
     $queriesType = $editorAssembly.GetType('AsterGraph.Editor.Runtime.IGraphEditorQueries', $true)
     $compatibilityMethod = $queriesType.GetMethods() |
       Where-Object {
@@ -581,21 +615,25 @@ function Assert-WarningGuidance {
         (($_.GetParameters() | ForEach-Object { $_.ParameterType.FullName }) -join ',') -eq 'System.String,System.String'
       } |
       Select-Object -First 1
-    if (-not $compatibilityMethod) {
-      throw 'IGraphEditorQueries.GetCompatibleTargets(string,string) was not found.'
+    if ($compatibilityMethod) {
+      throw 'IGraphEditorQueries.GetCompatibleTargets must not be present in the v1 public API surface.'
     }
 
-    $compatibilityMessage = Get-ObsoleteMessage -Member $compatibilityMethod
-    if (-not $compatibilityMessage.Contains('Compatibility-only shim', [System.StringComparison]::Ordinal) -or
-        -not $compatibilityMessage.Contains('GetCompatiblePortTargets', [System.StringComparison]::Ordinal)) {
-      throw 'IGraphEditorQueries.GetCompatibleTargets must warn as compatibility-only and name GetCompatiblePortTargets as the replacement.'
+    if (-not ($queriesType.GetMethods() | Where-Object { $_.Name -eq 'GetCompatiblePortTargets' } | Select-Object -First 1)) {
+      throw 'IGraphEditorQueries.GetCompatiblePortTargets must remain the canonical compatible-target query.'
     }
 
-    $targetType = $editorAssembly.GetType('AsterGraph.Editor.Menus.CompatiblePortTarget', $true)
-    $targetMessage = Get-ObsoleteMessage -Member $targetType
-    if (-not $targetMessage.Contains('Retained compatibility shim', [System.StringComparison]::Ordinal) -or
-        -not $targetMessage.Contains('GraphEditorCompatiblePortTargetSnapshot', [System.StringComparison]::Ordinal)) {
-      throw 'CompatiblePortTarget must warn as a retained compatibility shim and name GraphEditorCompatiblePortTargetSnapshot as the replacement.'
+    if ($editorAssembly.GetType('AsterGraph.Editor.Menus.CompatiblePortTarget', $false)) {
+      throw 'CompatiblePortTarget must not be present in the v1 public API surface.'
+    }
+
+    $capabilityType = $editorAssembly.GetType('AsterGraph.Editor.Runtime.GraphEditorCapabilitySnapshot', $true)
+    if ($capabilityType.GetConstructors() | Where-Object { $_.GetParameters().Count -eq 14 } | Select-Object -First 1) {
+      throw 'GraphEditorCapabilitySnapshot obsolete 14-parameter constructor must not be present.'
+    }
+
+    if ($capabilityType.GetMethods() | Where-Object { $_.Name -eq 'Deconstruct' -and $_.GetParameters().Count -eq 14 } | Select-Object -First 1) {
+      throw 'GraphEditorCapabilitySnapshot obsolete 14-field deconstruct must not be present.'
     }
   }
   finally {

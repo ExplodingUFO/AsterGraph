@@ -22,7 +22,7 @@ namespace AsterGraph.Avalonia.Hosting;
 /// <remarks>
 /// This builder delegates to <see cref="AsterGraphEditorFactory.Create(AsterGraphEditorOptions)" /> and
 /// <see cref="AsterGraphAvaloniaViewFactory.Create(AsterGraphAvaloniaViewOptions)" />. It does not introduce
-/// a second runtime model; runtime authority remains on <see cref="GraphEditorViewModel.Session" />.
+/// a second runtime model; runtime authority remains on <see cref="IGraphEditorSession" />.
 /// </remarks>
 public sealed class AsterGraphHostBuilder
 {

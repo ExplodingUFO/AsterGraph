@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Core.Models;
-using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
@@ -457,27 +455,4 @@ public sealed partial class GraphEditorViewModel
     public void CenterViewAt(GraphPoint worldPoint, bool updateStatus = true)
         => _kernel.CenterViewAt(worldPoint, updateStatus);
 
-    /// <summary>
-    /// 查询指定输出端口可连接的兼容输入端口。
-    /// </summary>
-    /// <remarks>
-    /// 此兼容立面仅保留在 retained host 边界，
-    /// 并将运行时 snapshot 目标重新映射回当前 <see cref="GraphEditorViewModel"/> 持有的
-    /// <see cref="NodeViewModel"/> / <see cref="PortViewModel"/> 实例。
-    /// </remarks>
-#pragma warning disable CS0618
-    public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
-        => _kernel.GetCompatiblePortTargets(sourceNodeId, sourcePortId)
-            .Select(target =>
-            {
-                var node = FindNode(target.NodeId);
-                var port = node?.GetPort(target.PortId);
-                return node is null || port is null
-                    ? null
-                    : new CompatiblePortTarget(node, port, target.Compatibility);
-            })
-            .Where(target => target is not null)
-            .Select(target => target!)
-            .ToList();
-#pragma warning restore CS0618
 }

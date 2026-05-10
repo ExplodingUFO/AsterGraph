@@ -49,34 +49,6 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
-    public void GraphEditorSession_PreservesConcreteBeginConnectionCompatibilityShim()
-    {
-        var method = typeof(GraphEditorSession).GetMethod(nameof(GraphEditorSession.BeginConnection), [typeof(string), typeof(string)]);
-
-        Assert.NotNull(method);
-        var attribute = Assert.Single(
-            method!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
-            attribute => attribute is ObsoleteAttribute);
-        var obsolete = Assert.IsType<ObsoleteAttribute>(attribute);
-
-        Assert.Contains("StartConnection", obsolete.Message, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void IGraphEditorCommands_BeginConnection_IsCompatibilityShimWithReplacementGuidance()
-    {
-        var method = typeof(IGraphEditorCommands).GetMethod(nameof(IGraphEditorCommands.BeginConnection), [typeof(string), typeof(string)]);
-
-        Assert.NotNull(method);
-        var attribute = Assert.Single(
-            method!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
-            attribute => attribute is ObsoleteAttribute);
-        var obsolete = Assert.IsType<ObsoleteAttribute>(attribute);
-
-        Assert.Contains("StartConnection", obsolete.Message, StringComparison.Ordinal);
-    }
-
-    [Fact]
     public void IGraphEditorCommands_StartConnection_IsCanonicalAndNotObsolete()
     {
         var method = typeof(IGraphEditorCommands).GetMethod(nameof(IGraphEditorCommands.StartConnection), [typeof(string), typeof(string)]);
@@ -216,23 +188,6 @@ public sealed class GraphEditorSessionTests
         var snapshot = session.Queries.CreateDocumentSnapshot();
 
         Assert.DoesNotContain(snapshot.Nodes, node => node.Id == "source-owned-node-001");
-    }
-
-    [Fact]
-    public void IGraphEditorCommands_BeginConnection_DefaultShimMatchesStartConnectionBehavior()
-    {
-        var definitionId = new NodeDefinitionId("tests.session.begin-shim");
-        IGraphEditorCommands commands = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId)).Commands;
-
-#pragma warning disable CS0618
-        commands.BeginConnection(SourceNodeId, SourcePortId);
-#pragma warning restore CS0618
-
-        var session = Assert.IsAssignableFrom<IGraphEditorSession>(commands);
-        var pending = session.Queries.GetPendingConnectionSnapshot();
-        Assert.True(pending.HasPendingConnection);
-        Assert.Equal(SourceNodeId, pending.SourceNodeId);
-        Assert.Equal(SourcePortId, pending.SourcePortId);
     }
 
     [Fact]
@@ -412,10 +367,6 @@ public sealed class GraphEditorSessionTests
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompatiblePortTargets))!.ReturnType);
         Assert.Empty(queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompatiblePortTargets))!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false));
 
-        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCompatibleTargets), typeof(string), typeof(string));
-#pragma warning disable CS0618
-        Assert.Equal(typeof(IReadOnlyList<CompatiblePortTarget>), queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets))!.ReturnType);
-#pragma warning restore CS0618
     }
 
     [Fact]
@@ -468,7 +419,7 @@ public sealed class GraphEditorSessionTests
 
         Assert.NotNull(hostType.GetMethod(nameof(IGraphEditorSessionHost.GetEdgeTemplateSnapshots), [typeof(string), typeof(string)]));
         Assert.NotNull(hostType.GetMethod(nameof(IGraphEditorSessionHost.GetCompatiblePortTargets), [typeof(string), typeof(string)]));
-        Assert.Null(hostType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]));
+        Assert.Null(hostType.GetMethod("GetCompatibleTargets", [typeof(string), typeof(string)]));
     }
 
     [Fact]
@@ -481,36 +432,7 @@ public sealed class GraphEditorSessionTests
         Assert.NotNull(compatibilityQueryType!.GetMethod("GetCompatibleTargetStates"));
         Assert.NotNull(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetEdgeTemplateSnapshots), [typeof(GraphDocument), typeof(string), typeof(string)]));
         Assert.NotNull(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetCompatiblePortTargets), [typeof(GraphDocument), typeof(string), typeof(string)]));
-        Assert.Null(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(GraphDocument), typeof(string), typeof(string)]));
-    }
-
-    [Fact]
-    public void IGraphEditorQueries_GetCompatibleTargets_IsMarkedAsCompatibilityOnlyShim()
-    {
-        var method = typeof(IGraphEditorQueries).GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]);
-
-        Assert.NotNull(method);
-        var attribute = Assert.Single(
-            method!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
-            attribute => attribute is ObsoleteAttribute);
-        var obsolete = Assert.IsType<ObsoleteAttribute>(attribute);
-        Assert.Contains("canonical runtime queries", obsolete.Message, StringComparison.Ordinal);
-        Assert.Contains("later minor releases may add stronger warnings", obsolete.Message, StringComparison.Ordinal);
-        Assert.Contains("future major release may remove it", obsolete.Message, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void CompatiblePortTarget_IsMarkedAsCompatibilityOnlyShim()
-    {
-#pragma warning disable CS0618
-        var attribute = Assert.Single(
-            typeof(CompatiblePortTarget).GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
-            attribute => attribute is ObsoleteAttribute);
-#pragma warning restore CS0618
-        var obsolete = Assert.IsType<ObsoleteAttribute>(attribute);
-        Assert.Contains("Retained compatibility shim", obsolete.Message, StringComparison.Ordinal);
-        Assert.Contains("canonical runtime queries", obsolete.Message, StringComparison.Ordinal);
-        Assert.Contains("future major release may remove it", obsolete.Message, StringComparison.Ordinal);
+        Assert.Null(compatibilityQueryType.GetMethod("GetCompatibleTargets", [typeof(GraphDocument), typeof(string), typeof(string)]));
     }
 
     [Fact]
@@ -553,28 +475,6 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(0, snapshot.MinConnections);
         Assert.Equal(1, snapshot.MaxConnections);
         Assert.Equal("Input (Flow, flow)", snapshot.ConnectionHint);
-    }
-
-    [Fact]
-    public void GraphEditorSession_GetCompatibleTargets_ComposesCompatibilityShimFromCanonicalSnapshots()
-    {
-        var definitionId = new NodeDefinitionId("tests.session.compatibility-bridge");
-        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
-
-        var snapshot = Assert.Single(session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId));
-#pragma warning disable CS0618
-        var compatibleTarget = Assert.Single(session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId));
-#pragma warning restore CS0618
-
-        Assert.Equal(snapshot.NodeId, compatibleTarget.Node.Id);
-        Assert.Equal(snapshot.NodeTitle, compatibleTarget.Node.Title);
-        Assert.Equal("Tests", compatibleTarget.Node.Category);
-        Assert.Equal("Session target node.", compatibleTarget.Node.Description);
-        Assert.Equal(snapshot.PortId, compatibleTarget.Port.Id);
-        Assert.Equal(snapshot.PortLabel, compatibleTarget.Port.Label);
-        Assert.Equal(snapshot.PortTypeId, compatibleTarget.Port.TypeId);
-        Assert.Equal(snapshot.PortAccentHex, compatibleTarget.Port.AccentHex);
-        Assert.Equal(snapshot.Compatibility, compatibleTarget.Compatibility);
     }
 
     [Fact]

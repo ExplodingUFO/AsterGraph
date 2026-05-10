@@ -59,12 +59,12 @@ This audit starts the v1 roadmap from the current `0.11.0-beta` repository state
 
 | Surface | Current evidence | v1 decision needed |
 | --- | --- | --- |
-| `GraphDocument` root-only constructor/deconstruction | Documented as retained for legacy hosts and plugins. | Remove from primary public API or move behind explicit migration helpers. |
-| `GraphDocumentCompatibility` legacy payload readers | Reads unversioned and older versioned payloads automatically. | Bound as explicit import/migration behavior; do not keep hidden legacy reads in normal save/restore if v1 is no-compat. |
-| `IGraphEditorCommands.BeginConnection(...)` | `[Obsolete]` compatibility helper over `StartConnection(...)`. | Remove once public API baseline and call sites prove replacement coverage. |
-| `IGraphEditorQueries.GetCompatibleTargets(...)` | `[Obsolete]` compatibility shim over canonical target queries. | Remove or quarantine as migration-only; update docs/tests accordingly. |
-| `GraphEditorCapabilitySnapshot` obsolete constructor/deconstruct | Kept for older call shapes. | Remove if no current public scenario requires positional API. |
-| Avalonia retained view facade wording | `AsterGraphAvaloniaViewFactory` and options still mention retained editor facade/direct `GraphEditorView` usage. | Reword or refactor so the canonical hosted API is the only promoted route. |
+| `GraphDocument` root-only constructor/deconstruction | Documented as retained for legacy hosts and plugins. | Removed from public metadata by #48; use canonical construction and direct properties. |
+| `GraphDocumentCompatibility` legacy payload readers | Read unversioned and older versioned payloads automatically. | Bounded by #48 as `GraphDocumentSerializer.ImportLegacy(...)`; normal `Deserialize(...)` reads current schema only. |
+| `IGraphEditorCommands.BeginConnection(...)` | Was an obsolete compatibility helper over `StartConnection(...)`. | Removed by #48; use `StartConnection(...)`. |
+| `IGraphEditorQueries.GetCompatibleTargets(...)` | Was an obsolete compatibility shim over canonical target queries. | Removed by #48; use `GetCompatiblePortTargets(...)` and `GraphEditorCompatiblePortTargetSnapshot`. |
+| `GraphEditorCapabilitySnapshot` obsolete constructor/deconstruct | Kept for older call shapes. | Removed by #48; use the six-parameter constructor plus `init` properties and direct property access. |
+| Avalonia retained view facade wording | `AsterGraphAvaloniaViewFactory` and options mentioned retained editor facade/direct `GraphEditorView` usage. | Reworded by #48 so the hosted factory route is promoted without compatibility-only facade wording. |
 | README/project-status references to removed tools | Public docs name missing `tools/AsterGraph.*` projects. | Reconcile before adding any React Flow parity marketing. |
 
 ## Target Module Boundaries

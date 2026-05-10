@@ -44,13 +44,12 @@ Those responsibilities live in `AsterGraph.Avalonia` or the consuming host.
   - `GraphEditorViewModel`
   - `GraphEditorView`
   - `GraphEditorViewModel.Session`
-- compatibility-only shims:
-  - `GetCompatibleTargets(...)`
-  - `CompatiblePortTarget`
+- retired compatibility-only shims:
+  - compatible-target MVVM shims were removed for v1; use `GetCompatiblePortTargets(...)` and `GraphEditorCompatiblePortTargetSnapshot`
   - `TrySetNodeExpansionState(...)`
   - `TrySetNodeGroupExtraPadding(...)`
 
-Keep new code on the stable canonical surfaces. Treat retained and compatibility-only APIs as migration support, not as the primary route.
+Keep new code on the stable canonical surfaces. Treat retained APIs as migration support, not as the primary route.
 
 ## Start Here
 

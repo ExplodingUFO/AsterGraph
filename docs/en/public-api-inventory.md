@@ -14,13 +14,25 @@ Use this page with [Host Integration](./host-integration.md) and [Extension Cont
 | Compatibility-only | Obsolete or legacy-shaped helpers that have canonical replacements. | Do not use for new work; follow the replacement guidance. |
 | Internal-only | Implementation details, internal namespaces, tests, samples, and proof tools. | Not a public support contract. |
 
+## V1 compatibility removal policy
+
+| Surface | V1 decision | Replacement / boundary |
+| --- | --- | --- |
+| `GraphDocument root-only constructor/deconstruct` | Removed from the public metadata surface. The canonical constructor carries `RootGraphId` and optional scoped graph payloads; property access replaces positional deconstruction. | Use the canonical `GraphDocument(...)` constructor with `RootGraphId` when constructing documents directly, or `GraphDocument.CreateScoped(...)` for scoped documents. |
+| Hidden legacy reads in `GraphDocumentSerializer.Deserialize(...)` | Removed from the normal save/restore path. `Deserialize(...)` accepts the current schema only. | Use `GraphDocumentSerializer.ImportLegacy(...)` for an explicit migration/import step, then save back through `Serialize(...)`. |
+| `IGraphEditorCommands.BeginConnection(...)` | Removed. | Use `IGraphEditorCommands.StartConnection(...)`. |
+| `IGraphEditorQueries.GetCompatibleTargets(...)` | Removed. | Use `IGraphEditorQueries.GetCompatiblePortTargets(...)`. |
+| `CompatiblePortTarget` | Removed. | Use `GraphEditorCompatiblePortTargetSnapshot`. |
+| `GraphEditorCapabilitySnapshot obsolete constructor/deconstruct` | Removed. | Use the six-parameter constructor plus `init` properties, and read properties directly instead of positional deconstruction. |
+| `AsterGraphAvaloniaViewFactory.Create(...)` and `AsterGraphAvaloniaViewOptions` retained-facade wording | Kept as supported hosted helpers, but not as a compatibility-only route. | Treat `AsterGraphEditorFactory.CreateSession(...)` as the runtime authority and the editor/view factories as hosted composition over that route. Direct `GraphEditorView` construction remains retained migration only. |
+
 ## Package Inventory
 
 | Package | Stable canonical | Supported hosted helper | Retained migration | Compatibility-only | Internal-only boundary |
 | --- | --- | --- | --- | --- | --- |
 | `AsterGraph.Abstractions` | Node definitions, port definitions, provider/plugin-facing contracts, identifiers, metadata DTOs used by the canonical route, and thin definition builders that produce those DTOs. | None. | None. | None currently published as a primary support tier. | Implementation helpers not exposed through package docs. |
-| `AsterGraph.Core` | Graph document, serialization-oriented model contracts, group container/collapse semantics, compatibility rule inputs, thin implicit-conversion rule builder, and shared data types used by editor/session composition. | None. | None. | Legacy conversion/compatibility helpers only where a newer runtime-first route exists. | Core internals and persistence implementation details. |
-| `AsterGraph.Editor` | `AsterGraphEditorFactory.CreateSession(...)`, `IGraphEditorSession`, `IGraphEditorCommands`, `IGraphEditorQueries`, DTO/snapshot queries, diagnostics, automation, validation snapshots, runtime overlay snapshots/providers, layout plan snapshots/providers, viewport visible scene projection snapshots/projector, hierarchy/group snapshots including collapsed-boundary connection projection, navigator/outline snapshots, plugin discovery/inspection, export services including raster export progress/cancel options. | `AsterGraphEditorFactory.Create(...)` as a hosted composition helper that still exposes the retained facade. | `GraphEditorViewModel`, `GraphEditorViewModel.Session`, retained menu/context-menu hooks used by migrating hosts. | `IGraphEditorQueries.GetCompatibleTargets(...)`, `CompatiblePortTarget`, older MVVM-shaped helpers where `GetCompatiblePortTargets(...)` or command/query snapshots exist. | `Runtime.Internal`, `Kernel.Internal`, projection/apply internals, proof-only helpers. |
+| `AsterGraph.Core` | Graph document, current-schema serialization model contracts, explicit legacy import, group container/collapse semantics, compatibility rule inputs, thin implicit-conversion rule builder, and shared data types used by editor/session composition. | None. | `GraphDocumentSerializer.ImportLegacy(...)` as a bounded import/migration entry point for older payloads. | None in the primary v1 surface. Retired surfaces are listed in the v1 removal policy. | Core internals and persistence implementation details. |
+| `AsterGraph.Editor` | `AsterGraphEditorFactory.CreateSession(...)`, `IGraphEditorSession`, `IGraphEditorCommands`, `IGraphEditorQueries`, DTO/snapshot queries, diagnostics, automation, validation snapshots, runtime overlay snapshots/providers, layout plan snapshots/providers, viewport visible scene projection snapshots/projector, hierarchy/group snapshots including collapsed-boundary connection projection, navigator/outline snapshots, plugin discovery/inspection, export services including raster export progress/cancel options. | `AsterGraphEditorFactory.Create(...)` as a hosted composition helper that still exposes the retained facade. | `GraphEditorViewModel`, `GraphEditorViewModel.Session`, retained menu/context-menu hooks used by migrating hosts. | None in the primary v1 surface. Retired surfaces are listed in the v1 removal policy. | `Runtime.Internal`, `Kernel.Internal`, projection/apply internals, proof-only helpers. |
 | `AsterGraph.Avalonia` | Adapter projection over the canonical editor/session route and hosted factories that consume the same runtime owner. | `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphCanvasViewFactory`, `AsterGraphInspectorViewFactory`, `AsterGraphMiniMapViewFactory`, `AsterGraphHostBuilder`, `AsterGraphWorkbenchOptions`, hosted workbench layout/panel-state options, and hosted performance policy budget markers. | `GraphEditorView` embedding for hosts that still use the retained editor facade. | Adapter-specific compatibility glue only when it bridges existing hosts to the canonical route. | Control internals, templates, interaction session internals, visual-only implementation details. |
 
 ## Route Mapping
@@ -39,11 +51,9 @@ Use this page with [Host Integration](./host-integration.md) and [Extension Cont
 | Hosted workbench layout state | Supported hosted helper | `AsterGraphWorkbenchLayoutPreset`, `AsterGraphWorkbenchPanelState`, `AsterGraphWorkbenchOptions.ForPreset(...)`, `AsterGraphWorkbenchOptions.ResetLayout()` | Persists and resets stock Avalonia workbench preset/panel state only; it is not a runtime layout engine, execution mode, or WPF parity promise. |
 | Thin definition builders | Stable canonical | `NodeDefinitionBuilder`, `PortDefinitionBuilder`, `PortDefinition.HandleId`, `PortDefinition.ConnectionHint`, `GraphPort.HandleId`, `GraphPort.ConnectionHint`, `NodeParameterDefinitionBuilder`, `ImplicitConversionRuleBuilder` | Convenience constructors and stable port/handle metadata only; each builder terminates in existing DTOs and does not create a second authoring schema or runtime model. |
 | Retained migration bridge | Retained migration | `GraphEditorViewModel`, `GraphEditorView`, `GraphEditorViewModel.Session` | Only for older hosts migrating in batches. |
-| Legacy compatible-target query | Compatibility-only | `IGraphEditorQueries.GetCompatibleTargets(...)`, `CompatiblePortTarget` | Prefer `GetCompatiblePortTargets(...)` and `GraphEditorCompatiblePortTargetSnapshot`. |
-
 ## Release Handoff
 
-- Release handoff: stable canonical surfaces are the default route, retained migration surfaces are bridge-only, and compatibility-only or obsolete surfaces must keep replacement guidance visible.
+- Release handoff: stable canonical surfaces are the default route, retained migration surfaces are bridge-only, and obsolete retired compatibility-only surfaces must stay classified in the v1 removal policy with replacement guidance.
 - Keep `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, and `PUBLIC_API_GUIDANCE_OK` in the same release proof block as `ASTERGRAPH_TEMPLATE_SMOKE_OK` and `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`.
 - Release-candidate proof markers: `API_RELEASE_CANDIDATE_PROOF_OK:True`, `PUBLIC_API_GUIDANCE_HANDOFF_OK:True`, and `RELEASE_BOUNDARY_STABILITY_OK:True`.
 - v0.61 API stabilization markers: `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, and `PUBLIC_API_STABILITY_SCOPE_OK:True`.
@@ -57,8 +67,8 @@ Use this page with [Host Integration](./host-integration.md) and [Extension Cont
 - New public host-facing symbols must be classified in this inventory before release.
 - Public API changes must update `eng/public-api-baseline.txt` intentionally; unclassified drift fails the release gate.
 - Stable canonical additions must be reflected in [Host Integration](./host-integration.md) or [Extension Contracts](./extension-contracts.md).
-- Retained migration and compatibility-only additions must include replacement guidance.
-- Compatibility-only APIs must be marked obsolete when a canonical replacement exists.
+- Retained migration additions must include replacement guidance and a migration boundary.
+- Compatibility-only additions are not allowed in the primary v1 surface unless the v1 compatibility removal policy is updated with an explicit retirement plan.
 - Internal implementation details must not be promoted by README, quick-start, or release notes.
 
 ## Baseline Gate
@@ -84,6 +94,6 @@ The release proof must include `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,Aste
 Before a release:
 
 1. Check that package docs, README, quick-start, and release notes use the same route names.
-2. Check that retained and compatibility-only APIs still point to canonical replacements.
+2. Check that retained APIs and retired compatibility-only APIs still point to canonical replacements.
 3. Check that `AsterGraphHostBuilder` stays documented as a thin hosted helper, not a runtime model.
 4. Check that WPF wording stays validation-only unless the adapter support matrix changes.

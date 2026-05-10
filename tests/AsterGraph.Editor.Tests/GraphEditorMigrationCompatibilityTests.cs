@@ -151,25 +151,24 @@ public sealed class GraphEditorMigrationCompatibilityTests
     }
 
     [Fact]
-#pragma warning disable CS0618
-    public void LegacyCompatibleTargets_ReturnRetainedNodeAndPortInstances()
+    public void LegacyEditorSession_ExposesCanonicalCompatiblePortTargets()
     {
         var harness = CreateHarness();
         var legacyEditor = CreateLegacyEditor(harness);
 
-        var compatibleTargets = legacyEditor.GetCompatibleTargets(SourceNodeId, SourcePortId);
+        var compatibleTargets = legacyEditor.Session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId);
 
         var target = Assert.Single(compatibleTargets);
         var retainedNode = Assert.IsType<NodeViewModel>(legacyEditor.FindNode(TargetNodeId));
         var retainedPort = Assert.IsType<PortViewModel>(retainedNode.GetPort(TargetPortId));
-        Assert.Same(retainedNode, target.Node);
-        Assert.Same(retainedPort, target.Port);
+        Assert.Equal(retainedNode.Id, target.NodeId);
+        Assert.Equal(retainedNode.Title, target.NodeTitle);
+        Assert.Equal(retainedPort.Id, target.PortId);
+        Assert.Equal(retainedPort.Label, target.PortLabel);
     }
-#pragma warning restore CS0618
 
     [Fact]
-#pragma warning disable CS0618
-    public void RetainedCompatibilityFacade_RemainsLocalizedWhileSessionHostStaysAdapterBacked()
+    public void RetainedCompatibilityRoute_RemainsLocalizedWhileSessionHostStaysAdapterBacked()
     {
         var harness = CreateHarness();
         var legacyEditor = CreateLegacyEditor(harness);
@@ -180,10 +179,8 @@ public sealed class GraphEditorMigrationCompatibilityTests
         var factoryHost = factoryEditor.Session.GetType()
             .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
             .GetValue(factoryEditor.Session);
-        var legacyFacadeTarget = Assert.Single(legacyEditor.GetCompatibleTargets(SourceNodeId, SourcePortId));
-        var factoryFacadeTarget = Assert.Single(factoryEditor.GetCompatibleTargets(SourceNodeId, SourcePortId));
-        var legacySessionTarget = Assert.Single(legacyEditor.Session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId));
-        var factorySessionTarget = Assert.Single(factoryEditor.Session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId));
+        var legacySessionTarget = Assert.Single(legacyEditor.Session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId));
+        var factorySessionTarget = Assert.Single(factoryEditor.Session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId));
         var legacyRetainedNode = Assert.IsType<NodeViewModel>(legacyEditor.FindNode(TargetNodeId));
         var factoryRetainedNode = Assert.IsType<NodeViewModel>(factoryEditor.FindNode(TargetNodeId));
         var legacyRetainedPort = Assert.IsType<PortViewModel>(legacyRetainedNode.GetPort(TargetPortId));
@@ -193,43 +190,20 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.NotNull(factoryHost);
         Assert.IsType<GraphEditorViewModelKernelAdapter>(legacyHost);
         Assert.IsType<GraphEditorViewModelKernelAdapter>(factoryHost);
-        Assert.Null(legacyHost!.GetType().GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]));
-        Assert.Null(factoryHost!.GetType().GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]));
-        Assert.Same(legacyRetainedNode, legacyFacadeTarget.Node);
-        Assert.Same(factoryRetainedNode, factoryFacadeTarget.Node);
-        Assert.Same(legacyRetainedPort, legacyFacadeTarget.Port);
-        Assert.Same(factoryRetainedPort, factoryFacadeTarget.Port);
-        Assert.NotSame(legacyRetainedNode, legacySessionTarget.Node);
-        Assert.NotSame(factoryRetainedNode, factorySessionTarget.Node);
-        Assert.Equal(legacyFacadeTarget.Node.Id, legacySessionTarget.Node.Id);
-        Assert.Equal(factoryFacadeTarget.Node.Id, factorySessionTarget.Node.Id);
-        Assert.Equal(legacyFacadeTarget.Port.Id, legacySessionTarget.Port.Id);
-        Assert.Equal(factoryFacadeTarget.Port.Id, factorySessionTarget.Port.Id);
+        Assert.Null(legacyHost!.GetType().GetMethod("GetCompatibleTargets", [typeof(string), typeof(string)]));
+        Assert.Null(factoryHost!.GetType().GetMethod("GetCompatibleTargets", [typeof(string), typeof(string)]));
+        Assert.Equal(legacyRetainedNode.Id, legacySessionTarget.NodeId);
+        Assert.Equal(factoryRetainedNode.Id, factorySessionTarget.NodeId);
+        Assert.Equal(legacyRetainedPort.Id, legacySessionTarget.PortId);
+        Assert.Equal(factoryRetainedPort.Id, factorySessionTarget.PortId);
     }
-#pragma warning restore CS0618
 
     [Fact]
-    public void MigrationGuidance_KeepsCompatibilityShimRetirementExplicit()
+    public void MigrationGuidance_RemovesCompatibleTargetShimFromPublicRuntimeSurface()
     {
-        var queryMethod = typeof(IGraphEditorQueries).GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]);
-
-        Assert.NotNull(queryMethod);
-        var queryAttribute = Assert.Single(
-            queryMethod!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
-            attribute => attribute is ObsoleteAttribute);
-#pragma warning disable CS0618
-        var shimAttribute = Assert.Single(
-            typeof(CompatiblePortTarget).GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
-            attribute => attribute is ObsoleteAttribute);
-#pragma warning restore CS0618
-
-        var queryObsolete = Assert.IsType<ObsoleteAttribute>(queryAttribute);
-        var shimObsolete = Assert.IsType<ObsoleteAttribute>(shimAttribute);
-        Assert.Contains("canonical runtime queries", queryObsolete.Message, StringComparison.Ordinal);
-        Assert.Contains("later minor releases may add stronger warnings", queryObsolete.Message, StringComparison.Ordinal);
-        Assert.Contains("future major release may remove it", queryObsolete.Message, StringComparison.Ordinal);
-        Assert.Contains("Retained compatibility shim", shimObsolete.Message, StringComparison.Ordinal);
-        Assert.Contains("future major release may remove it", shimObsolete.Message, StringComparison.Ordinal);
+        Assert.Null(typeof(IGraphEditorQueries).GetMethod("GetCompatibleTargets", [typeof(string), typeof(string)]));
+        Assert.Null(typeof(IGraphEditorQueries).Assembly.GetType("AsterGraph.Editor.Menus.CompatiblePortTarget", throwOnError: false));
+        Assert.NotNull(typeof(IGraphEditorQueries).GetMethod(nameof(IGraphEditorQueries.GetCompatiblePortTargets), [typeof(string), typeof(string)]));
     }
 
     [Fact]

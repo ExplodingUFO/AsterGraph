@@ -7,10 +7,9 @@ namespace AsterGraph.Avalonia.Hosting;
 /// </summary>
 /// <remarks>
 /// This factory applies host-supplied editor and view options and returns the stock shell that composes
-/// the canvas, inspector, and mini-map surfaces. Direct <see cref="GraphEditorView" /> construction remains
-/// supported for gradual migration, but new hosted-UI code should prefer this factory. The canonical runtime
-/// authority still lives on <c>CreateSession(...)</c> and <c>IGraphEditorSession</c>; this factory composes the
-/// current Avalonia adapter on top of the retained editor facade.
+/// the canvas, inspector, and mini-map surfaces. The canonical runtime authority still lives on
+/// <c>CreateSession(...)</c> and <c>IGraphEditorSession</c>; this factory composes the Avalonia adapter over the
+/// shared hosted editor/session route.
 /// </remarks>
 public static class AsterGraphAvaloniaViewFactory
 {
