@@ -65,6 +65,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("[Project Status](./docs/en/project-status.md)", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "externally proven", "validation-only", "bounded", "deferred"));
         Assert.True(HasLineWithAll(notes, "Repairability, Help, and Review UX", "validation repair", "support boundary", "release proof"));
+        Assert.Contains("GRAPH_ERROR_HELP_TARGET_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("REPAIR_HELP_REVIEW_LOOP_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("RELEASE_READINESS_GATE_OK:True", notes, StringComparison.Ordinal);
