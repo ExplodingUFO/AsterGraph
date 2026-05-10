@@ -35,6 +35,18 @@ Avalonia 包是第一个官方 adapter，不是整个 SDK 的唯一形态。
 - `WPF` 已经被锁定为当前公开 beta 线的 adapter 2 目标，它必须复用同一套 `Editor Kernel` + `Scene/Interaction` 形状，而不是复制一份 editor semantics。
 - Avalonia/WPF 之间的差异要通过 [Adapter Capability Matrix](./adapter-capability-matrix.md) 里的 `supported` / `partial` / `fallback` 公开；其中 `partial` / `fallback` 表示 validation-only，不代表 parity，也不代表已经与 Avalonia 对齐。
 
+## Layer Boundary Contract
+
+React Flow parity 路线把这份依赖合同作为 v1 工作的可执行骨架。除非某个 issue 先明确更新本合同，否则新增代码必须沿用这些依赖箭头：
+
+- `AsterGraph.Abstractions` 负责宿主可见的 identifiers、definitions、styling contracts 和 plugin-neutral interfaces。它不能引用 `AsterGraph.Core`、`AsterGraph.Editor`、`AsterGraph.Avalonia` 或 adapter 包。
+- `AsterGraph.Core -> Abstractions` 负责持久化 graph models、schema/version rules、serialization 和显式 migration helpers。它不能引用 session state、rendering projection、`GraphEditorViewModel`、`NodeCanvas` 或任何 Avalonia 类型。
+- `AsterGraph.Editor -> Core + Abstractions` 负责 `IGraphEditorSession`、commands、queries、events、runtime snapshots、layout services、history、validation、clipboard、export、plugin loading，以及 adapter-neutral scene/interaction seams。它不能引用 `AsterGraph.Avalonia` 或 Avalonia 包。
+- `AsterGraph.Avalonia -> Editor + Core` 负责 Avalonia controls、renderers、input coordinators、themes、hosted composition helpers 和 visual adapters。它必须消费 runtime/session contracts 与 snapshots，不能拥有 document mutation semantics。
+- Demo 与 Cookbook 项目只通过 public packages 演示宿主用法，不能成为 library behavior 的来源。
+
+Public runtime contracts 必须保持无 Avalonia 类型、无 retained view-model 类型。当前 compatibility exception 按精确 symbol 跟踪，而不是按 namespace 放行：`GraphEditorSession(GraphEditorViewModel, ...)`、`GraphEditorViewModel`、`GraphEditorView`、retained hosted factory routes，以及 #48 负责清理的 `IGraphEditorQueries.GetCompatibleTargets(...)` / `CompatiblePortTarget` MVVM shim。它们只作为迁移桥保留；新宿主应从 `CreateSession(...)` 和 `IGraphEditorSession` 开始。
+
 ## Official Capability Modules
 
 这些 `Official Capability Modules` 是建立在平台骨架之上的公开模块名：`Selection`、`History`、`Clipboard`、`Shortcut Policy`、`Layout`、`MiniMap`、`Stencil`、`Fragment Library`、`Export`、`Baseline Edge Authoring`、`Node Surface Authoring`、`Hierarchy Semantics`、`Composite Scope Authoring`、`Edge Semantics`、`Edge Geometry Tooling`。它们都根植于 canonical runtime/session contract，不是另一套 route 名称。
