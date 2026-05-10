@@ -1,0 +1,16 @@
+[
+  {
+    "id": "cookbook-default-starter-host-ai-pipeline",
+    "recipeId": "starter-host-route",
+    "scenario": "ai-pipeline",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1480,
+    "viewportHeight": 900,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "outputFileName": "cookbook-default-starter-host-ai-pipeline.png"
+  }
+]
