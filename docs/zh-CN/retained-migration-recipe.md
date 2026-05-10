@@ -50,8 +50,7 @@
 
 这个阶段期间还能保留的兼容桥接：
 
-- retained connection discovery：`GetCompatibleTargets(...)` 和 `CompatiblePortTarget`
-- canonical 替换：`GetCompatiblePortTargets(...)` 和 `GraphEditorCompatiblePortTargetSnapshot`
+- canonical connection discovery：`GetCompatiblePortTargets(...)` 和 `GraphEditorCompatiblePortTargetSnapshot`
 - 临时 node-group helper：`TrySetNodeExpansionState(...)` 和 `TrySetNodeGroupExtraPadding(...)`
 - canonical connection control：`connections.disconnect-*`，尤其是 `connections.disconnect-all`
 
@@ -70,7 +69,7 @@
 替换成 canonical seam：
 
 - shipped Avalonia UI 改成 `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
-- compatibility projection 改成 `GetCompatiblePortTargets(...)` 和 snapshot API
+- compatible-target projection 改成 `GetCompatiblePortTargets(...)` 和 snapshot API
 - 新工作统一从 session/runtime 路线开始
 
 这个阶段之后的归属：

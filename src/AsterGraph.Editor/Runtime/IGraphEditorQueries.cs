@@ -287,18 +287,4 @@ public interface IGraphEditorQueries
     GraphEditorCompatibleNodeSearchSnapshot GetCompatibleNodeDefinitionsForPendingConnection()
         => throw new NotSupportedException();
 
-    /// <summary>
-    /// 获取指定源端口的兼容连接目标。
-    /// </summary>
-    /// <param name="sourceNodeId">源节点实例标识。</param>
-    /// <param name="sourcePortId">源端口实例标识。</param>
-    /// <remarks>
-    /// 此成员保留为兼容 shim，用于依赖 MVVM 运行时对象的旧宿主代码。
-    /// 新的 canonical runtime queries 应优先使用 <see cref="GetCompatiblePortTargets(string, string)"/>。
-    /// v1.5 迁移窗口内仍保留该 shim；后续 minor 版本可能增加更强的警告，
-    /// future major release may remove it。
-    /// </remarks>
-    /// <returns>兼容目标集合。</returns>
-    [Obsolete("Compatibility-only shim. Use GetCompatiblePortTargets(string, string) for canonical runtime queries. The v1.5 migration window keeps this shim, later minor releases may add stronger warnings, and a future major release may remove it.")]
-    IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId);
 }

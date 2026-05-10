@@ -75,15 +75,17 @@ public sealed class GraphEditorArchitectureBoundaryTests
         Assert.Contains("Editor -> Core + Abstractions", english, StringComparison.Ordinal);
         Assert.Contains("Avalonia -> Editor + Core", english, StringComparison.Ordinal);
         Assert.Contains("Compatibility exceptions", english, StringComparison.Ordinal);
-        Assert.Contains("GetCompatibleTargets", english, StringComparison.Ordinal);
-        Assert.Contains("CompatiblePortTarget", english, StringComparison.Ordinal);
+        Assert.Contains("GetCompatiblePortTargets", english, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetCompatibleTargets", english, StringComparison.Ordinal);
+        Assert.DoesNotContain("`CompatiblePortTarget`", english, StringComparison.Ordinal);
 
         Assert.Contains("Core -> Abstractions", chinese, StringComparison.Ordinal);
         Assert.Contains("Editor -> Core + Abstractions", chinese, StringComparison.Ordinal);
         Assert.Contains("Avalonia -> Editor + Core", chinese, StringComparison.Ordinal);
         Assert.Contains("compatibility exception", chinese, StringComparison.Ordinal);
-        Assert.Contains("GetCompatibleTargets", chinese, StringComparison.Ordinal);
-        Assert.Contains("CompatiblePortTarget", chinese, StringComparison.Ordinal);
+        Assert.Contains("GetCompatiblePortTargets", chinese, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetCompatibleTargets", chinese, StringComparison.Ordinal);
+        Assert.DoesNotContain("`CompatiblePortTarget`", chinese, StringComparison.Ordinal);
     }
 
     private static IReadOnlyList<PublicTypeReference> GetPubliclyReferencedTypeGraph(Type type)
@@ -234,10 +236,7 @@ public sealed class GraphEditorArchitectureBoundaryTests
             return false;
         }
 
-        return reference.Path == "AsterGraph.Editor.Runtime.GraphEditorSession..ctor"
-            || reference.Path.Contains(
-                "GetCompatibleTargets -> AsterGraph.Editor.Menus.CompatiblePortTarget.",
-                StringComparison.Ordinal);
+        return reference.Path == "AsterGraph.Editor.Runtime.GraphEditorSession..ctor";
     }
 
     private static string ReadRepoFile(string relativePath)

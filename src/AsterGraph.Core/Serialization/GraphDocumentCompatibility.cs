@@ -4,7 +4,7 @@ using AsterGraph.Core.Models;
 namespace AsterGraph.Core.Serialization;
 
 /// <summary>
-/// 管理图文档 JSON 契约版本与兼容读取。
+/// 管理图文档 JSON 契约版本与显式迁移读取。
 /// </summary>
 internal static class GraphDocumentCompatibility
 {
@@ -24,6 +24,12 @@ internal static class GraphDocumentCompatibility
     }
 
     public static GraphDocument Deserialize(string json, JsonSerializerOptions options)
+        => Deserialize(json, options, allowLegacy: false);
+
+    public static GraphDocument ImportLegacy(string json, JsonSerializerOptions options)
+        => Deserialize(json, options, allowLegacy: true);
+
+    private static GraphDocument Deserialize(string json, JsonSerializerOptions options, bool allowLegacy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(json);
         ArgumentNullException.ThrowIfNull(options);
@@ -32,6 +38,12 @@ internal static class GraphDocumentCompatibility
         var root = document.RootElement;
         if (!root.TryGetProperty(nameof(GraphDocumentSerializer.GraphDocumentFilePayload.SchemaVersion), out var versionElement))
         {
+            if (!allowLegacy)
+            {
+                throw new InvalidOperationException(
+                    "Legacy graph document payloads without SchemaVersion must be loaded with GraphDocumentSerializer.ImportLegacy(...).");
+            }
+
             var legacyDocumentPayload = JsonSerializer.Deserialize<LegacyUnversionedGraphDocumentPayload>(json, options);
             return NormalizeDocument(
                 legacyDocumentPayload?.ToDocument() ?? throw new InvalidOperationException("Failed to deserialize legacy graph document."),
@@ -50,6 +62,12 @@ internal static class GraphDocumentCompatibility
             var payload = JsonSerializer.Deserialize<GraphDocumentSerializer.GraphDocumentFilePayload>(json, options)
                 ?? throw new InvalidOperationException("Failed to deserialize scoped graph document.");
             return NormalizeDocument(payload.ToDocument(), schemaVersion);
+        }
+
+        if (!allowLegacy)
+        {
+            throw new InvalidOperationException(
+                $"Legacy graph document schema version '{schemaVersion}' must be loaded with GraphDocumentSerializer.ImportLegacy(...). Current version is '{CurrentSchemaVersion}'.");
         }
 
         var legacyPayload = JsonSerializer.Deserialize<LegacyGraphDocumentFilePayload>(json, options)
@@ -166,7 +184,7 @@ internal static class GraphDocumentCompatibility
         IReadOnlyList<GraphNodeGroup>? Groups = null)
     {
         public GraphDocument ToDocument()
-            => new(Title, Description, Nodes, Connections, Groups);
+            => new(Title, Description, Nodes, Connections, Groups, GraphDocument.DefaultRootGraphId, null);
     }
 
     private sealed record LegacyUnversionedGraphDocumentPayload(
@@ -177,6 +195,6 @@ internal static class GraphDocumentCompatibility
         IReadOnlyList<GraphNodeGroup>? Groups = null)
     {
         public GraphDocument ToDocument()
-            => new(Title, Description, Nodes, Connections, Groups);
+            => new(Title, Description, Nodes, Connections, Groups, GraphDocument.DefaultRootGraphId, null);
     }
 }

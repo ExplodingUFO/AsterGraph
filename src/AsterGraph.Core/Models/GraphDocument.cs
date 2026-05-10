@@ -6,7 +6,7 @@ namespace AsterGraph.Core.Models;
 
 /// <summary>
 /// Immutable persisted graph document snapshot.
-/// Root nodes, connections, and groups remain the compatibility surface.
+/// Root nodes, connections, and groups describe the current root scope.
 /// Child graph scopes are stored separately and composed back into <see cref="GraphScopes"/>.
 /// </summary>
 public sealed record GraphDocument
@@ -22,19 +22,6 @@ public sealed record GraphDocument
     public const string DefaultRootGraphId = "graph-root";
 
     /// <summary>
-    /// Retained constructor shape for legacy hosts and plugins that target the original root-only document model.
-    /// </summary>
-    public GraphDocument(
-        string Title,
-        string Description,
-        IReadOnlyList<GraphNode> Nodes,
-        IReadOnlyList<GraphConnection> Connections,
-        IReadOnlyList<GraphNodeGroup>? Groups = null)
-        : this(Title, Description, Nodes, Connections, Groups, DefaultRootGraphId, null)
-    {
-    }
-
-    /// <summary>
     /// Creates a graph document snapshot.
     /// </summary>
     public GraphDocument(
@@ -42,8 +29,8 @@ public sealed record GraphDocument
         string description,
         IReadOnlyList<GraphNode> nodes,
         IReadOnlyList<GraphConnection> connections,
-        IReadOnlyList<GraphNodeGroup>? groups,
-        string rootGraphId,
+        IReadOnlyList<GraphNodeGroup>? groups = null,
+        string rootGraphId = DefaultRootGraphId,
         IReadOnlyList<GraphScope>? graphScopes = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
@@ -178,23 +165,6 @@ public sealed record GraphDocument
             groups ?? Groups,
             RootGraphId,
             GraphScopes);
-    }
-
-    /// <summary>
-    /// Retained positional deconstruction contract for legacy hosts and plugins.
-    /// </summary>
-    public void Deconstruct(
-        out string title,
-        out string description,
-        out IReadOnlyList<GraphNode> nodes,
-        out IReadOnlyList<GraphConnection> connections,
-        out IReadOnlyList<GraphNodeGroup>? groups)
-    {
-        title = Title;
-        description = Description;
-        nodes = Nodes;
-        connections = Connections;
-        groups = Groups;
     }
 
     private IReadOnlyList<GraphScope> BuildGraphScopesSnapshot()

@@ -45,7 +45,7 @@ The React Flow parity roadmap uses this dependency contract as the executable sp
 - `AsterGraph.Avalonia -> Editor + Core` owns Avalonia controls, renderers, input coordinators, themes, hosted composition helpers, and visual adapters. It must consume runtime/session contracts and snapshots instead of owning document mutation semantics.
 - Demo and Cookbook projects consume the public packages only to demonstrate host usage. They must not become the source of library behavior.
 
-Public runtime contracts must stay free of Avalonia types and retained view-model types. Compatibility exceptions are tracked by exact symbol, not by namespace. Current exceptions are `GraphEditorSession(GraphEditorViewModel, ...)`, `GraphEditorViewModel`, `GraphEditorView`, retained hosted factory routes, and the #48-owned `IGraphEditorQueries.GetCompatibleTargets(...)` / `CompatiblePortTarget` MVVM shim. They exist only as migration bridges while new hosts start from `CreateSession(...)` and `IGraphEditorSession`.
+Public runtime contracts must stay free of Avalonia types and retained view-model types. Compatibility exceptions are tracked by exact symbol, not by namespace. Current exceptions are `GraphEditorSession(GraphEditorViewModel, ...)`, `GraphEditorViewModel`, `GraphEditorView`, and retained hosted factory routes. They exist only as migration bridges while new hosts start from `CreateSession(...)`, `IGraphEditorSession`, and DTO queries such as `GetCompatiblePortTargets(...)`.
 
 ## Official Capability Modules
 

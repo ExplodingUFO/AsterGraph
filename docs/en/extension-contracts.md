@@ -2,7 +2,7 @@
 
 This document publishes the contract around surface stability, compatibility retirement, extension precedence, and lane ownership.
 
-The public SDK contract is canonical-first: shipped stability is defined by `CreateSession`-based runtime/session APIs in `AsterGraph.Editor`. Hosted helpers compose that route for stock UI, retained surfaces exist for migration, compatibility-only shims point to canonical replacements, and internal-only implementation details are not public contracts.
+The public SDK contract is canonical-first: shipped stability is defined by `CreateSession`-based runtime/session APIs in `AsterGraph.Editor`. Hosted helpers compose that route for stock UI, retained surfaces exist for migration, retired compatibility-only shims are tracked by the public inventory's v1 removal policy, and internal-only implementation details are not public contracts.
 
 ## Stability Tiers
 
@@ -28,9 +28,7 @@ The public SDK contract is canonical-first: shipped stability is defined by `Cre
 
 ### Compatibility-only surfaces
 
-- `IGraphEditorQueries.GetCompatibleTargets(...)`
-- `CompatiblePortTarget`
-- older MVVM-shaped overloads where newer runtime-first alternatives already exist
+None are published in the primary v1 surface. Retired compatibility-only symbols and replacements are listed in [Public API Inventory](./public-api-inventory.md#v1-compatibility-removal-policy).
 
 ### Internal-only surfaces
 
@@ -41,12 +39,12 @@ Use the retained surfaces only as migration bridges. New work should start on th
 ## Compatibility and Deprecation Policy
 
 - Deprecation/retirement uses the same five support tiers as the public inventory: stable canonical, supported hosted helper, retained migration, compatibility-only, and internal-only.
-- Compatibility-only APIs (`IGraphEditorQueries.GetCompatibleTargets(...)`, `CompatiblePortTarget`, etc.) are migration shims only and are not to be used for new work.
-- Every compatibility-only API must be clearly marked obsolete with replacement guidance that points to a canonical replacement symbol path (for example `CreateSession(...)` + session/query members).
+- Compatibility-only APIs are not allowed in the primary v1 surface unless the public inventory names the symbol, replacement, and retirement boundary.
+- Any temporary compatibility-only API must carry replacement guidance that points to a canonical replacement symbol path (for example `CreateSession(...)` + session/query members).
 - API removal is never abrupt: it requires a documented deprecation cycle, with symbol-level migration guidance and a stated replacement path before any removal is planned.
 - Migration guidance must be published per symbol, and includes old→new mapping (for example:
-  - `IGraphEditorQueries.GetCompatibleTargets(...)` → `AsterGraphEditorFactory.CreateSession(...).GetCompatiblePortTargets(...)`
-  - `CompatiblePortTarget` → `GraphEditorCompatiblePortTargetSnapshot` returned by `AsterGraphEditorFactory.CreateSession(...).GetCompatiblePortTargets(...)`
+  - retired compatible-target shim → `AsterGraphEditorFactory.CreateSession(...).GetCompatiblePortTargets(...)`
+  - retired MVVM target shape → `GraphEditorCompatiblePortTargetSnapshot` returned by `AsterGraphEditorFactory.CreateSession(...).GetCompatiblePortTargets(...)`
   - `GraphEditorViewModel` / `GraphEditorView` → `AsterGraphEditorFactory.CreateSession(...)` for runtime-only hosts, or `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` for the hosted Avalonia route)
 - Canonical-first implementation remains anchored on `CreateSession(...)` and `IGraphEditorSession`; `AsterGraphHostBuilder` and Avalonia factories are supported hosted helpers, while `GraphEditorViewModel` and `GraphEditorView` are retained only to keep migration moving without forcing immediate breakage.
 
@@ -64,13 +62,13 @@ The maintainer-facing package inventory is published in [Public API Inventory](.
   - Stable canonical: graph document, serialization-oriented model contracts, compatibility rule inputs, and shared data types used by editor/session composition
   - Supported hosted helper: none
   - Retained migration: none
-  - Compatibility-only: legacy conversion/compatibility helpers only where a newer runtime-first route exists
+  - Compatibility-only: none in the primary v1 surface; explicit legacy import is retained migration
   - Internal-only: core internals and persistence implementation details
 - `AsterGraph.Editor`
   - Stable canonical: `AsterGraphEditorFactory.CreateSession(...)`, `IGraphEditorSession`, command/query DTOs, diagnostics, automation, plugin discovery/inspection, and export services
   - Supported hosted helper: `AsterGraphEditorFactory.Create(...)` as hosted composition that still exposes the retained facade
   - Retained migration: `GraphEditorViewModel`, `GraphEditorViewModel.Session`, and retained menu/context-menu hooks used by migrating hosts
-  - Compatibility-only: `IGraphEditorQueries.GetCompatibleTargets(...)`, `CompatiblePortTarget`, and older MVVM-shaped helpers where runtime snapshots exist
+  - Compatibility-only: none in the primary v1 surface; retired symbols are tracked by the public inventory
   - Internal-only: `Runtime.Internal`, `Kernel.Internal`, projection/apply internals, and proof-only helpers
 - `AsterGraph.Avalonia`
   - Stable canonical: adapter projection over the canonical editor/session route

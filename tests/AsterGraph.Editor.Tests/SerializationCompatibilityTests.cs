@@ -43,7 +43,7 @@ public sealed class SerializationCompatibilityTests
         var document = CreateDocument();
         var legacyJson = JsonSerializer.Serialize(document, JsonOptions);
 
-        var restored = GraphDocumentSerializer.Deserialize(legacyJson);
+        var restored = GraphDocumentSerializer.ImportLegacy(legacyJson);
 
         Assert.Equal(document.Title, restored.Title);
         Assert.Equal(document.Nodes.Count, restored.Nodes.Count);
@@ -205,7 +205,7 @@ public sealed class SerializationCompatibilityTests
     }
 
     [Fact]
-    public void GraphDocument_RetainsLegacyDeconstructContract_WithoutInlineParameterMetadata()
+    public void GraphDocument_CanonicalProperties_DoNotExposeLegacyInlineParameterMetadata()
     {
         var document = new GraphDocument(
             "Legacy Graph",
@@ -227,14 +227,13 @@ public sealed class SerializationCompatibilityTests
             ],
             []);
 
-        var (title, description, nodes, connections, groups) = document;
-
-        Assert.Equal("Legacy Graph", title);
-        Assert.Equal("Compatibility contract.", description);
-        Assert.Empty(connections);
-        Assert.Null(groups);
+        Assert.Equal("Legacy Graph", document.Title);
+        Assert.Equal("Compatibility contract.", document.Description);
+        Assert.Single(document.Nodes);
+        Assert.Empty(document.Connections);
+        Assert.Null(document.Groups);
         Assert.Null(typeof(GraphPort).GetProperty("InlineParameterKey"));
-        Assert.NotNull(typeof(GraphDocument).GetConstructor(
+        Assert.Null(typeof(GraphDocument).GetConstructor(
         [
             typeof(string),
             typeof(string),
@@ -242,6 +241,9 @@ public sealed class SerializationCompatibilityTests
             typeof(IReadOnlyList<GraphConnection>),
             typeof(IReadOnlyList<GraphNodeGroup>),
         ]));
+        Assert.DoesNotContain(
+            typeof(GraphDocument).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance),
+            method => method.Name == "Deconstruct" && method.GetParameters().Length == 5);
     }
 
     [Fact]
@@ -328,7 +330,7 @@ public sealed class SerializationCompatibilityTests
         }
         """;
 
-        var restored = GraphDocumentSerializer.Deserialize(json);
+        var restored = GraphDocumentSerializer.ImportLegacy(json);
         var node = Assert.Single(restored.Nodes);
 
         Assert.NotNull(node.Surface);
@@ -395,7 +397,7 @@ public sealed class SerializationCompatibilityTests
         }
         """;
 
-        var restored = GraphDocumentSerializer.Deserialize(json);
+        var restored = GraphDocumentSerializer.ImportLegacy(json);
         var group = Assert.Single(restored.Groups!);
 
         Assert.Equal(new GraphPoint(76, 76), group.Position);
@@ -466,7 +468,7 @@ public sealed class SerializationCompatibilityTests
         }
         """;
 
-        var restored = GraphDocumentSerializer.Deserialize(json);
+        var restored = GraphDocumentSerializer.ImportLegacy(json);
         var group = Assert.Single(restored.GraphScopes, scope => scope.Id == GraphDocument.DefaultRootGraphId).Groups!;
         var rootGroup = Assert.Single(group);
 
@@ -538,7 +540,7 @@ public sealed class SerializationCompatibilityTests
         }
         """;
 
-        var restored = GraphDocumentSerializer.Deserialize(json);
+        var restored = GraphDocumentSerializer.ImportLegacy(json);
         var group = Assert.Single(restored.GraphScopes, scope => scope.Id == GraphDocument.DefaultRootGraphId).Groups!;
         var rootGroup = Assert.Single(group);
 
@@ -615,7 +617,7 @@ public sealed class SerializationCompatibilityTests
         }
         """;
 
-        var restored = GraphDocumentSerializer.Deserialize(json);
+        var restored = GraphDocumentSerializer.ImportLegacy(json);
         var scope = Assert.Single(restored.GraphScopes, scope => scope.Id == GraphDocument.DefaultRootGraphId);
         var node = Assert.Single(scope.Nodes);
         var group = Assert.Single(scope.Groups!);
@@ -686,7 +688,7 @@ public sealed class SerializationCompatibilityTests
         }
         """;
 
-        var restored = GraphDocumentSerializer.Deserialize(json);
+        var restored = GraphDocumentSerializer.ImportLegacy(json);
         var connection = Assert.Single(restored.Connections);
 
         Assert.Equal(GraphConnectionTargetKind.Port, connection.TargetKind);

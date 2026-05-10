@@ -700,10 +700,6 @@ public sealed partial class GraphEditorSession
         return edited;
     }
 
-    [Obsolete("Use StartConnection instead.")]
-    public void BeginConnection(string sourceNodeId, string sourcePortId)
-        => StartConnection(sourceNodeId, sourcePortId);
-
     public void StartConnection(string sourceNodeId, string sourcePortId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceNodeId);
