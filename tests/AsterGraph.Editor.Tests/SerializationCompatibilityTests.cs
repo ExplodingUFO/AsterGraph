@@ -66,6 +66,11 @@ public sealed class SerializationCompatibilityTests
         Assert.Contains("\"ChildGraphId\": \"graph-composite-001\"", json);
         Assert.Contains("\"NoteText\": \"Preview branch\"", json);
         Assert.Contains("\"Vertices\": [", json);
+        Assert.Contains("\"PathKind\": \"SmoothStep\"", json);
+        Assert.Contains("\"IsAnimated\": true", json);
+        Assert.Contains("\"UsesFloatingEndpoints\": true", json);
+        Assert.Contains("\"SourceMarker\": \"ArrowClosed\"", json);
+        Assert.Contains("\"TargetMarker\": \"ArrowClosed\"", json);
 
         Assert.Equal("graph-root", restored.RootGraphId);
         Assert.Equal(2, restored.GraphScopes!.Count);
@@ -80,6 +85,11 @@ public sealed class SerializationCompatibilityTests
         var childConnection = Assert.Single(childScope.Connections);
         Assert.NotNull(childConnection.Presentation);
         Assert.Equal("Preview branch", childConnection.Presentation!.NoteText);
+        Assert.Equal(GraphEdgePathKind.SmoothStep, childConnection.Presentation.PathKind);
+        Assert.True(childConnection.Presentation.IsAnimated);
+        Assert.True(childConnection.Presentation.UsesFloatingEndpoints);
+        Assert.Equal(GraphEdgeMarkerKind.ArrowClosed, childConnection.Presentation.SourceMarker);
+        Assert.Equal(GraphEdgeMarkerKind.ArrowClosed, childConnection.Presentation.TargetMarker);
         Assert.Equal(
             [new GraphPoint(360d, 120d), new GraphPoint(420d, 300d)],
             childConnection.Presentation.Route?.Vertices);
@@ -831,7 +841,12 @@ public sealed class SerializationCompatibilityTests
                                 [
                                     new GraphPoint(360d, 120d),
                                     new GraphPoint(420d, 300d),
-                                ]))),
+                                ]),
+                                PathKind: GraphEdgePathKind.SmoothStep,
+                                IsAnimated: true,
+                                UsesFloatingEndpoints: true,
+                                SourceMarker: GraphEdgeMarkerKind.ArrowClosed,
+                                TargetMarker: GraphEdgeMarkerKind.ArrowClosed)),
                     ]),
             ]);
 

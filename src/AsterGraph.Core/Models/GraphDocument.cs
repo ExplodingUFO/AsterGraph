@@ -283,7 +283,14 @@ public sealed record GraphDocument
             presentation.NoteText,
             presentation.Route is null
                 ? null
-                : new GraphConnectionRoute(presentation.Route.Vertices));
+                : new GraphConnectionRoute(presentation.Route.Vertices),
+            presentation.PathKind,
+            presentation.IsAnimated,
+            presentation.UsesFloatingEndpoints,
+            presentation.IsReconnectable,
+            presentation.IsEditable,
+            presentation.SourceMarker,
+            presentation.TargetMarker);
 
     private static List<GraphNodeGroup> CloneGroups(IReadOnlyList<GraphNodeGroup> groups)
         => groups

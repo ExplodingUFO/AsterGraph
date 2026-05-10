@@ -196,7 +196,7 @@ internal sealed class GraphEditorKernelDocumentMutator
 
                 updatedConnection = connection with
                 {
-                    Presentation = CreateEdgePresentation(normalizedNoteText, connection.Presentation?.Route),
+                    Presentation = CreateEdgePresentation(connection.Presentation, normalizedNoteText, connection.Presentation?.Route),
                 };
                 return updatedConnection;
             })
@@ -275,6 +275,7 @@ internal sealed class GraphEditorKernelDocumentMutator
                 updatedConnection = connection with
                 {
                     Presentation = CreateEdgePresentation(
+                        connection.Presentation,
                         connection.Presentation?.NoteText,
                         new GraphConnectionRoute(vertices)),
                 };
@@ -317,6 +318,7 @@ internal sealed class GraphEditorKernelDocumentMutator
                 updatedConnection = connection with
                 {
                     Presentation = CreateEdgePresentation(
+                        connection.Presentation,
                         connection.Presentation?.NoteText,
                         new GraphConnectionRoute(vertices)),
                 };
@@ -358,6 +360,7 @@ internal sealed class GraphEditorKernelDocumentMutator
                 updatedConnection = connection with
                 {
                     Presentation = CreateEdgePresentation(
+                        connection.Presentation,
                         connection.Presentation?.NoteText,
                         vertices.Count == 0 ? null : new GraphConnectionRoute(vertices)),
                 };
@@ -1267,7 +1270,10 @@ internal sealed class GraphEditorKernelDocumentMutator
                 node.Size),
             StringComparer.Ordinal);
 
-    private static GraphEdgePresentation? CreateEdgePresentation(string? noteText, GraphConnectionRoute? route)
+    private static GraphEdgePresentation? CreateEdgePresentation(
+        GraphEdgePresentation? current,
+        string? noteText,
+        GraphConnectionRoute? route)
     {
         var normalizedNoteText = string.IsNullOrWhiteSpace(noteText)
             ? null
@@ -1275,9 +1281,26 @@ internal sealed class GraphEditorKernelDocumentMutator
         var normalizedRoute = route is null || route.IsEmpty
             ? null
             : new GraphConnectionRoute(route.Vertices);
-        return normalizedNoteText is null && normalizedRoute is null
+        var hasPresentationMetadata = current is not null
+                                      && (current.PathKind != GraphEdgePathKind.Auto
+                                          || current.IsAnimated
+                                          || current.UsesFloatingEndpoints
+                                          || !current.IsReconnectable
+                                          || !current.IsEditable
+                                          || current.SourceMarker != GraphEdgeMarkerKind.None
+                                          || current.TargetMarker != GraphEdgeMarkerKind.None);
+        return normalizedNoteText is null && normalizedRoute is null && !hasPresentationMetadata
             ? null
-            : new GraphEdgePresentation(normalizedNoteText, normalizedRoute);
+            : new GraphEdgePresentation(
+                normalizedNoteText,
+                normalizedRoute,
+                current?.PathKind ?? GraphEdgePathKind.Auto,
+                current?.IsAnimated ?? false,
+                current?.UsesFloatingEndpoints ?? false,
+                current?.IsReconnectable ?? true,
+                current?.IsEditable ?? true,
+                current?.SourceMarker ?? GraphEdgeMarkerKind.None,
+                current?.TargetMarker ?? GraphEdgeMarkerKind.None);
     }
 }
 

@@ -296,9 +296,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         var existingConnectionIds = document.Connections.Select(candidate => candidate.Id).ToList();
         var upstreamConnectionId = CreateUniqueId(existingConnectionIds, "connection-");
         var downstreamConnectionId = CreateUniqueId(existingConnectionIds.Concat([upstreamConnectionId]), "connection-");
-        var upstreamPresentation = string.IsNullOrWhiteSpace(connection.Presentation?.NoteText)
-            ? null
-            : new GraphEdgePresentation(connection.Presentation.NoteText);
+        var upstreamPresentation = CreateLayoutEdgePresentation(connection.Presentation);
         var upstreamConnection = new GraphConnection(
             upstreamConnectionId,
             connection.SourceNodeId,
@@ -1340,7 +1338,20 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             return false;
         }
 
-        var mutation = _documentMutator.SetConnectionNoteText(CreateActiveScopeDocumentSnapshot(), connectionId, noteText);
+        var activeDocument = CreateActiveScopeDocumentSnapshot();
+        var connection = activeDocument.Connections
+            .FirstOrDefault(candidate => string.Equals(candidate.Id, connectionId, StringComparison.Ordinal));
+        if (connection?.Presentation?.IsEditable == false)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "This connection does not expose label editing.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.SetConnectionNoteText(activeDocument, connectionId, noteText);
         if (mutation.Connection is null)
         {
             if (updateStatus)
@@ -2120,21 +2131,42 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
                     return connection with
                     {
-                        Presentation = CreateLayoutEdgePresentation(connection.Presentation?.NoteText),
+                        Presentation = CreateLayoutEdgePresentation(connection.Presentation),
                     };
                 })
                 .ToList(),
         };
     }
 
-    private static GraphEdgePresentation? CreateLayoutEdgePresentation(string? noteText)
+    private static GraphEdgePresentation? CreateLayoutEdgePresentation(GraphEdgePresentation? presentation)
     {
-        var normalizedNoteText = string.IsNullOrWhiteSpace(noteText)
+        if (presentation is null)
+        {
+            return null;
+        }
+
+        var normalizedNoteText = string.IsNullOrWhiteSpace(presentation.NoteText)
             ? null
-            : noteText.Trim();
-        return normalizedNoteText is null
+            : presentation.NoteText.Trim();
+        var hasPresentationMetadata = presentation.PathKind != GraphEdgePathKind.Auto
+                                      || presentation.IsAnimated
+                                      || presentation.UsesFloatingEndpoints
+                                      || !presentation.IsReconnectable
+                                      || !presentation.IsEditable
+                                      || presentation.SourceMarker != GraphEdgeMarkerKind.None
+                                      || presentation.TargetMarker != GraphEdgeMarkerKind.None;
+        return normalizedNoteText is null && !hasPresentationMetadata
             ? null
-            : new GraphEdgePresentation(normalizedNoteText);
+            : new GraphEdgePresentation(
+                normalizedNoteText,
+                Route: null,
+                presentation.PathKind,
+                presentation.IsAnimated,
+                presentation.UsesFloatingEndpoints,
+                presentation.IsReconnectable,
+                presentation.IsEditable,
+                presentation.SourceMarker,
+                presentation.TargetMarker);
     }
 
     private bool HasSharedSelectionDefinitionWithParameters()
@@ -2815,7 +2847,14 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             presentation.NoteText,
             presentation.Route is null
                 ? null
-                : new GraphConnectionRoute(presentation.Route.Vertices));
+                : new GraphConnectionRoute(presentation.Route.Vertices),
+            presentation.PathKind,
+            presentation.IsAnimated,
+            presentation.UsesFloatingEndpoints,
+            presentation.IsReconnectable,
+            presentation.IsEditable,
+            presentation.SourceMarker,
+            presentation.TargetMarker);
 
     private static GraphParameterValue CloneParameterValue(GraphParameterValue parameter)
         => new(parameter.Key, parameter.TypeId, parameter.Value);

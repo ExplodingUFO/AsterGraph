@@ -156,6 +156,16 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
             return false;
         }
 
+        if (existingConnection.Presentation?.IsReconnectable == false)
+        {
+            if (updateStatus)
+            {
+                _host.SetStatus("This connection does not expose reconnect editing.");
+            }
+
+            return false;
+        }
+
         var sourceNode = FindNode(existingConnection.SourceNodeId);
         var sourcePort = sourceNode?.Outputs.FirstOrDefault(port => string.Equals(port.Id, existingConnection.SourcePortId, StringComparison.Ordinal));
         if (sourceNode is null || sourcePort is null)

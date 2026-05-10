@@ -26,6 +26,21 @@ public sealed record ConnectionStyleOptions
     public double PreviewStrokeOpacity { get; init; } = 0.52;
 
     /// <summary>
+    /// Dash length used when rendering animated connections.
+    /// </summary>
+    public double AnimatedDashLength { get; init; } = 9;
+
+    /// <summary>
+    /// Gap length used when rendering animated connections.
+    /// </summary>
+    public double AnimatedGapLength { get; init; } = 6;
+
+    /// <summary>
+    /// Size of endpoint markers such as closed arrows.
+    /// </summary>
+    public double MarkerSize { get; init; } = 12;
+
+    /// <summary>
     /// Background color of conversion or label badges.
     /// </summary>
     public string LabelBackgroundHex { get; init; } = "#0F1825";

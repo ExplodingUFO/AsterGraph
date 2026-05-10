@@ -300,6 +300,10 @@ public static partial class DemoCookbookCatalog
                     "Connection geometry snapshots",
                     "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
                     "GetConnectionGeometrySnapshots"),
+                new DemoCookbookAnchor(
+                    "Edge presentation contract",
+                    "src/AsterGraph.Core/Models/GraphEdgePresentation.cs",
+                    "GraphEdgePresentation"),
             ],
             [
                 new DemoCookbookAnchor(
@@ -322,6 +326,10 @@ public static partial class DemoCookbookCatalog
                     "Connection geometry proof",
                     "tests/AsterGraph.Editor.Tests/GraphEditorConnectionGeometryContractsTests.cs",
                     "SessionQueries_GetConnectionGeometrySnapshots_ProjectPersistedRouteVertices_IntoSceneContracts"),
+                new DemoCookbookAnchor(
+                    "Path variant edge presentation proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorConnectionGeometryContractsTests.cs",
+                    "SessionQueries_GetConnectionGeometrySnapshots_ProjectPathVariantEdgePresentation"),
             ],
             [
                 new DemoCookbookAnchor(
@@ -355,6 +363,10 @@ public static partial class DemoCookbookCatalog
                     "Route-vertex editing and geometry snapshots keep edge authoring spatially inspectable.",
                     "TryInsertConnectionRouteVertex"),
                 new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Bezier, SmoothStep, Step, Straight, animated, floating, and marker variants are modeled through edge presentation metadata.",
+                    "GraphEdgePresentation"),
+                new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.SupportEvidence,
                     "Advanced editing markers bind node surfaces, composites, and edge geometry to proof evidence.",
                     "TIERED_NODE_SURFACE_OK"),
@@ -368,6 +380,10 @@ public static partial class DemoCookbookCatalog
                     DemoCookbookInteractionKind.Connection,
                     "Route-vertex tools keep edge geometry explicit instead of UI-local.",
                     "EDGE_GEOMETRY_OK"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Path variant edge metadata stays renderer-backed by shared geometry snapshots.",
+                    "SessionQueries_GetConnectionGeometrySnapshots_ProjectPathVariantEdgePresentation"),
                 new DemoCookbookInteractionFacet(
                     DemoCookbookInteractionKind.LayoutReadability,
                     "Visual semantics proof keeps tiered nodes and spatial chrome readable.",
@@ -387,12 +403,13 @@ public static partial class DemoCookbookCatalog
                 "VISUAL_SEMANTICS_OK",
                 "COMPOSITE_SCOPE_OK",
                 "EDGE_GEOMETRY_OK",
+                "SessionQueries_GetConnectionGeometrySnapshots_ProjectPathVariantEdgePresentation",
             ],
             new DemoCookbookRouteClarity(
-                "v0.78 spatial authoring route: IGraphEditorSession.Commands and Queries drive node surfaces, composite scopes, scope navigation, and connection route vertices.",
+                "v0.78 spatial authoring route: IGraphEditorSession.Commands and Queries drive node surfaces, composite scopes, scope navigation, connection route vertices, and path variant edge presentation metadata.",
                 "Supported seams live in `AsterGraph.Editor` spatial authoring commands/query snapshots and `AsterGraph.Avalonia` hosted projection controls.",
                 "Demo cookbook points at proof cues only; Demo does not become the copyable spatial authoring implementation."),
-            "Spatial authoring coverage is limited to existing session contracts, Demo proof cues, and editor tests; it does not add executable sample promises.",
+            "Spatial authoring coverage is limited to existing session contracts, Demo proof cues, editor tests, and stock renderer evidence; it does not add executable sample promises.",
             CodeSample: """
             // Resize a node surface
             editor.Session.Commands.TrySetNodeSize(nodeId, width, height);
@@ -405,6 +422,13 @@ public static partial class DemoCookbookCatalog
 
             // Navigate back to parent scope
             editor.Session.Commands.TryExitScope();
+
+            // Persist an edge path/marker variant
+            var presentation = new GraphEdgePresentation(
+                PathKind: GraphEdgePathKind.SmoothStep,
+                IsAnimated: true,
+                UsesFloatingEndpoints: true,
+                TargetMarker: GraphEdgeMarkerKind.ArrowClosed);
             """
             ),
         new DemoCookbookRecipe(

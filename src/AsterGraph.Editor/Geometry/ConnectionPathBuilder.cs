@@ -48,12 +48,17 @@ public static class ConnectionPathBuilder
         }
 
         var points = BuildRoutePoints(start, route, end, routeStyle);
+        if (routeStyle == GraphEditorConnectionRouteStyle.SmoothStep)
+        {
+            return BuildSmoothStepSegments(points);
+        }
+
         var segments = new List<BezierConnection>(points.Count - 1);
         for (var index = 0; index < points.Count - 1; index++)
         {
-            segments.Add(routeStyle == GraphEditorConnectionRouteStyle.Orthogonal
-                ? BuildStraightSegment(points[index], points[index + 1])
-                : Build(points[index], points[index + 1]));
+            segments.Add(routeStyle == GraphEditorConnectionRouteStyle.Bezier
+                ? Build(points[index], points[index + 1])
+                : BuildStraightSegment(points[index], points[index + 1]));
         }
 
         return segments;
@@ -67,7 +72,7 @@ public static class ConnectionPathBuilder
     {
         ArgumentNullException.ThrowIfNull(route);
 
-        if (routeStyle != GraphEditorConnectionRouteStyle.Orthogonal)
+        if (routeStyle is GraphEditorConnectionRouteStyle.Bezier or GraphEditorConnectionRouteStyle.Straight)
         {
             var bezierPoints = new List<GraphPoint>(route.Vertices.Count + 2) { start };
             bezierPoints.AddRange(route.Vertices);
@@ -93,12 +98,18 @@ public static class ConnectionPathBuilder
         GraphConnectionRoute route,
         GraphPoint end,
         int segmentIndex)
+        => ResolveSegmentMidpoint(start, route, end, segmentIndex, GraphEditorConnectionRouteStyle.Bezier);
+
+    public static GraphPoint ResolveSegmentMidpoint(
+        GraphPoint start,
+        GraphConnectionRoute route,
+        GraphPoint end,
+        int segmentIndex,
+        GraphEditorConnectionRouteStyle routeStyle)
     {
         ArgumentNullException.ThrowIfNull(route);
 
-        var points = new List<GraphPoint>(route.Vertices.Count + 2) { start };
-        points.AddRange(route.Vertices);
-        points.Add(end);
+        var points = BuildRoutePoints(start, route, end, routeStyle);
 
         if (segmentIndex < 0 || segmentIndex >= points.Count - 1)
         {
@@ -118,6 +129,64 @@ public static class ConnectionPathBuilder
             new GraphPoint(start.X + ((end.X - start.X) / 3d), start.Y + ((end.Y - start.Y) / 3d)),
             new GraphPoint(start.X + (((end.X - start.X) * 2d) / 3d), start.Y + (((end.Y - start.Y) * 2d) / 3d)),
             end);
+
+    private static IReadOnlyList<BezierConnection> BuildSmoothStepSegments(IReadOnlyList<GraphPoint> points)
+    {
+        if (points.Count < 2)
+        {
+            return [];
+        }
+
+        const double cornerRadius = 18d;
+        var segments = new List<BezierConnection>();
+        var current = points[0];
+        for (var index = 1; index < points.Count; index++)
+        {
+            var corner = points[index];
+            if (index == points.Count - 1)
+            {
+                AddStraightIfDistinct(segments, current, corner);
+                continue;
+            }
+
+            var next = points[index + 1];
+            var beforeCorner = MoveToward(corner, current, cornerRadius);
+            var afterCorner = MoveToward(corner, next, cornerRadius);
+            AddStraightIfDistinct(segments, current, beforeCorner);
+            if (!IsSamePoint(beforeCorner, afterCorner))
+            {
+                segments.Add(new BezierConnection(beforeCorner, corner, corner, afterCorner));
+            }
+
+            current = afterCorner;
+        }
+
+        return segments;
+    }
+
+    private static void AddStraightIfDistinct(List<BezierConnection> segments, GraphPoint start, GraphPoint end)
+    {
+        if (!IsSamePoint(start, end))
+        {
+            segments.Add(BuildStraightSegment(start, end));
+        }
+    }
+
+    private static GraphPoint MoveToward(GraphPoint from, GraphPoint to, double distance)
+    {
+        var deltaX = to.X - from.X;
+        var deltaY = to.Y - from.Y;
+        var length = Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
+        if (length < 0.001d)
+        {
+            return from;
+        }
+
+        var resolved = Math.Min(distance, length / 2d);
+        return new GraphPoint(
+            from.X + (deltaX / length * resolved),
+            from.Y + (deltaY / length * resolved));
+    }
 
     private static void AppendOrthogonalLeg(List<GraphPoint> points, GraphPoint start, GraphPoint end)
     {

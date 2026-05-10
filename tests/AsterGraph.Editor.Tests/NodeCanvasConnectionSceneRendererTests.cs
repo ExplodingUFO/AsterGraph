@@ -361,6 +361,71 @@ public sealed class NodeCanvasConnectionSceneRendererTests
     }
 
     [AvaloniaFact]
+    public void RenderConnections_RendersAnimatedFloatingStraightEdgeWithMarkers()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var presentation = new GraphEdgePresentation(
+            NoteText: "Marked edge",
+            PathKind: GraphEdgePathKind.Straight,
+            IsAnimated: true,
+            UsesFloatingEndpoints: true,
+            SourceMarker: GraphEdgeMarkerKind.ArrowClosed,
+            TargetMarker: GraphEdgeMarkerKind.ArrowClosed);
+        var editor = CreateEditor(includeConnection: true, presentation: presentation);
+        var hostedScene = CreateHostedScene(editor);
+        var style = GraphEditorStyleOptions.Default.Connection with
+        {
+            AnimatedDashLength = 11,
+            AnimatedGapLength = 7,
+            MarkerSize = 18,
+        };
+
+        try
+        {
+            var context = CreateSceneContext(
+                editor,
+                hostedScene.ConnectionLayer,
+                hostedScene.NodeLayer,
+                hostedScene.CoordinateRoot,
+                hostedScene.NodeVisuals,
+                resolveConnectionStyle: _ => style);
+
+            renderer.RenderConnections(context);
+
+            var geometry = Assert.Single(editor.Session.Queries.GetConnectionGeometrySnapshots());
+            var path = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            var markers = hostedScene.ConnectionLayer.Children
+                .OfType<global::Avalonia.Controls.Shapes.Polygon>()
+                .ToList();
+            var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
+            var label = Assert.IsType<TextBlock>(chip.Child);
+            var expectedBounds = CreateRouteGeometry(
+                geometry.Source.Position,
+                geometry.Route,
+                geometry.RouteStyle,
+                geometry.Target.Position).Bounds;
+
+            Assert.True(geometry.UsesFloatingEndpoints);
+            Assert.Equal(GraphEditorConnectionRouteStyle.Straight, geometry.RouteStyle);
+            Assert.True(geometry.IsAnimated);
+            Assert.Equal(GraphEdgeMarkerKind.ArrowClosed, geometry.SourceMarker);
+            Assert.Equal(GraphEdgeMarkerKind.ArrowClosed, geometry.TargetMarker);
+            Assert.Equal([style.AnimatedDashLength, style.AnimatedGapLength], path.StrokeDashArray!.ToArray());
+            Assert.Equal(2, markers.Count);
+            Assert.All(markers, marker => Assert.Equal(3, marker.Points!.Count));
+            Assert.Equal("Marked edge", label.Text);
+            Assert.Equal(expectedBounds.X, path.Data!.Bounds.X, 6);
+            Assert.Equal(expectedBounds.Y, path.Data.Bounds.Y, 6);
+            Assert.Equal(expectedBounds.Width, path.Data.Bounds.Width, 6);
+            Assert.Equal(expectedBounds.Height, path.Data.Bounds.Height, 6);
+        }
+        finally
+        {
+            hostedScene.Window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void RenderConnections_DoubleTappedChip_CommitsEditedNoteText()
     {
         var renderer = new NodeCanvasConnectionSceneRenderer();
@@ -751,7 +816,11 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             styleOptions: GraphEditorStyleOptions.Default);
     }
 
-    private static GraphEditorViewModel CreateEditor(bool includeConnection, string? noteText = null, GraphConnectionRoute? route = null)
+    private static GraphEditorViewModel CreateEditor(
+        bool includeConnection,
+        string? noteText = null,
+        GraphConnectionRoute? route = null,
+        GraphEdgePresentation? presentation = null)
     {
         var catalog = CreateConnectionCatalog();
 
@@ -766,9 +835,9 @@ public sealed class NodeCanvasConnectionSceneRendererTests
                     TargetPortId,
                     "Float Flow",
                     "#6AD5C4",
-                    Presentation: string.IsNullOrWhiteSpace(noteText) && route is null
+                    Presentation: presentation ?? (string.IsNullOrWhiteSpace(noteText) && route is null
                         ? null
-                        : new GraphEdgePresentation(noteText, route)),
+                        : new GraphEdgePresentation(noteText, route))),
             }
             : [];
 

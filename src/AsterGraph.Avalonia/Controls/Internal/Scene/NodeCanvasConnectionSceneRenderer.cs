@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -85,24 +86,36 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 continue;
             }
 
-            DrawConnection(
-                context,
-                GetConnectionEndpointAnchor(
+            var sourceAnchor = geometry.UsesFloatingEndpoints
+                ? geometry.Source.Position
+                : GetConnectionEndpointAnchor(
                     context,
                     sourceNode,
                     sourcePort,
                     geometry.Target.Position,
-                    hierarchyConnection?.SourceCollapsedByGroupId),
-                geometry.Route,
-                geometry.RouteStyle,
-                GetConnectionTargetEndpointAnchor(
+                    hierarchyConnection?.SourceCollapsedByGroupId);
+            var targetAnchor = geometry.UsesFloatingEndpoints
+                ? geometry.Target.Position
+                : GetConnectionTargetEndpointAnchor(
                     context,
                     targetNode,
                     connection.Target,
                     geometry.Source.Position,
-                    hierarchyConnection?.TargetCollapsedByGroupId),
+                    hierarchyConnection?.TargetCollapsedByGroupId);
+
+            DrawConnection(
+                context,
+                sourceAnchor,
+                geometry.Route,
+                geometry.RouteStyle,
+                targetAnchor,
                 connection,
-                sourcePort);
+                sourcePort,
+                isPreview: false,
+                geometry.IsAnimated,
+                geometry.IsEditable,
+                geometry.SourceMarker,
+                geometry.TargetMarker);
         }
 
         if (context.ViewModel.HasPendingConnection
@@ -342,7 +355,11 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         GraphPoint end,
         ConnectionViewModel connection,
         PortViewModel? sourcePort = null,
-        bool isPreview = false)
+        bool isPreview = false,
+        bool isAnimated = false,
+        bool isEditable = true,
+        GraphEdgeMarkerKind sourceMarker = GraphEdgeMarkerKind.None,
+        GraphEdgeMarkerKind targetMarker = GraphEdgeMarkerKind.None)
     {
         if (context.ConnectionLayer is null || context.ViewModel is null)
         {
@@ -353,6 +370,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         var focusKind = context.ViewModel.InteractionFocus.GetConnectionFocusKind(connection);
         var hasInspectionFocus = context.ViewModel.InteractionFocus.HasInspection;
         var segments = ConnectionPathBuilder.BuildRoute(start, route, end, routeStyle);
+        var routePoints = ConnectionPathBuilder.BuildRoutePoints(start, route, end, routeStyle);
         var path = new global::Avalonia.Controls.Shapes.Path
         {
             Data = CreateRouteGeometry(start, segments),
@@ -366,6 +384,15 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 : ResolveStrokeThickness(connectionStyle, focusKind),
             StrokeLineCap = PenLineCap.Round,
         };
+        if (!isPreview && isAnimated)
+        {
+            path.StrokeDashArray = new AvaloniaList<double>
+            {
+                connectionStyle.AnimatedDashLength,
+                connectionStyle.AnimatedGapLength,
+            };
+        }
+
         if (!isPreview)
         {
             path.PointerPressed += (_, args) =>
@@ -386,7 +413,11 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             return;
         }
 
-        var labelAnchor = ConnectionPathBuilder.ResolveSegmentMidpoint(start, route, end, route.Vertices.Count / 2);
+        AddEndpointMarker(context, start, routePoints.Count > 1 ? routePoints[1] : end, sourceMarker, connection.AccentHex, connectionStyle);
+        AddEndpointMarker(context, end, routePoints.Count > 1 ? routePoints[^2] : start, targetMarker, connection.AccentHex, connectionStyle);
+
+        var labelSegmentIndex = Math.Clamp(routePoints.Count / 2 - 1, 0, Math.Max(0, routePoints.Count - 2));
+        var labelAnchor = ConnectionPathBuilder.ResolveSegmentMidpoint(start, route, end, labelSegmentIndex, routeStyle);
         var midpoint = new Point(labelAnchor.X, labelAnchor.Y);
         var typeToken = sourcePort is null ? string.Empty : GraphTypeCueFormatter.FormatPortToken(sourcePort);
         var displayText = GetDisplayedChipText(connection, connection.NoteText, typeToken, focusKind);
@@ -445,7 +476,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         };
         chip.DoubleTapped += (_, args) =>
         {
-            if (chip.Child is TextBox || context.ViewModel is null)
+            if (!isEditable || chip.Child is TextBox || context.ViewModel is null)
             {
                 return;
             }
@@ -507,6 +538,51 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         Canvas.SetLeft(chip, midpoint.X + connectionStyle.LabelOffsetX);
         Canvas.SetTop(chip, midpoint.Y + connectionStyle.LabelOffsetY);
         context.ConnectionLayer.Children.Add(chip);
+    }
+
+    private static void AddEndpointMarker(
+        NodeCanvasConnectionSceneContext context,
+        GraphPoint tip,
+        GraphPoint adjacent,
+        GraphEdgeMarkerKind markerKind,
+        string accentHex,
+        ConnectionStyleOptions connectionStyle)
+    {
+        if (context.ConnectionLayer is null || markerKind == GraphEdgeMarkerKind.None)
+        {
+            return;
+        }
+
+        var deltaX = tip.X - adjacent.X;
+        var deltaY = tip.Y - adjacent.Y;
+        var length = Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
+        if (length < 0.001d)
+        {
+            return;
+        }
+
+        var unitX = deltaX / length;
+        var unitY = deltaY / length;
+        var normalX = -unitY;
+        var normalY = unitX;
+        var markerLength = Math.Max(4d, connectionStyle.MarkerSize);
+        var markerWidth = markerLength * 0.72d;
+        var baseCenterX = tip.X - (unitX * markerLength);
+        var baseCenterY = tip.Y - (unitY * markerLength);
+
+        context.ConnectionLayer.Children.Add(new global::Avalonia.Controls.Shapes.Polygon
+        {
+            Fill = BrushFactory.Solid(accentHex, connectionStyle.StrokeOpacity),
+            Stroke = BrushFactory.Solid(accentHex, connectionStyle.StrokeOpacity),
+            StrokeThickness = Math.Max(1d, connectionStyle.Thickness * 0.42d),
+            IsHitTestVisible = false,
+            Points = new AvaloniaList<Point>
+            {
+                new(tip.X, tip.Y),
+                new(baseCenterX + (normalX * markerWidth / 2d), baseCenterY + (normalY * markerWidth / 2d)),
+                new(baseCenterX - (normalX * markerWidth / 2d), baseCenterY - (normalY * markerWidth / 2d)),
+            },
+        });
     }
 
     private static Geometry CreateRouteGeometry(GraphPoint start, IReadOnlyList<BezierConnection> segments)

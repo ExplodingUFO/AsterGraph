@@ -64,7 +64,7 @@ C:AsterGraph.Core.Models.GraphConnectionRoute()
 C:AsterGraph.Core.Models.GraphConnectionRoute(System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPoint>)
 C:AsterGraph.Core.Models.GraphConnectionTargetRef(System.String,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind)
 C:AsterGraph.Core.Models.GraphDocument(System.String,System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphNode>,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphConnection>,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphNodeGroup>,System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphScope>)
-C:AsterGraph.Core.Models.GraphEdgePresentation(System.String,AsterGraph.Core.Models.GraphConnectionRoute)
+C:AsterGraph.Core.Models.GraphEdgePresentation(System.String,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphEdgePathKind,System.Boolean,System.Boolean,System.Boolean,System.Boolean,AsterGraph.Core.Models.GraphEdgeMarkerKind,AsterGraph.Core.Models.GraphEdgeMarkerKind)
 C:AsterGraph.Core.Models.GraphNode(System.String,System.String,System.String,System.String,System.String,AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPort>,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPort>,System.String,AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphParameterValue>,AsterGraph.Core.Models.GraphNodeSurfaceState,AsterGraph.Core.Models.GraphCompositeNode)
 C:AsterGraph.Core.Models.GraphNodeGroup(System.String,System.String,AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize,System.Collections.Generic.IReadOnlyList<System.String>,System.Boolean,AsterGraph.Core.Models.GraphPadding)
 C:AsterGraph.Core.Models.GraphNodeSurfaceState(AsterGraph.Core.Models.GraphNodeExpansionState,System.String)
@@ -168,7 +168,7 @@ C:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot(System.Strin
 C:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot(System.String,System.String,System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult)
 C:AsterGraph.Editor.Runtime.GraphEditorCompositeNodeSnapshot(System.String,System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphCompositeBoundaryPort>,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphCompositeBoundaryPort>)
 C:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot(System.String,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,AsterGraph.Core.Models.GraphPoint)
-C:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot(System.String,AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot,AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot)
+C:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot(System.String,AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot,AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot,AsterGraph.Core.Models.GraphEdgePathKind,System.Boolean,System.Boolean,System.Boolean,System.Boolean,AsterGraph.Core.Models.GraphEdgeMarkerKind,AsterGraph.Core.Models.GraphEdgeMarkerKind)
 C:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot(System.Collections.Generic.IReadOnlyList<System.String>,System.Int32,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPoint>)
 C:AsterGraph.Editor.Runtime.GraphEditorConnectionRuntimeOverlaySnapshot(System.String,AsterGraph.Editor.Runtime.GraphEditorRuntimeOverlayStatus,System.String,System.String,System.Nullable<System.Int32>,System.Boolean)
 C:AsterGraph.Editor.Runtime.GraphEditorEdgeTemplateSnapshot(System.String,System.String,System.String,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,AsterGraph.Abstractions.Identifiers.PortTypeId,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String,System.String,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult)
@@ -346,6 +346,13 @@ F:AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage.NodeSurface:AsterGra
 F:AsterGraph.Core.Models.GraphConnectionTargetKind.Parameter:AsterGraph.Core.Models.GraphConnectionTargetKind
 F:AsterGraph.Core.Models.GraphConnectionTargetKind.Port:AsterGraph.Core.Models.GraphConnectionTargetKind
 F:AsterGraph.Core.Models.GraphDocument.DefaultRootGraphId:System.String
+F:AsterGraph.Core.Models.GraphEdgeMarkerKind.ArrowClosed:AsterGraph.Core.Models.GraphEdgeMarkerKind
+F:AsterGraph.Core.Models.GraphEdgeMarkerKind.None:AsterGraph.Core.Models.GraphEdgeMarkerKind
+F:AsterGraph.Core.Models.GraphEdgePathKind.Auto:AsterGraph.Core.Models.GraphEdgePathKind
+F:AsterGraph.Core.Models.GraphEdgePathKind.Bezier:AsterGraph.Core.Models.GraphEdgePathKind
+F:AsterGraph.Core.Models.GraphEdgePathKind.SmoothStep:AsterGraph.Core.Models.GraphEdgePathKind
+F:AsterGraph.Core.Models.GraphEdgePathKind.Step:AsterGraph.Core.Models.GraphEdgePathKind
+F:AsterGraph.Core.Models.GraphEdgePathKind.Straight:AsterGraph.Core.Models.GraphEdgePathKind
 F:AsterGraph.Core.Models.GraphNodeExpansionState.Collapsed:AsterGraph.Core.Models.GraphNodeExpansionState
 F:AsterGraph.Core.Models.GraphNodeExpansionState.Expanded:AsterGraph.Core.Models.GraphNodeExpansionState
 F:AsterGraph.Core.Models.PortDirection.Input:AsterGraph.Core.Models.PortDirection
@@ -412,6 +419,9 @@ F:AsterGraph.Editor.Runtime.GraphEditorCommandSurfaceKind.Tool:AsterGraph.Editor
 F:AsterGraph.Editor.Runtime.GraphEditorCommandSurfaceKind.Workbench:AsterGraph.Editor.Runtime.GraphEditorCommandSurfaceKind
 F:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle.Bezier:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle
 F:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle.Orthogonal:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle
+F:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle.SmoothStep:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle
+F:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle.Step:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle
+F:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle.Straight:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle
 F:AsterGraph.Editor.Runtime.GraphEditorGraphItemSearchResultKind.Connection:AsterGraph.Editor.Runtime.GraphEditorGraphItemSearchResultKind
 F:AsterGraph.Editor.Runtime.GraphEditorGraphItemSearchResultKind.Group:AsterGraph.Editor.Runtime.GraphEditorGraphItemSearchResultKind
 F:AsterGraph.Editor.Runtime.GraphEditorGraphItemSearchResultKind.Issue:AsterGraph.Editor.Runtime.GraphEditorGraphItemSearchResultKind
@@ -842,7 +852,7 @@ M:AsterGraph.Core.Models.GraphDocument.GetRootGraphScope():AsterGraph.Core.Model
 M:AsterGraph.Core.Models.GraphDocument.ToString():System.String
 M:AsterGraph.Core.Models.GraphDocument.WithRootGraphContents(System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphNode>,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphConnection>,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphNodeGroup>):AsterGraph.Core.Models.GraphDocument
 M:AsterGraph.Core.Models.GraphEdgePresentation.<Clone>$():AsterGraph.Core.Models.GraphEdgePresentation
-M:AsterGraph.Core.Models.GraphEdgePresentation.Deconstruct(out System.String&,out AsterGraph.Core.Models.GraphConnectionRoute&):System.Void
+M:AsterGraph.Core.Models.GraphEdgePresentation.Deconstruct(out System.String&,out AsterGraph.Core.Models.GraphConnectionRoute&,out AsterGraph.Core.Models.GraphEdgePathKind&,out System.Boolean&,out System.Boolean&,out System.Boolean&,out System.Boolean&,out AsterGraph.Core.Models.GraphEdgeMarkerKind&,out AsterGraph.Core.Models.GraphEdgeMarkerKind&):System.Void
 M:AsterGraph.Core.Models.GraphEdgePresentation.Equals(AsterGraph.Core.Models.GraphEdgePresentation):System.Boolean
 M:AsterGraph.Core.Models.GraphEdgePresentation.Equals(System.Object):System.Boolean
 M:AsterGraph.Core.Models.GraphEdgePresentation.GetHashCode():System.Int32
@@ -1074,6 +1084,7 @@ M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.Build(AsterGraph.Core.Models.
 M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.BuildRoute(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle):System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Geometry.BezierConnection>
 M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.BuildRoute(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint):System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Geometry.BezierConnection>
 M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.BuildRoutePoints(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle):System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPoint>
+M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.ResolveSegmentMidpoint(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint,System.Int32,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle):AsterGraph.Core.Models.GraphPoint
 M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.ResolveSegmentMidpoint(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint,System.Int32):AsterGraph.Core.Models.GraphPoint
 M:AsterGraph.Editor.Geometry.NodeBounds.Deconstruct(out System.Double&,out System.Double&,out System.Double&,out System.Double&):System.Void
 M:AsterGraph.Editor.Geometry.NodeBounds.Equals(AsterGraph.Editor.Geometry.NodeBounds):System.Boolean
@@ -1370,7 +1381,7 @@ M:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot.Equals
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot.GetHashCode():System.Int32
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot.ToString():System.String
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot
-M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Deconstruct(out System.String&,out AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot&,out AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot&,out AsterGraph.Core.Models.GraphConnectionRoute&,out AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle&,out AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot&):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Deconstruct(out System.String&,out AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot&,out AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot&,out AsterGraph.Core.Models.GraphConnectionRoute&,out AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle&,out AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot&,out AsterGraph.Core.Models.GraphEdgePathKind&,out System.Boolean&,out System.Boolean&,out System.Boolean&,out System.Boolean&,out AsterGraph.Core.Models.GraphEdgeMarkerKind&,out AsterGraph.Core.Models.GraphEdgeMarkerKind&):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Equals(System.Object):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.GetHashCode():System.Int32
@@ -2264,6 +2275,8 @@ P:AsterGraph.Abstractions.Styling.CanvasStyleOptions.SelectionCornerRadius:Syste
 P:AsterGraph.Abstractions.Styling.CanvasStyleOptions.SelectionFillHex:System.String:get,set
 P:AsterGraph.Abstractions.Styling.CanvasStyleOptions.SelectionFillOpacity:System.Double:get,set
 P:AsterGraph.Abstractions.Styling.CanvasStyleOptions.SnapTolerance:System.Double:get,set
+P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.AnimatedDashLength:System.Double:get,set
+P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.AnimatedGapLength:System.Double:get,set
 P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.LabelBackgroundHex:System.String:get,set
 P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.LabelBackgroundOpacity:System.Double:get,set
 P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.LabelBorderOpacity:System.Double:get,set
@@ -2276,6 +2289,7 @@ P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.LabelHorizontalPadding:
 P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.LabelOffsetX:System.Double:get,set
 P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.LabelOffsetY:System.Double:get,set
 P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.LabelVerticalPadding:System.Double:get,set
+P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.MarkerSize:System.Double:get,set
 P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.PreviewStrokeOpacity:System.Double:get,set
 P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.PreviewThickness:System.Double:get,set
 P:AsterGraph.Abstractions.Styling.ConnectionStyleOptions.StrokeOpacity:System.Double:get,set
@@ -2573,8 +2587,15 @@ P:AsterGraph.Core.Models.GraphDocument.Groups:System.Collections.Generic.IReadOn
 P:AsterGraph.Core.Models.GraphDocument.Nodes:System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphNode>:get,set
 P:AsterGraph.Core.Models.GraphDocument.RootGraphId:System.String:get,set
 P:AsterGraph.Core.Models.GraphDocument.Title:System.String:get,set
+P:AsterGraph.Core.Models.GraphEdgePresentation.IsAnimated:System.Boolean:get,set
+P:AsterGraph.Core.Models.GraphEdgePresentation.IsEditable:System.Boolean:get,set
+P:AsterGraph.Core.Models.GraphEdgePresentation.IsReconnectable:System.Boolean:get,set
 P:AsterGraph.Core.Models.GraphEdgePresentation.NoteText:System.String:get,set
+P:AsterGraph.Core.Models.GraphEdgePresentation.PathKind:AsterGraph.Core.Models.GraphEdgePathKind:get,set
 P:AsterGraph.Core.Models.GraphEdgePresentation.Route:AsterGraph.Core.Models.GraphConnectionRoute:get,set
+P:AsterGraph.Core.Models.GraphEdgePresentation.SourceMarker:AsterGraph.Core.Models.GraphEdgeMarkerKind:get,set
+P:AsterGraph.Core.Models.GraphEdgePresentation.TargetMarker:AsterGraph.Core.Models.GraphEdgeMarkerKind:get,set
+P:AsterGraph.Core.Models.GraphEdgePresentation.UsesFloatingEndpoints:System.Boolean:get,set
 P:AsterGraph.Core.Models.GraphNode.AccentHex:System.String:get,set
 P:AsterGraph.Core.Models.GraphNode.Category:System.String:get,set
 P:AsterGraph.Core.Models.GraphNode.Composite:AsterGraph.Core.Models.GraphCompositeNode:get,set
@@ -3117,11 +3138,18 @@ P:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot.Endpoi
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot.NodeId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot.Position:AsterGraph.Core.Models.GraphPoint:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.ConnectionId:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.IsAnimated:System.Boolean:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.IsEditable:System.Boolean:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.IsReconnectable:System.Boolean:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.PathKind:AsterGraph.Core.Models.GraphEdgePathKind:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Route:AsterGraph.Core.Models.GraphConnectionRoute:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.RouteStyle:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.RoutingEvidence:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Source:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.SourceMarker:AsterGraph.Core.Models.GraphEdgeMarkerKind:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.Target:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.TargetMarker:AsterGraph.Core.Models.GraphEdgeMarkerKind:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot.UsesFloatingEndpoints:System.Boolean:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.CrossingCount:System.Int32:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.ObstacleNodeIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorConnectionRouteEvidenceSnapshot.PathPoints:System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPoint>:get,set
@@ -4011,6 +4039,8 @@ T:enum AsterGraph.Avalonia.Presentation.GraphResizeFeedbackHandle
 T:enum AsterGraph.Avalonia.Presentation.GraphResizeFeedbackSurfaceKind
 T:enum AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage
 T:enum AsterGraph.Core.Models.GraphConnectionTargetKind
+T:enum AsterGraph.Core.Models.GraphEdgeMarkerKind
+T:enum AsterGraph.Core.Models.GraphEdgePathKind
 T:enum AsterGraph.Core.Models.GraphNodeExpansionState
 T:enum AsterGraph.Core.Models.PortDirection
 T:enum AsterGraph.Editor.Diagnostics.GraphEditorDiagnosticSeverity
