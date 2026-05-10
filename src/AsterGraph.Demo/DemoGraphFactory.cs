@@ -17,6 +17,9 @@ public static class DemoGraphFactory
     public const string SelectionMarqueeWorkbenchScenario = "selection-marquee-workbench";
     public const string KeyboardNavigationLabScenario = "keyboard-navigation-lab";
     public const string HostEventInspectorScenario = "host-event-inspector";
+    public const string WorkspaceSaveRestoreScenario = "workspace-save-restore";
+    public const string ClipboardFragmentRoundtripScenario = "clipboard-fragment-roundtrip";
+    public const string ValidationPreventCycleScenario = "validation-prevent-cycle";
 
     public static IReadOnlyList<DemoScenarioPreset> ScenarioPresets { get; } =
     [
@@ -52,6 +55,18 @@ public static class DemoGraphFactory
             HostEventInspectorScenario,
             "Host Event Inspector Fixture",
             "A host-observable graph fixture for selection, viewport, and mutation event evidence."),
+        new(
+            WorkspaceSaveRestoreScenario,
+            "Workspace Save Restore Fixture",
+            "A lifecycle fixture for save/load command affordances, workspace diagnostics, and restore review."),
+        new(
+            ClipboardFragmentRoundtripScenario,
+            "Clipboard Fragment Roundtrip Fixture",
+            "A lifecycle fixture for copy/paste, fragment export/import, and serializer proof evidence."),
+        new(
+            ValidationPreventCycleScenario,
+            "Validation Prevent Cycle Fixture",
+            "A lifecycle fixture for validation focus, helper-line feedback, and invalid-route repair review."),
     ];
 
     public static GraphDocument CreateStartupDocument(INodeCatalog catalog, string? scenarioName)
@@ -109,6 +124,21 @@ public static class DemoGraphFactory
         if (string.Equals(scenarioName, HostEventInspectorScenario, StringComparison.OrdinalIgnoreCase))
         {
             return CreateHostEventInspector(catalog);
+        }
+
+        if (string.Equals(scenarioName, WorkspaceSaveRestoreScenario, StringComparison.OrdinalIgnoreCase))
+        {
+            return CreateWorkspaceSaveRestore(catalog);
+        }
+
+        if (string.Equals(scenarioName, ClipboardFragmentRoundtripScenario, StringComparison.OrdinalIgnoreCase))
+        {
+            return CreateClipboardFragmentRoundtrip(catalog);
+        }
+
+        if (string.Equals(scenarioName, ValidationPreventCycleScenario, StringComparison.OrdinalIgnoreCase))
+        {
+            return CreateValidationPreventCycle(catalog);
         }
 
         throw new ArgumentException($"Unknown demo scenario '{scenarioName}'.", nameof(scenarioName));
@@ -400,6 +430,127 @@ public static class DemoGraphFactory
                     new GraphPoint(352, 80),
                     new GraphSize(1304, 760),
                     ["event-prompt", "event-tool", "event-llm", "event-parser", "event-clock", "event-preview"]),
+            ]);
+
+    private static GraphDocument CreateWorkspaceSaveRestore(INodeCatalog catalog)
+        => new(
+            "Workspace Save Restore Fixture",
+            "A lifecycle fixture for save/load command affordances, workspace diagnostics, and restore review.",
+            [
+                CreateNode(catalog, "save-input", new NodeDefinitionId("aster.demo.ai-input"), new GraphPoint(60, 260)),
+                CreateNode(catalog, "save-prompt", new NodeDefinitionId("aster.demo.prompt-builder"), new GraphPoint(390, 90), groupId: "workspace-lifecycle"),
+                CreateNode(catalog, "save-tool", new NodeDefinitionId("aster.demo.tool-call"), new GraphPoint(720, 310), groupId: "workspace-lifecycle"),
+                CreateNode(catalog, "save-llm", new NodeDefinitionId("aster.demo.llm-call"), new GraphPoint(1040, 120), groupId: "workspace-lifecycle", surface: new GraphNodeSurfaceState(GraphNodeExpansionState.Expanded, "workspace-lifecycle")),
+                CreateNode(catalog, "save-parser", new NodeDefinitionId("aster.demo.response-parser"), new GraphPoint(1380, 260), groupId: "workspace-lifecycle"),
+                CreateNode(catalog, "save-output", new NodeDefinitionId("aster.demo.ai-output"), new GraphPoint(1730, 280)),
+                CreateNode(catalog, "restore-clock", new NodeDefinitionId("aster.demo.time-driver"), new GraphPoint(390, 650), groupId: "workspace-lifecycle"),
+                CreateNode(catalog, "restore-light", new NodeDefinitionId("aster.demo.lighting-mix"), new GraphPoint(980, 610), groupId: "workspace-lifecycle"),
+                CreateNode(catalog, "restore-preview", new NodeDefinitionId("aster.demo.viewport-output"), new GraphPoint(1440, 650)),
+            ],
+            [
+                Connect("save-input", "text", "save-prompt", "context", "saved request", "#78F0E5"),
+                Connect("save-prompt", "prompt", "save-tool", "query", "restore query", "#FFD56A"),
+                Connect("save-prompt", "prompt", "save-llm", "prompt", "persisted prompt", "#78F0E5"),
+                Connect("save-tool", "evidence", "save-llm", "context", "saved context", "#4AD6FF"),
+                Connect("save-llm", "response", "save-parser", "response", "restored response", "#FFB866"),
+                Connect("save-parser", "payload", "save-output", "payload", "saved payload", "#79E28A"),
+                Connect("restore-clock", "pulse", "restore-light", "pulse", "restore marker", "#E0AEFF"),
+                Connect("restore-light", "lit", "restore-preview", "surface", "restore preview", "#FFB866"),
+            ],
+            [
+                new GraphNodeGroup(
+                    "workspace-lifecycle",
+                    "Workspace Lifecycle",
+                    new GraphPoint(362, 64),
+                    new GraphSize(1320, 784),
+                    ["save-prompt", "save-tool", "save-llm", "save-parser", "restore-clock", "restore-light", "restore-preview"]),
+            ]);
+
+    private static GraphDocument CreateClipboardFragmentRoundtrip(INodeCatalog catalog)
+        => new(
+            "Clipboard Fragment Roundtrip Fixture",
+            "A lifecycle fixture for copy/paste, fragment export/import, and serializer proof evidence.",
+            [
+                CreateNode(catalog, "clip-source-a", new NodeDefinitionId("aster.demo.noise-field"), new GraphPoint(80, 100), groupId: "clipboard-source-fragment"),
+                CreateNode(catalog, "clip-source-b", new NodeDefinitionId("aster.demo.palette-ramp"), new GraphPoint(80, 420), groupId: "clipboard-source-fragment"),
+                CreateNode(catalog, "clip-compose", new NodeDefinitionId("aster.demo.slope-blend"), new GraphPoint(500, 260), groupId: "clipboard-source-fragment", surface: new GraphNodeSurfaceState(GraphNodeExpansionState.Expanded, "clipboard-source-fragment")),
+                CreateNode(catalog, "clip-copy-preview", new NodeDefinitionId("aster.demo.lighting-mix"), new GraphPoint(900, 220), groupId: "clipboard-roundtrip"),
+                CreateNode(catalog, "clip-paste-a", new NodeDefinitionId("aster.demo.noise-field"), new GraphPoint(1260, 80), groupId: "clipboard-roundtrip"),
+                CreateNode(catalog, "clip-paste-b", new NodeDefinitionId("aster.demo.palette-ramp"), new GraphPoint(1260, 410), groupId: "clipboard-roundtrip"),
+                CreateNode(catalog, "clip-pasted-compose", new NodeDefinitionId("aster.demo.slope-blend"), new GraphPoint(1620, 260), groupId: "clipboard-roundtrip"),
+                CreateNode(catalog, "clip-output", new NodeDefinitionId("aster.demo.viewport-output"), new GraphPoint(2020, 300)),
+            ],
+            [
+                Connect("clip-source-a", "height", "clip-compose", "height", "copied height", "#FFD56A"),
+                Connect("clip-source-a", "mask", "clip-compose", "mask", "copied mask", "#4AD6FF"),
+                Connect("clip-source-b", "tint", "clip-compose", "tint", "copied tint", "#78F0E5"),
+                Connect("clip-compose", "albedo", "clip-copy-preview", "albedo", "source albedo", "#79E28A"),
+                Connect("clip-compose", "rough", "clip-copy-preview", "rough", "source rough", "#FFD56A"),
+                Connect("clip-paste-a", "height", "clip-pasted-compose", "height", "pasted height", "#FFD56A"),
+                Connect("clip-paste-a", "mask", "clip-pasted-compose", "mask", "pasted mask", "#4AD6FF"),
+                Connect("clip-paste-b", "tint", "clip-pasted-compose", "tint", "pasted tint", "#78F0E5"),
+                Connect("clip-pasted-compose", "albedo", "clip-output", "surface", "pasted preview", "#FFB866"),
+            ],
+            [
+                new GraphNodeGroup(
+                    "clipboard-source-fragment",
+                    "Source Fragment",
+                    new GraphPoint(52, 64),
+                    new GraphSize(748, 606),
+                    ["clip-source-a", "clip-source-b", "clip-compose"]),
+                new GraphNodeGroup(
+                    "clipboard-roundtrip",
+                    "Clipboard Roundtrip",
+                    new GraphPoint(872, 48),
+                    new GraphSize(948, 654),
+                    ["clip-copy-preview", "clip-paste-a", "clip-paste-b", "clip-pasted-compose"]),
+            ]);
+
+    private static GraphDocument CreateValidationPreventCycle(INodeCatalog catalog)
+        => new(
+            "Validation Prevent Cycle Fixture",
+            "A lifecycle fixture for validation focus, helper-line feedback, and invalid-route repair review.",
+            [
+                CreateNode(catalog, "validate-clock", new NodeDefinitionId("aster.demo.time-driver"), new GraphPoint(60, 300)),
+                CreateNode(catalog, "validate-source", new NodeDefinitionId("aster.demo.noise-field"), new GraphPoint(390, 90), groupId: "validation-helper-lane"),
+                CreateNode(catalog, "validate-palette", new NodeDefinitionId("aster.demo.palette-ramp"), new GraphPoint(390, 430), groupId: "validation-helper-lane"),
+                CreateNode(catalog, "validate-slope", new NodeDefinitionId("aster.demo.slope-blend"), new GraphPoint(810, 250), groupId: "validation-helper-lane", surface: new GraphNodeSurfaceState(GraphNodeExpansionState.Expanded, "validation-helper-lane")),
+                CreateNode(catalog, "validate-light", new NodeDefinitionId("aster.demo.lighting-mix"), new GraphPoint(1240, 230), groupId: "validation-helper-lane"),
+                CreateNode(catalog, "validate-output", new NodeDefinitionId("aster.demo.viewport-output"), new GraphPoint(1690, 270)),
+                CreateNode(catalog, "validate-review", new NodeDefinitionId("aster.demo.ai-output"), new GraphPoint(1230, 610), groupId: "validation-helper-lane"),
+            ],
+            [
+                Connect("validate-clock", "phase", "validate-source", "phase", "candidate source", "#78F0E5"),
+                Connect("validate-clock", "pulse", "validate-palette", "pulse", "helper pulse", "#FFD56A"),
+                Connect("validate-source", "height", "validate-slope", "height", "valid height", "#FFD56A"),
+                Connect("validate-source", "mask", "validate-slope", "mask", "valid mask", "#4AD6FF"),
+                Connect("validate-palette", "tint", "validate-slope", "tint", "valid tint", "#78F0E5"),
+                Connect(
+                    "validate-slope",
+                    "albedo",
+                    "validate-light",
+                    "albedo",
+                    "validated albedo",
+                    "#79E28A",
+                    new GraphEdgePresentation(Route: new GraphConnectionRoute([new GraphPoint(1110, 170)]), TargetMarker: GraphEdgeMarkerKind.ArrowClosed)),
+                Connect("validate-slope", "rough", "validate-light", "rough", "validated rough", "#FFD56A"),
+                Connect(
+                    "validate-light",
+                    "lit",
+                    "validate-output",
+                    "surface",
+                    "accepted route",
+                    "#FFB866",
+                    new GraphEdgePresentation(PathKind: GraphEdgePathKind.Step, TargetMarker: GraphEdgeMarkerKind.ArrowClosed)),
+                Connect("validate-slope", "albedo", "validate-review", "payload", "invalid review", "#FF7A90"),
+            ],
+            [
+                new GraphNodeGroup(
+                    "validation-helper-lane",
+                    "Validation Helper Lane",
+                    new GraphPoint(362, 64),
+                    new GraphSize(1330, 736),
+                    ["validate-source", "validate-palette", "validate-slope", "validate-light", "validate-review"]),
             ]);
 
     private static GraphNode CreateNode(

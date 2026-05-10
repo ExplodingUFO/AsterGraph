@@ -165,6 +165,33 @@ public sealed class DemoScenarioLaunchTests
                 RequiredNodeId = "event-output",
                 RequiredGroupId = "host-event-lane",
             },
+            new
+            {
+                Id = "workspace-save-restore",
+                Title = "Workspace Save Restore Fixture",
+                MinimumNodes = 9,
+                MinimumConnections = 8,
+                RequiredNodeId = "save-output",
+                RequiredGroupId = "workspace-lifecycle",
+            },
+            new
+            {
+                Id = "clipboard-fragment-roundtrip",
+                Title = "Clipboard Fragment Roundtrip Fixture",
+                MinimumNodes = 8,
+                MinimumConnections = 9,
+                RequiredNodeId = "clip-output",
+                RequiredGroupId = "clipboard-roundtrip",
+            },
+            new
+            {
+                Id = "validation-prevent-cycle",
+                Title = "Validation Prevent Cycle Fixture",
+                MinimumNodes = 7,
+                MinimumConnections = 9,
+                RequiredNodeId = "validate-output",
+                RequiredGroupId = "validation-helper-lane",
+            },
         };
 
         foreach (var scenario in scenarios)

@@ -49,7 +49,7 @@ public sealed class DemoCookbookNavigationTests
 
         Assert.Empty(viewModel.FilteredCookbookRecipes);
 
-        viewModel.CookbookSearchText = "support";
+        viewModel.CookbookSearchText = "bundle";
 
         var categoryMatch = Assert.Single(viewModel.FilteredCookbookRecipes);
         Assert.Equal("diagnostics-support-route", categoryMatch.Id);
@@ -76,7 +76,7 @@ public sealed class DemoCookbookNavigationTests
         Assert.Empty(viewModel.CookbookWorkspace.NavigationGroups);
         Assert.Equal("plugin-trust-route", viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
 
-        viewModel.CookbookSearchText = "support";
+        viewModel.CookbookSearchText = "bundle";
 
         var categoryGroup = Assert.Single(viewModel.CookbookWorkspace.NavigationGroups);
         Assert.Equal(DemoCookbookRecipeCategory.DiagnosticsSupport, categoryGroup.Category);

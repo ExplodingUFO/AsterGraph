@@ -145,5 +145,68 @@
       "event-output"
     ],
     "outputFileName": "cookbook-interaction-host-event-inspector.png"
+  },
+  {
+    "id": "cookbook-lifecycle-workspace-save-restore",
+    "recipeId": "lifecycle-workspace-save-restore-route",
+    "scenario": "workspace-save-restore",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Workspace Save Restore Fixture",
+    "minimumNodeCount": 9,
+    "minimumConnectionCount": 8,
+    "requiredNodeIds": [
+      "save-input",
+      "save-output"
+    ],
+    "outputFileName": "cookbook-lifecycle-workspace-save-restore.png"
+  },
+  {
+    "id": "cookbook-lifecycle-clipboard-fragment",
+    "recipeId": "lifecycle-clipboard-fragment-route",
+    "scenario": "clipboard-fragment-roundtrip",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Clipboard Fragment Roundtrip Fixture",
+    "minimumNodeCount": 8,
+    "minimumConnectionCount": 9,
+    "requiredNodeIds": [
+      "clip-source-a",
+      "clip-output"
+    ],
+    "outputFileName": "cookbook-lifecycle-clipboard-fragment.png"
+  },
+  {
+    "id": "cookbook-lifecycle-validation-helper",
+    "recipeId": "lifecycle-validation-helper-route",
+    "scenario": "validation-prevent-cycle",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Validation Prevent Cycle Fixture",
+    "minimumNodeCount": 7,
+    "minimumConnectionCount": 9,
+    "requiredNodeIds": [
+      "validate-clock",
+      "validate-output"
+    ],
+    "outputFileName": "cookbook-lifecycle-validation-helper.png"
   }
 ]

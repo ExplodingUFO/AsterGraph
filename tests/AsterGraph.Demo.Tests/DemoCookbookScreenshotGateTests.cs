@@ -174,6 +174,31 @@ public sealed class DemoCookbookScreenshotGateTests
     }
 
     [Fact]
+    public void CookbookScreenshotGate_IncludesLifecycleFixtureBatchRoutes()
+    {
+        var routes = LoadRoutes(GetRepositoryRoot());
+
+        Assert.Contains(routes, route =>
+            route.Id == "cookbook-lifecycle-workspace-save-restore"
+            && route.RecipeId == "lifecycle-workspace-save-restore-route"
+            && route.Scenario == "workspace-save-restore"
+            && route.ExpectedDocumentTitle == "Workspace Save Restore Fixture"
+            && route.RequiredNodeIds.Contains("save-output", StringComparer.Ordinal));
+        Assert.Contains(routes, route =>
+            route.Id == "cookbook-lifecycle-clipboard-fragment"
+            && route.RecipeId == "lifecycle-clipboard-fragment-route"
+            && route.Scenario == "clipboard-fragment-roundtrip"
+            && route.ExpectedDocumentTitle == "Clipboard Fragment Roundtrip Fixture"
+            && route.RequiredNodeIds.Contains("clip-output", StringComparer.Ordinal));
+        Assert.Contains(routes, route =>
+            route.Id == "cookbook-lifecycle-validation-helper"
+            && route.RecipeId == "lifecycle-validation-helper-route"
+            && route.Scenario == "validation-prevent-cycle"
+            && route.ExpectedDocumentTitle == "Validation Prevent Cycle Fixture"
+            && route.RequiredNodeIds.Contains("validate-output", StringComparer.Ordinal));
+    }
+
+    [Fact]
     public void CookbookScreenshotGate_DocumentationNamesCommandArtifactsAndCiPosture()
     {
         var english = ReadRepoFile("docs/en/demo-cookbook.md");
