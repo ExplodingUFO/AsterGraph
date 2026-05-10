@@ -88,19 +88,72 @@ internal static class GraphEditorConnectionGeometryProjector
             return null;
         }
 
+        var presentation = connection.Presentation;
         var route = connection.Presentation?.Route ?? GraphConnectionRoute.Empty;
+        var usesFloatingEndpoints = presentation?.UsesFloatingEndpoints ?? false;
+        if (usesFloatingEndpoints)
+        {
+            var sourceBounds = CreateNodeBounds(sourceNode);
+            var targetBounds = CreateNodeBounds(targetNode);
+            sourceAnchor = sourceAnchor with
+            {
+                Position = ResolveFloatingAnchor(sourceBounds, targetBounds),
+            };
+            targetAnchor = targetAnchor with
+            {
+                Position = ResolveFloatingAnchor(targetBounds, sourceBounds),
+            };
+        }
+
         return new GraphEditorConnectionGeometrySnapshot(
             connection.Id,
             sourceAnchor,
             targetAnchor,
             route,
-            ResolveRouteStyle(route));
+            ResolveRouteStyle(route, presentation?.PathKind ?? GraphEdgePathKind.Auto),
+            PathKind: presentation?.PathKind ?? GraphEdgePathKind.Auto,
+            IsAnimated: presentation?.IsAnimated ?? false,
+            UsesFloatingEndpoints: usesFloatingEndpoints,
+            IsReconnectable: presentation?.IsReconnectable ?? true,
+            IsEditable: presentation?.IsEditable ?? true,
+            SourceMarker: presentation?.SourceMarker ?? GraphEdgeMarkerKind.None,
+            TargetMarker: presentation?.TargetMarker ?? GraphEdgeMarkerKind.None);
     }
 
-    private static GraphEditorConnectionRouteStyle ResolveRouteStyle(GraphConnectionRoute route)
-        => route.IsEmpty
-            ? GraphEditorConnectionRouteStyle.Bezier
-            : GraphEditorConnectionRouteStyle.Orthogonal;
+    private static GraphEditorConnectionRouteStyle ResolveRouteStyle(GraphConnectionRoute route, GraphEdgePathKind pathKind)
+        => pathKind switch
+        {
+            GraphEdgePathKind.Bezier => GraphEditorConnectionRouteStyle.Bezier,
+            GraphEdgePathKind.SmoothStep => GraphEditorConnectionRouteStyle.SmoothStep,
+            GraphEdgePathKind.Step => GraphEditorConnectionRouteStyle.Step,
+            GraphEdgePathKind.Straight => GraphEditorConnectionRouteStyle.Straight,
+            _ => route.IsEmpty
+                ? GraphEditorConnectionRouteStyle.Bezier
+                : GraphEditorConnectionRouteStyle.Step,
+        };
+
+    private static GraphPoint ResolveFloatingAnchor(NodeBounds nodeBounds, NodeBounds towardBounds)
+    {
+        var nodeCenter = new GraphPoint(
+            nodeBounds.X + (nodeBounds.Width / 2d),
+            nodeBounds.Y + (nodeBounds.Height / 2d));
+        var targetCenter = new GraphPoint(
+            towardBounds.X + (towardBounds.Width / 2d),
+            towardBounds.Y + (towardBounds.Height / 2d));
+        var deltaX = targetCenter.X - nodeCenter.X;
+        var deltaY = targetCenter.Y - nodeCenter.Y;
+        if (NearlyZero(deltaX) && NearlyZero(deltaY))
+        {
+            return nodeCenter;
+        }
+
+        var halfWidth = Math.Max(nodeBounds.Width / 2d, 0.001d);
+        var halfHeight = Math.Max(nodeBounds.Height / 2d, 0.001d);
+        var scale = 1d / Math.Max(Math.Abs(deltaX) / halfWidth, Math.Abs(deltaY) / halfHeight);
+        return new GraphPoint(
+            nodeCenter.X + (deltaX * scale),
+            nodeCenter.Y + (deltaY * scale));
+    }
 
     private static GraphEditorConnectionRouteEvidenceSnapshot CreateRoutingEvidence(
         GraphEditorConnectionGeometrySnapshot snapshot,

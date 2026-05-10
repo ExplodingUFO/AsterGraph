@@ -17,12 +17,17 @@ public sealed class DemoCookbookV078CatalogTests
         Assert.Contains(recipe.CodeAnchors, anchor => anchor.Evidence == "TrySetNodeSize");
         Assert.Contains(recipe.CodeAnchors, anchor => anchor.Evidence == "TryWrapSelectionToComposite");
         Assert.Contains(recipe.CodeAnchors, anchor => anchor.Evidence == "TryInsertConnectionRouteVertex");
+        Assert.Contains(recipe.CodeAnchors, anchor => anchor.Evidence == "GraphEdgePresentation");
         Assert.Contains(recipe.DemoAnchors, anchor => anchor.Evidence == "SessionCommands_NodeGroups_PromoteToComposite_AndExposeBoundaryPorts");
+        Assert.Contains(recipe.DemoAnchors, anchor => anchor.Evidence == "SessionQueries_GetConnectionGeometrySnapshots_ProjectPathVariantEdgePresentation");
         Assert.Contains(recipe.ProofMarkers, marker => marker == "TIERED_NODE_SURFACE_OK");
         Assert.Contains(recipe.ProofMarkers, marker => marker == "COMPOSITE_SCOPE_OK");
         Assert.Contains(recipe.ProofMarkers, marker => marker == "EDGE_GEOMETRY_OK");
+        Assert.Contains(recipe.ProofMarkers, marker => marker == "SessionQueries_GetConnectionGeometrySnapshots_ProjectPathVariantEdgePresentation");
         AssertScenarioAndInteractionEvidence(recipe, "GetScopeNavigationSnapshot");
         AssertScenarioAndInteractionEvidence(recipe, "EDGE_GEOMETRY_OK");
+        AssertScenarioAndInteractionEvidence(recipe, "GraphEdgePresentation");
+        AssertScenarioAndInteractionEvidence(recipe, "SessionQueries_GetConnectionGeometrySnapshots_ProjectPathVariantEdgePresentation");
     }
 
     private static DemoCookbookRecipe GetRecipe(string id)

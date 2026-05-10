@@ -254,13 +254,21 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
         var reconnect = GetCommandDescriptor(commands, "connections.reconnect");
         var disconnect = GetCommandDescriptor(commands, "connections.disconnect");
         var clearNote = GetCommandDescriptor(commands, "connections.note.set");
+        var isReconnectable = connection.Presentation?.IsReconnectable ?? true;
+        var isEditable = connection.Presentation?.IsEditable ?? true;
+        var reconnectDescriptor = isReconnectable
+            ? reconnect
+            : CreateContextualDescriptor(
+                reconnect,
+                reconnect.Title,
+                Localize("editor.tool.connection.reconnectDisabled", "Connection reconnect editing disabled"));
 
         var items = new List<GraphEditorToolDescriptorSnapshot>
         {
             new GraphEditorToolDescriptorSnapshot(
                 "connection-reconnect",
                 GraphEditorToolContextKind.Connection,
-                reconnect,
+                reconnectDescriptor,
                 CreateCommand("connections.reconnect", ("connectionId", connection.Id)),
                 order: 0),
             new GraphEditorToolDescriptorSnapshot(
@@ -271,7 +279,7 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
                 order: 10),
         };
 
-        if (!string.IsNullOrWhiteSpace(connection.Presentation?.NoteText))
+        if (isEditable && !string.IsNullOrWhiteSpace(connection.Presentation?.NoteText))
         {
             items.Add(new GraphEditorToolDescriptorSnapshot(
                 "connection-clear-note",
@@ -309,6 +317,22 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
             descriptor.Source,
             descriptor.IsEnabled,
             descriptor.DisabledReason,
+            descriptor.RecoveryHint,
+            descriptor.RecoveryCommandId);
+
+    private static GraphEditorCommandDescriptorSnapshot CreateContextualDescriptor(
+        GraphEditorCommandDescriptorSnapshot descriptor,
+        string title,
+        string disabledReason)
+        => new(
+            descriptor.Id,
+            title,
+            descriptor.Group,
+            descriptor.IconKey,
+            descriptor.DefaultShortcut,
+            descriptor.Source,
+            isEnabled: false,
+            disabledReason,
             descriptor.RecoveryHint,
             descriptor.RecoveryCommandId);
 

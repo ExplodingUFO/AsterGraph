@@ -11,13 +11,27 @@ namespace AsterGraph.Editor.Runtime;
 /// <param name="Route">Resolved persisted bend-point route between source and target anchors.</param>
 /// <param name="RouteStyle">Resolved rendering style for this route.</param>
 /// <param name="RoutingEvidence">Bounded routing evidence used by hosts for inspection and quality checks.</param>
+/// <param name="PathKind">Persisted path kind that produced <paramref name="RouteStyle"/>.</param>
+/// <param name="IsAnimated">Whether this edge should use animated stock rendering.</param>
+/// <param name="UsesFloatingEndpoints">Whether the endpoints are resolved from node bounds instead of fixed port anchors.</param>
+/// <param name="IsReconnectable">Whether stock UI should expose reconnect affordances.</param>
+/// <param name="IsEditable">Whether stock UI should expose label/note editing affordances.</param>
+/// <param name="SourceMarker">Optional source endpoint marker.</param>
+/// <param name="TargetMarker">Optional target endpoint marker.</param>
 public sealed record GraphEditorConnectionGeometrySnapshot(
     string ConnectionId,
     GraphEditorConnectionEndpointGeometrySnapshot Source,
     GraphEditorConnectionEndpointGeometrySnapshot Target,
     GraphConnectionRoute Route,
     GraphEditorConnectionRouteStyle RouteStyle = GraphEditorConnectionRouteStyle.Bezier,
-    GraphEditorConnectionRouteEvidenceSnapshot? RoutingEvidence = null);
+    GraphEditorConnectionRouteEvidenceSnapshot? RoutingEvidence = null,
+    GraphEdgePathKind PathKind = GraphEdgePathKind.Auto,
+    bool IsAnimated = false,
+    bool UsesFloatingEndpoints = false,
+    bool IsReconnectable = true,
+    bool IsEditable = true,
+    GraphEdgeMarkerKind SourceMarker = GraphEdgeMarkerKind.None,
+    GraphEdgeMarkerKind TargetMarker = GraphEdgeMarkerKind.None);
 
 /// <summary>
 /// Supported editor-side route rendering styles.
@@ -30,9 +44,24 @@ public enum GraphEditorConnectionRouteStyle
     Bezier,
 
     /// <summary>
+    /// Axis-aligned routing through deterministic dog-leg segments with rounded corners.
+    /// </summary>
+    SmoothStep,
+
+    /// <summary>
     /// Axis-aligned routing through deterministic dog-leg segments.
     /// </summary>
-    Orthogonal,
+    Step,
+
+    /// <summary>
+    /// Straight routing through anchors and optional route vertices.
+    /// </summary>
+    Straight,
+
+    /// <summary>
+    /// Backward-compatible name for <see cref="Step"/>.
+    /// </summary>
+    Orthogonal = Step,
 }
 
 /// <summary>

@@ -5,6 +5,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Geometry;
+using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Runtime;
 using Xunit;
 
@@ -35,6 +36,20 @@ public sealed class GraphEditorConnectionGeometryContractsTests
         Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.Route)));
         Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.RouteStyle)));
         Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.RoutingEvidence)));
+        Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.PathKind)));
+        Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.IsAnimated)));
+        Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.UsesFloatingEndpoints)));
+        Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.IsReconnectable)));
+        Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.IsEditable)));
+        Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.SourceMarker)));
+        Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.TargetMarker)));
+        Assert.NotNull(typeof(GraphEdgePresentation).GetProperty(nameof(GraphEdgePresentation.PathKind)));
+        Assert.NotNull(typeof(GraphEdgePresentation).GetProperty(nameof(GraphEdgePresentation.IsAnimated)));
+        Assert.NotNull(typeof(GraphEdgePresentation).GetProperty(nameof(GraphEdgePresentation.UsesFloatingEndpoints)));
+        Assert.NotNull(typeof(GraphEdgePresentation).GetProperty(nameof(GraphEdgePresentation.IsReconnectable)));
+        Assert.NotNull(typeof(GraphEdgePresentation).GetProperty(nameof(GraphEdgePresentation.IsEditable)));
+        Assert.NotNull(typeof(GraphEdgePresentation).GetProperty(nameof(GraphEdgePresentation.SourceMarker)));
+        Assert.NotNull(typeof(GraphEdgePresentation).GetProperty(nameof(GraphEdgePresentation.TargetMarker)));
         Assert.NotNull(typeof(GraphEditorConnectionRouteEvidenceSnapshot).GetProperty(nameof(GraphEditorConnectionRouteEvidenceSnapshot.ObstacleNodeIds)));
         Assert.NotNull(typeof(GraphEditorConnectionRouteEvidenceSnapshot).GetProperty(nameof(GraphEditorConnectionRouteEvidenceSnapshot.CrossingCount)));
         Assert.NotNull(typeof(GraphEditorConnectionRouteEvidenceSnapshot).GetProperty(nameof(GraphEditorConnectionRouteEvidenceSnapshot.PathPoints)));
@@ -42,6 +57,11 @@ public sealed class GraphEditorConnectionGeometryContractsTests
         Assert.NotNull(typeof(GraphEditorConnectionEndpointGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionEndpointGeometrySnapshot.EndpointId)));
         Assert.NotNull(typeof(GraphEditorConnectionEndpointGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionEndpointGeometrySnapshot.EndpointKind)));
         Assert.NotNull(typeof(GraphEditorConnectionEndpointGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionEndpointGeometrySnapshot.Position)));
+        Assert.Contains(GraphEdgePathKind.Bezier, Enum.GetValues<GraphEdgePathKind>());
+        Assert.Contains(GraphEdgePathKind.SmoothStep, Enum.GetValues<GraphEdgePathKind>());
+        Assert.Contains(GraphEdgePathKind.Step, Enum.GetValues<GraphEdgePathKind>());
+        Assert.Contains(GraphEdgePathKind.Straight, Enum.GetValues<GraphEdgePathKind>());
+        Assert.Contains(GraphEdgeMarkerKind.ArrowClosed, Enum.GetValues<GraphEdgeMarkerKind>());
     }
 
     [Fact]
@@ -148,6 +168,61 @@ public sealed class GraphEditorConnectionGeometryContractsTests
         Assert.Contains(
             crossing.RoutingEvidence.PathPoints,
             point => Math.Abs(point.X - 360d) < 0.001d);
+    }
+
+    [Fact]
+    public void SessionQueries_GetConnectionGeometrySnapshots_ProjectPathVariantEdgePresentation()
+    {
+        var session = AsterGraphEditorFactory.CreateSession(CreatePathVariantEdgePresentationOptions());
+
+        var geometries = session.Queries.GetConnectionGeometrySnapshots()
+            .ToDictionary(geometry => geometry.ConnectionId, StringComparer.Ordinal);
+
+        var smoothStep = geometries["connection-smooth-step-001"];
+        var step = geometries["connection-step-001"];
+        var straight = geometries["connection-straight-001"];
+        var floating = geometries["connection-floating-001"];
+
+        Assert.Equal(GraphEdgePathKind.SmoothStep, smoothStep.PathKind);
+        Assert.Equal(GraphEditorConnectionRouteStyle.SmoothStep, smoothStep.RouteStyle);
+        Assert.True(smoothStep.IsAnimated);
+        Assert.Equal(GraphEdgeMarkerKind.ArrowClosed, smoothStep.TargetMarker);
+        Assert.Equal(GraphEdgePathKind.Step, step.PathKind);
+        Assert.Equal(GraphEditorConnectionRouteStyle.Step, step.RouteStyle);
+        Assert.Equal(GraphEdgePathKind.Straight, straight.PathKind);
+        Assert.Equal(GraphEditorConnectionRouteStyle.Straight, straight.RouteStyle);
+        Assert.Equal(GraphConnectionRoute.Empty, straight.Route);
+        Assert.True(floating.UsesFloatingEndpoints);
+        Assert.Equal(GraphEdgePathKind.Bezier, floating.PathKind);
+        Assert.Equal(GraphEditorConnectionRouteStyle.Bezier, floating.RouteStyle);
+        Assert.NotEqual(
+            PortAnchorCalculator.GetAnchor(new NodeBounds(120d, 160d, 240d, 160d), PortDirection.Output, 0, 1),
+            floating.Source.Position);
+        Assert.Equal(360d, floating.Source.Position.X, 6);
+        Assert.Equal(246d, floating.Source.Position.Y, 6);
+        Assert.Equal(520d, floating.Target.Position.X, 6);
+        Assert.Equal(254d, floating.Target.Position.Y, 6);
+    }
+
+    [Fact]
+    public void SessionCommands_RespectEdgeReconnectAndEditAffordanceFlags()
+    {
+        var session = AsterGraphEditorFactory.CreateSession(CreateEdgeAffordanceOptions());
+
+        var geometry = Assert.Single(session.Queries.GetConnectionGeometrySnapshots());
+        var menu = session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(
+            ContextMenuTargetKind.Connection,
+            new GraphPoint(240d, 180d),
+            selectedConnectionId: geometry.ConnectionId,
+            clickedConnectionId: geometry.ConnectionId));
+
+        Assert.False(geometry.IsReconnectable);
+        Assert.False(geometry.IsEditable);
+        Assert.False(session.Commands.TrySetConnectionNoteText(geometry.ConnectionId, "Updated", updateStatus: false));
+        Assert.False(session.Commands.TryReconnectConnection(geometry.ConnectionId, updateStatus: false));
+        var reconnect = Assert.Single(menu, item => string.Equals(item.Id, "connection-reconnect", StringComparison.Ordinal));
+        Assert.False(reconnect.IsEnabled);
+        Assert.DoesNotContain(menu, item => string.Equals(item.Id, "connection-clear-note", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -417,6 +492,90 @@ public sealed class GraphEditorConnectionGeometryContractsTests
                         TargetPortId,
                         "Shared B",
                         "#6AD5C4"),
+                ]),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        };
+    }
+
+    private static AsterGraphEditorOptions CreatePathVariantEdgePresentationOptions()
+    {
+        var definitionId = new NodeDefinitionId("tests.geometry.react-flow-presentation");
+        return new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(
+                definitionId,
+                [
+                    new GraphConnection(
+                        "connection-smooth-step-001",
+                        SourceNodeId,
+                        SourcePortId,
+                        TargetNodeId,
+                        TargetPortId,
+                        "Smooth Step Flow",
+                        "#6AD5C4",
+                        Presentation: new GraphEdgePresentation(
+                            Route: new GraphConnectionRoute([new GraphPoint(420d, 120d)]),
+                            PathKind: GraphEdgePathKind.SmoothStep,
+                            IsAnimated: true,
+                            TargetMarker: GraphEdgeMarkerKind.ArrowClosed)),
+                    new GraphConnection(
+                        "connection-step-001",
+                        SourceNodeId,
+                        SourcePortId,
+                        TargetNodeId,
+                        TargetPortId,
+                        "Step Flow",
+                        "#6AD5C4",
+                        Presentation: new GraphEdgePresentation(PathKind: GraphEdgePathKind.Step)),
+                    new GraphConnection(
+                        "connection-straight-001",
+                        SourceNodeId,
+                        SourcePortId,
+                        TargetNodeId,
+                        TargetPortId,
+                        "Straight Flow",
+                        "#6AD5C4",
+                        Presentation: new GraphEdgePresentation(PathKind: GraphEdgePathKind.Straight)),
+                    new GraphConnection(
+                        "connection-floating-001",
+                        SourceNodeId,
+                        SourcePortId,
+                        TargetNodeId,
+                        TargetPortId,
+                        "Floating Flow",
+                        "#6AD5C4",
+                        Presentation: new GraphEdgePresentation(
+                            PathKind: GraphEdgePathKind.Bezier,
+                            UsesFloatingEndpoints: true,
+                            SourceMarker: GraphEdgeMarkerKind.ArrowClosed,
+                            TargetMarker: GraphEdgeMarkerKind.ArrowClosed)),
+                ]),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        };
+    }
+
+    private static AsterGraphEditorOptions CreateEdgeAffordanceOptions()
+    {
+        var definitionId = new NodeDefinitionId("tests.geometry.edge-affordances");
+        return new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(
+                definitionId,
+                [
+                    new GraphConnection(
+                        "connection-affordance-001",
+                        SourceNodeId,
+                        SourcePortId,
+                        TargetNodeId,
+                        TargetPortId,
+                        "Locked Flow",
+                        "#6AD5C4",
+                        Presentation: new GraphEdgePresentation(
+                            NoteText: "Read-only edge",
+                            IsReconnectable: false,
+                            IsEditable: false)),
                 ]),
             NodeCatalog = CreateCatalog(definitionId),
             CompatibilityService = new DefaultPortCompatibilityService(),

@@ -10,7 +10,7 @@
 | `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`、`GetNodeGroups()`、`GetNodeGroupSnapshots()`、`TrySetNodeGroupCollapsed(...)`、`TrySetNodeGroupPosition(...)`、`TrySetNodeGroupSize(...)`、`TrySetNodeGroupMemberships(...)` | 固定组框、内容区 membership、组折叠状态、boundary-edge projection 和 frame drag/resize chrome | `FIXED_GROUP_FRAME_OK`、`HIERARCHY_SEMANTICS_OK`、`GROUP_SERIALIZATION_COOKBOOK_OK` |
 | `Composite Scope Authoring` | `TryWrapSelectionToComposite(...)`、`TryPromoteNodeGroupToComposite(...)`、`TryExposeCompositePort(...)`、`TryUnexposeCompositePort(...)`、`TryEnterCompositeChildGraph(...)`、`TryReturnToParentGraphScope(...)`、`GetScopeNavigationSnapshot()`、`GetCompositeNodeSnapshots()` | breadcrumb navigation、composite authoring actions 和 scope-return controls | `COMPOSITE_SCOPE_OK` |
 | `Edge Semantics` | `TrySetConnectionNoteText(...)`、`TryReconnectConnection(...)`、disconnect commands 和 pending-connection snapshot | 边注解编辑、断开 affordance 和 reconnect workflow | `EDGE_NOTE_OK`、`DISCONNECT_FLOW_OK` |
-| `Edge Geometry Tooling` | `GetConnectionGeometrySnapshots()`、`TryInsertConnectionRouteVertex(...)`、`TryMoveConnectionRouteVertex(...)`、`TryRemoveConnectionRouteVertex(...)` | route-vertex authoring tools 和 routed edge rendering | `EDGE_GEOMETRY_OK` |
+| `Edge Geometry Tooling` | `GraphEdgePresentation`、`GraphEdgePathKind`、`GraphEdgeMarkerKind`、`GetConnectionGeometrySnapshots()`、`TryInsertConnectionRouteVertex(...)`、`TryMoveConnectionRouteVertex(...)`、`TryRemoveConnectionRouteVertex(...)` | Bezier、SmoothStep、Step、Straight、animated、floating、marker-backed edge contracts，加上 route-vertex authoring tools 和 routed edge rendering | `EDGE_GEOMETRY_OK` |
 
 ## 使用方式
 
