@@ -113,6 +113,20 @@ v0.79 catalog 的 route boundary 字符串：
 
 这份 cookbook 只是索引现有资产。它不引入 runtime marketplace、sandbox、workflow execution engine、WPF parity 承诺或 GA support claim。
 
+## Screenshot Gate
+
+会影响 recipe、graph visual、node/edge presentation 或 Cookbook layout 的 UI 变更，都要在变更前后运行确定性的 Cookbook screenshot gate：
+
+```bash
+dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --configuration Debug --no-restore --filter FullyQualifiedName~DemoCookbookScreenshotGateTests
+```
+
+`DemoCookbookScreenshotGateTests` 会读取 `tests/AsterGraph.Demo.Tests/CookbookScreenshotGateRoutes.json`，通过 canonical scene PNG exporter 捕获每条路线，并把 PNG 与 metadata 写到 `artifacts/test-results/cookbook-screenshot-gate`。后续要增加 Cookbook 路线时，只追加 manifest 行；常规路线覆盖不要修改 test internals。
+
+第一条 gate 路线是 `starter-host-route` + `ai-pipeline` scenario，记录 `1480x900` viewport metadata、English UI text 和 `canonical-dark` theme。视觉 PR 需要附上生成的 before/after PNG 和 `metadata.json`。
+
+CI 姿态：这个 gate 已经接入 `AsterGraph.Demo.Tests`，所以正常 net9 validation lane 会执行它。当前 gate 验证确定性 artifact 生成、PNG 有效性、route metadata 和最小图片不变量；metadata 会记录 `PngSha256`，但暂不做严格 pixel hash baseline，直到 Skia/native drift 在不同 CI host 上被测量清楚。
+
 ## 相关文档
 
 - [Demo Guide](./demo-guide.md)

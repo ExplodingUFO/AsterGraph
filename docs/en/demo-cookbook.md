@@ -109,6 +109,20 @@ Route boundary strings for the v0.79 catalog:
 
 The cookbook indexes existing assets. It does not introduce a runtime marketplace, sandbox, workflow execution engine, WPF parity promise, or GA support claim.
 
+## Screenshot Gate
+
+Run the deterministic Cookbook screenshot gate before and after UI changes that affect recipes, graph visuals, node/edge presentation, or Cookbook layout:
+
+```bash
+dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --configuration Debug --no-restore --filter FullyQualifiedName~DemoCookbookScreenshotGateTests
+```
+
+`DemoCookbookScreenshotGateTests` reads `tests/AsterGraph.Demo.Tests/CookbookScreenshotGateRoutes.json`, captures each route through the canonical scene PNG exporter, and writes PNG plus metadata under `artifacts/test-results/cookbook-screenshot-gate`. Add future Cookbook routes by appending manifest rows; do not edit the test internals for routine route coverage.
+
+The first gate route is `starter-host-route` with the `ai-pipeline` scenario, `1480x900` viewport metadata, English UI text, and the `canonical-dark` theme. Attach the generated before/after PNG and `metadata.json` when a PR changes visuals.
+
+CI posture: this gate is wired into `AsterGraph.Demo.Tests`, so the normal net9 validation lane runs it. The gate checks deterministic artifact generation, PNG validity, route metadata, and minimum image invariants; it records `PngSha256` for evidence but avoids a strict pixel hash baseline until Skia/native drift is measured across CI hosts.
+
 ## Related Docs
 
 - [Demo Guide](./demo-guide.md)
