@@ -149,6 +149,31 @@ public sealed class DemoCookbookScreenshotGateTests
     }
 
     [Fact]
+    public void CookbookScreenshotGate_IncludesInteractionFixtureBatchRoutes()
+    {
+        var routes = LoadRoutes(GetRepositoryRoot());
+
+        Assert.Contains(routes, route =>
+            route.Id == "cookbook-interaction-selection-marquee"
+            && route.RecipeId == "interaction-selection-marquee-route"
+            && route.Scenario == "selection-marquee-workbench"
+            && route.ExpectedDocumentTitle == "Selection Rectangle Fixture"
+            && route.RequiredNodeIds.Contains("select-output", StringComparer.Ordinal));
+        Assert.Contains(routes, route =>
+            route.Id == "cookbook-interaction-keyboard-navigation"
+            && route.RecipeId == "interaction-keyboard-navigation-route"
+            && route.Scenario == "keyboard-navigation-lab"
+            && route.ExpectedDocumentTitle == "Keyboard Navigation Fixture"
+            && route.RequiredNodeIds.Contains("key-output", StringComparer.Ordinal));
+        Assert.Contains(routes, route =>
+            route.Id == "cookbook-interaction-host-event-inspector"
+            && route.RecipeId == "interaction-host-event-inspector-route"
+            && route.Scenario == "host-event-inspector"
+            && route.ExpectedDocumentTitle == "Host Event Inspector Fixture"
+            && route.RequiredNodeIds.Contains("event-output", StringComparer.Ordinal));
+    }
+
+    [Fact]
     public void CookbookScreenshotGate_DocumentationNamesCommandArtifactsAndCiPosture()
     {
         var english = ReadRepoFile("docs/en/demo-cookbook.md");

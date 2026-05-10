@@ -82,5 +82,68 @@
       "panel-output"
     ],
     "outputFileName": "cookbook-builtin-hosted-controls.png"
+  },
+  {
+    "id": "cookbook-interaction-selection-marquee",
+    "recipeId": "interaction-selection-marquee-route",
+    "scenario": "selection-marquee-workbench",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Selection Rectangle Fixture",
+    "minimumNodeCount": 8,
+    "minimumConnectionCount": 10,
+    "requiredNodeIds": [
+      "select-clock",
+      "select-output"
+    ],
+    "outputFileName": "cookbook-interaction-selection-marquee.png"
+  },
+  {
+    "id": "cookbook-interaction-keyboard-navigation",
+    "recipeId": "interaction-keyboard-navigation-route",
+    "scenario": "keyboard-navigation-lab",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Keyboard Navigation Fixture",
+    "minimumNodeCount": 7,
+    "minimumConnectionCount": 8,
+    "requiredNodeIds": [
+      "key-clock",
+      "key-output"
+    ],
+    "outputFileName": "cookbook-interaction-keyboard-navigation.png"
+  },
+  {
+    "id": "cookbook-interaction-host-event-inspector",
+    "recipeId": "interaction-host-event-inspector-route",
+    "scenario": "host-event-inspector",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Host Event Inspector Fixture",
+    "minimumNodeCount": 8,
+    "minimumConnectionCount": 7,
+    "requiredNodeIds": [
+      "event-input",
+      "event-output"
+    ],
+    "outputFileName": "cookbook-interaction-host-event-inspector.png"
   }
 ]
