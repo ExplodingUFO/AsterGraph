@@ -21,7 +21,7 @@
 - Bug 报告模板
 - 预发布 notes 的证据复核
 
-这样可以让 `HelloWorld`、`Demo`、`ScaleSmoke` 这类没有 support bundle 的反馈照常进入分诊，同时保持证据合同一致。
+这样可以让 `src/AsterGraph.Demo`、template 或 release-lane 这类没有 support bundle 的反馈照常进入分诊，同时保持证据合同一致。
 
 在把某条反馈当成“应该扩大支持面”的候选之前，先看 [Project Status](./project-status.md) 里的就绪门禁。落在已证明/受边界约束之外的报告，先当 intake evidence，而不是自动扩大范围。单条报告不会扩大公开声明；扩大 support 或 capability 需要 3 到 5 条真实外部报告聚焦在同一个受限风险上。若 route 能产出 bundle，就把 `SUPPORT_BUNDLE_PATH:...` 那一行当成 support bundle 附件备注；否则记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
 

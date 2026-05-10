@@ -86,18 +86,18 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 - `导览` 会沿同一个场景走过创建节点、typed connection、参数编辑、插件信任、自动化、runtime feedback、保存 / 加载和 SVG 导出。
 - `扩展`：看 candidate discovery、trust decision、load snapshot 和 allowlist 决策
 - `自动化`：看 typed automation execution 与结果投影
-- `集成`：看 `HostSample`、standalone surfaces、presenter replacement、本地化证明
+- `集成`：看当前 template/Demo 路线、standalone surfaces、presenter replacement、本地化证明
 - `运行时` 和 `证明`：一起看 host-owned shell state、recent workspace、autosave 提示、threshold-driven side rails 和 shared runtime evidence
 - `证明`：会把 advanced-editing split 映射到正式 surface：`Node Surface Authoring`（`TIERED_NODE_SURFACE_OK`、`NON_OBSCURING_EDITING_OK`、`VISUAL_SEMANTICS_OK`）、`Hierarchy Semantics`（`FIXED_GROUP_FRAME_OK`、`HIERARCHY_SEMANTICS_OK`）、`Composite Scope Authoring`（`COMPOSITE_SCOPE_OK`）、`Edge Semantics`（`EDGE_NOTE_OK`、`DISCONNECT_FLOW_OK`）和 `Edge Geometry Tooling`（`EDGE_GEOMETRY_OK`）。
 - `视图` 和 `证明`：一起把 hierarchy、composite scope、edge semantics 和 edge geometry 维持在可见产品面上，而不是退回 retained-only 解释或第二套编辑模型。
 
 ## Demo 与其他入口样例的分工
 
-- `Starter.Avalonia` = 第一个 hosted 脚手架；最小端到端 Avalonia 入口
-- `HelloWorld` = 最小仅运行时第一跑样例
-- `HelloWorld.Avalonia` = 最小 hosted-UI 第一跑样例
-- `ConsumerSample.Avalonia` = canonical 路线上的真实 hosted-UI 样例，带宿主动作、参数编辑和一个可信插件
-- `HostSample` = 推荐消费路线的窄范围验证样例，不是上手入口
+- `templates/astergraph-avalonia` = 第一个 hosted 脚手架；最小端到端 Avalonia 入口
+- `src/AsterGraph.Demo -- --proof` = 最小仅运行时第一跑样例
+- `src/AsterGraph.Demo` = 最小 hosted-UI 第一跑样例
+- `src/AsterGraph.Demo` = canonical 路线上的真实 hosted-UI 样例，带宿主动作、参数编辑和一个可信插件
+- `release validation lane` = 推荐消费路线的窄范围验证样例，不是上手入口
 - `Demo` = 完整能力展示与宿主边界说明
 
-想先看第一个 hosted 入口看 `Starter.Avalonia`；想最快跑起来看 `HelloWorld` 或 `HelloWorld.Avalonia`；想先看一个真实宿主集成看 `ConsumerSample.Avalonia`；想做 proof 导向的路线验证看 `HostSample`；想肉眼检查产品面和边界时看 `Demo`。
+想先看第一个 hosted 入口看 `templates/astergraph-avalonia`；想最快跑起来看 `src/AsterGraph.Demo -- --proof` 或 `src/AsterGraph.Demo`；想先看一个真实宿主集成看 `src/AsterGraph.Demo`；想做 proof 导向的路线验证看 `release validation lane`；想肉眼检查产品面和边界时看 `Demo`。

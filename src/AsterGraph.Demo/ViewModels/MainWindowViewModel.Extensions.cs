@@ -29,8 +29,8 @@ public partial class MainWindowViewModel
 
     public IReadOnlyList<string> ConsumerPathLines =>
     [
-        T("HostSample = 最小 consumer path。", "HostSample = minimal consumer path."),
-        T("Demo = 功能展示与边界说明壳层。", "Demo = showcase shell for capability and boundary proof."),
+        T("templates/astergraph-avalonia = 最小生成宿主。", "templates/astergraph-avalonia = minimal generated host."),
+        T("src/AsterGraph.Demo = showcase shell 与 proof mode。", "src/AsterGraph.Demo = showcase shell and proof mode."),
         "Hosted-UI composition: AsterGraphEditorFactory.Create(...) + AsterGraphAvaloniaViewFactory.Create(...).",
         "Shared runtime owner: Session (IGraphEditorSession).",
         "Runtime-only host route: AsterGraphEditorFactory.CreateSession(...).",

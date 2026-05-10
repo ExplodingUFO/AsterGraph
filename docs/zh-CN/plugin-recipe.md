@@ -54,7 +54,7 @@ public sealed class GreetingNodeProvider : INodeDefinitionProvider
 
 ```powershell
 dotnet build GreetingPlugin/GreetingPlugin.csproj
-dotnet run --project tools/AsterGraph.PluginTool -- validate GreetingPlugin/bin/Debug/net8.0/GreetingPlugin.dll
+dotnet build MyGraphPlugin/MyGraphPlugin.csproj
 ```
 
 validator 是跨平台 CLI。它会输出 manifest 摘要、兼容性状态、trust-policy 结果、签名证据和 SHA-256 哈希，宿主可以把这些信息接入 allowlist。
@@ -90,7 +90,7 @@ var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 | 模式 | 适用场景 | 宿主决策 |
 | --- | --- | --- |
 | Local dev allow | 已知机器上的本地开发循环。 | 只允许固定本地插件目录，并在 diagnostics 里显示 `ImplicitAllow` 或 local-dev reason。 |
-| Hash allowlist | 小团队共享已知插件二进制。 | 持久化 PluginTool 输出的 SHA-256 hash，只允许完全匹配的候选项。 |
+| Hash allowlist | 小团队共享已知插件二进制。 | 持久化 artifact SHA-256 hash，只允许完全匹配的候选项。 |
 | Publisher/signature policy | 组织内部发布的插件包。 | 只有 signature evidence 和 publisher metadata 符合 host policy 时才允许。 |
 | Block unknown source | 默认 prerelease 或企业姿态。 | 没有 allowlist、hash 或签名匹配的候选项，在 activation 前阻止。 |
 | Enterprise fixed directory | 受管桌面部署。 | 只从管理员控制的目录发现插件，并保留 allowlist import/export 记录用于审计。 |

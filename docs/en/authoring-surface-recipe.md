@@ -2,7 +2,7 @@
 
 Use this recipe when you want one copyable host-owned path for custom node, port, parameter, and edge presentation on top of the canonical session route.
 
-`ConsumerSample.Avalonia` is the concrete host that carries this recipe in code. Pair this document with [Authoring Inspector Recipe](./authoring-inspector-recipe.md) for metadata vocabulary and with [Consumer Sample](./consumer-sample.md) for the sample-owned host boundary.
+`src/AsterGraph.Demo` is the concrete host that carries this recipe in code. Pair this document with [Authoring Inspector Recipe](./authoring-inspector-recipe.md) for metadata vocabulary and with [Demo Guide](./demo-guide.md) for the current Demo-owned host boundary.
 
 ## Copyable custom authoring presentation
 
@@ -80,7 +80,7 @@ Use one hosted handoff from definitions to proof instead of stitching together s
 3. Project node-side state from `GetNodeParameterSnapshots(nodeId)` so `NodeParameterEditorHost` and `INodeParameterEditorRegistry` reuse the same metadata and validation contract on the custom node surface.
 4. Write values back through `TrySetSelectedNodeParameterValue(...)` or `TrySetNodeParameterValue(...)`; keep validation on the shared session command path instead of adding a second editor model.
 5. Project host commands from `GetCommandDescriptors()` so toolbars, menus, shortcuts, and palette actions stay on the same shared command route.
-6. Close the handoff with `AsterGraph.ConsumerSample.Avalonia -- --proof` and expect `PORT_HANDLE_ID_OK:True`, `PORT_GROUP_AUTHORING_OK:True`, `PORT_CONNECTION_HINT_OK:True`, `PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`, `CUSTOM_EXTENSION_SURFACE_OK:True`, and `AUTHORING_SURFACE_OK:True`.
+6. Close the handoff with `src/AsterGraph.Demo -- --proof` and expect `PORT_HANDLE_ID_OK:True`, `PORT_GROUP_AUTHORING_OK:True`, `PORT_CONNECTION_HINT_OK:True`, `PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`, `CUSTOM_EXTENSION_SURFACE_OK:True`, and `AUTHORING_SURFACE_OK:True`.
 
 ## Copy path
 
@@ -94,6 +94,6 @@ Use one hosted handoff from definitions to proof instead of stitching together s
 ## Related docs
 
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md)
-- [Consumer Sample](./consumer-sample.md)
+- [Demo Guide](./demo-guide.md)
 - [Host Integration](./host-integration.md)
 - [Advanced Editing Guide](./advanced-editing.md)

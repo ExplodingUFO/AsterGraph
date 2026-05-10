@@ -1,7 +1,7 @@
 # Capability Breadth Recipe
 
 Use this recipe when you want one copyable hosted path for searchable grouped stencil, SVG/PNG/JPEG export breadth, and shared node or edge quick tools.
-Pair it with `ConsumerSample.Avalonia`, because that is the defended hosted proof route for the current beta evaluator ladder.
+Pair it with `src/AsterGraph.Demo`, because that is the defended hosted proof route for the current beta evaluator ladder.
 
 ## What It Covers
 
@@ -11,16 +11,16 @@ Pair it with `ConsumerSample.Avalonia`, because that is the defended hosted proo
 
 ## Copy This Hosted Path
 
-- Step 1: Project searchable grouped stencil from `ConsumerSample.Avalonia` through `IGraphEditorSession.Queries.GetNodeTemplateSnapshots()` and the stock hosted library chrome.
+- Step 1: Project searchable grouped stencil from `src/AsterGraph.Demo` through `IGraphEditorSession.Queries.GetNodeTemplateSnapshots()` and the stock hosted library chrome.
 - Step 2: Close SVG plus raster export breadth through `IGraphEditorSession.Commands.TryExportSceneAsSvg(...)`, `IGraphEditorSession.Commands.TryExportSceneAsImage(...)`, and `GraphEditorSceneImageExportFormat.Png`.
-- Step 3: Project shared node and edge quick tools through `AsterGraphAuthoringToolActionFactory.CreateNodeActions(...)`, `AsterGraphAuthoringToolActionFactory.CreateConnectionActions(...)`, `AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(...)`, `IGraphEditorSession.Queries.GetToolDescriptors(...)`, and `AsterGraph.ConsumerSample.Avalonia -- --proof`.
+- Step 3: Project shared node and edge quick tools through `AsterGraphAuthoringToolActionFactory.CreateNodeActions(...)`, `AsterGraphAuthoringToolActionFactory.CreateConnectionActions(...)`, `AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(...)`, `IGraphEditorSession.Queries.GetToolDescriptors(...)`, and `src/AsterGraph.Demo -- --proof`.
 
 ## Proof Contract
 
 Validate the route with:
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof
 ```
 
 Expected capability-breadth proof markers:
@@ -42,6 +42,6 @@ Expected capability-breadth proof markers:
 
 ## Related Docs
 
-- [Consumer Sample](./consumer-sample.md)
+- [Demo Guide](./demo-guide.md)
 - [Authoring Surface Recipe](./authoring-surface-recipe.md)
 - [Host Integration](./host-integration.md)

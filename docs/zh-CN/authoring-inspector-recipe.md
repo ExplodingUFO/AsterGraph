@@ -8,10 +8,10 @@
 当你需要时复制这份 recipe；它提供 canonical 的元数据词汇和 stock inspector 行为。
 
 - 当你需要 `defaultValue`、`isAdvanced`、`helpText`、`placeholderText`、`constraints.IsReadOnly`、`editorKind`、`constraints` 和 `groupName` 时，复制这份 recipe。
-- 从 `ConsumerSample.Avalonia` 复制：选中节点参数读写 seam 和宿主自管 proof 边界。
+- 从 `src/AsterGraph.Demo` 复制：选中节点参数读写 seam 和宿主自管 proof 边界。
 - 把样例和这份 recipe 分开：样例证明 seam，recipe 承载元数据词汇。
 
-第 1 步是这份 recipe 里的 metadata；第 2 步是 `ConsumerSample.Avalonia` 里的选中节点 seam；第 3 步是 support-bundle 的 `parameterSnapshots` 证据。
+第 1 步是这份 recipe 里的 metadata；第 2 步是 `src/AsterGraph.Demo` 里的选中节点 seam；第 3 步是 support-bundle 的 `parameterSnapshots` 证据。
 
 ## 统一的 recipe 词汇
 
@@ -145,10 +145,10 @@ var definition = new NodeDefinition(
 
 ## 去哪里看现成效果
 
-- 最小默认 UI 样例：[`tools/AsterGraph.HelloWorld.Avalonia`](../../tools/AsterGraph.HelloWorld.Avalonia/)
+- 最小默认 UI 样例：`src/AsterGraph.Demo`
 - 完整展示宿主：[`src/AsterGraph.Demo`](../../src/AsterGraph.Demo/)
-- 更真实的宿主集成：[Consumer Sample](./consumer-sample.md)
-- 补充这份 recipe 的样例指导：[Consumer Sample](./consumer-sample.md)
+- 更真实的宿主集成：[Demo Guide](./demo-guide.md)
+- 补充这份 recipe 的样例指导：[Demo Guide](./demo-guide.md)
 
 ## 什么时候该自己扩展
 

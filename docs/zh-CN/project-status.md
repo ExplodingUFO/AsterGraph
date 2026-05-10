@@ -33,13 +33,13 @@
   - `AsterGraph.Editor`
   - `AsterGraph.Avalonia`
 - 示例与验证工具：
-  - `tools/AsterGraph.HelloWorld`：最快的 runtime-only 第一跑样例
-  - `tools/AsterGraph.Starter.Avalonia`：shipped 的 Avalonia starter scaffold
-  - `tools/AsterGraph.HelloWorld.Avalonia`：在 starter scaffold 之后的默认 UI 第一跑样例
-  - `tools/AsterGraph.ConsumerSample.Avalonia`：介于 HelloWorld 和 Demo 之间的真实宿主样例
-  - `tools/AsterGraph.HostSample`：这条 canonical adoption route 在 ladder 之后的 proof harness
-  - `tools/AsterGraph.PackageSmoke`：打包消费验证
-  - `tools/AsterGraph.ScaleSmoke`：公开的大图基线与状态连续性验证
+  - `src/AsterGraph.Demo -- --proof`：最快的 runtime-only 第一跑样例
+  - `templates/astergraph-avalonia`：shipped 的 Avalonia starter scaffold
+  - `src/AsterGraph.Demo`：在 starter scaffold 之后的默认 UI 第一跑样例
+  - `src/AsterGraph.Demo`：介于 src/AsterGraph.Demo -- --proof 和 Demo 之间的真实宿主样例
+  - `src/AsterGraph.Demo -- --proof`：这条 canonical adoption route 在 ladder 之后的 proof harness
+  - `release validation lane`：打包消费验证
+  - `release validation lane`：公开的大图基线与状态连续性验证
 - `adoption-intake-dry-run.md` 里的合成 dry-run fixtures 只是维护者/内部预演，不是外部验证，也不会扩大 support 或 capability 声明
 - 推荐接入路径：
   - runtime-only 宿主使用 `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
@@ -68,11 +68,11 @@
 - v0.64 bounded workbench affordance proof 把最高优先级的 `layout-resume` friction row 映射到现有 hosted workbench options，不新增 runtime route、WPF parity、remote sync、macro/query system、execution engine 或 GA claim：`WORKBENCH_AFFORDANCE_POLISH_OK:True`、`WORKBENCH_AFFORDANCE_ROUTE_OK:True`、`WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`
 - v0.64 workbench evidence bundle proof 把 friction 与 affordance evidence 保持在本地 support bundle 内，不代表 telemetry、remote sync、external validation 或 GA readiness：`WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True`、`WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True`、`WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True`
 - v0.64 adopter polish handoff proof 汇总 phases 392-394，并建议下一条线继续 adopter-driven，直到真实报告足以支持更大范围声明：`WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True`、`WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True`、`V064_MILESTONE_PROOF_OK:True`
-- v0.67 Repairability, Help, and Review UX proof 已经是来自 `ConsumerSample.Avalonia` 的完成证据，不再是下一条工作线：`GRAPH_ERROR_HELP_TARGET_OK:True`、`GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True` 和 `REPAIR_HELP_REVIEW_LOOP_OK:True`
+- v0.67 Repairability, Help, and Review UX proof 已经是来自 `src/AsterGraph.Demo -- --proof` 的完成证据，不再是下一条工作线：`GRAPH_ERROR_HELP_TARGET_OK:True`、`GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True` 和 `REPAIR_HELP_REVIEW_LOOP_OK:True`
 - panel projection proof 在 hosted proof route 上汇总 mini-map lightweight projection 和 inspector narrow projection 证据，但不创建 broad graph subscription contract：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True`、`PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff proof 把 phases 371-374 绑定在现有 hosted workbench 证据上，但不扩大 graph-size support claims：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`V059_MILESTONE_PROOF_OK:True`
 - adapter-2 validation scope proof 让 WPF 继续停在同一条 canonical route 和 matrix vocabulary 上，不扩大 public WPF support 或 parity claims：`ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True`、`ADAPTER2_SCOPE_BOUNDARY_OK:True`
-- WPF proof sample evidence 让 `AsterGraph.HelloWorld.Wpf` 保持可复制，并绑定到 canonical session/runtime route，但不创建第二条 onboarding path（second onboarding path）：`ADAPTER2_WPF_SAMPLE_PROOF_OK:True`、`ADAPTER2_CANONICAL_ROUTE_OK:True`、`ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`
+- WPF proof sample evidence 让 `release validation lane` 保持可复制，并绑定到 canonical session/runtime route，但不创建第二条 onboarding path（second onboarding path）：`ADAPTER2_WPF_SAMPLE_PROOF_OK:True`、`ADAPTER2_CANONICAL_ROUTE_OK:True`、`ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`
 - adapter-2 performance/accessibility handoff proof 把现有 WPF proof budgets 绑定到 adapter-2 accessibility 和 performance recipes，不扩大 WPF support：`ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`、`ADAPTER2_RECIPE_ALIGNMENT_OK:True`、`ADAPTER2_PROOF_BUDGET_OK:True`
 - v0.60 adapter-2 validation handoff proof 在不改变 WPF support boundary 的前提下收口 validation-only milestone：`ADAPTER2_VALIDATION_HANDOFF_OK:True`、`ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True`、`V060_MILESTONE_PROOF_OK:True`
 - 图面可用性 proof marker：
@@ -90,7 +90,7 @@
 - plugin discovery、trust policy、loading、inspection
 - `IGraphEditorSession.Automation`
 - contract、maintenance、release 验证 lanes
-- release lane 里的 `.NET 10` 打包 `HostSample` 兼容性验证
+- release lane 里的 `.NET 10` 下游消费验证
 - public API guidance proof 继续和 template/plugin proof 放在同一条 release story：`PUBLIC_API_SURFACE_OK`、`PUBLIC_API_SCOPE_OK`、`PUBLIC_API_GUIDANCE_OK`、`PUBLIC_API_DIFF_GATE_OK:True`、`PUBLIC_API_USAGE_GUIDANCE_OK:True`、`PUBLIC_API_STABILITY_SCOPE_OK:True`、`ASTERGRAPH_TEMPLATE_SMOKE_OK`、`TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`
 - v0.75 library-grade proof 把 phases 445-449 映射到同一个 release gate：rendering/viewport projection、interaction contracts、extension surfaces、host packaging/template proof 和 professional cookbook coverage 都已进入文档，而且不扩大 package、adapter、graph-size、marketplace、execution-engine 或 GA claims。
 
@@ -126,10 +126,10 @@
 
 | 声明 | 路线级证据 |
 | --- | --- |
-| canonical runtime/session 路线和维护中的评估阶梯，已经在当前防守住的 beta 线上被外部证据证明。 | `tools/AsterGraph.HelloWorld`、`tools/AsterGraph.Starter.Avalonia`、`tools/AsterGraph.HelloWorld.Avalonia`、`tools/AsterGraph.ConsumerSample.Avalonia`、`tools/AsterGraph.HostSample`、`HOST_SAMPLE_OK`、`CONSUMER_SAMPLE_OK`、`GRAPH_SNIPPET_CATALOG_OK`、`GRAPH_SNIPPET_INSERT_OK`、`FRAGMENT_LIBRARY_SEARCH_OK`、`FRAGMENT_LIBRARY_PREVIEW_OK`、`FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK`、`FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK`、`AUTHORING_FLOW_PROOF_OK`、`AUTHORING_FLOW_HANDOFF_OK`、`AUTHORING_FLOW_SCOPE_BOUNDARY_OK`、`EXPERIENCE_POLISH_HANDOFF_OK`、`FEATURE_ENHANCEMENT_PROOF_OK`、`EXPERIENCE_SCOPE_BOUNDARY_OK`、`AUTHORING_DEPTH_HANDOFF_OK`、`AUTHORING_DEPTH_SCOPE_BOUNDARY_OK`、`V058_MILESTONE_PROOF_OK` |
-| showcase authoring surface 和宿主自管 runtime feedback 已经作为有边界的 beta 宿主体验被外部证据证明。 | `src/AsterGraph.Demo`、`tools/AsterGraph.ConsumerSample.Avalonia`、`DEMO_OK:True`、`DEMO_SCENARIO_PRESETS_OK:True`、`DEMO_GESTURE_PROOF_OK:True`、`CONSUMER_GESTURE_PROOF_OK:True`、`INTERACTION_SUPPORT_BUNDLE_OK:True`、`COMMAND_SURFACE_OK:True`、`COMPOSITE_SCOPE_OK:True`、`EDGE_NOTE_OK:True`、`EDGE_GEOMETRY_OK:True`、`DISCONNECT_FLOW_OK:True`、`RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`、`RUNTIME_LOG_LOCATE_OK:True`、`RUNTIME_LOG_EXPORT_OK:True`、`AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`、`AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`、`AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True` |
-| 打包后的 consumer proof 已被外部证据证明，而且没有扩大 SDK 边界。 | `tools/AsterGraph.PackageSmoke`、`PACKAGE_SMOKE_OK`、`HOST_SAMPLE_NET10_OK` |
-| Scale proof 已在 defended `baseline`/`large` 层级和 5000 节点 `stress` 上被外部证据证明：performance、authoring、保守 PNG/JPEG raster export 和 reload 受防守；stress SVG export 只作为 telemetry。 | `tools/AsterGraph.ScaleSmoke`、`SCALE_PERFORMANCE_BUDGET_OK:baseline:True`、`SCALE_PERFORMANCE_BUDGET_OK:large:True`、`SCALE_PERFORMANCE_BUDGET_OK:stress:True`、`SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800`、`SCALE_RASTER_EXPORT_STRESS_OK:True` |
+| canonical runtime/session 路线和维护中的评估阶梯，已经在当前防守住的 beta 线上被外部证据证明。 | `src/AsterGraph.Demo -- --proof`、`templates/astergraph-avalonia`、`src/AsterGraph.Demo`、`src/AsterGraph.Demo`、`src/AsterGraph.Demo -- --proof`、`HOST_SAMPLE_OK`、`CONSUMER_SAMPLE_OK`、`GRAPH_SNIPPET_CATALOG_OK`、`GRAPH_SNIPPET_INSERT_OK`、`FRAGMENT_LIBRARY_SEARCH_OK`、`FRAGMENT_LIBRARY_PREVIEW_OK`、`FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK`、`FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK`、`AUTHORING_FLOW_PROOF_OK`、`AUTHORING_FLOW_HANDOFF_OK`、`AUTHORING_FLOW_SCOPE_BOUNDARY_OK`、`EXPERIENCE_POLISH_HANDOFF_OK`、`FEATURE_ENHANCEMENT_PROOF_OK`、`EXPERIENCE_SCOPE_BOUNDARY_OK`、`AUTHORING_DEPTH_HANDOFF_OK`、`AUTHORING_DEPTH_SCOPE_BOUNDARY_OK`、`V058_MILESTONE_PROOF_OK` |
+| showcase authoring surface 和宿主自管 runtime feedback 已经作为有边界的 beta 宿主体验被外部证据证明。 | `src/AsterGraph.Demo`、`src/AsterGraph.Demo`、`DEMO_OK:True`、`DEMO_SCENARIO_PRESETS_OK:True`、`DEMO_GESTURE_PROOF_OK:True`、`CONSUMER_GESTURE_PROOF_OK:True`、`INTERACTION_SUPPORT_BUNDLE_OK:True`、`COMMAND_SURFACE_OK:True`、`COMPOSITE_SCOPE_OK:True`、`EDGE_NOTE_OK:True`、`EDGE_GEOMETRY_OK:True`、`DISCONNECT_FLOW_OK:True`、`RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`、`RUNTIME_LOG_LOCATE_OK:True`、`RUNTIME_LOG_EXPORT_OK:True`、`AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`、`AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`、`AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True` |
+| 打包后的 consumer proof 已被外部证据证明，而且没有扩大 SDK 边界。 | `release validation lane`、`PACKAGE_SMOKE_OK`、`HOST_SAMPLE_NET10_OK` |
+| Scale proof 已在 defended `baseline`/`large` 层级和 5000 节点 `stress` 上被外部证据证明：performance、authoring、保守 PNG/JPEG raster export 和 reload 受防守；stress SVG export 只作为 telemetry。 | `release validation lane`、`SCALE_PERFORMANCE_BUDGET_OK:baseline:True`、`SCALE_PERFORMANCE_BUDGET_OK:large:True`、`SCALE_PERFORMANCE_BUDGET_OK:stress:True`、`SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800`、`SCALE_RASTER_EXPORT_STRESS_OK:True` |
 
 ### 仅验证通过或受边界约束的声明
 
@@ -137,8 +137,8 @@
 | --- | --- | --- |
 | `WPF` 作为 adapter 2 | 只算 validation-only，不代表 Avalonia parity，也不是 public WPF support。WPF support expansion 必须等 3-5 real external reports 聚焦在同一个受限风险后才能讨论。当前证据只覆盖有边界的 hosted shell accessibility、performance 和 export-breadth 路径。 | `HELLOWORLD_WPF_OK`、`HOSTED_ACCESSIBILITY_BASELINE_OK`、`HOSTED_ACCESSIBILITY_FOCUS_OK`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`、`HOSTED_ACCESSIBILITY_OK`、`ADAPTER2_PERFORMANCE_BASELINE_OK`、`ADAPTER2_EXPORT_BREADTH_OK`、`ADAPTER2_PROJECTION_BUDGET_OK`、`ADAPTER2_COMMAND_BUDGET_OK`、`ADAPTER2_SCENE_BUDGET_OK`、`ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK`、`ADAPTER2_RECIPE_ALIGNMENT_OK`、`ADAPTER2_PROOF_BUDGET_OK`、`ADAPTER2_VALIDATION_HANDOFF_OK`、`ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK`、`V060_MILESTONE_PROOF_OK`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`、[Adapter Capability Matrix](./adapter-capability-matrix.md) |
 | retained 路线 | 只作为迁移桥，不是新的 primary host path。 | [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)、[稳定化支持矩阵](./stabilization-support-matrix.md) |
-| stress raster export budget | 5000 节点 PNG/JPEG export 有保守 defended 红线；这是防回归 guard，不是 fast-export 声明。 | `SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800`、`SCALE_RASTER_EXPORT_STRESS_OK:True`、[ScaleSmoke 基线](./scale-baseline.md) |
-| XLarge telemetry | 10000 节点 ScaleSmoke 只是 telemetry-only，不是支持承诺或 virtualization 声明。 | `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`、[ScaleSmoke 基线](./scale-baseline.md) |
+| stress raster export budget | 5000 节点 PNG/JPEG export 有保守 defended 红线；这是防回归 guard，不是 fast-export 声明。 | `SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:reload<=800`、`SCALE_RASTER_EXPORT_STRESS_OK:True`、[规模基线](./scale-baseline.md) |
+| XLarge telemetry | 10000 节点规模证据只是 telemetry-only，不是支持承诺或 virtualization 声明。 | `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`、[规模基线](./scale-baseline.md) |
 
 ### 在更多采用者证据出现前继续延后
 
@@ -158,17 +158,17 @@
 
 ## 公开入口分工
 
-这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`；`HostSample` 放在这条 ladder 之后，作为 proof harness。
+这条 hosted route ladder 是 `templates/astergraph-avalonia -> src/AsterGraph.Demo -> src/AsterGraph.Demo -- --proof`；release validation 在这条 ladder 之后作为维护者证据。
 
-- `tools/AsterGraph.HelloWorld` = runtime-only 第一跑样例
-- `tools/AsterGraph.Starter.Avalonia` = shipped 的 Avalonia starter scaffold
-- `tools/AsterGraph.HelloWorld.Avalonia` = 在 starter scaffold 之后的默认 UI 第一跑样例
-- `tools/AsterGraph.ConsumerSample.Avalonia` = 真实 hosted-UI 宿主样例
-- `tools/AsterGraph.Starter.Wpf` = validation-only adapter-2 组合验证样例
-- `tools/AsterGraph.HelloWorld.Wpf` = validation-only adapter-2 proof 样例
-- `tools/AsterGraph.HostSample` = 这条 ladder 之后的 canonical adoption proof
-- `tools/AsterGraph.PackageSmoke` = 打包消费验证
-- `tools/AsterGraph.ScaleSmoke` = 大图基线加历史记录与状态连续性验证
+- `src/AsterGraph.Demo -- --proof` = runtime-only 第一跑样例
+- `templates/astergraph-avalonia` = shipped 的 Avalonia starter scaffold
+- `src/AsterGraph.Demo` = 在 starter scaffold 之后的默认 UI 第一跑样例
+- `src/AsterGraph.Demo` = 真实 hosted-UI 宿主样例
+- `adapter-2 validation evidence` = validation-only adapter-2 组合验证样例
+- `adapter-2 validation evidence` = validation-only adapter-2 proof 样例
+- `src/AsterGraph.Demo -- --proof` = 这条 ladder 之后的 canonical adoption proof
+- `release validation lane` = 打包消费验证
+- `release validation lane` = 大图基线加历史记录与状态连续性验证
 - `src/AsterGraph.Demo` = 可视化展示宿主
 
 ## 对外入口
@@ -177,8 +177,8 @@
 - [公开 Beta 评估路径](./evaluation-path.md) = 从第一次安装到真实宿主 proof 的单一路径
 - [稳定化支持矩阵](./stabilization-support-matrix.md)
 - [Quick Start](./quick-start.md)
-- [Consumer Sample](./consumer-sample.md)
-- [ScaleSmoke 基线](./scale-baseline.md)
+- [Demo Guide](./demo-guide.md)
+- [规模基线](./scale-baseline.md)
 - [Advanced Editing Guide](./advanced-editing.md)
 - [Adoption Feedback Loop](./adoption-feedback.md)
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md)

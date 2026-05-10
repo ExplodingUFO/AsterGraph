@@ -16,12 +16,12 @@
 - default Avalonia hosted UI and standalone surfaces
 - runtime inspection surface for trusted, loaded, and blocked outcomes
 - command/trust timeline and perf overlay in the showcase host
-- `tools/AsterGraph.Starter.Avalonia` as the shipped Avalonia starter scaffold
+- `templates/astergraph-avalonia` as the shipped Avalonia starter scaffold
 - plugin discovery, trust policy, load inspection, and runtime loading
 - automation execution through `IGraphEditorSession.Automation`
 - official proof lanes and smoke tools
-- one medium hosted-UI consumer sample between HelloWorld and Demo
-- packed `HostSample` compatibility proof under `.NET 10` inside the release lane
+- one medium hosted-UI consumer sample between src/AsterGraph.Demo -- --proof and Demo
+- packed `release validation lane` compatibility proof under `.NET 10` inside the release lane
 - shipped definition-driven inspector metadata plus stock text/number/boolean/enum/list editors
 - tiered node surfaces, hierarchy snapshots, composite scope navigation, edge notes, and routed edge geometry tooling
 
@@ -56,7 +56,7 @@
 - [Versioning](./versioning.md)
 - [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
-- [ScaleSmoke Baseline](./scale-baseline.md)
+- [Scale Baseline](./scale-baseline.md)
 - [Advanced Editing Guide](./advanced-editing.md)
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md)
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)

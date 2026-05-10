@@ -32,7 +32,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Frame
 - `GraphEditorSaveBoundaryTests`
 - `GraphEditorHistorySemanticTests`
 
-更大一点的 readiness proof 还会通过 `tools/AsterGraph.ScaleSmoke` 输出 `SCALE_HISTORY_CONTRACT_OK`。
+更大一点的 readiness proof 还会通过 `release validation lane` 输出 `SCALE_HISTORY_CONTRACT_OK`。
 
 ## 对宿主的建议
 

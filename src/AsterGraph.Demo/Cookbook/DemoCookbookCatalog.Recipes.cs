@@ -473,7 +473,7 @@ public static partial class DemoCookbookCatalog
                     "ToMiniMapBudgetMarker"),
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.SupportEvidence,
-                    "ScaleSmoke keeps baseline, large, and stress budgets tied to release evidence.",
+                    "Scale Baseline keeps baseline, large, and stress budgets tied to release evidence.",
                     "SCALE_PERFORMANCE_BUDGET_OK"),
             ],
             [

@@ -54,7 +54,7 @@ public sealed class GreetingNodeProvider : INodeDefinitionProvider
 
 ```powershell
 dotnet build GreetingPlugin/GreetingPlugin.csproj
-dotnet run --project tools/AsterGraph.PluginTool -- validate GreetingPlugin/bin/Debug/net8.0/GreetingPlugin.dll
+dotnet build MyGraphPlugin/MyGraphPlugin.csproj
 ```
 
 The validator is a cross-platform CLI. It reports the manifest summary, compatibility status, trust-policy outcome, signature evidence, and SHA-256 hash that a host can use for an allowlist.
@@ -90,7 +90,7 @@ Use one of these host-owned patterns. They are policy recipes, not runtime fallb
 | Pattern | When to use it | Host decision |
 | --- | --- | --- |
 | Local dev allow | Inner-loop development on a known machine. | Allow a fixed local plugin directory and show `ImplicitAllow` or a local-dev reason string in diagnostics. |
-| Hash allowlist | Small teams sharing known plugin binaries. | Persist the PluginTool SHA-256 hash and allow only exact matches. |
+| Hash allowlist | Small teams sharing known plugin binaries. | Persist the artifact SHA-256 hash and allow only exact matches. |
 | Publisher/signature policy | Organization-published packages. | Allow only candidates whose signature evidence and publisher metadata match the host policy. |
 | Block unknown source | Default prerelease or enterprise posture. | Block candidates without an allowlist, hash, or accepted signature match before activation. |
 | Enterprise fixed directory | Managed desktop deployments. | Discover only from an admin-controlled directory and keep import/export allowlist records for audit. |

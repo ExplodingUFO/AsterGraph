@@ -2,8 +2,8 @@
 
 This guide documents the supported host routes without turning the public onboarding flow into maintainer proof documentation. The canonical route stays session-first/runtime-first; retained MVVM is only a compatibility bridge during migration.
 
-The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
-When docs call `ConsumerSample.Avalonia` a defended route, that means it is the realistic hosted proof on this ladder, not another canonical route.
+The hosted route ladder is `templates/astergraph-avalonia -> src/AsterGraph.Demo -> src/AsterGraph.Demo -- --proof`.
+When docs call `src/AsterGraph.Demo` a defended route, that means it is the realistic hosted proof on this ladder, not another canonical route.
 
 ## Canonical Routes
 
@@ -97,12 +97,12 @@ For package-by-package support tiers, use [Public API Inventory](./public-api-in
 
 | Need | Packages to start with | Canonical entry point | First sample |
 | --- | --- | --- | --- |
-| Runtime-only/custom UI | `AsterGraph.Editor` (+ `AsterGraph.Abstractions` when defining nodes) | `CreateSession(...)` | `tools/AsterGraph.HelloWorld` |
-| Default Avalonia UI | `AsterGraph.Avalonia` | `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
-| Plugin trust/discovery | `AsterGraph.Editor` | `DiscoverPluginCandidates(...)` + `PluginTrustPolicy` | `tools/AsterGraph.ConsumerSample.Avalonia` |
+| Runtime-only/custom UI | `AsterGraph.Editor` (+ `AsterGraph.Abstractions` when defining nodes) | `CreateSession(...)` | `src/AsterGraph.Demo -- --proof` |
+| Default Avalonia UI | `AsterGraph.Avalonia` | `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `src/AsterGraph.Demo` |
+| Plugin trust/discovery | `AsterGraph.Editor` | `DiscoverPluginCandidates(...)` + `PluginTrustPolicy` | `src/AsterGraph.Demo` |
 | Automation | `AsterGraph.Editor` | `IGraphEditorSession.Automation.Execute(...)` | `src/AsterGraph.Demo` |
 | Runtime feedback overlay | `AsterGraph.Editor` | `AsterGraphEditorOptions.RuntimeOverlayProvider` + `IGraphEditorQueries.GetRuntimeOverlaySnapshot()` | `src/AsterGraph.Demo` |
-| Layout plans | `AsterGraph.Editor` | `AsterGraphEditorOptions.LayoutProvider` + `IGraphEditorQueries.CreateLayoutPlan(...)` | `tools/AsterGraph.ConsumerSample.Avalonia` |
+| Layout plans | `AsterGraph.Editor` | `AsterGraphEditorOptions.LayoutProvider` + `IGraphEditorQueries.CreateLayoutPlan(...)` | `src/AsterGraph.Demo` |
 | Retained migration bridge | `AsterGraph.Editor` (+ `AsterGraph.Avalonia` when embedding `GraphEditorView`) | retained constructor path | migration-only legacy host |
 
 If you are starting new work, begin with [Quick Start](./quick-start.md) and keep the retained bridge for legacy migration only.
@@ -114,22 +114,22 @@ Copy from each bounded source for the part it owns:
 - Copy from `CreateSession(...)`: host-owned runtime/session projection for custom UI hosts.
 - Copy from `AsterGraphHostBuilder`: common hosted Avalonia composition when document, catalog, compatibility, plugin trust, localization, diagnostics, behavior, menu augmentation, node-presentation state, tools, runtime overlay, and layout inputs are enough.
 - Copy from `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`: shipped Avalonia composition for hosted UI hosts.
-- Copy from `ConsumerSample.Avalonia`: action projection, trust workflow, and selected-node parameter read/write seam only.
+- Copy from `src/AsterGraph.Demo`: action projection, trust workflow, and selected-node parameter read/write seam only.
 - Copy from `Authoring Inspector Recipe`: definition-driven parameter metadata and stock inspector vocabulary.
 - Copy from [Authoring Surface Recipe](./authoring-surface-recipe.md): the hosted handoff from node-side editors and validation through shared commands and proof on the hosted Avalonia route.
 - Keep the split explicit: the sample is the seam proof and the recipe is the metadata source. More specifically, the inspector recipe owns metadata vocabulary and the surface recipe owns the hosted authoring handoff.
 
 ## Sample Roles
 
-- `AsterGraph.HelloWorld` = first-run sample for the runtime-only path
-- `AsterGraph.HelloWorld.Avalonia` = first-run sample for the shipped Avalonia UI path
-- `AsterGraph.Starter.Avalonia` = starter scaffold for the shipped Avalonia path
-- `AsterGraph.ConsumerSample.Avalonia` = medium hosted-UI sample on the canonical route with host actions, parameter editing, and one trusted plugin
-- `AsterGraph.Starter.Wpf` = validation-only adapter-2 composition sample, not an onboarding route
-- `AsterGraph.HelloWorld.Wpf` = validation-only adapter-2 proof sample for WPF markers, not a parity claim
-- `AsterGraph.HostSample` = narrow proof harness for the canonical runtime-only and hosted-UI routes
-- `AsterGraph.PackageSmoke` = packed-package proof
-- `AsterGraph.ScaleSmoke` = public scale baseline plus history/state proof
+- `src/AsterGraph.Demo -- --proof` = first-run sample for the runtime-only path
+- `src/AsterGraph.Demo` = first-run sample for the shipped Avalonia UI path
+- `templates/astergraph-avalonia` = starter scaffold for the shipped Avalonia path
+- `src/AsterGraph.Demo` = medium hosted-UI sample on the canonical route with host actions, parameter editing, and one trusted plugin
+- `release validation lane` = validation-only adapter-2 composition sample, not an onboarding route
+- `release validation lane` = validation-only adapter-2 proof sample for WPF markers, not a parity claim
+- `release validation lane` = narrow proof harness for the canonical runtime-only and hosted-UI routes
+- `release validation lane` = packed-package proof
+- `scale baseline` = public scale baseline plus history/state proof
 - `AsterGraph.Demo` = full showcase host for visual inspection
 
 ## Second Adapter Contract
@@ -157,16 +157,16 @@ Use [Feature Catalog](./feature-catalog.md) when a feature needs a governed reco
 
 | Module | Canonical seam | Hosted/UI note | First proof/sample anchor |
 | --- | --- | --- | --- |
-| `Selection` | `SetSelection(...)` + `GetSelectionSnapshot()` | route 2 projects the same selection state into the shipped visuals | `AsterGraph.ScaleSmoke`, `AsterGraph.HelloWorld` |
-| `History` | `Undo()` / `Redo()` plus the save/dirty contract | hosted shells reuse the same kernel-owned history boundary | `AsterGraph.ScaleSmoke`, [State Contracts](./state-contracts.md) |
-| `Clipboard` | `TryCopySelectionAsync()` / `TryPasteSelectionAsync()` | host clipboard services remain the seam underneath | `AsterGraph.HostSample` |
-| `Shortcut Policy` | `AsterGraphCommandShortcutPolicy` | Avalonia-specific composition knob, but still part of the official hosted route | `AsterGraph.PackageSmoke`, `AsterGraph.HelloWorld.Avalonia` |
+| `Selection` | `SetSelection(...)` + `GetSelectionSnapshot()` | route 2 projects the same selection state into the shipped visuals | `scale baseline`, `src/AsterGraph.Demo -- --proof` |
+| `History` | `Undo()` / `Redo()` plus the save/dirty contract | hosted shells reuse the same kernel-owned history boundary | `scale baseline`, [State Contracts](./state-contracts.md) |
+| `Clipboard` | `TryCopySelectionAsync()` / `TryPasteSelectionAsync()` | host clipboard services remain the seam underneath | `release validation lane` |
+| `Shortcut Policy` | `AsterGraphCommandShortcutPolicy` | Avalonia-specific composition knob, but still part of the official hosted route | `release validation lane`, `src/AsterGraph.Demo` |
 | `Layout` | session align/distribute commands | snaplines and visual guides stay adapter-owned | `AsterGraph.Demo` |
 | `MiniMap` | session/viewport snapshots + `AsterGraphMiniMapViewFactory.Create(...)` | standalone surface under route 2, not a separate route | `AsterGraph.Demo` |
 | `Stencil` | session stencil discovery + insertion commands | shipped Avalonia surface consumes the same session discovery data | `AsterGraph.Demo` |
 | `Fragment Library` | session fragment/template commands backed by fragment workspace/library services | hosted shells can replace storage without replacing the command surface | `AsterGraph.Demo` |
-| `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` plus raster SVG/PNG/JPEG export `GraphEditorSceneImageExportOptions` progress/cancel/scope options | export stays separate from workspace persistence and fragment storage | `AsterGraph.HostSample`, `AsterGraph.ScaleSmoke` |
-| `Baseline Edge Authoring` | connection start/complete/reconnect/disconnect commands + pending snapshot | pointer gestures are adapter behavior layered on top of the same session semantics | `AsterGraph.HostSample`, `AsterGraph.ScaleSmoke` |
+| `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` plus raster SVG/PNG/JPEG export `GraphEditorSceneImageExportOptions` progress/cancel/scope options | export stays separate from workspace persistence and fragment storage | `release validation lane`, `scale baseline` |
+| `Baseline Edge Authoring` | connection start/complete/reconnect/disconnect commands + pending snapshot | pointer gestures are adapter behavior layered on top of the same session semantics | `release validation lane`, `scale baseline` |
 | `Node Surface Authoring` | `GetNodeSurfaceSnapshots()`, `TrySetNodeSize(...)`, and parameter edits through the shared session command path | Avalonia projects the same tier state into card thresholds, node-side parameter editors, and stock authoring chrome | `AsterGraph.Demo`, [Advanced Editing Guide](./advanced-editing.md) |
 | `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`, `GetNodeGroups()`, `GetNodeGroupSnapshots()`, and group collapse/move/resize/membership commands | the stock canvas keeps frame chrome, content-area membership, and collapse affordances on top of the same hierarchy state | `AsterGraph.Demo`, [Advanced Editing Guide](./advanced-editing.md) |
 | `Composite Scope Authoring` | wrap/promote/expose/unexpose/scope-navigation commands plus scope/composite queries | breadcrumb chrome and host-owned workflow controls reuse the same session navigation state | `AsterGraph.Demo`, [Advanced Editing Guide](./advanced-editing.md) |
@@ -222,4 +222,4 @@ For deeper proof, CI lanes, and release gates, use [CONTRIBUTING.md](../../CONTR
 - [Advanced Editing Guide](./advanced-editing.md)
 - [Authoring Surface Recipe](./authoring-surface-recipe.md)
 - [Retained-To-Session Migration Recipe](./retained-migration-recipe.md)
-- [ScaleSmoke Baseline](./scale-baseline.md)
+- [Scale Baseline](./scale-baseline.md)

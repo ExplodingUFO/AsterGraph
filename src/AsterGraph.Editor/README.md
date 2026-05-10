@@ -53,7 +53,7 @@ Keep new code on the stable canonical surfaces. Treat retained APIs as migration
 
 ## Start Here
 
-- quickest runtime-only first run: [`tools/AsterGraph.HelloWorld`](../../tools/AsterGraph.HelloWorld/)
+- quickest runtime-only proof run: `src/AsterGraph.Demo -- --proof`
 - canonical onboarding: [Quick Start](../../docs/en/quick-start.md)
 - route and package boundary details: [Host Integration](../../docs/en/host-integration.md)
 - advanced editing surface map: [Advanced Editing Guide](../../docs/en/advanced-editing.md)

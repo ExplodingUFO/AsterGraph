@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -86,12 +87,12 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("公开 Beta 评估路径", readmeZh, StringComparison.Ordinal);
         Assert.Contains("evaluation-path.md", quickStart, StringComparison.Ordinal);
         Assert.Contains("Beta Evaluation Path", quickStart, StringComparison.Ordinal);
-        Assert.Contains("ConsumerSample.Avalonia -- --proof", quickStart, StringComparison.Ordinal);
-        Assert.Contains("HostSample", quickStart, StringComparison.Ordinal);
+        Assert.Contains("templates/astergraph-avalonia", quickStart, StringComparison.Ordinal);
+        Assert.Contains("src/AsterGraph.Demo -- --proof", quickStart, StringComparison.Ordinal);
         Assert.Contains("evaluation-path.md", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("公开 Beta 评估路径", quickStartZh, StringComparison.Ordinal);
-        Assert.Contains("ConsumerSample.Avalonia -- --proof", quickStartZh, StringComparison.Ordinal);
-        Assert.Contains("HostSample", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("templates/astergraph-avalonia", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("src/AsterGraph.Demo -- --proof", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("evaluation-path.md", projectStatus, StringComparison.Ordinal);
         Assert.Contains("single route ladder", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("evaluation-path.md", projectStatusZh, StringComparison.Ordinal);
@@ -115,28 +116,57 @@ public sealed class DemoProofReleaseSurfaceTests
 
         foreach (var contents in new[] { evaluationPath, evaluationPathZh })
         {
-            Assert.Contains("Starter.Avalonia", contents, StringComparison.Ordinal);
-            Assert.Contains("HelloWorld.Avalonia", contents, StringComparison.Ordinal);
-            Assert.Contains("ConsumerSample.Avalonia", contents, StringComparison.Ordinal);
-            Assert.Contains("HostSample", contents, StringComparison.Ordinal);
+            Assert.Contains("templates/astergraph-avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("src/AsterGraph.Demo", contents, StringComparison.Ordinal);
+            Assert.Contains("src/AsterGraph.Demo -- --proof", contents, StringComparison.Ordinal);
+            Assert.Contains("release validation lane", contents, StringComparison.Ordinal);
             Assert.Contains("CONSUMER_SAMPLE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("HOST_SAMPLE_OK:True", contents, StringComparison.Ordinal);
         }
 
         Assert.True(HasLineWith(evaluationPath, "WPF", "validation"));
-        Assert.Contains("AsterGraph.HelloWorld.Wpf", evaluationPath, StringComparison.Ordinal);
+        Assert.Contains("HELLOWORLD_WPF_OK:True", evaluationPath, StringComparison.Ordinal);
         Assert.Contains("adapter-2-accessibility-recipe.md", evaluationPath, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adapter-2-performance-recipe.md", evaluationPath, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWith(evaluationPath, "retained", "migration"));
-        Assert.True(HasLineWith(evaluationPath, "HostSample", "proof"));
-        Assert.True(HasLineWith(evaluationPath, "HostSample", "after"));
+        Assert.True(HasLineWith(evaluationPath, "src/AsterGraph.Demo -- --proof", "proof"));
+        Assert.True(HasLineWith(evaluationPath, "release validation lane", "after"));
         Assert.True(HasLineWith(evaluationPathZh, "WPF", "验证"));
-        Assert.Contains("AsterGraph.HelloWorld.Wpf", evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains("HELLOWORLD_WPF_OK:True", evaluationPathZh, StringComparison.Ordinal);
         Assert.Contains("adapter-2-accessibility-recipe.md", evaluationPathZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adapter-2-performance-recipe.md", evaluationPathZh, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWith(evaluationPathZh, "retained", "迁移"));
-        Assert.True(HasLineWith(evaluationPathZh, "HostSample", "proof"));
-        Assert.True(HasLineWith(evaluationPathZh, "HostSample", "之后"));
+        Assert.True(HasLineWith(evaluationPathZh, "src/AsterGraph.Demo -- --proof", "proof"));
+        Assert.True(HasLineWith(evaluationPathZh, "release validation lane", "之后"));
+    }
+
+    [Fact]
+    public void PublicDocs_DoNotReferenceRemovedSampleProjectRoutes()
+    {
+        var removedRouteTerms = new[]
+        {
+            "tools/AsterGraph.",
+            "AsterGraph.ConsumerSample",
+            "ConsumerSample.Avalonia",
+            "AsterGraph.Starter",
+            "Starter.Avalonia",
+            "HelloWorld.Avalonia",
+            "AsterGraph.HostSample",
+            "AsterGraph.PackageSmoke",
+            "AsterGraph.ScaleSmoke",
+            "AsterGraph.PluginTool",
+            "consumer-sample.md",
+        };
+
+        foreach (var (relativePath, contents) in EnumeratePublicDocContents())
+        {
+            foreach (var removedTerm in removedRouteTerms)
+            {
+                Assert.False(
+                    contents.Contains(removedTerm, StringComparison.Ordinal),
+                    $"{relativePath} still references removed route '{removedTerm}'.");
+            }
+        }
     }
 
     [Fact]
@@ -145,8 +175,8 @@ public sealed class DemoProofReleaseSurfaceTests
         var recipe = ReadRepoFile("docs/en/adapter-2-accessibility-recipe.md");
         var recipeZh = ReadRepoFile("docs/zh-CN/adapter-2-accessibility-recipe.md");
 
-        Assert.Contains("ConsumerSample.Avalonia -- --proof", recipe, StringComparison.Ordinal);
-        Assert.Contains("AsterGraph.HelloWorld.Wpf", recipe, StringComparison.Ordinal);
+        Assert.Contains("src/AsterGraph.Demo -- --proof", recipe, StringComparison.Ordinal);
+        Assert.Contains("release validation lane", recipe, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK:True", recipe, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", recipe, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", recipe, StringComparison.Ordinal);
@@ -155,8 +185,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.True(HasLineWith(recipe, "WPF", "validation-only"));
         Assert.True(HasLineWith(recipe, "Avalonia", "defended"));
 
-        Assert.Contains("ConsumerSample.Avalonia -- --proof", recipeZh, StringComparison.Ordinal);
-        Assert.Contains("AsterGraph.HelloWorld.Wpf", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("src/AsterGraph.Demo -- --proof", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("release validation lane", recipeZh, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK:True", recipeZh, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", recipeZh, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", recipeZh, StringComparison.Ordinal);
@@ -172,8 +202,8 @@ public sealed class DemoProofReleaseSurfaceTests
         var recipe = ReadRepoFile("docs/en/adapter-2-performance-recipe.md");
         var recipeZh = ReadRepoFile("docs/zh-CN/adapter-2-performance-recipe.md");
 
-        Assert.Contains("ConsumerSample.Avalonia -- --proof", recipe, StringComparison.Ordinal);
-        Assert.Contains("AsterGraph.HelloWorld.Wpf", recipe, StringComparison.Ordinal);
+        Assert.Contains("src/AsterGraph.Demo -- --proof", recipe, StringComparison.Ordinal);
+        Assert.Contains("release validation lane", recipe, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", recipe, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", recipe, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK:True:none", recipe, StringComparison.Ordinal);
@@ -185,8 +215,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.True(HasLineWith(recipe, "WPF", "validation-only"));
         Assert.True(HasLineWith(recipe, "Avalonia", "defended"));
 
-        Assert.Contains("ConsumerSample.Avalonia -- --proof", recipeZh, StringComparison.Ordinal);
-        Assert.Contains("AsterGraph.HelloWorld.Wpf", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("src/AsterGraph.Demo -- --proof", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("release validation lane", recipeZh, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", recipeZh, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", recipeZh, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK:True:none", recipeZh, StringComparison.Ordinal);
@@ -540,14 +570,13 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Equal(
             new[]
             {
-                "HelloWorld",
-                "AsterGraph.Starter.Avalonia",
-                "HelloWorld.Avalonia",
-                "ConsumerSample.Avalonia",
-                "HostSample",
-                "PackageSmoke",
-                "ScaleSmoke",
-                "Demo",
+                "templates/astergraph-avalonia",
+                "templates/astergraph-plugin",
+                "src/AsterGraph.Demo",
+                "src/AsterGraph.Demo -- --proof",
+                "release validation lane",
+                "CI/test lane",
+                "Host Integration / retained migration",
             },
             routeOptions);
         Assert.Contains("options:", routeBlock, StringComparison.Ordinal);
@@ -600,7 +629,7 @@ public sealed class DemoProofReleaseSurfaceTests
 
         foreach (var contents in new[] { adoptionFeedback, adoptionFeedbackZh })
         {
-            Assert.True(HasLineWithAll(contents, "HelloWorld", "AsterGraph.Starter.Avalonia", "HelloWorld.Avalonia", "ConsumerSample.Avalonia", "HostSample", "PackageSmoke", "ScaleSmoke", "Demo"));
+            Assert.True(HasLineWithAll(contents, "templates/astergraph-avalonia", "templates/astergraph-plugin", "src/AsterGraph.Demo", "src/AsterGraph.Demo -- --proof", "release validation lane"));
         }
 
         Assert.True(HasLineWithAll(supportBundle, "route", "version", "proof markers", "friction", "no support bundle"));
@@ -956,9 +985,9 @@ public sealed class DemoProofReleaseSurfaceTests
 
         foreach (var contents in new[] { quickStart, quickStartZh })
         {
-            Assert.Contains("HostSample", contents, StringComparison.Ordinal);
-            Assert.Contains("PackageSmoke", contents, StringComparison.Ordinal);
-            Assert.Contains("ScaleSmoke", contents, StringComparison.Ordinal);
+            Assert.Contains("templates/astergraph-avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("src/AsterGraph.Demo", contents, StringComparison.Ordinal);
+            Assert.Contains("release validation lane", contents, StringComparison.Ordinal);
             Assert.Contains("Demo", contents, StringComparison.Ordinal);
         }
 
@@ -1021,8 +1050,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:True", checklist, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK", checklist, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", checklist, StringComparison.Ordinal);
-        Assert.True(HasLineWithAll(checklist, "AsterGraph.Starter.Wpf", "validation-only", "not onboarding"));
-        Assert.True(HasLineWithAll(checklist, "AsterGraph.HelloWorld.Wpf", "validation-only", "not parity"));
+        Assert.True(HasLineWithAll(checklist, "HELLOWORLD_WPF_OK", "adapter-2", "validation"));
+        Assert.True(HasLineWithAll(checklist, "HELLOWORLD_WPF_OK", "parity"));
         Assert.True(HasLineWith(checklist, "HELLOWORLD_WPF_OK", "adapter-2"));
         Assert.True(HasLineWith(checklist, "HELLOWORLD_WPF_OK", "parity"));
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", checklistZh, StringComparison.Ordinal);
@@ -1031,8 +1060,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:True", checklistZh, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK", checklistZh, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", checklistZh, StringComparison.Ordinal);
-        Assert.True(HasLineWithAll(checklistZh, "AsterGraph.Starter.Wpf", "validation-only", "不是上手入口"));
-        Assert.True(HasLineWithAll(checklistZh, "AsterGraph.HelloWorld.Wpf", "validation-only", "不代表 parity"));
+        Assert.True(HasLineWithAll(checklistZh, "HELLOWORLD_WPF_OK", "adapter-2", "验证"));
+        Assert.True(HasLineWithAll(checklistZh, "HELLOWORLD_WPF_OK", "parity"));
         Assert.True(HasLineWith(checklistZh, "HELLOWORLD_WPF_OK", "adapter-2"));
         Assert.True(HasLineWith(checklistZh, "HELLOWORLD_WPF_OK", "parity"));
     }
@@ -1117,7 +1146,7 @@ public sealed class DemoProofReleaseSurfaceTests
         AssertAppearsBefore(readme, "The scenario shows the SDK as an embeddable authoring surface", "## Public Beta");
         AssertAppearsBefore(readme, "dotnet new astergraph-avalonia", "## Public Beta");
         AssertAppearsBefore(readme, "dotnet new astergraph-plugin", "## Public Beta");
-        AssertAppearsBefore(readme, "tools/AsterGraph.PluginTool", "## Public Beta");
+        AssertAppearsBefore(readme, "templates/astergraph-plugin", "## Public Beta");
         AssertAppearsBefore(readme, "## Start Here", "## Public Beta");
         Assert.Contains("parameter editing", readme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("trusted plugin context", readme, StringComparison.OrdinalIgnoreCase);
@@ -1130,7 +1159,7 @@ public sealed class DemoProofReleaseSurfaceTests
         AssertAppearsBefore(readmeZh, "这个场景把 SDK 展示成一个可嵌入的 authoring surface", "## 公开 Beta");
         AssertAppearsBefore(readmeZh, "dotnet new astergraph-avalonia", "## 公开 Beta");
         AssertAppearsBefore(readmeZh, "dotnet new astergraph-plugin", "## 公开 Beta");
-        AssertAppearsBefore(readmeZh, "tools/AsterGraph.PluginTool", "## 公开 Beta");
+        AssertAppearsBefore(readmeZh, "templates/astergraph-plugin", "## 公开 Beta");
         AssertAppearsBefore(readmeZh, "## 从哪里开始", "## 公开 Beta");
         Assert.Contains("参数编辑", readmeZh, StringComparison.Ordinal);
         Assert.Contains("可信插件上下文", readmeZh, StringComparison.Ordinal);
@@ -1296,11 +1325,11 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", readme, StringComparison.Ordinal);
         Assert.Contains("dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", readmeZh, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(readme, "30 seconds", "AI workflow", "scenario"));
-        Assert.True(HasLineWithAll(readme, "5 minutes", "ConsumerSample.Avalonia", "--proof --support-bundle"));
+        Assert.True(HasLineWithAll(readme, "5 minutes", "dotnet new astergraph-avalonia", "src/AsterGraph.Demo -- --proof"));
         Assert.True(HasLineWithAll(readme, "30 minutes", "Quick Start", "Host Integration"));
         Assert.True(HasLineWithAll(readme, "Maintainer", "Public Launch Checklist", "Adapter Capability Matrix", "Beta Support Bundle"));
         Assert.True(HasLineWithAll(readmeZh, "30 秒", "AI workflow", "场景"));
-        Assert.True(HasLineWithAll(readmeZh, "5 分钟", "ConsumerSample.Avalonia", "--proof --support-bundle"));
+        Assert.True(HasLineWithAll(readmeZh, "5 分钟", "dotnet new astergraph-avalonia", "src/AsterGraph.Demo -- --proof"));
         Assert.True(HasLineWithAll(readmeZh, "30 分钟", "Quick Start", "Host Integration"));
         Assert.True(HasLineWithAll(readmeZh, "维护者", "Public Launch Checklist", "Adapter Capability Matrix", "Beta Support Bundle"));
         Assert.True(HasLineWithAll(quickStart, "30 seconds", "src/AsterGraph.Demo", "scenario"));
@@ -1320,6 +1349,35 @@ public sealed class DemoProofReleaseSurfaceTests
 
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
+
+    private static IEnumerable<(string RelativePath, string Contents)> EnumeratePublicDocContents()
+    {
+        var root = GetRepositoryRoot();
+        var relativeFiles = new[]
+            {
+                "README.md",
+                "README.zh-CN.md",
+                ".github/ISSUE_TEMPLATE/adoption_feedback.yml",
+            }
+            .Concat(EnumerateRelativeFiles(root, "docs", "*.md"))
+            .Concat(EnumerateRelativeFiles(root, "templates", "*.md"))
+            .Concat(EnumerateRelativeFiles(root, "src", "README.md"))
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var relativePath in relativeFiles)
+        {
+            yield return (relativePath, ReadRepoFile(relativePath));
+        }
+    }
+
+    private static IEnumerable<string> EnumerateRelativeFiles(string root, string relativeDirectory, string searchPattern)
+    {
+        var directory = Path.Combine(root, relativeDirectory);
+        return Directory.Exists(directory)
+            ? Directory.EnumerateFiles(directory, searchPattern, SearchOption.AllDirectories)
+                .Select(path => Path.GetRelativePath(root, path))
+            : [];
+    }
 
     private static string GetRepositoryRoot()
     {

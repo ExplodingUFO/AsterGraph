@@ -4,14 +4,14 @@
 
 按顺序执行。每一步只增加一条 bounded seam；后面的步骤不会推翻前面的结果。
 
-这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
+这条 hosted route ladder 是 `templates/astergraph-avalonia -> src/AsterGraph.Demo -> src/AsterGraph.Demo -- --proof`。
 
-## 第 1 步：Starter.Avalonia — 最小端到端脚手架
+## 第 1 步：templates/astergraph-avalonia — 最小端到端脚手架
 
 先跑这个，确认第一条 hosted Avalonia 路线能通。
 
 ```powershell
-dotnet run --project tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj --nologo
+dotnet new astergraph-avalonia -n MyGraphHost
 ```
 
 ### 复制这个
@@ -30,12 +30,12 @@ dotnet run --project tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalon
 
 壳层能打开后，再去看最小 stock sample。
 
-## 第 2 步：HelloWorld.Avalonia — 最小 shipped Avalonia surface
+## 第 2 步：src/AsterGraph.Demo — 最小 shipped Avalonia surface
 
 跑这个来确认 shipped Avalonia surface 在没有额外宿主逻辑时也能工作。
 
 ```powershell
-dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj --nologo
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --scenario ai-pipeline
 ```
 
 ### 复制这个
@@ -52,12 +52,12 @@ dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.
 
 确认无误后，进入真实宿主 proof。
 
-## 第 3 步：ConsumerSample.Avalonia — 真实宿主 proof
+## 第 3 步：src/AsterGraph.Demo — 真实宿主 proof
 
 跑这个，在受防守的路线上验证 host-owned actions、trusted-plugin flow、参数编辑、command projection 和 hosted accessibility semantics。
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof
 ```
 
 ### 复制这个
@@ -89,13 +89,9 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 如需正式 intake 记录，加上 `--support-bundle <support-bundle-path>` 运行，并复用输出的 `SUPPORT_BUNDLE_PATH:...` 行。详见 [Beta Support Bundle](./support-bundle.md)。
 
-## 第 4 步：阶梯之后的 proof harness
+## 第 4 步：release validation lane
 
-只有在真实宿主样例已经看懂之后，再跑 `HostSample`。
-
-```powershell
-dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
-```
+只有在真实宿主样例已经看懂之后，才使用 release validation lane。
 
 期待：
 
@@ -108,18 +104,18 @@ dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --
 
 | Seam | 从哪里复制 | 详细 recipe |
 | --- | --- | --- |
-| Factory 组合 | `Starter.Avalonia` / `HelloWorld.Avalonia` | [快速开始](./quick-start.md) |
-| Plugin discovery/trust | `ConsumerSample.Avalonia` | [Plugin Host Recipe](./plugin-host-recipe.md) |
-| 自定义 node/port/edge | `ConsumerSample.Avalonia` | [Custom Node Host Recipe](./custom-node-host-recipe.md) |
+| Factory 组合 | `templates/astergraph-avalonia` / `src/AsterGraph.Demo` | [快速开始](./quick-start.md) |
+| Plugin discovery/trust | `src/AsterGraph.Demo` | [Plugin Host Recipe](./plugin-host-recipe.md) |
+| 自定义 node/port/edge | `src/AsterGraph.Demo` | [Custom Node Host Recipe](./custom-node-host-recipe.md) |
 | 参数元数据 | Inspector 词汇表 | [Authoring Inspector Recipe](./authoring-inspector-recipe.md) |
-| Node surface authoring | `ConsumerSample.Avalonia` | [Authoring Surface Recipe](./authoring-surface-recipe.md) |
+| Node surface authoring | `src/AsterGraph.Demo` | [Authoring Surface Recipe](./authoring-surface-recipe.md) |
 | Retained 迁移 | 现有 `GraphEditorViewModel` 宿主 | [Retained 迁移 Recipe](./retained-migration-recipe.md) |
-| Accessibility handoff | `ConsumerSample.Avalonia` | [Hosted Accessibility Recipe](./hosted-accessibility-recipe.md) |
-| 性能预算 | `ScaleSmoke` | [ScaleSmoke 基线](./scale-baseline.md) |
+| Accessibility handoff | `src/AsterGraph.Demo` | [Hosted Accessibility Recipe](./hosted-accessibility-recipe.md) |
+| 性能预算 | `release validation lane` | [规模基线](./scale-baseline.md) |
 
 ## 相关文档
 
 - [快速开始](./quick-start.md)
 - [公开 Beta 评估路径](./evaluation-path.md)
-- [Consumer Sample](./consumer-sample.md)
+- `src/AsterGraph.Demo`
 - [Host Integration](./host-integration.md)

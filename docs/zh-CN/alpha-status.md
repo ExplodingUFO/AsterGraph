@@ -16,12 +16,12 @@
 - 默认 Avalonia hosted UI 与 standalone surfaces
 - trusted / loaded / blocked 的 runtime inspection surface
 - showcase 宿主里的 command/trust timeline 和 perf overlay
-- `tools/AsterGraph.Starter.Avalonia` 作为 shipped 的 Avalonia starter scaffold
+- `templates/astergraph-avalonia` 作为 shipped 的 Avalonia starter scaffold
 - plugin discovery / trust policy / load inspection / runtime loading
 - `IGraphEditorSession.Automation`
 - 官方 proof lanes 与 smoke tools
-- 一个介于 HelloWorld 和 Demo 之间的中等 hosted-UI consumer 样例
-- `.NET 10` packed `HostSample` proof 位于 release lane
+- 一个介于 src/AsterGraph.Demo -- --proof 和 Demo 之间的中等 hosted-UI consumer 样例
+- `.NET 10` packed `release validation lane` proof 位于 release lane
 - shipped definition-driven inspector 元数据和内建 text/number/boolean/enum/list editor
 - 分层节点表面、hierarchy snapshot、composite scope navigation、边注解和 routed edge geometry tooling
 
@@ -56,7 +56,7 @@
 - [Versioning](./versioning.md)
 - [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
-- [ScaleSmoke 基线](./scale-baseline.md)
+- [规模基线](./scale-baseline.md)
 - [Advanced Editing Guide](./advanced-editing.md)
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md)
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md)

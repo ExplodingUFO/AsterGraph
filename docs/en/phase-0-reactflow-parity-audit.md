@@ -7,7 +7,7 @@ This audit starts the v1 roadmap from the current `0.11.0-beta` repository state
 - Current package version is `0.11.0-beta` in `Directory.Build.props`; the matching tag `v0.11.0-beta` exists.
 - Publishable libraries are `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and `AsterGraph.Avalonia`; all target `net8.0;net9.0;net10.0`.
 - `AsterGraph.Demo` is the current visible demo host and targets `net9.0`.
-- The current solution contains libraries, templates, Demo, and tests. The old `tools/AsterGraph.*` sample/proof projects are not in the solution or tracked source tree.
+- The current solution contains libraries, templates, Demo, and tests. The old `historical proof route *` sample/proof projects are not in the solution or tracked source tree.
 - `docs/plans/` is gitignored, so roadmap artifacts that must travel with the repository need to live under tracked docs paths.
 
 ## Architecture Inventory
@@ -65,7 +65,7 @@ This audit starts the v1 roadmap from the current `0.11.0-beta` repository state
 | `IGraphEditorQueries.GetCompatibleTargets(...)` | Was an obsolete compatibility shim over canonical target queries. | Removed by #48; use `GetCompatiblePortTargets(...)` and `GraphEditorCompatiblePortTargetSnapshot`. |
 | `GraphEditorCapabilitySnapshot` obsolete constructor/deconstruct | Kept for older call shapes. | Removed by #48; use the six-parameter constructor plus `init` properties and direct property access. |
 | Avalonia retained view facade wording | `AsterGraphAvaloniaViewFactory` and options mentioned retained editor facade/direct `GraphEditorView` usage. | Reworded by #48 so the hosted factory route is promoted without compatibility-only facade wording. |
-| README/project-status references to removed tools | Public docs name missing `tools/AsterGraph.*` projects. | Reconcile before adding any React Flow parity marketing. |
+| README/project-status references to removed tools | Public docs name missing `historical proof route *` projects. | Reconcile before adding any React Flow parity marketing. |
 
 ## Target Module Boundaries
 

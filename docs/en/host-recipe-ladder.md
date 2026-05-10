@@ -4,14 +4,14 @@ This is the unified "copy-from-here" ladder for hosts building on AsterGraph.
 
 Follow it in order. Each step adds one bounded seam; nothing later undoes what came before.
 
-The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
+The hosted route ladder is `templates/astergraph-avalonia -> src/AsterGraph.Demo -> src/AsterGraph.Demo -- --proof`.
 
-## Step 1: Starter.Avalonia — smallest end-to-end scaffold
+## Step 1: templates/astergraph-avalonia — smallest end-to-end scaffold
 
 Run this first to confirm the first hosted Avalonia route works.
 
 ```powershell
-dotnet run --project tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj --nologo
+dotnet new astergraph-avalonia -n MyGraphHost
 ```
 
 ### Copy This
@@ -30,12 +30,12 @@ dotnet run --project tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalon
 
 Once the shell opens, move to the smallest stock sample.
 
-## Step 2: HelloWorld.Avalonia — smallest shipped Avalonia surface
+## Step 2: src/AsterGraph.Demo — smallest shipped Avalonia surface
 
 Run this to confirm the shipped Avalonia surface without extra host wiring.
 
 ```powershell
-dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj --nologo
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --scenario ai-pipeline
 ```
 
 ### Copy This
@@ -52,12 +52,12 @@ dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.
 
 Once this is clear, move to the realistic hosted proof.
 
-## Step 3: ConsumerSample.Avalonia — realistic hosted proof
+## Step 3: src/AsterGraph.Demo — realistic hosted proof
 
 Run this to prove host-owned actions, trusted-plugin flow, parameter editing, command projection, and hosted accessibility semantics on the defended route.
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof
 ```
 
 ### Copy This
@@ -93,13 +93,9 @@ If `CONSUMER_SAMPLE_PARAMETER_OK` or `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` fa
 
 For the actual intake record, run with `--support-bundle <support-bundle-path>` and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line. See [Beta Support Bundle](./support-bundle.md).
 
-## Step 4: Post-ladder proof harness
+## Step 4: Release validation lane
 
-Run `HostSample` only after the realistic hosted sample is already understood.
-
-```powershell
-dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
-```
+Use the release validation lane only after the realistic hosted sample is already understood.
 
 Expect:
 
@@ -112,18 +108,18 @@ Expect:
 
 | Seam | Copy from | Detailed recipe |
 | --- | --- | --- |
-| Factory composition | `Starter.Avalonia` / `HelloWorld.Avalonia` | [Quick Start](./quick-start.md) |
-| Plugin discovery/trust | `ConsumerSample.Avalonia` | [Plugin Host Recipe](./plugin-host-recipe.md) |
-| Custom node/port/edge | `ConsumerSample.Avalonia` | [Custom Node Host Recipe](./custom-node-host-recipe.md) |
+| Factory composition | `templates/astergraph-avalonia` / `src/AsterGraph.Demo` | [Quick Start](./quick-start.md) |
+| Plugin discovery/trust | `src/AsterGraph.Demo` | [Plugin Host Recipe](./plugin-host-recipe.md) |
+| Custom node/port/edge | `src/AsterGraph.Demo` | [Custom Node Host Recipe](./custom-node-host-recipe.md) |
 | Parameter metadata | Inspector vocabulary | [Authoring Inspector Recipe](./authoring-inspector-recipe.md) |
-| Node surface authoring | `ConsumerSample.Avalonia` | [Authoring Surface Recipe](./authoring-surface-recipe.md) |
+| Node surface authoring | `src/AsterGraph.Demo` | [Authoring Surface Recipe](./authoring-surface-recipe.md) |
 | Retained migration | Existing `GraphEditorViewModel` host | [Retained Migration Recipe](./retained-migration-recipe.md) |
-| Accessibility handoff | `ConsumerSample.Avalonia` | [Hosted Accessibility Recipe](./hosted-accessibility-recipe.md) |
-| Performance budgets | `ScaleSmoke` | [ScaleSmoke Baseline](./scale-baseline.md) |
+| Accessibility handoff | `src/AsterGraph.Demo` | [Hosted Accessibility Recipe](./hosted-accessibility-recipe.md) |
+| Performance budgets | `release validation lane` | [Scale Baseline](./scale-baseline.md) |
 
 ## Related Docs
 
 - [Quick Start](./quick-start.md)
 - [Evaluation Path](./evaluation-path.md)
-- [Consumer Sample](./consumer-sample.md)
+- `src/AsterGraph.Demo`
 - [Host Integration](./host-integration.md)

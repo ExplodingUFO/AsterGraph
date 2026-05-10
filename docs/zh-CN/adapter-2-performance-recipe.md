@@ -4,9 +4,9 @@
 
 ## 交接顺序
 
-- 先走受防守的 Avalonia hosted 路线，运行 `AsterGraph.ConsumerSample.Avalonia -- --proof`，并先把共享的 `HOST_NATIVE_METRIC:*` 行放进记录里。
+- 先走受防守的 Avalonia hosted 路线，运行 `src/AsterGraph.Demo -- --proof`，并先把共享的 `HOST_NATIVE_METRIC:*` 行放进记录里。
 - 复用同一条受限 intake 记录和来自受防守 Avalonia 路线的 support-bundle attachment note；`WPF` 不会打开第二条 intake 流程。
-- 只把 `AsterGraph.HelloWorld.Wpf -- --proof` 当成 validation-only 的 adapter-2 跟进验证。
+- 只把 release validation lane 当成 validation-only 的 adapter-2 跟进验证。
 - 把 `ADAPTER2_PERFORMANCE_BASELINE_OK:True`、`ADAPTER2_EXPORT_BREADTH_OK:True`、`ADAPTER2_PROJECTION_BUDGET_OK:True:none`、`ADAPTER2_COMMAND_BUDGET_OK:True:none`、`ADAPTER2_SCENE_BUDGET_OK:True:none`、`ADAPTER2_PROOF_BUDGET_OK:True`、`ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`、`ADAPTER2_RECIPE_ALIGNMENT_OK:True` 和 `HELLOWORLD_WPF_OK:True` 继续放在同一条本地记录里。
 - 所有 `WPF` performance proof 行都只能当成验证证据；这些 marker 都不会扩大公开支持承诺。
 
@@ -14,16 +14,16 @@
 
 ```powershell
 # 先跑受防守的 Avalonia hosted proof
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof
 
 # 只有在受防守的 Avalonia proof 之后才跑有边界的 adapter-2 performance 验证
-dotnet run --project tools/AsterGraph.HelloWorld.Wpf/AsterGraph.HelloWorld.Wpf.csproj --nologo -- --proof
+dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --filter FullyQualifiedName~ReleaseClosureContractTests
 ```
 
 ## 什么算成功
 
 - 受防守的 Avalonia 路线仍然是第一个 proof gate
-- `AsterGraph.HelloWorld.Wpf -- --proof` 会输出 `ADAPTER2_PERFORMANCE_BASELINE_OK:True`
+- Adapter-2 release evidence 会保留 `ADAPTER2_PERFORMANCE_BASELINE_OK:True`
 - 同一轮 `WPF` proof 还会输出 `ADAPTER2_EXPORT_BREADTH_OK:True`
 - 同一轮 `WPF` proof 还会输出 `ADAPTER2_PROJECTION_BUDGET_OK:True:none`
 - 同一轮 `WPF` proof 还会输出 `ADAPTER2_COMMAND_BUDGET_OK:True:none`

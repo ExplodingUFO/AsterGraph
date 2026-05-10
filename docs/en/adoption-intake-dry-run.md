@@ -14,7 +14,7 @@ Fixture coverage marker: `ADOPTION_INTAKE_EVIDENCE_OK:True`.
 
 ## Record 1: Parameter Projection Failure
 
-- route: `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`
+- route: `src/AsterGraph.Demo -- --proof --support-bundle <support-bundle-path>`
 - version: `v0.0.0-dry-run`
 - proof markers: `CONSUMER_SAMPLE_PARAMETER_OK:False`
 - friction: parameter projection did not surface the expected host-owned values on the selected node
@@ -31,7 +31,7 @@ parameterSnapshots
 
 ## Record 2: Metadata Projection Failure
 
-- route: `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`
+- route: `src/AsterGraph.Demo -- --proof --support-bundle <support-bundle-path>`
 - version: `v0.0.0-dry-run`
 - proof markers: `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:False`
 - friction: metadata projection did not expose the expected inspector fields for the selected node
@@ -48,7 +48,7 @@ parameterSnapshots
 
 ## Record 3: Support-Bundle Persistence Failure
 
-- route: `ConsumerSample.Avalonia -- --proof`
+- route: `src/AsterGraph.Demo -- --proof`
 - version: `v0.0.0-dry-run`
 - proof markers: `SUPPORT_BUNDLE_PERSISTENCE_OK:False`
 - friction: the dry-run stopped before a bundle could be written and reused
