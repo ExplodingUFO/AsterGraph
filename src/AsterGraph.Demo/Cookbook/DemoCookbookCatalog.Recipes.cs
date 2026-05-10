@@ -1178,5 +1178,282 @@ public static partial class DemoCookbookCatalog
             // Events flushed when mutation scope exits
             """
             ),
+        new DemoCookbookRecipe(
+            "builtin-minimap-workbench-route",
+            DemoCookbookRecipeCategory.PerformanceViewport,
+            "Built-in MiniMap workbench route",
+            "Capture the stock MiniMap, performance policy, and wide graph overview as a runnable Cookbook fixture.",
+            [
+                new DemoCookbookAnchor(
+                    "Standalone MiniMap factory",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphMiniMapViewFactory.cs",
+                    "AsterGraphMiniMapViewFactory"),
+                new DemoCookbookAnchor(
+                    "MiniMap cadence budget marker",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphWorkbenchPerformancePolicy.cs",
+                    "ToMiniMapBudgetMarker"),
+                new DemoCookbookAnchor(
+                    "MiniMap lightweight stock surface",
+                    "src/AsterGraph.Avalonia/Controls/GraphMiniMap.cs",
+                    "UsesLightweightProjection"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "MiniMap workbench graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "minimap-workbench"),
+                new DemoCookbookAnchor(
+                    "MiniMap performance policy proof",
+                    "tests/AsterGraph.Editor.Tests/GraphMiniMapStandaloneTests.cs",
+                    "WorkbenchPerformancePolicy_ExposesMiniMapCadenceBudgetMarker"),
+                new DemoCookbookAnchor(
+                    "Demo MiniMap host proof",
+                    "tests/AsterGraph.Demo.Tests/DemoCapabilityShowcaseTests.cs",
+                    "PART_StandaloneMiniMapHost"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Built-in MiniMap cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "BUILTIN_MINIMAP_WORKBENCH_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.HostCodeExample,
+                    "Standalone hosts compose the stock MiniMap through the supported factory.",
+                    "AsterGraphMiniMapViewFactory"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The minimap-workbench fixture spreads connected nodes across a wide canvas for overview capture.",
+                    "minimap-workbench"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "MiniMap cadence and lightweight projection stay bounded by performance policy markers.",
+                    "ToMiniMapBudgetMarker"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Existing MiniMap tests and Demo host proof remain the support evidence for this route.",
+                    "MINIMAP_LIGHTWEIGHT_PROJECTION_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "The wide fixture makes the MiniMap overview and world-bounds projection visible.",
+                    "minimap-workbench"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Standalone MiniMap composition remains inspectable through the public factory.",
+                    "AsterGraphMiniMapViewFactory"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Cadence markers explain when the hosted workbench uses lightweight projection.",
+                    "ToMiniMapBudgetMarker"),
+            ],
+            [
+                "MINIMAP_LIGHTWEIGHT_PROJECTION_OK",
+                "BUILTIN_MINIMAP_WORKBENCH_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "Built-in MiniMap workbench route: launch `minimap-workbench` and inspect AsterGraphMiniMapViewFactory plus hosted performance policy evidence.",
+                "Supported seams live in `AsterGraph.Avalonia` MiniMap factories, stock GraphMiniMap projection, and AsterGraphWorkbenchPerformancePolicy budget markers.",
+                "Demo cookbook provides a wide fixture and screenshot-gate coverage only; Demo does not add a second viewport model or graph index."),
+            "MiniMap coverage is limited to the existing standalone factory, hosted workbench policy, and screenshot fixture; it does not add a background graph index, second renderer, or runtime execution mode.",
+            CodeSample: """
+            // Compose the stock standalone MiniMap beside a hosted editor.
+            var miniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
+            {
+                Session = editor.Session,
+            });
+
+            // Keep cadence policy host-visible for large graphs.
+            var policy = AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraphWorkbenchPerformanceMode.Balanced);
+            var marker = policy.ToMiniMapBudgetMarker();
+            """
+            ),
+        new DemoCookbookRecipe(
+            "builtin-background-grid-route",
+            DemoCookbookRecipeCategory.PerformanceViewport,
+            "Built-in Background/Grid route",
+            "Capture the stock grid background, grid-density bounds, and snap-aware fixture as a runnable Cookbook route.",
+            [
+                new DemoCookbookAnchor(
+                    "Grid background renderer",
+                    "src/AsterGraph.Avalonia/Controls/GridBackground.cs",
+                    "CalculateVisibleLineMetrics"),
+                new DemoCookbookAnchor(
+                    "Canvas grid style",
+                    "src/AsterGraph.Abstractions/Styling/CanvasStyleOptions.cs",
+                    "GridBackgroundHex"),
+                new DemoCookbookAnchor(
+                    "Snap-to-grid command seam",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TrySnapSelectedNodesToGrid"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Background grid graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "background-grid-density"),
+                new DemoCookbookAnchor(
+                    "Grid density proof",
+                    "tests/AsterGraph.Editor.Tests/GridBackgroundTests.cs",
+                    "CalculateVisibleLineMetrics_WithExtremeZoomSpacing_KeepsLineDensityBounded"),
+                new DemoCookbookAnchor(
+                    "Layout action projection proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorViewTests.cs",
+                    "AuthoringToolsChrome_ProjectsStockSelectionLayoutActions"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Built-in grid cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "GRID_BACKGROUND_DENSITY_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The background-grid-density fixture keeps nodes aligned to a readable grid cadence.",
+                    "background-grid-density"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.NodeMetadata,
+                    "Canvas styling keeps the stock grid background color and density configurable through existing style options.",
+                    "GridBackgroundHex"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "Grid line metrics stay bounded at extreme zoom levels.",
+                    "CalculateVisibleLineMetrics_WithExtremeZoomSpacing_KeepsLineDensityBounded"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Snap-to-grid and layout action projection stay on shared session command seams.",
+                    "TrySnapSelectedNodesToGrid"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Snap commands keep selected nodes aligned to the visible grid.",
+                    "TrySnapSelectedNodesToGrid"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "Grid line metrics bound visual density instead of letting zoom create unreadable line counts.",
+                    "CalculateVisibleLineMetrics"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Hosted layout actions project stock alignment and snap controls with disabled-state feedback.",
+                    "AuthoringToolsChrome_ProjectsStockSelectionLayoutActions"),
+            ],
+            [
+                "GRID_BACKGROUND_DENSITY_OK",
+                "LAYOUT_PROVIDER_SEAM_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "Built-in Background/Grid route: launch `background-grid-density` and inspect GridBackground plus snap-to-grid command evidence.",
+                "Supported seams live in `AsterGraph.Avalonia` GridBackground rendering, AsterGraph style options, and `AsterGraph.Editor` layout commands.",
+                "Demo cookbook provides a snapped graph fixture and screenshot-gate coverage only; Demo does not add another renderer or layout runtime."),
+            "Background/grid coverage is limited to existing grid rendering, style options, and snap/layout commands; it does not add a second renderer, background graph index, or new layout engine.",
+            CodeSample: """
+            // Read the stock grid style used by the canvas.
+            var style = GraphEditorStyleOptions.Default.Canvas;
+            var gridBackground = style.GridBackgroundHex;
+
+            // Keep node placement aligned through the session command seam.
+            editor.Session.Commands.TrySnapSelectedNodesToGrid(20);
+            """
+            ),
+        new DemoCookbookRecipe(
+            "builtin-hosted-controls-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Built-in hosted Controls/Panel route",
+            "Capture hosted workbench controls, panel-state composition, and recovery hints through a runnable Cookbook fixture.",
+            [
+                new DemoCookbookAnchor(
+                    "Default workbench composition",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphHostBuilder.cs",
+                    "UseDefaultWorkbench"),
+                new DemoCookbookAnchor(
+                    "Hosted Avalonia view composition",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphHostBuilder.cs",
+                    "BuildAvaloniaView"),
+                new DemoCookbookAnchor(
+                    "Workbench panel state",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphWorkbenchOptions.cs",
+                    "AsterGraphWorkbenchPanelState"),
+                new DemoCookbookAnchor(
+                    "Command recovery hint",
+                    "src/AsterGraph.Editor/Runtime/GraphEditorCommandDescriptorSnapshot.cs",
+                    "RecoveryHint"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Hosted controls graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "hosted-controls-panel"),
+                new DemoCookbookAnchor(
+                    "Hosted layout tools proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorViewTests.cs",
+                    "AuthoringToolsChrome_ProjectsStockSelectionLayoutActions"),
+                new DemoCookbookAnchor(
+                    "Demo hosted panel proof",
+                    "tests/AsterGraph.Demo.Tests/DemoCookbookNavigationTests.cs",
+                    "PART_CookbookWorkspaceNavigationPanel"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Built-in hosted controls cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "HOSTED_CONTROLS_PANEL_COMPOSITION_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.HostCodeExample,
+                    "UseDefaultWorkbench composes the stock toolbar, command palette, panels, MiniMap, diagnostics, and status chrome.",
+                    "UseDefaultWorkbench"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The hosted-controls-panel fixture keeps a panel-sized authoring graph ready for screenshot capture.",
+                    "hosted-controls-panel"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.NodeMetadata,
+                    "Panel state stays host-owned through AsterGraphWorkbenchPanelState.",
+                    "AsterGraphWorkbenchPanelState"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "RecoveryHint keeps disabled hosted controls explainable without Demo-only fallbacks.",
+                    "RecoveryHint"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Hosted layout tools project selection actions from stock command descriptors.",
+                    "AuthoringToolsChrome_ProjectsStockSelectionLayoutActions"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Workbench panel visibility is controlled through the hosted panel-state options.",
+                    "AsterGraphWorkbenchPanelState"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Recovery hints keep disabled commands supportable from the hosted control surface.",
+                    "RecoveryHint"),
+            ],
+            [
+                "HOSTED_CONTROLS_PANEL_COMPOSITION_OK",
+                "DESIGNER_WORKBENCH_AUTHORING_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "Built-in hosted Controls/Panel route: launch `hosted-controls-panel` and inspect UseDefaultWorkbench, panel-state, and RecoveryHint evidence.",
+                "Supported seams live in `AsterGraph.Avalonia` hosted workbench options and `AsterGraph.Editor` command descriptor recovery metadata.",
+                "Demo cookbook provides a composed panel fixture and screenshot-gate coverage only; Demo does not add a new workflow engine or control framework."),
+            "Hosted controls coverage is limited to existing workbench options, panel state, and command descriptor recovery metadata; it does not add telemetry, remote sync, a workflow engine, or a new control framework.",
+            CodeSample: """
+            // Compose stock hosted controls when the default workbench is enough.
+            var view = AsterGraphHostBuilder.Create()
+                .UseDocument(document)
+                .UseCatalog(catalog)
+                .UseDefaultWorkbench()
+                .BuildAvaloniaView();
+
+            // Hosts can still tune panel visibility through workbench options.
+            var panels = AsterGraphWorkbenchPanelState.Default;
+            """
+            ),
     ];
 }

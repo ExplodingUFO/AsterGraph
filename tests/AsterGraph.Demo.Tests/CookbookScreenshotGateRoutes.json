@@ -11,6 +11,76 @@
     "backgroundHex": "#09141C",
     "scale": 1.0,
     "minimumBytes": 4096,
+    "expectedDocumentTitle": "AI Workflow / Agent Pipeline",
+    "minimumNodeCount": 6,
+    "minimumConnectionCount": 6,
+    "requiredNodeIds": [
+      "input",
+      "output"
+    ],
     "outputFileName": "cookbook-default-starter-host-ai-pipeline.png"
+  },
+  {
+    "id": "cookbook-builtin-minimap-workbench",
+    "recipeId": "builtin-minimap-workbench-route",
+    "scenario": "minimap-workbench",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "MiniMap Workbench Surface",
+    "minimumNodeCount": 8,
+    "minimumConnectionCount": 7,
+    "requiredNodeIds": [
+      "time-hub",
+      "minimap-output"
+    ],
+    "outputFileName": "cookbook-builtin-minimap-workbench.png"
+  },
+  {
+    "id": "cookbook-builtin-background-grid",
+    "recipeId": "builtin-background-grid-route",
+    "scenario": "background-grid-density",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Background Grid Density",
+    "minimumNodeCount": 9,
+    "minimumConnectionCount": 8,
+    "requiredNodeIds": [
+      "grid-clock",
+      "grid-output"
+    ],
+    "outputFileName": "cookbook-builtin-background-grid.png"
+  },
+  {
+    "id": "cookbook-builtin-hosted-controls",
+    "recipeId": "builtin-hosted-controls-route",
+    "scenario": "hosted-controls-panel",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Hosted Controls Panel Composition",
+    "minimumNodeCount": 7,
+    "minimumConnectionCount": 7,
+    "requiredNodeIds": [
+      "panel-input",
+      "panel-output"
+    ],
+    "outputFileName": "cookbook-builtin-hosted-controls.png"
   }
 ]

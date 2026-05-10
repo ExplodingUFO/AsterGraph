@@ -55,6 +55,18 @@ public sealed class DemoCookbookScreenshotGateTests
             viewModel.Session.Commands.FitToViewport(updateStatus: false);
 
             var scene = viewModel.Session.Queries.GetSceneSnapshot();
+            Assert.Equal(route.ExpectedDocumentTitle, scene.Document.Title);
+            Assert.True(
+                scene.Document.Nodes.Count >= route.MinimumNodeCount,
+                $"{route.Id} should capture at least {route.MinimumNodeCount} nodes.");
+            Assert.True(
+                scene.Document.Connections.Count >= route.MinimumConnectionCount,
+                $"{route.Id} should capture at least {route.MinimumConnectionCount} connections.");
+            foreach (var requiredNodeId in route.RequiredNodeIds)
+            {
+                Assert.Contains(scene.Document.Nodes, node => string.Equals(node.Id, requiredNodeId, StringComparison.Ordinal));
+            }
+
             var exportService = new GraphSceneImageExportService(outputDirectory);
             var writtenPath = exportService.Export(
                 scene,
@@ -112,6 +124,31 @@ public sealed class DemoCookbookScreenshotGateTests
     }
 
     [Fact]
+    public void CookbookScreenshotGate_IncludesBuiltInBatchRoutes()
+    {
+        var routes = LoadRoutes(GetRepositoryRoot());
+
+        Assert.Contains(routes, route =>
+            route.Id == "cookbook-builtin-minimap-workbench"
+            && route.RecipeId == "builtin-minimap-workbench-route"
+            && route.Scenario == "minimap-workbench"
+            && route.ExpectedDocumentTitle == "MiniMap Workbench Surface"
+            && route.RequiredNodeIds.Contains("minimap-output", StringComparer.Ordinal));
+        Assert.Contains(routes, route =>
+            route.Id == "cookbook-builtin-background-grid"
+            && route.RecipeId == "builtin-background-grid-route"
+            && route.Scenario == "background-grid-density"
+            && route.ExpectedDocumentTitle == "Background Grid Density"
+            && route.RequiredNodeIds.Contains("grid-output", StringComparer.Ordinal));
+        Assert.Contains(routes, route =>
+            route.Id == "cookbook-builtin-hosted-controls"
+            && route.RecipeId == "builtin-hosted-controls-route"
+            && route.Scenario == "hosted-controls-panel"
+            && route.ExpectedDocumentTitle == "Hosted Controls Panel Composition"
+            && route.RequiredNodeIds.Contains("panel-output", StringComparer.Ordinal));
+    }
+
+    [Fact]
     public void CookbookScreenshotGate_DocumentationNamesCommandArtifactsAndCiPosture()
     {
         var english = ReadRepoFile("docs/en/demo-cookbook.md");
@@ -141,6 +178,10 @@ public sealed class DemoCookbookScreenshotGateTests
         Assert.True(route.ViewportHeight >= 640);
         Assert.True(route.Scale > 0d);
         Assert.True(route.MinimumBytes >= 1024);
+        Assert.False(string.IsNullOrWhiteSpace(route.ExpectedDocumentTitle));
+        Assert.True(route.MinimumNodeCount > 0);
+        Assert.True(route.MinimumConnectionCount > 0);
+        Assert.NotEmpty(route.RequiredNodeIds);
     }
 
     private static IReadOnlyList<CookbookScreenshotGateRoute> LoadRoutes(string repoRoot)
@@ -189,6 +230,10 @@ public sealed class DemoCookbookScreenshotGateTests
         string BackgroundHex,
         double Scale,
         int MinimumBytes,
+        string ExpectedDocumentTitle,
+        int MinimumNodeCount,
+        int MinimumConnectionCount,
+        string[] RequiredNodeIds,
         string OutputFileName);
 
     private sealed record CookbookScreenshotGateMetadata(

@@ -105,6 +105,61 @@ public sealed class DemoScenarioLaunchTests
     }
 
     [Fact]
+    public void DemoGraphFactory_CreatesBuiltInCookbookScenarioFixtures()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterProvider(new DemoNodeDefinitionProvider());
+        var scenarios = new[]
+        {
+            new
+            {
+                Id = "minimap-workbench",
+                Title = "MiniMap Workbench Surface",
+                MinimumNodes = 8,
+                MinimumConnections = 7,
+                RequiredNodeId = "minimap-output",
+                RequiredGroupId = "minimap-surface",
+            },
+            new
+            {
+                Id = "background-grid-density",
+                Title = "Background Grid Density",
+                MinimumNodes = 9,
+                MinimumConnections = 8,
+                RequiredNodeId = "grid-output",
+                RequiredGroupId = "grid-density-band",
+            },
+            new
+            {
+                Id = "hosted-controls-panel",
+                Title = "Hosted Controls Panel Composition",
+                MinimumNodes = 7,
+                MinimumConnections = 7,
+                RequiredNodeId = "panel-output",
+                RequiredGroupId = "hosted-control-panel",
+            },
+        };
+
+        foreach (var scenario in scenarios)
+        {
+            Assert.True(DemoGraphFactory.IsKnownScenario(scenario.Id), $"{scenario.Id} should be a known scenario preset.");
+
+            var document = DemoGraphFactory.CreateScenario(catalog, scenario.Id);
+
+            Assert.Equal(scenario.Title, document.Title);
+            Assert.True(document.Nodes.Count >= scenario.MinimumNodes, $"{scenario.Id} should have enough nodes for a distinct screenshot fixture.");
+            Assert.True(document.Connections.Count >= scenario.MinimumConnections, $"{scenario.Id} should have enough connections for a distinct screenshot fixture.");
+            Assert.Contains(document.Nodes, node => node.Id == scenario.RequiredNodeId);
+            Assert.NotNull(document.Groups);
+            Assert.Contains(document.Groups, group => group.Id == scenario.RequiredGroupId);
+        }
+
+        Assert.Equal(
+            scenarios.Length + 2,
+            DemoGraphFactory.ScenarioPresets.Select(preset => preset.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+    }
+
+    [Fact]
     public void MainWindowViewModel_RunsAiPipelineMockRuntimeFeedback()
     {
         var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
