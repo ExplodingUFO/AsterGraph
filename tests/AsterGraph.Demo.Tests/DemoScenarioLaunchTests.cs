@@ -105,7 +105,7 @@ public sealed class DemoScenarioLaunchTests
     }
 
     [Fact]
-    public void DemoGraphFactory_CreatesBuiltInCookbookScenarioFixtures()
+    public void DemoGraphFactory_CreatesCookbookScenarioFixtures()
     {
         var catalog = new NodeCatalog();
         catalog.RegisterProvider(new DemoNodeDefinitionProvider());
@@ -137,6 +137,33 @@ public sealed class DemoScenarioLaunchTests
                 MinimumConnections = 7,
                 RequiredNodeId = "panel-output",
                 RequiredGroupId = "hosted-control-panel",
+            },
+            new
+            {
+                Id = "selection-marquee-workbench",
+                Title = "Selection Rectangle Fixture",
+                MinimumNodes = 8,
+                MinimumConnections = 10,
+                RequiredNodeId = "select-output",
+                RequiredGroupId = "selection-marquee-band",
+            },
+            new
+            {
+                Id = "keyboard-navigation-lab",
+                Title = "Keyboard Navigation Fixture",
+                MinimumNodes = 7,
+                MinimumConnections = 8,
+                RequiredNodeId = "key-output",
+                RequiredGroupId = "keyboard-focus-ring",
+            },
+            new
+            {
+                Id = "host-event-inspector",
+                Title = "Host Event Inspector Fixture",
+                MinimumNodes = 8,
+                MinimumConnections = 7,
+                RequiredNodeId = "event-output",
+                RequiredGroupId = "host-event-lane",
             },
         };
 

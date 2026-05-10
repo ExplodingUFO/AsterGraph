@@ -1179,6 +1179,289 @@ public static partial class DemoCookbookCatalog
             """
             ),
         new DemoCookbookRecipe(
+            "interaction-selection-marquee-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Interaction selection marquee route",
+            "Launch a dedicated fixture for rectangle selection, bulk selection commands, and selected-route inspection.",
+            [
+                new DemoCookbookAnchor(
+                    "Selection rectangle query",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
+                    "GetSelectionRectangleSnapshot"),
+                new DemoCookbookAnchor(
+                    "Marquee overlay coordinator",
+                    "src/AsterGraph.Avalonia/Controls/Internal/Overlay/NodeCanvasOverlayCoordinator.cs",
+                    "UpdateMarqueeSelection"),
+                new DemoCookbookAnchor(
+                    "Bulk selection commands",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "SelectAll"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Selection marquee graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "selection-marquee-workbench"),
+                new DemoCookbookAnchor(
+                    "Selection rectangle query proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSelectionTransformContractsTests.cs",
+                    "Queries_GetSelectionRectangleSnapshot_ReturnsNodesAndConnectionsInRectangle"),
+                new DemoCookbookAnchor(
+                    "Marquee selection finalize proof",
+                    "tests/AsterGraph.Editor.Tests/NodeCanvasOverlayCoordinatorTests.cs",
+                    "UpdateMarqueeSelection_WithFinalizeTrue_UsesBackendSelectionRectangleQuery"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Interaction fixture cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "INTERACTION_SELECTION_MARQUEE_FIXTURE_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The selection-marquee-workbench fixture spreads nodes across a rectangle so multi-select captures a distinct scene.",
+                    "selection-marquee-workbench"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "Selection rectangle query returns intersecting nodes and connections.",
+                    "GetSelectionRectangleSnapshot"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Marquee finalize proof keeps the route tied to the backend query path.",
+                    "UpdateMarqueeSelection_WithFinalizeTrue_UsesBackendSelectionRectangleQuery"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "The runnable fixture highlights rectangle-sized selection and selected-route inspection.",
+                    "selection-marquee-workbench"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "A marked SmoothStep route keeps selected connection inspection visible in screenshots.",
+                    "INTERACTION_SELECTION_MARQUEE_FIXTURE_OK"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "GetSelectionRectangleSnapshot exposes the selected node and connection ids.",
+                    "GetSelectionRectangleSnapshot"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Bulk selection commands retain the existing command route and proof markers.",
+                    "SelectAll"),
+            ],
+            [
+                "INTERACTION_SELECTION_MARQUEE_FIXTURE_OK",
+                "SELECTION_RECTANGLE_QUERY_OK",
+                "SELECTION_RECTANGLE_MARQUEE_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "Interaction selection marquee route: launch `selection-marquee-workbench` and inspect GetSelectionRectangleSnapshot plus marquee-selection proof evidence.",
+                "Supported seams live in `AsterGraph.Editor` selection query/command contracts and `AsterGraph.Avalonia` overlay coordinator controls.",
+                "Demo cookbook provides a rectangular fixture and screenshot-gate coverage only; Demo does not add another selection model or hit-test path."),
+            "Selection marquee fixture coverage is limited to existing selection query, command, and overlay contracts; it does not add a spatial index, alternate selection model, or custom hit-test runtime.",
+            CodeSample: """
+            // Inspect the current rectangle-selection state.
+            var rectangle = editor.Session.Queries.GetSelectionRectangleSnapshot();
+
+            // Keep bulk selection on the canonical command route.
+            editor.Session.Commands.SelectAll();
+            editor.Session.Commands.InvertSelection();
+            editor.Session.Commands.SelectNone();
+            """
+            ),
+        new DemoCookbookRecipe(
+            "interaction-keyboard-navigation-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Interaction keyboard navigation route",
+            "Launch a spatial fixture for arrow-key nudge, nearest-node navigation, viewport shortcuts, and automation peer inspection.",
+            [
+                new DemoCookbookAnchor(
+                    "Canvas key down handler",
+                    "src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs",
+                    "HandleCanvasKeyDown"),
+                new DemoCookbookAnchor(
+                    "Canvas arrow key handler",
+                    "src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs",
+                    "TryHandleCanvasArrowKey"),
+                new DemoCookbookAnchor(
+                    "Canvas automation peer",
+                    "src/AsterGraph.Avalonia/Controls/Internal/Automation/NodeCanvasAutomationPeer.cs",
+                    "NodeCanvasAutomationPeer"),
+                new DemoCookbookAnchor(
+                    "Viewport zoom shortcuts",
+                    "src/AsterGraph.Editor/Runtime/Internal/GraphEditorCommandDescriptorCatalog.cs",
+                    "viewport.zoom-in"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Keyboard navigation graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "keyboard-navigation-lab"),
+                new DemoCookbookAnchor(
+                    "Arrow key nudge proof",
+                    "tests/AsterGraph.Editor.Tests/NodeCanvasStandaloneTests.cs",
+                    "ArrowKey_Nudge_MovesSelectedNodesWhenNodesAreSelected"),
+                new DemoCookbookAnchor(
+                    "Arrow key navigate proof",
+                    "tests/AsterGraph.Editor.Tests/NodeCanvasStandaloneTests.cs",
+                    "ArrowKey_Navigate_SelectsNearestNodeWhenNoSelection"),
+                new DemoCookbookAnchor(
+                    "Automation peer surface proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorViewTests.cs",
+                    "DefaultChromeMode_ExposesCanvasAndNodeAutomationPeers"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Interaction fixture cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "INTERACTION_KEYBOARD_NAVIGATION_FIXTURE_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The keyboard-navigation-lab fixture arranges nearby nodes for nearest-node arrow navigation.",
+                    "keyboard-navigation-lab"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "Automation peers expose canvas and node titles to accessibility tools.",
+                    "DefaultChromeMode_ExposesCanvasAndNodeAutomationPeers"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Arrow-key proof markers back nudge and nearest-node behavior.",
+                    "CANVAS_KEYBOARD_NAVIGATION_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Arrow-key nudge moves selected nodes while nearest-node navigation selects a target when no selection exists.",
+                    "ArrowKey_Nudge_MovesSelectedNodesWhenNodesAreSelected"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "The fixture keeps directional targets visible around a center node for focus recovery.",
+                    "keyboard-navigation-lab"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Automation peers expose node titles and canvas group structure.",
+                    "DefaultChromeMode_ExposesCanvasAndNodeAutomationPeers"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Viewport shortcuts remain command-descriptor backed instead of Demo-local.",
+                    "viewport.zoom-in"),
+            ],
+            [
+                "INTERACTION_KEYBOARD_NAVIGATION_FIXTURE_OK",
+                "CANVAS_KEYBOARD_NAVIGATION_OK",
+                "ARROW_KEY_NEAREST_NODE_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "Interaction keyboard navigation route: launch `keyboard-navigation-lab` and inspect NodeCanvas arrow-key, viewport shortcut, and automation peer evidence.",
+                "Supported seams live in `AsterGraph.Avalonia` canvas controls and `AsterGraph.Editor` command descriptor/shortcut contracts.",
+                "Demo cookbook provides a spatial fixture and screenshot-gate coverage only; Demo does not add a separate input model or accessibility framework."),
+            "Keyboard navigation fixture coverage is limited to existing Avalonia canvas controls, automation peers, and command shortcut contracts; it does not add a custom input framework or full accessibility provider suite.",
+            CodeSample: """
+            // Let the stock canvas route arrow keys to selection or focus.
+            editor.Session.Commands.TryMoveSelectionBy(10, 0);
+
+            // Keep viewport shortcuts command-backed.
+            editor.Session.Commands.ZoomIn();
+            editor.Session.Commands.PanBy(100, 0);
+            """
+            ),
+        new DemoCookbookRecipe(
+            "interaction-host-event-inspector-route",
+            DemoCookbookRecipeCategory.ReviewHelp,
+            "Interaction host event inspector route",
+            "Launch a host-observable fixture for selection, viewport, and mutation event evidence.",
+            [
+                new DemoCookbookAnchor(
+                    "Host event subscription surface",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorEvents.cs",
+                    "IGraphEditorEvents"),
+                new DemoCookbookAnchor(
+                    "Mutation batching entry",
+                    "src/AsterGraph.Editor/Runtime/Mutation/GraphEditorSessionMutation.cs",
+                    "BeginMutation"),
+                new DemoCookbookAnchor(
+                    "Pending event flush",
+                    "src/AsterGraph.Editor/Runtime/Mutation/GraphEditorSessionMutation.cs",
+                    "FlushPendingEvents"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Host event inspector graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "host-event-inspector"),
+                new DemoCookbookAnchor(
+                    "Event memory leak proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionTests.cs",
+                    "SessionEvents_SubscribeAndUnsubscribe_DoNotLeakMemory"),
+                new DemoCookbookAnchor(
+                    "Selection event cadence proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionTests.cs",
+                    "SessionEvents_SelectionChanges_AreThrottledToBoundedCadence"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Interaction fixture cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "INTERACTION_HOST_EVENT_INSPECTOR_FIXTURE_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The host-event-inspector fixture keeps event-producing selection and mutation routes visible.",
+                    "host-event-inspector"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "IGraphEditorEvents exposes typed document, selection, viewport, and command events.",
+                    "IGraphEditorEvents"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Mutation batching provides bounded event cadence without time-based throttling.",
+                    "EVENT_BATCHING_CADENCE_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Selection event cadence stays bounded for host observers.",
+                    "SessionEvents_SelectionChanges_AreThrottledToBoundedCadence"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "Command and mutation events keep graph changes observable for support review.",
+                    "IGraphEditorEvents"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "The fixture makes event source nodes and host payload output inspectable.",
+                    "host-event-inspector"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "FlushPendingEvents deduplicates and raises pending events when mutation scope ends.",
+                    "FlushPendingEvents"),
+            ],
+            [
+                "INTERACTION_HOST_EVENT_INSPECTOR_FIXTURE_OK",
+                "HOST_EVENT_SUBSCRIPTION_OK",
+                "EVENT_BATCHING_CADENCE_OK",
+            ],
+            new DemoCookbookRouteClarity(
+                "Interaction host event inspector route: launch `host-event-inspector` and inspect IGraphEditorEvents plus mutation batching evidence.",
+                "Supported seams live in `AsterGraph.Editor` session event contracts and mutation batching internals.",
+                "Demo cookbook provides a host-observable fixture and screenshot-gate coverage only; Demo does not add telemetry, remote sync, or a new event broker."),
+            "Host event fixture coverage is bounded to existing session event contracts and mutation batching; it does not add telemetry, remote sync, time-based throttling, or a separate event broker.",
+            CodeSample: """
+            // Subscribe to stock editor events from the host.
+            editor.Events.SelectionChanged += (_, args) =>
+                Console.WriteLine(args.NodeIds.Count);
+
+            // Batch mutations for bounded event cadence.
+            using (editor.Session.BeginMutation())
+            {
+                editor.Session.Commands.SelectAll();
+                editor.Session.Commands.TryExecuteCommand("viewport.zoom-in");
+            }
+            """
+            ),
+        new DemoCookbookRecipe(
             "builtin-minimap-workbench-route",
             DemoCookbookRecipeCategory.PerformanceViewport,
             "Built-in MiniMap workbench route",
