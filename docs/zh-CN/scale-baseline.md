@@ -111,6 +111,19 @@ AsterGraph 当前防守的是 viewport-budgeted scene projection/rendering contr
 
 这条路径仍会扫描当前 document/session collection，并在 scene rebuild 时重建可见 visual。不要把它宣传成 ItemsRepeater/Skia-style incremental renderer virtualization、background graph index 或新的 graph-size support tier。后续如果要扩大到这个声明，必须先补 renderer thresholds、可重复 proof command 和 focused renderer tests，再修改这条边界。
 
+## Renderer Virtualization Proof Contract
+
+Phase 489 先定义最低 renderer virtualization contract，后续 issue 才能把当前 viewport-budgeted scene projection/rendering 边界提升成 ItemsRepeater/Skia-style incremental renderer virtualization 声明。后续 implementation issue 必须提供：
+
+- 不是 informational-only、且绑定到明确 defended tier 的 renderer thresholds；
+- 在 release runner class 上能产出稳定 pass/fail 输出的 repeatable proof command；
+- 覆盖 incremental visual lifecycle、invalidation evidence 和 connection preview preservation 的 focused renderer tests；
+- 包含 graph size、viewport、zoom、overscan、visual counts、invalidation counts 和 measured timings 的 artifact metadata；
+- 证明被声明的操作不依赖 full collection scan 或 full scene rebuild 的证据；
+- background graph index 的清晰边界，包括 freshness、cancellation 和 invalidation behavior。
+
+在这些证据存在前，`xlarge` 仍是 telemetry-only。它的 10000 节点 marker 不是 renderer virtualization evidence，不是 background graph index proof，也不是 support-tier expansion。
+
 ## 运行方式
 
 ```powershell

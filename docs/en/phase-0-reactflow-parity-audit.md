@@ -14,6 +14,10 @@ Phase 486 expands the full-window shell gate without adding strict pixel baselin
 
 Phase 488 opens GitHub #99 / `avalonia-node-map-ce1` for the P2 layout provider and background/cancel proof refresh. The slice is docs/tests-first: keep `IGraphLayoutProvider`, `PreviewLayoutPlan`, `TryApplyLayoutPlan`, `TryApplyLayoutRequest`, snap-to-grid commands, and the `background-grid-density` route tied to existing source-backed proof. Do not widen the synchronous provider seam into async or cancellable layout execution in this issue.
 
+## Phase 489 Update
+
+Phase 489 opens GitHub #101 / `avalonia-node-map-6sc` as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice is docs/tests only: it defines the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It makes no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
+
 ## Phase 484 Update
 
 Phase 484 refreshes the roadmap after the Phase 478-483 wave closed and after Phase 480 delivered the rotatable-node surface. The previous next-wave queue was stale because GitHub #80 / `avalonia-node-map-p480` is now closed. This update keeps the work docs-only, replaces the one-item queue with a prioritized split plan, and keeps public claims tied to current source, tests, docs, and CI evidence.
@@ -116,7 +120,7 @@ The original first wave is no longer the next work queue. These tracker items ar
 
 ## Next Issue Wave
 
-Phase 484 is the active planning issue for turning the now-empty queue into the next implementation wave. Follow-up issues should be created only after this docs refresh lands, so their titles, write sets, and dependencies reflect the current matrix instead of the stale Phase 478 snapshot.
+Phase 484 reopened the next implementation wave after the old queue emptied. Phase 489 is the current active P2 item in that wave, and it stays docs/tests-only until a separate implementation issue approves a true renderer virtualization contract.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
@@ -124,12 +128,12 @@ Phase 484 is the active planning issue for turning the now-empty queue into the 
 | TBD | TBD | Cookbook example architecture refresh | P1 | `src/AsterGraph.Demo/Cookbook`, `docs/en/demo-cookbook.md`, `docs/zh-CN/demo-cookbook.md`, screenshot route metadata if examples are renamed or split | Parallel with visual gate decision if route IDs and screenshots stay stable. Avoid core/editor API changes. |
 | #95 | `avalonia-node-map-0xr` | Phase 486: decide full-window visual coverage expansion | P1 | `tests/AsterGraph.Demo.Tests`, screenshot metadata/docs | Independent from API/model work. Keep strict pixel baselines deferred unless drift data is measured. |
 | #97 | `avalonia-node-map-i8s` | Phase 487: harden custom node copyable-host recipe | P2 | host recipe docs, templates, Demo cookbook route text, consistency tests | Closed by PR #98. No Core/Editor/Avalonia API changes. |
-| #99 | `avalonia-node-map-ce1` | Phase 488: refresh layout provider and background/cancel proof | P2 | layout provider docs/tests, Demo routes, command guidance around preview/apply/cancel | Active docs/tests slice. Keep runtime API stable unless tests prove a missing provider contract. |
-| TBD | TBD | Renderer virtualization design spike | P2 | docs/tests first; `AsterGraph.Avalonia` renderer/projection only if a true virtualization contract is approved | Sequential with any claim expansion. Do not claim 10000-node support from xlarge telemetry. |
+| #99 | `avalonia-node-map-ce1` | Phase 488: refresh layout provider and background/cancel proof | P2 | layout provider docs/tests, Demo routes, command guidance around preview/apply/cancel | Closed by PR #100. Keep runtime API stable unless tests prove a missing provider contract. |
+| #101 | `avalonia-node-map-6sc` | Phase 489: renderer virtualization design spike | P2 | scale/parity docs and focused consistency tests | Active docs/tests design spike. Sequential with any claim expansion. Do not claim 10000-node support from xlarge telemetry. |
 | TBD | TBD | Accessibility breadth audit | P3 | Avalonia built-ins, automation peer tests, docs for keyboard/screen-reader coverage | Parallel after visual routes are stable; keep claims bounded to audited controls. |
 | TBD | TBD | Retained migration removal roadmap | P3 | public API inventory, stabilization support matrix, retained migration docs/tests | Sequential with v1 policy and public API baseline work. Do not delete retained surfaces as a side effect of unrelated parity work. |
 
-Recommended next branch after Phase 480: `feature/reactflow-parity-roadmap` for #91 / `avalonia-node-map-4xr`. Recommended first implementation branch after #91 should be whichever P1 item the refreshed plan promotes, likely either Cookbook example architecture or full-window visual coverage expansion.
+Current active branch: `perf/renderer-virtualization-spike` for #101 / `avalonia-node-map-6sc`. The first future implementation branch that widens renderer claims should be created only after the proof contract below is satisfied by a new tracker item.
 
 ## Recommended Parallel Worktree Plan
 
@@ -137,7 +141,7 @@ Recommended next branch after Phase 480: `feature/reactflow-parity-roadmap` for 
 - `docs/cookbook-example-architecture`: candidate P1; owns Cookbook catalog/docs/example ergonomics only.
 - `ui/full-window-visual-coverage`: candidate P1; owns shell-state captures, metadata, and visual verification docs only.
 - `docs/custom-node-copyable-recipes`: candidate P2; owns host-copy custom-node guidance and templates only unless a missing public seam is proven.
-- `perf/renderer-virtualization-spike`: candidate P2; owns proof design and claim boundaries before any renderer implementation.
+- `perf/renderer-virtualization-spike`: active Phase 489 branch for #101 / `avalonia-node-map-6sc`; owns proof design and claim boundaries before any renderer implementation.
 
 ## UI Verification Policy
 

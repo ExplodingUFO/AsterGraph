@@ -111,6 +111,19 @@ AsterGraph currently defends a viewport-budgeted scene projection/rendering cont
 
 This path still scans current document/session collections and rebuilds visible visuals during scene rebuilds. Do not market it as ItemsRepeater/Skia-style incremental renderer virtualization, a background graph index, or a new graph-size support tier. If a future release wants that claim, add renderer thresholds, repeatable proof commands, and focused renderer tests before changing this boundary.
 
+## Renderer Virtualization Proof Contract
+
+Phase 489 defines the minimum renderer virtualization contract before any future issue can promote the current viewport-budgeted scene projection/rendering boundary into an ItemsRepeater/Skia-style incremental renderer virtualization claim. A follow-up implementation issue must provide:
+
+- renderer thresholds that are non-informational and tied to a named defended tier;
+- a repeatable proof command that produces stable pass/fail output on the release runner class;
+- focused renderer tests that cover incremental visual lifecycle, invalidation evidence, and connection preview preservation;
+- artifact metadata for the graph size, viewport, zoom, overscan, visual counts, invalidation counts, and measured timings;
+- evidence that the renderer does not depend on a full collection scan or full scene rebuild for the claimed operation;
+- a clear boundary for any background graph index, including freshness, cancellation, and invalidation behavior.
+
+Until those items exist, `xlarge` remains telemetry-only. Its 10000-node markers are not renderer virtualization evidence, not a background graph index proof, and not a support-tier expansion.
+
 ## Commands
 
 ```powershell
