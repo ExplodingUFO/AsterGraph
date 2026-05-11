@@ -18,6 +18,10 @@ Phase 491 is GitHub #105 / `avalonia-node-map-44i`, the accessibility breadth au
 
 Phase 492 is GitHub #107 / `avalonia-node-map-j8v`, the retained migration removal roadmap selected after the Phase 491 accessibility breadth audit closed. This slice is inventory now, remove later: it records the retained bridge, explicit legacy import, and already-retired compatibility-only surfaces that must stay classified before any removal issue changes API shape. It does not authorize runtime behavior changes, public API deletion, public API baseline updates, or UI changes.
 
+## Phase 493 Update
+
+Phase 493 is GitHub #109 / `avalonia-node-map-8qv`, the custom node presenter cookbook parity proof selected after the retained migration roadmap closed. This slice is docs/tests only: it ties the partial custom-node parity row to the defended host-owned presenter route in the Custom Node Host Recipe, including `NodeBodyPresenter`, `NodeVisualPresenter`, `NodeDragHandle`, anchor maps, host-owned edge overlays, and `CUSTOM_EXTENSION_SURFACE_OK` proof markers. It does not authorize runtime behavior changes, public API changes, React Flow hooks/components parity claims, Demo UI redesign, or screenshot-gate expansion.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -86,7 +90,7 @@ Phase 483 closes GitHub #82 by choosing the bounded-docs path instead of a rende
 
 | Capability | Current status | Evidence / remaining gap | Next action |
 | --- | --- | --- | --- |
-| Custom nodes with arbitrary Avalonia content | Partial / supported through AsterGraph idioms | Node definitions, `IGraphNodeVisualPresenter`, authoring-surface docs, templates, and hosted controls exist. The public story is still less direct than React Flow's custom node component model. | Keep improving docs and samples with concrete host-owned visual presenter examples. |
+| Custom nodes with arbitrary Avalonia content | Partial / supported through AsterGraph idioms | Node definitions, `AsterGraphPresentationOptions.NodeBodyPresenter`, `AsterGraphPresentationOptions.NodeVisualPresenter`, `NodeDragHandle`, `GraphNodeVisual.PortAnchors`, `GraphNodeVisual.ConnectionTargetAnchors`, host-owned edge overlays from `GetConnectionGeometrySnapshots()`, the Custom Node Host Recipe, and `CUSTOM_EXTENSION_SURFACE_OK` proof markers define the defended route. The public story remains AsterGraph host-owned presenter guidance, not React Flow hooks/components parity. | Phase 493 ties the roadmap to the defended recipe and keeps the boundary docs/tests-only; future changes need a new tracker if the presenter contracts themselves change. |
 | Node drag handles | Present / guarded | `NodeDragHandle` exposes a public Avalonia attached property for custom node visual/body presenters. Focused headless tests cover drag from marked handles and suppression from unmarked body surfaces when a handle exists. | Keep guarded with `StandaloneCanvas_NodeDragHandle_*` tests and public API baseline checks. |
 | Node resizer | Present | `NodeResizer`, `TrySetNodeSize`, built-in component catalog, Cookbook route, and focused tests exist. | Keep guarded by built-in tests and screenshot route. |
 | Rotatable nodes | Present / guarded | `GraphNodeSurfaceState.RotationDegrees`, `IGraphEditorCommands.TrySetNodeRotation(...)`, `GraphEditorNodeSurfaceSnapshot.RotationDegrees`, serializer compatibility, renderer/hit-test geometry, public API baseline, and bilingual host docs are in place. | Keep guarded by model/session/Avalonia tests, public API validation, and command/query guidance. |
@@ -166,19 +170,23 @@ Remaining bounded gap: headless tests can guard names, peers, focusability, and 
 
 Phase 490 repaired the stale Phase 484 queue after the closed Phase 485-489 work. GitHub #103 / `avalonia-node-map-3x0` is closed by PR #104 and did not authorize runtime or public API changes.
 
-Phase 491 now owns the accessibility breadth audit because the matrix still marks accessibility breadth as partial while the visual, Cookbook architecture, layout proof, and renderer proof-contract slices have closed trackers. Retained migration removal remains a later future tracker item because it depends on v1 policy and public API baseline work.
+Phase 491 closed the accessibility breadth audit while keeping live screen-reader announcement proof as a separately tracked future boundary.
 
 Phase 492 now owns the retained migration removal roadmap as an inventory now, remove later slice. It can classify retained and compatibility-only surfaces, but any actual deletion needs a later API-change tracker tied to the v1 policy and `eng/public-api-baseline.txt`.
+
+Phase 493 now owns the custom node presenter cookbook parity proof. It records that the supported custom-node route is host-owned `NodeBodyPresenter` / `NodeVisualPresenter` guidance plus existing proof markers, not a runtime API expansion or React Flow component/hook parity claim.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
 | #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states | P2 | Avalonia built-ins, automation/focus tests, docs for keyboard/screen-reader coverage boundaries | Current docs/tests-first accessibility audit. No runtime, public API, or visual changes unless evidence proves a specific missing contract. |
 | #107 | `avalonia-node-map-j8v` | Phase 492: inventory retained migration surfaces and define removal roadmap | P3 | public API inventory, stabilization support matrix, retained migration docs/tests | Docs/tests-first inventory now, remove later slice. Sequential with v1 policy and public API baseline work; do not delete retained surfaces as a side effect of parity docs work. |
+| #109 | `avalonia-node-map-8qv` | Phase 493: strengthen custom node presenter cookbook parity proof | P2 | React Flow parity audit docs and focused docs tests | Docs/tests-first traceability slice. Do not change runtime behavior, public API, Demo visuals, or screenshot gates unless a later tracker proves a missing presenter contract. |
 
 ## Recommended Parallel Worktree Plan
 
 - `docs/phase-491-accessibility-breadth-audit`: owns #105 / `avalonia-node-map-44i`; audits accessibility docs/tests across Avalonia built-ins and shell states only.
 - `docs/phase-492-retained-migration-roadmap`: owns #107 / `avalonia-node-map-j8v`; inventories retained migration surfaces and removal gates only. Deletion or baseline updates need a later API-change tracker.
+- `docs/phase-493-custom-node-presenter-proof`: owns #109 / `avalonia-node-map-8qv`; binds the custom-node parity row to the defended host recipe and docs tests only.
 
 ## UI Verification Policy
 
@@ -197,4 +205,5 @@ Current coverage includes scene-level route captures plus two manifest-driven fu
 - GitHub #79 and Beads `avalonia-node-map-p478` were created with `.planning/*` in the write set. Because `.planning/` is ignored and absent from this worktree, this refresh records that as tracker drift instead of force-adding local planning files.
 - Beads is the durable local tracker for this repository. Phase 491 now owns the accessibility breadth audit with GitHub #105 / `avalonia-node-map-44i`; later follow-ups should get explicit GitHub and Beads IDs before code changes.
 - Phase 492 now owns retained migration removal planning with GitHub #107 / `avalonia-node-map-j8v`; it records classification and gates, not API removal.
-- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, and Phase 492 unless a focused test proves a specific missing contract.
+- Phase 493 now owns custom node presenter cookbook parity proof with GitHub #109 / `avalonia-node-map-8qv`; it records route traceability, not a presenter API expansion.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, and Phase 493 unless a focused test proves a specific missing contract.
