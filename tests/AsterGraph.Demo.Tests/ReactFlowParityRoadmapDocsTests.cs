@@ -177,8 +177,6 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.Contains("broad language/theme certification", contents, StringComparison.OrdinalIgnoreCase);
         }
 
-        Assert.Contains("three manifest-driven full-window shell captures", englishParity, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("三条 manifest-driven full-window shell", chineseParity, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Phase 494 closed localized full-window shell visual gate coverage", englishParity, StringComparison.Ordinal);
         Assert.Contains("Phase 494 已关闭 localized full-window shell visual gate coverage", chineseParity, StringComparison.Ordinal);
     }
@@ -210,6 +208,30 @@ public sealed class ReactFlowParityRoadmapDocsTests
 
         Assert.Contains("at least three concrete follow-up candidates", englishParity, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("至少三个具体 follow-up candidates", chineseParity, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase497ClosedDrawerShellVisualGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 497", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #117", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-5nl", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-closed", contents, StringComparison.Ordinal);
+            Assert.Contains("expectedPaneOpen: false", contents, StringComparison.Ordinal);
+            Assert.Contains("strict pixel baselines", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("broad language/theme certification", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("docs/phase-497-shell-closed-drawer-gate", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("four manifest-driven full-window shell captures", englishParity, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("四条 manifest-driven full-window shell", chineseParity, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Current owned slice", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Current owned slice", chineseParity, StringComparison.Ordinal);
     }
 
     private static string ReadRepoFile(string relativePath)
