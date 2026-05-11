@@ -81,6 +81,8 @@ builder 会委托给现有 editor/session 和 Avalonia view factories。`CreateS
 
 如果宿主自己拥有布局算法，可以传入 `AsterGraphEditorOptions.LayoutProvider`，并通过 `IGraphEditorQueries.CreateLayoutPlan(...)` 请求可预览的 plan。返回的 `GraphLayoutPlan` 只描述建议节点位置和 route-reset 意图；创建 plan 不会修改文档，也不会让 AsterGraph 依赖某一个固定布局引擎。
 
+`LAYOUT_PROVIDER_EVIDENCE_EXPANSION`：当前 layout seam 是同步且由宿主拥有。`IGraphLayoutProvider.CreateLayoutPlan(GraphLayoutRequest)` 接收 `GraphLayoutRequest` 并返回 `GraphLayoutPlan`；`IGraphEditorQueries.CreateLayoutPlan(...)` 只暴露可预览计划，不做 mutation，而 `PreviewLayoutPlan`、`TryApplyLayoutPlan`、`TryApplyLayoutRequest`、`TrySnapSelectedNodesToGrid` 和 `TrySnapAllNodesToGrid` 继续把 preview/apply/grid 行为保留在现有 session command route 上。`GraphEditorLayoutProviderSeamTests` 是 source-backed proof；这项证据不表示 provider execution 已经变成 async 或 cancellable。
+
 ## 何时选择 retained
 
 | 路线 | 适用时机 | 不适用时机 | recipe |

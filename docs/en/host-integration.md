@@ -82,6 +82,8 @@ Hosts that already run or simulate graph work can pass `AsterGraphEditorOptions.
 
 Hosts that own a layout algorithm can pass `AsterGraphEditorOptions.LayoutProvider` and request previewable plans through `IGraphEditorQueries.CreateLayoutPlan(...)`. The returned `GraphLayoutPlan` describes proposed node positions and route-reset intent only; creating the plan does not mutate the document or make AsterGraph depend on one layout engine.
 
+`LAYOUT_PROVIDER_EVIDENCE_EXPANSION`: the current layout seam is synchronous and host-owned. `IGraphLayoutProvider.CreateLayoutPlan(GraphLayoutRequest)` receives a `GraphLayoutRequest` and returns a `GraphLayoutPlan`; `IGraphEditorQueries.CreateLayoutPlan(...)` exposes that plan without mutation, while `PreviewLayoutPlan`, `TryApplyLayoutPlan`, `TryApplyLayoutRequest`, `TrySnapSelectedNodesToGrid`, and `TrySnapAllNodesToGrid` keep preview/apply/grid behavior on the existing session command route. `GraphEditorLayoutProviderSeamTests` is the source-backed proof, and this evidence does not make provider execution async or cancellable.
+
 ## When To Choose Retained
 
 | Route | Choose this when | Do not use this when | Recipe |
