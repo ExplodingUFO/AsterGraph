@@ -6,17 +6,29 @@ This document started as the Phase 0 audit for the `0.11.0-beta` baseline. Phase
 
 The scope of this refresh is docs and tracker state only. It does not change product code, runtime behavior, renderer contracts, or public support claims.
 
-## Phase 486 Update
+## Phase 490 Update
 
-Phase 486 expands the full-window shell gate without adding strict pixel baselines or Demo runtime changes. `CookbookShellVisualGateStates.json` now drives two deterministic shell states, `shell-cookbook-default-open` and `shell-runtime-diagnostics-open`, against the same default `starter-host-route` / `ai-pipeline` fixture. The gate validates drawer state, dimensions, nonblank pixels, distinct colors, output metadata, and required named shell parts while leaving flyouts, context menus, language/theme variants, and hash baselines out of scope.
-
-## Phase 488 Update
-
-Phase 488 opens GitHub #99 / `avalonia-node-map-ce1` for the P2 layout provider and background/cancel proof refresh. The slice is docs/tests-first: keep `IGraphLayoutProvider`, `PreviewLayoutPlan`, `TryApplyLayoutPlan`, `TryApplyLayoutRequest`, snap-to-grid commands, and the `background-grid-density` route tied to existing source-backed proof. Do not widen the synchronous provider seam into async or cancellable layout execution in this issue.
+Phase 490 is GitHub #103 / `avalonia-node-map-3x0`, a stale-roadmap repair after Phases 485-489 closed. This slice is docs/tests only: it updates the bilingual parity roadmap, removes completed work from the candidate queue, and selects the accessibility breadth audit as the next open parity gap. No Core/Editor/Avalonia runtime or public API changes are in scope.
 
 ## Phase 489 Update
 
-Phase 489 opens GitHub #101 / `avalonia-node-map-6sc` as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice is docs/tests only: it defines the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It makes no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
+Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
+
+## Phase 488 Update
+
+Phase 488 closed GitHub #99 / `avalonia-node-map-ce1` through PR #100 for the P2 layout provider and background/cancel proof refresh. The slice was docs/tests-first: keep `IGraphLayoutProvider`, `PreviewLayoutPlan`, `TryApplyLayoutPlan`, `TryApplyLayoutRequest`, snap-to-grid commands, and the `background-grid-density` route tied to existing source-backed proof. Do not widen the synchronous provider seam into async or cancellable layout execution in this issue.
+
+## Phase 487 Update
+
+Phase 487 closed GitHub #97 / `avalonia-node-map-i8s` through PR #98 by hardening the custom-node copyable-host recipe docs and templates. It stayed inside host recipe docs, templates, Demo cookbook route text, and consistency tests with no Core/Editor/Avalonia API changes.
+
+## Phase 486 Update
+
+Phase 486 closed GitHub #95 / `avalonia-node-map-0xr` through PR #96 by expanding the full-window shell gate without adding strict pixel baselines or Demo runtime changes. `CookbookShellVisualGateStates.json` now drives two deterministic shell states, `shell-cookbook-default-open` and `shell-runtime-diagnostics-open`, against the same default `starter-host-route` / `ai-pipeline` fixture. The gate validates drawer state, dimensions, nonblank pixels, distinct colors, output metadata, and required named shell parts while leaving flyouts, context menus, language/theme variants, and hash baselines out of scope.
+
+## Phase 485 Update
+
+Phase 485 closed GitHub #93 / `avalonia-node-map-3hc` through PR #94 by clarifying the Cookbook host-copy architecture path. The completed work documents the guarded host-copy architecture route and bilingual guidance without changing Core/Editor/Avalonia runtime APIs.
 
 ## Phase 484 Update
 
@@ -117,31 +129,30 @@ The original first wave is no longer the next work queue. These tracker items ar
 | #81 | `avalonia-node-map-p479` | Public hosted-Avalonia node drag-handle API through `NodeDragHandle`. |
 | #82 | `avalonia-node-map-p483` | Large-graph virtualization claim bounded to viewport-budgeted scene projection/rendering; no renderer virtualization or 10000-node support claim. |
 | #80 | `avalonia-node-map-p480` | Rotatable node model, command/query projection, renderer geometry, compatibility overloads, API baseline, and docs. |
+| #91 | `avalonia-node-map-4xr` | Phase 484 roadmap refresh after rotatable nodes. |
+| #93 | `avalonia-node-map-3hc` | Phase 485 Cookbook host-copy architecture path; Closed by PR #94. |
+| #95 | `avalonia-node-map-0xr` | Phase 486 full-window shell visual-state expansion; Closed by PR #96. |
+| #97 | `avalonia-node-map-i8s` | Phase 487 custom-node copyable-host recipe hardening; Closed by PR #98. |
+| #99 | `avalonia-node-map-ce1` | Phase 488 layout provider and background/cancel proof refresh; Closed by PR #100. |
+| #101 | `avalonia-node-map-6sc` | Phase 489 renderer virtualization proof-contract design spike; Closed by PR #102. |
 
 ## Next Issue Wave
 
-Phase 484 reopened the next implementation wave after the old queue emptied. Phase 489 is the current active P2 item in that wave, and it stays docs/tests-only until a separate implementation issue approves a true renderer virtualization contract.
+Phase 490 repairs the stale Phase 484 queue after the closed Phase 485-489 work. GitHub #103 / `avalonia-node-map-3x0` is the current docs/tests only stale-roadmap repair and does not authorize runtime or public API changes.
+
+The accessibility breadth audit is the next open parity gap because the current matrix still marks accessibility breadth as partial while the visual, Cookbook architecture, layout proof, and renderer proof-contract slices now have closed trackers. Retained migration removal remains a later future tracker item because it depends on v1 policy and public API baseline work.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #91 | `avalonia-node-map-4xr` | Phase 484: refresh React Flow parity roadmap after rotatable nodes | P1 | `docs/en/phase-0-reactflow-parity-audit.md`, `docs/zh-CN/phase-0-reactflow-parity-audit.md`, GitHub/Beads tracker state | Current docs-only issue. No product code or public API changes. |
-| TBD | TBD | Cookbook example architecture refresh | P1 | `src/AsterGraph.Demo/Cookbook`, `docs/en/demo-cookbook.md`, `docs/zh-CN/demo-cookbook.md`, screenshot route metadata if examples are renamed or split | Parallel with visual gate decision if route IDs and screenshots stay stable. Avoid core/editor API changes. |
-| #95 | `avalonia-node-map-0xr` | Phase 486: decide full-window visual coverage expansion | P1 | `tests/AsterGraph.Demo.Tests`, screenshot metadata/docs | Independent from API/model work. Keep strict pixel baselines deferred unless drift data is measured. |
-| #97 | `avalonia-node-map-i8s` | Phase 487: harden custom node copyable-host recipe | P2 | host recipe docs, templates, Demo cookbook route text, consistency tests | Closed by PR #98. No Core/Editor/Avalonia API changes. |
-| #99 | `avalonia-node-map-ce1` | Phase 488: refresh layout provider and background/cancel proof | P2 | layout provider docs/tests, Demo routes, command guidance around preview/apply/cancel | Closed by PR #100. Keep runtime API stable unless tests prove a missing provider contract. |
-| #101 | `avalonia-node-map-6sc` | Phase 489: renderer virtualization design spike | P2 | scale/parity docs and focused consistency tests | Active docs/tests design spike. Sequential with any claim expansion. Do not claim 10000-node support from xlarge telemetry. |
-| TBD | TBD | Accessibility breadth audit | P3 | Avalonia built-ins, automation peer tests, docs for keyboard/screen-reader coverage | Parallel after visual routes are stable; keep claims bounded to audited controls. |
-| TBD | TBD | Retained migration removal roadmap | P3 | public API inventory, stabilization support matrix, retained migration docs/tests | Sequential with v1 policy and public API baseline work. Do not delete retained surfaces as a side effect of unrelated parity work. |
-
-Current active branch: `perf/renderer-virtualization-spike` for #101 / `avalonia-node-map-6sc`. The first future implementation branch that widens renderer claims should be created only after the proof contract below is satisfied by a new tracker item.
+| #103 | `avalonia-node-map-3x0` | Phase 490: repair stale React Flow parity roadmap after Phase 489 | P1 | `docs/en/phase-0-reactflow-parity-audit.md`, `docs/zh-CN/phase-0-reactflow-parity-audit.md`, focused docs tests, GitHub/Beads tracker state | Current docs/tests only stale-roadmap repair. No Core/Editor/Avalonia runtime or public API changes. |
+| TBD | TBD | Accessibility breadth audit | P2 | Avalonia built-ins, automation peer tests, docs for keyboard/screen-reader coverage | Next open parity gap. Create a future tracker item before code or UI changes; keep claims bounded to audited controls. |
+| TBD | TBD | Retained migration removal roadmap | P3 | public API inventory, stabilization support matrix, retained migration docs/tests | Later future tracker item. Sequential with v1 policy and public API baseline work; do not delete retained surfaces as a side effect of parity docs work. |
 
 ## Recommended Parallel Worktree Plan
 
-- `feature/reactflow-parity-roadmap`: owns #91 / `avalonia-node-map-4xr`; docs and tracker plan only.
-- `docs/cookbook-example-architecture`: candidate P1; owns Cookbook catalog/docs/example ergonomics only.
-- `ui/full-window-visual-coverage`: candidate P1; owns shell-state captures, metadata, and visual verification docs only.
-- `docs/custom-node-copyable-recipes`: candidate P2; owns host-copy custom-node guidance and templates only unless a missing public seam is proven.
-- `perf/renderer-virtualization-spike`: active Phase 489 branch for #101 / `avalonia-node-map-6sc`; owns proof design and claim boundaries before any renderer implementation.
+- `docs/phase-490-parity-roadmap-repair`: owns #103 / `avalonia-node-map-3x0`; repairs bilingual roadmap docs and focused docs tests only.
+- Future accessibility branch name should be chosen only after a new GitHub/Beads tracker item exists; expected ownership is accessibility docs/tests across Avalonia built-ins and shell states.
+- Future retained-migration branch name should be chosen only after v1 policy and public API baseline scope are explicit; expected ownership is public API inventory and stabilization docs/tests.
 
 ## UI Verification Policy
 
@@ -158,5 +169,5 @@ Current coverage includes scene-level route captures plus two manifest-driven fu
 ## Tracker Notes
 
 - GitHub #79 and Beads `avalonia-node-map-p478` were created with `.planning/*` in the write set. Because `.planning/` is ignored and absent from this worktree, this refresh records that as tracker drift instead of force-adding local planning files.
-- Beads is the durable local tracker for this repository. Phase 484 reopens the queue with GitHub #91 / `avalonia-node-map-4xr`; later follow-ups should get explicit GitHub and Beads IDs before code changes.
-- Product code remains out of scope for Phase 478 and Phase 484.
+- Beads is the durable local tracker for this repository. Phase 490 repairs the queue with GitHub #103 / `avalonia-node-map-3x0`; later follow-ups should get explicit GitHub and Beads IDs before code changes.
+- Product code remains out of scope for Phase 478, Phase 484, and Phase 490.

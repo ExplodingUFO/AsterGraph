@@ -6,17 +6,29 @@
 
 本次刷新只修改文档和 tracker 状态，不修改产品代码、运行时行为、渲染器契约或公开支持声明。
 
-## Phase 486 更新
+## Phase 490 更新
 
-Phase 486 扩展 full-window shell gate，但不加入 strict pixel baselines，也不改 Demo runtime。`CookbookShellVisualGateStates.json` 现在基于同一条 default `starter-host-route` / `ai-pipeline` fixture 驱动两条确定性 shell state：`shell-cookbook-default-open` 和 `shell-runtime-diagnostics-open`。这个 gate 会验证 drawer state、dimensions、nonblank pixels、distinct colors、output metadata 和 required named shell parts；flyouts、context menus、language/theme variants 和 hash baselines 仍然不在本阶段范围内。
-
-## Phase 488 更新
-
-Phase 488 为 P2 的 layout provider 与 background/cancel proof refresh 打开 GitHub #99 / `avalonia-node-map-ce1`。本 slice 先做 docs/tests：把 `IGraphLayoutProvider`、`PreviewLayoutPlan`、`TryApplyLayoutPlan`、`TryApplyLayoutRequest`、snap-to-grid commands 和 `background-grid-density` route 继续绑定到现有 source-backed proof。不要在这个 issue 中把同步 provider seam 扩大成异步或可取消的 layout execution。
+Phase 490 是 GitHub #103 / `avalonia-node-map-3x0`，用于在 Phases 485-489 全部关闭后做 stale-roadmap repair。本 slice 是 docs/tests only：更新中英文 parity roadmap，把已完成工作移出候选队列，并选择 Accessibility breadth audit 是下一项 open parity gap。No Core/Editor/Avalonia runtime or public API changes。
 
 ## Phase 489 更新
 
-Phase 489 通过 GitHub #101 / `avalonia-node-map-6sc` 在 `perf/renderer-virtualization-spike` 分支上打开 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
+Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
+
+## Phase 488 更新
+
+Phase 488 通过 PR #100 关闭 GitHub #99 / `avalonia-node-map-ce1`，完成 P2 的 layout provider 与 background/cancel proof refresh。本 slice 先做 docs/tests：把 `IGraphLayoutProvider`、`PreviewLayoutPlan`、`TryApplyLayoutPlan`、`TryApplyLayoutRequest`、snap-to-grid commands 和 `background-grid-density` route 继续绑定到现有 source-backed proof。不要在这个 issue 中把同步 provider seam 扩大成异步或可取消的 layout execution。
+
+## Phase 487 更新
+
+Phase 487 通过 PR #98 关闭 GitHub #97 / `avalonia-node-map-i8s`，强化 custom-node copyable-host recipe docs 与 templates。本 slice 只触碰 host recipe docs、templates、Demo cookbook route text 和 consistency tests，没有修改 Core/Editor/Avalonia API。
+
+## Phase 486 更新
+
+Phase 486 通过 PR #96 关闭 GitHub #95 / `avalonia-node-map-0xr`，扩展 full-window shell gate，但不加入 strict pixel baselines，也不改 Demo runtime。`CookbookShellVisualGateStates.json` 现在基于同一条 default `starter-host-route` / `ai-pipeline` fixture 驱动两条确定性 shell state：`shell-cookbook-default-open` 和 `shell-runtime-diagnostics-open`。这个 gate 会验证 drawer state、dimensions、nonblank pixels、distinct colors、output metadata 和 required named shell parts；flyouts、context menus、language/theme variants 和 hash baselines 仍然不在本阶段范围内。
+
+## Phase 485 更新
+
+Phase 485 通过 PR #94 关闭 GitHub #93 / `avalonia-node-map-3hc`，澄清 Cookbook host-copy architecture path。完成内容记录 guarded host-copy architecture route 和双语文档指引，不修改 Core/Editor/Avalonia runtime API。
 
 ## Phase 484 更新
 
@@ -117,31 +129,30 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 | #81 | `avalonia-node-map-p479` | 通过 `NodeDragHandle` 提供 public hosted-Avalonia node drag-handle API。 |
 | #82 | `avalonia-node-map-p483` | Large-graph virtualization claim 已收窄到 viewport-budgeted scene projection/rendering；不声明 renderer virtualization 或 10000 节点支持。 |
 | #80 | `avalonia-node-map-p480` | Rotatable node model、command/query projection、renderer geometry、compatibility overloads、API baseline 和 docs。 |
+| #91 | `avalonia-node-map-4xr` | Phase 484 在 rotatable nodes 后刷新 roadmap。 |
+| #93 | `avalonia-node-map-3hc` | Phase 485 Cookbook host-copy architecture path；已由 PR #94 关闭。 |
+| #95 | `avalonia-node-map-0xr` | Phase 486 full-window shell visual-state expansion；已由 PR #96 关闭。 |
+| #97 | `avalonia-node-map-i8s` | Phase 487 custom-node copyable-host recipe hardening；已由 PR #98 关闭。 |
+| #99 | `avalonia-node-map-ce1` | Phase 488 layout provider 与 background/cancel proof refresh；已由 PR #100 关闭。 |
+| #101 | `avalonia-node-map-6sc` | Phase 489 renderer virtualization proof-contract design spike；已由 PR #102 关闭。 |
 
 ## 下一轮 Issue Wave
 
-Phase 484 已经把清空后的队列重新转换成下一轮 implementation wave。Phase 489 是当前 active P2 item，并且在新的 implementation issue 批准真正 renderer virtualization contract 前保持 docs/tests-only。
+Phase 490 在 Phase 485-489 已关闭后修复过期的 Phase 484 队列。GitHub #103 / `avalonia-node-map-3x0` 是当前 docs/tests only 的 stale-roadmap repair，不授权 runtime 或 public API 修改。
+
+Accessibility breadth audit 是下一项 open parity gap，因为当前矩阵仍把 accessibility breadth 标为 Partial，而 visual、Cookbook architecture、layout proof 和 renderer proof-contract slices 都已有关闭的 tracker。Retained migration removal 仍是 later future tracker item，因为它依赖 v1 policy 和 public API baseline work。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #91 | `avalonia-node-map-4xr` | Phase 484: refresh React Flow parity roadmap after rotatable nodes | P1 | `docs/en/phase-0-reactflow-parity-audit.md`、`docs/zh-CN/phase-0-reactflow-parity-audit.md`、GitHub/Beads tracker state | 当前 docs-only issue。不修改产品代码或 public API。 |
-| TBD | TBD | Cookbook example architecture refresh | P1 | `src/AsterGraph.Demo/Cookbook`、`docs/en/demo-cookbook.md`、`docs/zh-CN/demo-cookbook.md`，如果重命名/拆分示例则包含 screenshot route metadata | 可与 visual gate decision 并行，但 route ID 和截图要保持稳定。避免 Core/Editor API 修改。 |
-| #95 | `avalonia-node-map-0xr` | Phase 486: decide full-window visual coverage expansion | P1 | `tests/AsterGraph.Demo.Tests`、screenshot metadata/docs | 独立于 API/model 工作。除非已测量 drift，否则继续延后严格 pixel baseline。 |
-| #97 | `avalonia-node-map-i8s` | Phase 487: harden custom node copyable-host recipe | P2 | host recipe docs、templates、Demo cookbook route text、consistency tests | 已由 PR #98 关闭。未修改 Core/Editor/Avalonia API。 |
-| #99 | `avalonia-node-map-ce1` | Phase 488: refresh layout provider and background/cancel proof | P2 | layout provider docs/tests、Demo routes、preview/apply/cancel 的 command guidance | 已由 PR #100 关闭。除非测试证明 provider contract 缺失，否则保持 runtime API 稳定。 |
-| #101 | `avalonia-node-map-6sc` | Phase 489: renderer virtualization design spike | P2 | scale/parity docs 和 focused consistency tests | 当前 docs/tests design spike。与任何 claim expansion 串行。不能用 xlarge telemetry 声明 10000 节点支持。 |
-| TBD | TBD | Accessibility breadth audit | P3 | Avalonia built-ins、automation peer tests、keyboard/screen-reader coverage docs | visual routes 稳定后可并行；公开声明仅限已审计 controls。 |
-| TBD | TBD | Retained migration removal roadmap | P3 | public API inventory、stabilization support matrix、retained migration docs/tests | 必须与 v1 policy 和 public API baseline work 串行；不要在无关 parity work 中顺手删除 retained surfaces。 |
-
-当前 active branch 是 `perf/renderer-virtualization-spike`，对应 #101 / `avalonia-node-map-6sc`。后续如果要扩大 renderer 声明，必须先由新的 tracker item 满足下面定义的 proof contract，再创建 implementation branch。
+| #103 | `avalonia-node-map-3x0` | Phase 490: repair stale React Flow parity roadmap after Phase 489 | P1 | `docs/en/phase-0-reactflow-parity-audit.md`、`docs/zh-CN/phase-0-reactflow-parity-audit.md`、focused docs tests、GitHub/Beads tracker state | 当前 docs/tests only stale-roadmap repair。No Core/Editor/Avalonia runtime or public API changes。 |
+| TBD | TBD | Accessibility breadth audit | P2 | Avalonia built-ins、automation peer tests、keyboard/screen-reader coverage docs | Next open parity gap。代码或 UI 修改前先创建 future tracker item；公开声明仅限已审计 controls。 |
+| TBD | TBD | Retained migration removal roadmap | P3 | public API inventory、stabilization support matrix、retained migration docs/tests | Later future tracker item。必须与 v1 policy 和 public API baseline work 串行；不要在 parity docs work 中顺手删除 retained surfaces。 |
 
 ## 推荐并行 Worktree 计划
 
-- `feature/reactflow-parity-roadmap`：负责 #91 / `avalonia-node-map-4xr`；只做 docs 和 tracker plan。
-- `docs/cookbook-example-architecture`：候选 P1；只负责 Cookbook catalog/docs/example ergonomics。
-- `ui/full-window-visual-coverage`：候选 P1；只负责 shell-state captures、metadata 和 visual verification docs。
-- `docs/custom-node-copyable-recipes`：候选 P2；只负责 host-copy custom-node guidance 和 templates，除非证明缺失 public seam。
-- `perf/renderer-virtualization-spike`：#101 / `avalonia-node-map-6sc` 的 active Phase 489 branch；在任何 renderer implementation 前先负责 proof design 和 claim boundaries。
+- `docs/phase-490-parity-roadmap-repair`：负责 #103 / `avalonia-node-map-3x0`；只修复双语 roadmap docs 和 focused docs tests。
+- Future accessibility branch name 应在新的 GitHub/Beads tracker item 创建后再确定；预期 ownership 是 Avalonia built-ins 和 shell states 的 accessibility docs/tests。
+- Future retained-migration branch name 应在 v1 policy 和 public API baseline 范围明确后再确定；预期 ownership 是 public API inventory 与 stabilization docs/tests。
 
 ## UI 验证策略
 
@@ -158,5 +169,5 @@ Phase 484 已经把清空后的队列重新转换成下一轮 implementation wav
 ## Tracker 备注
 
 - GitHub #79 和 Beads `avalonia-node-map-p478` 创建时把 `.planning/*` 列入 write set。由于 `.planning/` 被 ignore 且当前 worktree 中不存在，本次刷新将它记录为 tracker drift，而不是 force-add 本地 planning 文件。
-- Beads 是本仓库的持久本地 tracker。Phase 484 通过 GitHub #91 / `avalonia-node-map-4xr` 重新打开队列；后续 follow-up 在代码修改前也必须先拿到明确的 GitHub 与 Beads ID。
-- Phase 478 和 Phase 484 都不修改产品代码。
+- Beads 是本仓库的持久本地 tracker。Phase 490 通过 GitHub #103 / `avalonia-node-map-3x0` 修复队列；后续 follow-up 在代码修改前也必须先拿到明确的 GitHub 与 Beads ID。
+- Phase 478、Phase 484 和 Phase 490 都不修改产品代码。
