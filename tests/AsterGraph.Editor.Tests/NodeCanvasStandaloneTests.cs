@@ -630,6 +630,98 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void StandaloneCanvas_NodeDragHandle_AllowsDragFromMarkedBodySurface()
+    {
+        var editor = CreateEditor();
+        var bodyPresenter = new DragHandleNodeBodyPresenter();
+        var (window, canvas) = CreateStandaloneCanvasWindow(
+            editor,
+            presentation: new AsterGraphPresentationOptions
+            {
+                NodeBodyPresenter = bodyPresenter,
+            });
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var sourceNode = editor.FindNode(SourceNodeId)!;
+            var initialX = sourceNode.X;
+            var initialY = sourceNode.Y;
+            var sourceSurface = canvas.GetVisualDescendants()
+                .OfType<Control>()
+                .Single(control => string.Equals(AutomationProperties.GetName(control), "Canvas Source node", StringComparison.Ordinal));
+            var handle = sourceSurface.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(control.Name, DragHandleNodeBodyPresenter.HandleName, StringComparison.Ordinal));
+            var pressPoint = WorldToScreenPoint(canvas, sourceNode.X + 72d, sourceNode.Y + 92d);
+            var movedPoint = WorldToScreenPoint(canvas, sourceNode.X + 132d, sourceNode.Y + 128d);
+            var pressedArgs = CreatePointerPressedArgs(handle, canvas, pointer, pressPoint, KeyModifiers.None);
+            var movedArgs = CreatePointerMovedArgs(canvas, pointer, movedPoint, KeyModifiers.None);
+
+            handle.RaiseEvent(pressedArgs);
+            InvokeCanvasPointerMoved(canvas, movedArgs);
+
+            sourceNode = editor.FindNode(SourceNodeId)!;
+            Assert.True(NodeDragHandle.GetIsDragHandle(handle));
+            Assert.True(pressedArgs.Handled);
+            Assert.True(movedArgs.Handled);
+            Assert.Same(canvas, pointer.Captured);
+            Assert.True(sourceNode.X > initialX);
+            Assert.True(sourceNode.Y > initialY);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneCanvas_NodeDragHandle_BlocksDragFromUnmarkedBodySurfaceWhenHandleExists()
+    {
+        var editor = CreateEditor();
+        var bodyPresenter = new DragHandleNodeBodyPresenter();
+        var (window, canvas) = CreateStandaloneCanvasWindow(
+            editor,
+            presentation: new AsterGraphPresentationOptions
+            {
+                NodeBodyPresenter = bodyPresenter,
+            });
+        var pointer = new global::Avalonia.Input.Pointer(2, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var sourceNode = editor.FindNode(SourceNodeId)!;
+            var initialX = sourceNode.X;
+            var initialY = sourceNode.Y;
+            var sourceSurface = canvas.GetVisualDescendants()
+                .OfType<Control>()
+                .Single(control => string.Equals(AutomationProperties.GetName(control), "Canvas Source node", StringComparison.Ordinal));
+            var content = sourceSurface.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(control.Name, DragHandleNodeBodyPresenter.ContentName, StringComparison.Ordinal));
+            var pressPoint = WorldToScreenPoint(canvas, sourceNode.X + 72d, sourceNode.Y + 132d);
+            var movedPoint = WorldToScreenPoint(canvas, sourceNode.X + 152d, sourceNode.Y + 172d);
+            var pressedArgs = CreatePointerPressedArgs(content, canvas, pointer, pressPoint, KeyModifiers.None);
+            var movedArgs = CreatePointerMovedArgs(canvas, pointer, movedPoint, KeyModifiers.None);
+
+            content.RaiseEvent(pressedArgs);
+            InvokeCanvasPointerMoved(canvas, movedArgs);
+
+            sourceNode = editor.FindNode(SourceNodeId)!;
+            Assert.False(NodeDragHandle.GetIsDragHandle(content));
+            Assert.True(pressedArgs.Handled);
+            Assert.False(movedArgs.Handled);
+            Assert.Null(pointer.Captured);
+            Assert.Equal(initialX, sourceNode.X);
+            Assert.Equal(initialY, sourceNode.Y);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void WheelViewportGestures_CanBeDisabledForHostCooperativeScrolling()
     {
         var editor = CreateEditor();
@@ -3794,6 +3886,51 @@ public sealed class NodeCanvasStandaloneTests
             {
                 marker.Text = $"CUSTOM NODE BODY UPDATED:{context.Node.Id}";
             }
+        }
+    }
+
+    private sealed class DragHandleNodeBodyPresenter : IGraphNodeBodyPresenter
+    {
+        public const string HandleName = "PART_DragHandleNodeBodyPresenterHandle";
+        public const string ContentName = "PART_DragHandleNodeBodyPresenterContent";
+
+        public GraphNodeBodyVisual Create(GraphNodeVisualContext context)
+        {
+            var root = new StackPanel
+            {
+                Margin = new Thickness(8),
+                Spacing = 6,
+            };
+            var handle = new Border
+            {
+                Name = HandleName,
+                Height = 28,
+                Background = Brushes.Transparent,
+                Child = new TextBlock
+                {
+                    Text = "Drag handle",
+                },
+            };
+            var content = new Border
+            {
+                Name = ContentName,
+                Height = 44,
+                Background = Brushes.Transparent,
+                Child = new TextBlock
+                {
+                    Text = "Interactive body content",
+                },
+            };
+
+            NodeDragHandle.SetIsDragHandle(handle, true);
+            root.Children.Add(handle);
+            root.Children.Add(content);
+
+            return new GraphNodeBodyVisual(root);
+        }
+
+        public void Update(GraphNodeBodyVisual visual, GraphNodeVisualContext context)
+        {
         }
     }
 }

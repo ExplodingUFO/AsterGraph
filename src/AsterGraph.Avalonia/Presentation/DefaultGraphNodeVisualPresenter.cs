@@ -217,6 +217,16 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
                 return;
             }
 
+            if (!NodeDragHandle.ShouldStartNodeDrag(border, args.Source))
+            {
+                if (args.GetCurrentPoint(border).Properties.IsLeftButtonPressed)
+                {
+                    args.Handled = true;
+                }
+
+                return;
+            }
+
             border.Focus();
             context.BeginNodeDrag(context.Node, args);
         };

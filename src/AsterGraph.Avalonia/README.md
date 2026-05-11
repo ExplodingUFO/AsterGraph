@@ -92,6 +92,8 @@ Use the builder to reduce boilerplate in the common hosted route. Use explicit f
 
 `NodeCanvas` consumes the shared editor command/query surface for tiered authoring UX. The same persisted node/group state drives resize handles, width/height tiers, node-side parameter values, fixed group frames, geometry-based membership, and editor-only group chrome.
 
+Stock-shell custom node body presenters can opt into React Flow-style drag handles through `NodeDragHandle.SetIsDragHandle(control, true)`. When any marked handle exists in a stock-shell node, node dragging starts only from that handle or its descendants; unmarked body surfaces no longer rely on Demo-only hooks or `NodeCanvas` internals. Full custom node visual presenters still own their own pointer routing and can read the same attached property.
+
 Group frames keep header, border, and content-area semantics separate: the stock canvas drags from the header, resizes from the border, and treats the content area as the membership zone while keeping the stored frame boundary stable.
 
 Node-side parameter editors are created through the stock `NodeParameterEditorRegistry` seam. The canvas only renders a parameter editor when the active tier exposes the section and the parameter endpoint is not connected upstream.
