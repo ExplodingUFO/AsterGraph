@@ -6,6 +6,10 @@ This document started as the Phase 0 audit for the `0.11.0-beta` baseline. Phase
 
 The scope of this refresh is docs and tracker state only. It does not change product code, runtime behavior, renderer contracts, or public support claims.
 
+## Phase 481 Update
+
+Phase 481 adds a deterministic full-window Cookbook shell capture alongside the existing scene PNG gate. The new gate covers the default Cookbook shell route, writes artifacts under `artifacts/test-results/cookbook-shell-visual-gate`, and validates dimensions, nonblank pixels, shell-part coverage, and metadata. Strict pixel-baseline comparison remains intentionally deferred until Skia/native drift is measured across CI hosts.
+
 ## Repository Baseline
 
 - Current package version is `0.11.0-beta` in `Directory.Build.props`; publishable libraries are `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and `AsterGraph.Avalonia`.
@@ -13,7 +17,7 @@ The scope of this refresh is docs and tracker state only. It does not change pro
 - `AsterGraph.Demo` remains the visible demo host and Cookbook proof surface.
 - `src/AsterGraph.Demo/Cookbook/DemoCookbookCatalog.Recipes.cs` currently contains 25 `DemoCookbookRecipe` entries.
 - `tests/AsterGraph.Demo.Tests/CookbookScreenshotGateRoutes.json` currently defines 15 deterministic scene PNG capture routes.
-- `tests/AsterGraph.Demo.Tests/DemoCookbookScreenshotGateTests.cs` captures canonical graph scenes through `GraphSceneImageExportService`, writes `artifacts/test-results/cookbook-screenshot-gate/metadata.json`, and validates route metadata.
+- `tests/AsterGraph.Demo.Tests/DemoCookbookScreenshotGateTests.cs` captures canonical graph scenes through `GraphSceneImageExportService`, writes `artifacts/test-results/cookbook-screenshot-gate/metadata.json`, validates route metadata, and now captures the default Cookbook full-window shell under `artifacts/test-results/cookbook-shell-visual-gate`.
 - `.planning/` and `docs/plans/` are gitignored in this repository. Phase 478 treats the `.planning/*` write-set references in GitHub #79 and Beads `avalonia-node-map-p478` as tracker drift; durable planning state for this slice lives in tracked docs plus GitHub/Beads issues.
 
 ## Architecture Inventory
@@ -26,8 +30,8 @@ The scope of this refresh is docs and tracker state only. It does not change pro
 | Layout integration | `src/AsterGraph.Editor/Runtime` and services | `GraphLayoutRequest`, `GraphLayoutPlan`, `IGraphLayoutProvider`, preview/apply/cancel evidence, and snap/grid commands. | Provider seam exists; background/cancel/provider examples need continued proof when layout claims expand. |
 | Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`, scene host projection, edge renderer, interaction coordinators, automation peers, MiniMap, Background, Controls, Panel, NodeToolbar, EdgeToolbar, and NodeResizer. | Built-ins are now reusable public components. Remaining UI parity gaps are drag-handle API, rotation, and full-window visual regression coverage. |
 | Hosted workbench shell | `GraphEditorView` and hosted factories | Header, library, canvas, inspector, validation panel, authoring tools, minimap, command projection, and status chrome. | Useful supported route, but new public features should avoid making Demo shell chrome a hidden dependency. |
-| Demo/Cookbook | `src/AsterGraph.Demo` | 25 recipes, route clarity docs, built-in/interaction/lifecycle batches, and scene PNG screenshot gate metadata. | Cookbook breadth and scene coverage are no longer missing. Full-window shell capture and pixel-baseline comparison remain gaps. |
-| CI and release gates | `.github/workflows`, `eng/ci.ps1`, test projects | Build/test/maintenance/contract/release/hygiene lanes, public API baseline, package validation, docs route checks, and scene PNG gate tests. | Strong text/API/scene gates. Add full-window visual regression only after a deterministic capture plan is proven. |
+| Demo/Cookbook | `src/AsterGraph.Demo` | 25 recipes, route clarity docs, built-in/interaction/lifecycle batches, scene PNG screenshot gate metadata, and default full-window shell visual metadata. | Cookbook breadth, scene coverage, and the first shell-level capture are covered. Pixel-baseline comparison and broader shell-state coverage remain bounded future work. |
+| CI and release gates | `.github/workflows`, `eng/ci.ps1`, test projects | Build/test/maintenance/contract/release/hygiene lanes, public API baseline, package validation, docs route checks, scene PNG gate tests, and default full-window shell gate tests. | Strong text/API/scene/shell gates. Keep strict pixel baselines deferred until deterministic drift is measured. |
 
 ## React Flow Parity Matrix
 
@@ -62,7 +66,7 @@ The scope of this refresh is docs and tracker state only. It does not change pro
 | Declarative + code-first API | Partial | Host builder, definitions, builders, templates, and session APIs exist. Avalonia markup-first ergonomics are not equivalent to React Flow hooks/components. | Keep docs honest; do not claim React hook parity. |
 | Accessibility breadth | Partial | Keyboard navigation and automation peers are covered in targeted tests. A broad accessibility audit across all built-ins and shell states remains weaker. | Add issue only if adopter/release evidence needs it. |
 | Host events | Present | `IGraphEditorEvents`, mutation batching, and host-event Cookbook route exist. | Keep guarded. |
-| Screenshot-driven UI quality | Partial | Scene PNG gate exists for canonical graph scenes. Full hosted window, panels, flyouts, shell chrome, and pixel-baseline comparison are not yet covered. | GitHub #83 / `avalonia-node-map-p481`. |
+| Screenshot-driven UI quality | Partial / guarded | Scene PNG gate exists for canonical graph scenes. The default Cookbook full-window shell route now captures host menu, drawer, left navigation, graph host, and recipe panel metadata. Pixel-baseline comparison and broader flyout/shell-state coverage are not yet covered. | Keep #83 focused on the first shell gate; add follow-ups only if visual drift evidence requires broader baselines. |
 
 ## Completed Phase 0 Issue Wave
 
@@ -79,6 +83,7 @@ The original first wave is no longer the next work queue. These tracker items ar
 | #52 | `avalonia-node-map-a08` | Cookbook expansion and screenshot-gate parent. |
 | #59, #61, #63, #65 | `avalonia-node-map-a08.*` | Scene screenshot foundation plus built-in, interaction, and lifecycle Cookbook batches. |
 | #67, #69, #71, #73, #75, #77 | `avalonia-node-map-y1e.*` | Built-in catalog, NodeToolbar, EdgeToolbar, NodeResizer, Panel, Controls, and screenshot coverage for standalone built-ins. |
+| #83 | `avalonia-node-map-p481` | First full-window Cookbook shell visual gate with artifact metadata and CI lane coverage. |
 
 ## Next Issue Wave
 
@@ -86,16 +91,14 @@ The original first wave is no longer the next work queue. These tracker items ar
 | --- | --- | --- | --- | --- | --- |
 | #81 | `avalonia-node-map-p479` | Phase 479: define public node drag-handle API | P1 | `AsterGraph.Abstractions` or `AsterGraph.Avalonia`, canvas interaction routing, tests, docs | Can start after Phase 478. Avoid overlapping with rotation changes in node transform/hit-test code. |
 | #80 | `avalonia-node-map-p480` | Phase 480: add rotatable node model and rendering contract | P2 | `AsterGraph.Core`, `AsterGraph.Editor`, `AsterGraph.Avalonia`, serialization/API/tests/docs | Keep separate from drag-handle work because both may touch node hit testing and adorners. |
-| #83 | `avalonia-node-map-p481` | Phase 481: add full-window Cookbook visual regression gate | P1 | `tests/AsterGraph.Demo.Tests`, optional Demo capture seam, docs, optional CI scripts | Can run in parallel with editor-only policy work. Useful before heavy visual changes. |
 | #84 | `avalonia-node-map-p482` | Phase 482: harden cycle-prevention connection policy | P1 | `AsterGraph.Editor` validation policy, tests, Demo/Cookbook docs | Smallest product-code parity slice; can run independently of UI work. |
 | #82 | `avalonia-node-map-p483` | Phase 483: prove or bound large-graph rendering virtualization | P1 | `AsterGraph.Avalonia` renderer/projection if implementing; otherwise scale docs/tests | Start as an evidence/decision branch before any renderer rewrite. |
 
-Recommended next branch: `avalonia-node-map-p481` / GitHub #83 if the next milestone will touch visible UI, because it adds the missing full-window proof gate before drag-handle or rotation work changes pixels. If the next branch needs to stay editor-only, start `avalonia-node-map-p482` / GitHub #84 instead.
+Recommended next branch: `avalonia-node-map-p482` / GitHub #84 if the next branch should stay editor-only, because it hardens the cycle-prevention policy without overlapping the drag-handle or rotation hit-test paths. If the next milestone will touch visible UI, start `avalonia-node-map-p479` / GitHub #81 after reviewing the new full-window shell gate artifacts.
 
 ## Recommended Parallel Worktree Plan
 
 - `docs/phase478-parity-refresh`: owns this audit refresh, Chinese mirror, tracker split, and Phase 478 closure only.
-- `ui/full-window-cookbook-gate`: owns #83 / `avalonia-node-map-p481`. Avoid product API changes.
 - `feature/cycle-prevention-policy`: owns #84 / `avalonia-node-map-p482`. Avoid Avalonia shell work except docs/examples.
 - `feature/node-drag-handle-api`: owns #81 / `avalonia-node-map-p479`. Coordinate with rotation if both touch hit testing or adorners.
 - `feature/rotatable-nodes`: owns #80 / `avalonia-node-map-p480`. Do not mix with drag-handle API unless a shared transform abstraction is explicitly approved.
@@ -111,7 +114,7 @@ All future UI changes to `src/AsterGraph.Avalonia` or `src/AsterGraph.Demo` shou
 - a Cookbook route for each new public UI component or interaction;
 - an explicit note when a UI change is structural-only and does not alter pixels.
 
-Current coverage is scene-level, not full-window. `DemoCookbookScreenshotGateTests` and `CookbookScreenshotGateRoutes.json` prove canonical graph scenes and route metadata; they do not capture the hosted shell, panels, flyouts, or pixel-baseline comparisons. That remaining gap is tracked by GitHub #83 / `avalonia-node-map-p481`.
+Current coverage includes scene-level route captures and the first default full-window Cookbook shell capture. `DemoCookbookScreenshotGateTests` and `CookbookScreenshotGateRoutes.json` prove canonical graph scenes, route metadata, and the default hosted shell artifact; they still do not provide strict pixel-baseline comparisons or broad flyout/state coverage.
 
 ## Tracker Notes
 

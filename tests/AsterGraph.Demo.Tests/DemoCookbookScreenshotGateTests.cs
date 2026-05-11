@@ -3,9 +3,15 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.Json;
+using Avalonia.Controls;
+using Avalonia.Headless;
+using Avalonia.Headless.XUnit;
+using Avalonia.Threading;
 using AsterGraph.Demo.Cookbook;
 using AsterGraph.Demo.ViewModels;
+using AsterGraph.Demo.Views;
 using AsterGraph.Editor.Services;
+using SkiaSharp;
 using Xunit;
 
 namespace AsterGraph.Demo.Tests;
@@ -14,6 +20,8 @@ public sealed class DemoCookbookScreenshotGateTests
 {
     private const string ManifestRelativePath = "tests/AsterGraph.Demo.Tests/CookbookScreenshotGateRoutes.json";
     private const string OutputRootRelativePath = "artifacts/test-results/cookbook-screenshot-gate";
+    private const string ShellOutputRootRelativePath = "artifacts/test-results/cookbook-shell-visual-gate";
+    private const int ShellMinimumBytes = 8192;
 
     [Fact]
     public void CookbookScreenshotGate_CapturesManifestRoutesAndWritesMetadata()
@@ -106,11 +114,7 @@ public sealed class DemoCookbookScreenshotGateTests
 
             Assert.Equal(imagePath, writtenPath);
             Assert.True(File.Exists(writtenPath));
-            Assert.True(bytes.Length > route.MinimumBytes);
-            Assert.Equal(0x89, bytes[0]);
-            Assert.Equal(0x50, bytes[1]);
-            Assert.Equal(0x4E, bytes[2]);
-            Assert.Equal(0x47, bytes[3]);
+            AssertPngArtifact(bytes, route.MinimumBytes);
 
             var metadataJson = File.ReadAllText(metadataPath);
             Assert.Contains(route.Id, metadataJson, StringComparison.Ordinal);
@@ -120,6 +124,134 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains(route.ViewportHeight.ToString(System.Globalization.CultureInfo.InvariantCulture), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ToRepoRelativePath(repoRoot, writtenPath), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ManifestRelativePath, metadataJson, StringComparison.Ordinal);
+        }
+    }
+
+    [AvaloniaFact]
+    public void CookbookScreenshotGate_CapturesFullWindowShellAndWritesMetadata()
+    {
+        var repoRoot = GetRepositoryRoot();
+        var route = LoadRoutes(repoRoot).Single(candidate =>
+            string.Equals(candidate.Id, "cookbook-default-starter-host-ai-pipeline", StringComparison.Ordinal));
+        AssertRouteReferencesCatalog(route);
+
+        var outputDirectory = Path.Combine(repoRoot, ShellOutputRootRelativePath, route.Id);
+        if (Directory.Exists(outputDirectory))
+        {
+            Directory.Delete(outputDirectory, recursive: true);
+        }
+
+        Directory.CreateDirectory(outputDirectory);
+        var imagePath = Path.Combine(
+            outputDirectory,
+            Path.GetFileNameWithoutExtension(route.OutputFileName) + "-shell.png");
+        var metadataPath = Path.Combine(outputDirectory, "metadata.json");
+        var storageRootPath = Path.Combine(
+            Path.GetTempPath(),
+            "AsterGraph.Demo.Tests",
+            nameof(DemoCookbookScreenshotGateTests),
+            "shell",
+            Guid.NewGuid().ToString("N"));
+        var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: storageRootPath,
+            EnableStatePersistence: false,
+            RestoreLastWorkspaceOnStartup: false,
+            InitialScenario: route.Scenario));
+
+        viewModel.SelectLanguage(route.Language);
+        viewModel.SelectedCookbookRecipe = viewModel.CookbookRecipes.Single(recipe =>
+            string.Equals(recipe.Id, route.RecipeId, StringComparison.Ordinal));
+        viewModel.Session.Commands.UpdateViewportSize(route.ViewportWidth, route.ViewportHeight);
+        viewModel.Session.Commands.FitToViewport(updateStatus: false);
+        viewModel.PreferredWindowWidth = route.ViewportWidth;
+        viewModel.PreferredWindowHeight = route.ViewportHeight;
+        viewModel.OpenHostMenuGroup(route.HostGroup);
+
+        var window = new MainWindow
+        {
+            Width = route.ViewportWidth,
+            Height = route.ViewportHeight,
+            DataContext = viewModel,
+        };
+
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Loaded);
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+            var hostMenu = Assert.IsType<Menu>(window.FindControl<Menu>("PART_HostMenu"));
+            var shellSplitView = Assert.IsType<SplitView>(window.FindControl<SplitView>("PART_HostShellSplitView"));
+            var navigationPanel = Assert.IsType<Border>(window.FindControl<Border>("PART_CookbookWorkspaceNavigationPanel"));
+            var graphHost = Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost"));
+            var recipeContentPanel = Assert.IsType<Border>(window.FindControl<Border>("PART_CookbookWorkspaceRecipeContentPanel"));
+
+            Assert.NotNull(hostMenu);
+            Assert.True(shellSplitView.IsPaneOpen);
+            Assert.True(navigationPanel.IsVisible);
+            Assert.NotNull(graphHost.Content);
+            Assert.True(recipeContentPanel.IsVisible);
+
+            using var frame = window.CaptureRenderedFrame();
+            Assert.NotNull(frame);
+            frame!.Save(imagePath);
+
+            var bytes = File.ReadAllBytes(imagePath);
+            var imageSize = AssertPngArtifact(bytes, ShellMinimumBytes);
+            Assert.True(imageSize.Width >= route.ViewportWidth);
+            Assert.True(imageSize.Height >= route.ViewportHeight);
+            var pixelInspection = InspectNonBlankPng(imagePath);
+            Assert.True(pixelInspection.NonTransparentPixelCount > imageSize.Width * imageSize.Height / 4);
+            Assert.True(pixelInspection.DistinctColorCount > 1);
+
+            var metadata = new CookbookShellVisualGateMetadata(
+                route.Id,
+                route.RecipeId,
+                route.Scenario,
+                route.HostGroup,
+                route.Language,
+                route.Theme,
+                route.ViewportWidth,
+                route.ViewportHeight,
+                imageSize.Width,
+                imageSize.Height,
+                "headless-avalonia-window",
+                "full-window-shell",
+                ToRepoRelativePath(repoRoot, imagePath),
+                ManifestRelativePath,
+                viewModel.SelectedHostMenuGroupTitle,
+                viewModel.SelectedCookbookRecipe.Title,
+                shellSplitView.IsPaneOpen,
+                [
+                    "PART_HostMenu",
+                    "PART_HostShellSplitView",
+                    "PART_CookbookWorkspaceNavigationPanel",
+                    "PART_MainGraphEditorHost",
+                    "PART_CookbookWorkspaceRecipeContentPanel",
+                ],
+                pixelInspection.NonTransparentPixelCount,
+                pixelInspection.DistinctColorCount,
+                Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant());
+
+            File.WriteAllText(
+                metadataPath,
+                JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
+
+            var metadataJson = File.ReadAllText(metadataPath);
+            Assert.Contains(route.Id, metadataJson, StringComparison.Ordinal);
+            Assert.Contains(route.RecipeId, metadataJson, StringComparison.Ordinal);
+            Assert.Contains("full-window-shell", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("PART_HostMenu", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("PART_HostShellSplitView", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("PART_CookbookWorkspaceNavigationPanel", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("PART_MainGraphEditorHost", metadataJson, StringComparison.Ordinal);
+            Assert.Contains(ToRepoRelativePath(repoRoot, imagePath), metadataJson, StringComparison.Ordinal);
+            Assert.Contains(ManifestRelativePath, metadataJson, StringComparison.Ordinal);
+        }
+        finally
+        {
+            window.Close();
         }
     }
 
@@ -251,6 +383,8 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains("DemoCookbookScreenshotGateTests", contents, StringComparison.Ordinal);
             Assert.Contains("CookbookScreenshotGateRoutes.json", contents, StringComparison.Ordinal);
             Assert.Contains(OutputRootRelativePath, contents, StringComparison.Ordinal);
+            Assert.Contains(ShellOutputRootRelativePath, contents, StringComparison.Ordinal);
+            Assert.Contains("full-window", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("CI", contents, StringComparison.Ordinal);
             Assert.Contains("before/after", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("builtin-standalone-controls-route", contents, StringComparison.Ordinal);
@@ -315,6 +449,61 @@ public sealed class DemoCookbookScreenshotGateTests
     private static string ToRepoRelativePath(string repoRoot, string path)
         => Path.GetRelativePath(repoRoot, path).Replace('\\', '/');
 
+    private static PngSize AssertPngArtifact(byte[] bytes, int minimumBytes)
+    {
+        Assert.True(bytes.Length > minimumBytes);
+        Assert.Equal(0x89, bytes[0]);
+        Assert.Equal(0x50, bytes[1]);
+        Assert.Equal(0x4E, bytes[2]);
+        Assert.Equal(0x47, bytes[3]);
+        Assert.Equal(0x0D, bytes[4]);
+        Assert.Equal(0x0A, bytes[5]);
+        Assert.Equal(0x1A, bytes[6]);
+        Assert.Equal(0x0A, bytes[7]);
+
+        return new PngSize(ReadBigEndianInt32(bytes, 16), ReadBigEndianInt32(bytes, 20));
+    }
+
+    private static PngPixelInspection InspectNonBlankPng(string imagePath)
+    {
+        using var bitmap = SKBitmap.Decode(imagePath);
+        Assert.NotNull(bitmap);
+        Assert.True(bitmap.Width > 0);
+        Assert.True(bitmap.Height > 0);
+
+        var nonTransparentPixelCount = 0;
+        var colors = new HashSet<uint>();
+        for (var y = 0; y < bitmap.Height; y++)
+        {
+            for (var x = 0; x < bitmap.Width; x++)
+            {
+                var pixel = bitmap.GetPixel(x, y);
+                if (pixel.Alpha == 0)
+                {
+                    continue;
+                }
+
+                nonTransparentPixelCount++;
+                if (colors.Count <= 32)
+                {
+                    colors.Add(
+                        ((uint)pixel.Alpha << 24)
+                        | ((uint)pixel.Red << 16)
+                        | ((uint)pixel.Green << 8)
+                        | pixel.Blue);
+                }
+            }
+        }
+
+        return new PngPixelInspection(nonTransparentPixelCount, colors.Count);
+    }
+
+    private static int ReadBigEndianInt32(byte[] bytes, int offset)
+        => (bytes[offset] << 24)
+           | (bytes[offset + 1] << 16)
+           | (bytes[offset + 2] << 8)
+           | bytes[offset + 3];
+
     private static string GetRepositoryRoot()
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);
@@ -369,4 +558,31 @@ public sealed class DemoCookbookScreenshotGateTests
         int NodeCount,
         int ConnectionCount,
         string PngSha256);
+
+    private sealed record CookbookShellVisualGateMetadata(
+        string Id,
+        string RecipeId,
+        string Scenario,
+        string HostGroup,
+        string Language,
+        string Theme,
+        int RequestedWindowWidth,
+        int RequestedWindowHeight,
+        int ActualPixelWidth,
+        int ActualPixelHeight,
+        string CaptureAdapter,
+        string CaptureScope,
+        string OutputPath,
+        string BaselineSource,
+        string SelectedHostMenuGroupTitle,
+        string SelectedCookbookRecipeTitle,
+        bool IsHostPaneOpen,
+        string[] CoveredShellParts,
+        int NonTransparentPixelCount,
+        int DistinctColorCount,
+        string PngSha256);
+
+    private sealed record PngSize(int Width, int Height);
+
+    private sealed record PngPixelInspection(int NonTransparentPixelCount, int DistinctColorCount);
 }
