@@ -26,6 +26,17 @@
 - 如果你要做 Narrator、NVDA 或 VoiceOver 这类本地 screen-reader-ready 检查，就继续盯住同一批具名 hosted surface 和 control：`GraphEditorView`、`NodeCanvas`、`GraphInspectorView`、`PART_CommandPaletteSearchBox`、`PART_ParameterSearchBox`，以及投影出来的 command 按钮和 node/edge tool。
 - 这条路径只提供本地评估证据，不扩大支持承诺，也不意味着 screen-reader 认证。
 
+## Manual Assistive-Technology Validation Checklist
+
+`ACCESSIBILITY_MANUAL_AT_VALIDATION_PLAN` 把 manual assistive-technology validation 与现有 headless automation proof 分开。只有在 `HOSTED_ACCESSIBILITY_OK:True` 和 release validation lane 通过之后才开始；这些证据能证明 automation names、focus routes、keyboard flow 和 command surfaces，但 live announcements 仍然属于 unverified live screen-reader behavior。
+
+- Narrator on Windows：打开 hosted Demo route，按 Tab 经过 `GraphEditorView`、`NodeCanvas`、`GraphInspectorView`、`PART_CommandPaletteSearchBox` 和投影出来的 command buttons；记录 names、focus movement、command-palette close、validation focus buttons 以及 export/status text 是否按预期播报。
+- NVDA on Windows：复跑同一条具名路线，并记录 browse/focus modes 是否暴露同样的 command labels、selected-node parameter metadata、edge text editor names 和 validation target help text。
+- VoiceOver on macOS，或当前 host 上最接近的平台等价检查：复跑同一批具名 surfaces，并记录 focus order、command labels 与 status announcements 的差异。
+- 把 manual notes 附在 Demo support bundle 旁边；如果失败，把它作为后续 implementation tracker 的 adopter evidence。
+
+这份 checklist 只是 planning evidence：no live-region/runtime behavior change、no UI change、no public API change、no retained API removal，并且 no broad screen-reader certification claim。
+
 ## Proof Contract
 
 用下面这条命令验证 hosted route：
