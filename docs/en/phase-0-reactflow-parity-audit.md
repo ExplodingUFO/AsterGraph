@@ -26,6 +26,10 @@ Phase 493 is GitHub #109 / `avalonia-node-map-8qv`, the custom node presenter co
 
 Phase 494 is GitHub #111 / `avalonia-node-map-p5z`, a localized full-window shell visual gate expansion after the custom-node presenter parity proof closed. This slice is docs/tests only: it adds shell-state-owned language/theme metadata and a Chinese Cookbook drawer capture, `shell-cookbook-default-open-zh-cn`, beside the existing English Cookbook and runtime diagnostics captures. It does not authorize strict pixel hash baselines, runtime UI changes, broad language/theme certification, flyout capture, popup capture, or context-menu capture.
 
+## Phase 495 Update
+
+Phase 495 is GitHub #113 / `avalonia-node-map-wzt`, a post-Phase-494 roadmap refresh after all prior next-wave entries closed. This slice is docs/tests only: it refreshes the active issue split from current GitHub and Beads evidence, records at least three concrete follow-up candidates, and keeps worktree/parallelism guidance current. It authorizes no Core/Editor/Avalonia runtime changes, no public API changes, no Demo UI redesign, no retained API deletion, no strict pixel baselines, and no broad React Flow parity claim expansion.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -180,21 +184,24 @@ Phase 492 now owns the retained migration removal roadmap as an inventory now, r
 
 Phase 493 closed the custom node presenter cookbook parity proof. It records that the supported custom-node route is host-owned `NodeBodyPresenter` / `NodeVisualPresenter` guidance plus existing proof markers, not a runtime API expansion or React Flow component/hook parity claim.
 
-Phase 494 now owns localized full-window shell visual gate coverage. It adds one Chinese Cookbook drawer state and shell-state language/theme metadata while leaving strict pixel baselines and broad flyout/theme/language coverage for later tracker-backed work.
+Phase 494 closed localized full-window shell visual gate coverage. It added one Chinese Cookbook drawer state and shell-state language/theme metadata while leaving strict pixel baselines and broad flyout/theme/language coverage for later tracker-backed work.
+
+Phase 495 refreshes the active queue after GitHub and Beads returned to zero open issues. The next wave below is a planning split, not an implementation claim; each row still needs its own GitHub issue, Beads issue, worktree, validation plan, and PR before code or docs changes begin.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states | P2 | Avalonia built-ins, automation/focus tests, docs for keyboard/screen-reader coverage boundaries | Current docs/tests-first accessibility audit. No runtime, public API, or visual changes unless evidence proves a specific missing contract. |
-| #107 | `avalonia-node-map-j8v` | Phase 492: inventory retained migration surfaces and define removal roadmap | P3 | public API inventory, stabilization support matrix, retained migration docs/tests | Docs/tests-first inventory now, remove later slice. Sequential with v1 policy and public API baseline work; do not delete retained surfaces as a side effect of parity docs work. |
-| #109 | `avalonia-node-map-8qv` | Phase 493: strengthen custom node presenter cookbook parity proof | P2 | React Flow parity audit docs and focused docs tests | Docs/tests-first traceability slice. Do not change runtime behavior, public API, Demo visuals, or screenshot gates unless a later tracker proves a missing presenter contract. |
-| #111 | `avalonia-node-map-p5z` | Phase 494: add localized full-window shell visual gate state | P2 | shell visual gate manifest, screenshot docs/tests, parity audit docs | Docs/tests-first visual gate coverage slice. Do not add runtime UI changes, strict pixel baselines, flyout capture, or broad language/theme certification. |
+| TBD | TBD | Phase 496: document Cookbook example architecture contract | P1 | `docs/en/demo-cookbook.md`, `docs/zh-CN/demo-cookbook.md`, `tests/AsterGraph.Demo.Tests/DemoCookbookDocsTests.cs` | Docs/tests-only and independent from shell visual breadth. Clarify catalog/projection/ViewModel/docs/manifest ownership, category-derived route posture, doc-only aliases, and duplicate related-doc hygiene. No Core/Editor/Avalonia runtime changes. |
+| TBD | TBD | Phase 497: expand shell visual gate breadth without pixel baselines | P2 | `tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json`, `tests/AsterGraph.Demo.Tests/DemoCookbookScreenshotGateTests.cs`, bilingual screenshot docs | Can run after Phase 495 and parallel to Cookbook docs work if the shell manifest write set stays isolated. Add bounded states for closed drawer, selected non-Cookbook host group, or search/filter state; still no strict pixel baselines, flyout capture, popup capture, or broad language/theme certification. |
+| TBD | TBD | Phase 498: define retained migration removal execution gate | P3 | public API inventory docs/tests, retained migration recipe/docs, `eng/public-api-baseline.txt` analysis only unless a later API-change issue is approved | Sequential with v1 policy. This is a gate definition, not deletion: identify exact symbols, blocker tests, support-window criteria, and migration evidence needed before any retained API removal PR. |
+| TBD | TBD | Phase 499: prove renderer virtualization execution boundary | P2 | renderer projection tests/docs, scale baseline docs, possible spike-only benchmark harness | Independent from retained migration. Keep claims bounded to viewport-budgeted projection unless a focused implementation issue proves true renderer virtualization under CI-repeatable performance evidence. |
 
 ## Recommended Parallel Worktree Plan
 
-- `docs/phase-491-accessibility-breadth-audit`: owns #105 / `avalonia-node-map-44i`; audits accessibility docs/tests across Avalonia built-ins and shell states only.
-- `docs/phase-492-retained-migration-roadmap`: owns #107 / `avalonia-node-map-j8v`; inventories retained migration surfaces and removal gates only. Deletion or baseline updates need a later API-change tracker.
-- `docs/phase-493-custom-node-presenter-proof`: owns #109 / `avalonia-node-map-8qv`; binds the custom-node parity row to the defended host recipe and docs tests only.
-- `docs/phase-494-localized-shell-visual-gate`: owns #111 / `avalonia-node-map-p5z`; adds shell-state language/theme metadata and a Chinese full-window Cookbook shell capture only.
+- `docs/phase-495-roadmap-refresh`: owns #113 / `avalonia-node-map-wzt`; refreshes this roadmap and creates at least three concrete follow-up candidates without runtime or public API changes.
+- `docs/phase-496-cookbook-architecture-contract`: should own the Cookbook example architecture contract row; docs/tests-only and safe to parallelize with shell visual work.
+- `docs/phase-497-shell-visual-breadth`: should own bounded shell visual gate breadth; isolate writes to shell manifest, screenshot tests, and screenshot docs.
+- `docs/phase-498-retained-removal-gate`: should own retained migration removal execution criteria; keep sequential with v1/API-baseline policy work.
+- `perf/phase-499-renderer-virtualization-boundary`: should own any renderer virtualization execution proof. Treat as a spike/contract branch until performance evidence justifies implementation.
 
 ## UI Verification Policy
 
@@ -215,4 +222,5 @@ Current coverage includes scene-level route captures plus three manifest-driven 
 - Phase 492 now owns retained migration removal planning with GitHub #107 / `avalonia-node-map-j8v`; it records classification and gates, not API removal.
 - Phase 493 now owns custom node presenter cookbook parity proof with GitHub #109 / `avalonia-node-map-8qv`; it records route traceability, not a presenter API expansion.
 - Phase 494 now owns localized full-window shell visual gate coverage with GitHub #111 / `avalonia-node-map-p5z`; it records one localized shell visual state, not a broad visual certification.
-- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, and Phase 494 unless a focused test proves a specific missing contract.
+- Phase 495 now owns the post-Phase-494 roadmap refresh with GitHub #113 / `avalonia-node-map-wzt`; it records the next issue split, not implementation.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, and Phase 495 unless a focused test proves a specific missing contract.
