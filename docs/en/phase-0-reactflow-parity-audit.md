@@ -70,6 +70,10 @@ Phase 505 is GitHub #133 / `avalonia-node-map-b4z`, the accessibility manual ass
 
 Phase 506 is GitHub #135 / `avalonia-node-map-h7c`, the broader shell visual coverage planning slice selected after the accessibility manual assistive-technology validation plan closed. This slice remains docs/tests only: `SHELL_VISUAL_COVERAGE_PLANNING` maps the current five manifest-driven full-window shell captures to future flyout capture, popup capture, context-menu capture, additional language/theme variants, and pixel-baseline drift measurement. It authorizes no manifest rows, no strict pixel baselines, no runtime UI changes, no public API changes, no retained API removal, and no broad visual/language/theme certification.
 
+## Phase 507 Update
+
+Phase 507 is GitHub #137 / `avalonia-node-map-3tw`, the post-Phase-506 visual queue refresh. This slice is docs/tests only: it repairs the active queue after Phases 503-506 closed and converts the Phase 506 visual planning candidates into concrete next tracker candidates, GitHub #139-#143 / `avalonia-node-map-2nu`, `avalonia-node-map-0ff`, `avalonia-node-map-8lu`, `avalonia-node-map-9rq`, and `avalonia-node-map-1j4`. It authorizes no runtime UI behavior changes, no shell-state manifest rows, no strict pixel baselines, no public API changes, no retained API removal, and no broad visual/language/theme certification.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -242,16 +246,20 @@ Phase 503 now owns the declarative API ergonomics audit through GitHub #129 / `a
 
 Phase 504 now owns the layout provider evidence expansion through GitHub #131 / `avalonia-node-map-8lf`. It remains docs/tests only: record the current synchronous, host-owned `IGraphLayoutProvider` / `GraphLayoutRequest` / `GraphLayoutPlan` seam and its preview/apply/snap command evidence without claiming async/cancellable provider execution, runtime behavior change, public API change, UI redesign, retained API removal, or a new layout engine.
 
-Phase 505 now owns the accessibility manual assistive-technology validation plan through GitHub #133 / `avalonia-node-map-b4z`. It remains docs/tests only: record a manual checklist for Narrator, NVDA, and VoiceOver or platform-equivalent checks after `HOSTED_ACCESSIBILITY_OK:True` is green, while explicitly distinguishing headless automation from unverified live screen-reader behavior. It authorizes no live-region/runtime behavior change, no UI change, no public API change, no retained API removal, and no broad screen-reader certification claim.
+Phase 505 closed the accessibility manual assistive-technology validation plan through GitHub #133 / `avalonia-node-map-b4z`. It remained docs/tests only: record a manual checklist for Narrator, NVDA, and VoiceOver or platform-equivalent checks after `HOSTED_ACCESSIBILITY_OK:True` is green, while explicitly distinguishing headless automation from unverified live screen-reader behavior. It authorized no live-region/runtime behavior change, no UI change, no public API change, no retained API removal, and no broad screen-reader certification claim.
 
-Phase 506 now owns the broader shell visual coverage planning through GitHub #135 / `avalonia-node-map-h7c`. It remains docs/tests only: document how the existing five manifest-driven full-window shell captures lead into future flyout, popup, context-menu, language/theme, and drift-measurement work without adding manifest rows or widening visual certification claims in this slice.
+Phase 506 closed the broader shell visual coverage planning through GitHub #135 / `avalonia-node-map-h7c`. It remained docs/tests only: document how the existing five manifest-driven full-window shell captures lead into future flyout, popup, context-menu, language/theme, and drift-measurement work without adding manifest rows or widening visual certification claims in this slice.
+
+Phase 507 now owns the post-Phase-506 visual queue refresh through GitHub #137 / `avalonia-node-map-3tw`. It is docs/tests only: repair the stale current-owned table and turn the Phase 506 planning candidates into the next concrete visual-coverage queue without runtime UI behavior changes, shell-state manifest rows, strict pixel baselines, public API changes, retained API removal, or broad visual/language/theme certification.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #129 | `avalonia-node-map-mzu` | Phase 503: declarative API ergonomics audit | P3 | parity roadmap docs, Quick Start, Host Integration, focused docs tests | Current owned slice. Independent docs/tests audit for declarative API ergonomics; do not introduce public API changes, runtime behavior changes, UI changes, retained API removal, or a `<ReactFlow>`-equivalent DSL without a later implementation tracker. |
-| #131 | `avalonia-node-map-8lf` | Phase 504: layout provider evidence expansion | P3 | layout docs/tests, Cookbook route evidence | Current owned slice. Independent from shell visual work. Keep current provider seam synchronous and host-owned; do not introduce async/cancellable provider execution, runtime behavior changes, public API changes, UI changes, retained API removal, or a new layout engine. |
-| #133 | `avalonia-node-map-b4z` | Phase 505: accessibility manual assistive-technology validation plan | P3 | accessibility docs, manual validation checklist, focused docs tests | Current owned slice. Documents manual assistive-technology validation steps only; no live-region/runtime behavior changes, UI changes, public API changes, retained API removal, or broad screen-reader certification claim in this slice. |
-| #135 | `avalonia-node-map-h7c` | Phase 506: broader shell visual coverage planning | P3 | shell visual docs/tests planning | Current owned slice. Plans future flyout capture, popup capture, context-menu capture, additional language/theme variants, and pixel-baseline drift measurement; no manifest rows, strict pixel baselines, runtime UI changes, public API changes, retained API removal, or broad visual/language/theme certification. |
+| #137 | `avalonia-node-map-3tw` | Phase 507: post-Phase-506 visual queue refresh | P3 | parity roadmap docs and focused docs tests | Current owned slice. Repairs stale tracker wording only; no runtime UI behavior changes, shell-state manifest rows, strict pixel baselines, public API changes, retained API removal, or broad visual/language/theme certification. |
+| #139 | `avalonia-node-map-2nu` | Phase 508: shell flyout visual capture | P3 | shell visual gate harness, manifest/docs/tests, generated artifact metadata | Candidate after Phase 507. Should isolate one flyout capture path and prove full-window artifact metadata without claiming broad shell certification. |
+| #140 | `avalonia-node-map-0ff` | Phase 509: popup visual capture | P3 | shell visual gate harness, manifest/docs/tests, generated artifact metadata | Candidate after flyout capture. Keep popup coverage separate from context menus and avoid runtime redesign unless explicitly tracked. |
+| #141 | `avalonia-node-map-8lu` | Phase 510: context-menu visual capture | P3 | context-menu visual harness/docs/tests, generated artifact metadata | Candidate after popup capture. Should use the existing context-menu presenter route and avoid public API changes or retained hook removal. |
+| #142 | `avalonia-node-map-9rq` | Phase 511: additional language/theme shell variants | P3 | shell state manifest/docs/tests for bounded language/theme rows | Candidate after overlay capture shape is clear. Adds explicit variants only; no broad visual/language/theme certification. |
+| #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement | P3 | drift measurement docs/tests/artifact metadata | Must precede any strict pixel baseline. Compares recorded `PngSha256` and host metadata as evidence, not pass/fail hash policy yet. |
 
 ## Recommended Parallel Worktree Plan
 
@@ -267,6 +275,12 @@ Phase 506 now owns the broader shell visual coverage planning through GitHub #13
 - `docs/phase-504-layout-provider-evidence`: owned #131 / `avalonia-node-map-8lf`; isolated layout provider proof docs/tests without changing provider runtime behavior.
 - `docs/phase-505-accessibility-manual-validation`: owns #133 / `avalonia-node-map-b4z`; isolate writes to accessibility docs, manual validation checklist wording, and focused docs tests.
 - `docs/phase-506-shell-visual-coverage-planning`: owns #135 / `avalonia-node-map-h7c`; isolate writes to shell visual planning docs/tests and do not edit shell-state manifest rows.
+- `docs/phase-507-visual-queue-refresh`: owns #137 / `avalonia-node-map-3tw`; isolate writes to this parity roadmap and focused docs tests only.
+- `visual/phase-508-shell-flyout-capture`: owns #139 / `avalonia-node-map-2nu`; candidate worktree for the first tracker-backed flyout visual capture.
+- `visual/phase-509-popup-capture`: owns #140 / `avalonia-node-map-0ff`; candidate worktree for popup visual capture, separate from context-menu capture.
+- `visual/phase-510-context-menu-capture`: owns #141 / `avalonia-node-map-8lu`; candidate worktree for context-menu visual capture through the existing context-menu presenter route.
+- `visual/phase-511-language-theme-shell-variants`: owns #142 / `avalonia-node-map-9rq`; candidate worktree for bounded language/theme shell-state rows after overlay capture shape is settled.
+- `visual/phase-512-pixel-drift-measurement`: owns #143 / `avalonia-node-map-1j4`; candidate worktree for drift measurement before any strict pixel-baseline gate.
 
 ## UI Verification Policy
 
@@ -293,6 +307,11 @@ Current coverage includes scene-level route captures plus five manifest-driven f
 - Phase 499 now owns renderer virtualization execution-boundary proof with GitHub #121 / `avalonia-node-map-9x7`; it records proof criteria, not renderer implementation.
 - Phase 500 closed selected runtime shell visual gate state with GitHub #123 / `avalonia-node-map-66t`; it records one runtime closed-shell state, not broad visual certification.
 - Phase 501 closed post-Phase-500 parity follow-up queue refresh with GitHub #125 / `avalonia-node-map-38n`; it records the next issue split, not implementation.
-- Phase 502 now owns renderer virtualization execution proof with GitHub #127 / `avalonia-node-map-mai`; it records proof-command and artifact-metadata criteria, not renderer implementation.
-- Phase 503 now owns declarative API ergonomics audit with GitHub #129 / `avalonia-node-map-mzu`; it records the current copyable API routes, not a new DSL or public API.
-- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, Phase 499, Phase 500, Phase 501, Phase 502, and Phase 503 unless a focused test proves a specific missing contract.
+- Phase 502 closed renderer virtualization execution proof with GitHub #127 / `avalonia-node-map-mai`; it records proof-command and artifact-metadata criteria, not renderer implementation.
+- Phase 503 closed declarative API ergonomics audit with GitHub #129 / `avalonia-node-map-mzu`; it records the current copyable API routes, not a new DSL or public API.
+- Phase 504 closed layout provider evidence expansion with GitHub #131 / `avalonia-node-map-8lf`; it records the current synchronous host-owned layout provider seam.
+- Phase 505 closed accessibility manual assistive-technology validation planning with GitHub #133 / `avalonia-node-map-b4z`; it records manual AT checks without certification claims.
+- Phase 506 closed broader shell visual coverage planning with GitHub #135 / `avalonia-node-map-h7c`; it records the future visual candidates without adding manifest rows.
+- Phase 507 now owns the post-Phase-506 visual queue refresh with GitHub #137 / `avalonia-node-map-3tw`; it assigns real tracker IDs to Phases 508-512.
+- Phase 508 / #139 / `avalonia-node-map-2nu`, Phase 509 / #140 / `avalonia-node-map-0ff`, Phase 510 / #141 / `avalonia-node-map-8lu`, Phase 511 / #142 / `avalonia-node-map-9rq`, and Phase 512 / #143 / `avalonia-node-map-1j4` are the next concrete visual-coverage candidates.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, Phase 499, Phase 500, Phase 501, Phase 502, Phase 503, Phase 504, Phase 505, Phase 506, and Phase 507 unless a focused test proves a specific missing contract.

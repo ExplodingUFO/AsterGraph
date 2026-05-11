@@ -70,6 +70,10 @@ Phase 505 是 GitHub #133 / `avalonia-node-map-b4z`，承接 layout provider evi
 
 Phase 506 是 GitHub #135 / `avalonia-node-map-h7c`，承接 accessibility manual assistive-technology validation plan 关闭后的 broader shell visual coverage planning。本 slice 仍是 docs/tests only：`SHELL_VISUAL_COVERAGE_PLANNING` 把当前 five manifest-driven full-window shell captures 映射到后续 flyout capture、popup capture、context-menu capture、additional language/theme variants 和 pixel-baseline drift measurement。它不授权 no manifest rows、no strict pixel baselines、no runtime UI changes、no public API changes、no retained API removal 或 no broad visual/language/theme certification。
 
+## Phase 507 更新
+
+Phase 507 是 GitHub #137 / `avalonia-node-map-3tw`，承接 Phase 506 关闭后的 post-Phase-506 visual queue refresh。本 slice 是 docs/tests only：修复 Phases 503-506 已关闭后仍停留在 active queue 的 stale 状态，并把 Phase 506 visual planning candidates 转成具体 next tracker candidates：GitHub #139-#143 / `avalonia-node-map-2nu`、`avalonia-node-map-0ff`、`avalonia-node-map-8lu`、`avalonia-node-map-9rq` 和 `avalonia-node-map-1j4`。它不授权 no runtime UI behavior changes、no shell-state manifest rows、no strict pixel baselines、no public API changes、no retained API removal 或 no broad visual/language/theme certification。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -242,16 +246,20 @@ Phase 503 现在通过 GitHub #129 / `avalonia-node-map-mzu` 承接 declarative 
 
 Phase 504 现在通过 GitHub #131 / `avalonia-node-map-8lf` 承接 layout provider evidence expansion。它保持 docs/tests only：记录当前同步且由宿主拥有的 `IGraphLayoutProvider` / `GraphLayoutRequest` / `GraphLayoutPlan` seam，以及 preview/apply/snap command evidence；不声明 async/cancellable provider execution、runtime behavior change、public API change、UI redesign、retained API removal 或 new layout engine。
 
-Phase 505 现在通过 GitHub #133 / `avalonia-node-map-b4z` 承接 accessibility manual assistive-technology validation plan。它保持 docs/tests only：在 `HOSTED_ACCESSIBILITY_OK:True` 已经通过后，为 Narrator、NVDA 和 VoiceOver 或平台等价检查记录 manual checklist，同时明确区分 headless automation 与 unverified live screen-reader behavior。它不授权 no live-region/runtime behavior change、no UI change、no public API change、no retained API removal 或 no broad screen-reader certification claim。
+Phase 505 已通过 GitHub #133 / `avalonia-node-map-b4z` 关闭 accessibility manual assistive-technology validation plan。它保持 docs/tests only：在 `HOSTED_ACCESSIBILITY_OK:True` 已经通过后，为 Narrator、NVDA 和 VoiceOver 或平台等价检查记录 manual checklist，同时明确区分 headless automation 与 unverified live screen-reader behavior。它不授权 no live-region/runtime behavior change、no UI change、no public API change、no retained API removal 或 no broad screen-reader certification claim。
 
-Phase 506 现在通过 GitHub #135 / `avalonia-node-map-h7c` 承接 broader shell visual coverage planning。它保持 docs/tests only：记录现有 five manifest-driven full-window shell captures 如何衔接到后续 flyout、popup、context-menu、language/theme 和 drift-measurement work；本 slice 不新增 manifest rows，也不扩大 visual certification claims。
+Phase 506 已通过 GitHub #135 / `avalonia-node-map-h7c` 关闭 broader shell visual coverage planning。它保持 docs/tests only：记录现有 five manifest-driven full-window shell captures 如何衔接到后续 flyout、popup、context-menu、language/theme 和 drift-measurement work；本 slice 不新增 manifest rows，也不扩大 visual certification claims。
+
+Phase 507 现在通过 GitHub #137 / `avalonia-node-map-3tw` 承接 post-Phase-506 visual queue refresh。它是 docs/tests only：修复 stale current-owned table，并把 Phase 506 planning candidates 转成下一轮具体 visual-coverage queue；不做 no runtime UI behavior changes、no shell-state manifest rows、no strict pixel baselines、no public API changes、no retained API removal 或 no broad visual/language/theme certification。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #129 | `avalonia-node-map-mzu` | Phase 503: declarative API ergonomics audit | P3 | parity roadmap docs、Quick Start、Host Integration、focused docs tests | Current owned slice。独立的 docs/tests audit declarative API ergonomics；没有后续 implementation tracker 时不引入 public API changes、runtime behavior changes、UI changes、retained API removal 或 `<ReactFlow>`-equivalent DSL。 |
-| #131 | `avalonia-node-map-8lf` | Phase 504: layout provider evidence expansion | P3 | layout docs/tests、Cookbook route evidence | Current owned slice。与 shell visual work 独立；保持当前 provider seam 同步且由宿主拥有，不引入 async/cancellable provider execution、runtime behavior changes、public API changes、UI changes、retained API removal 或 new layout engine。 |
-| #133 | `avalonia-node-map-b4z` | Phase 505: accessibility manual assistive-technology validation plan | P3 | accessibility docs、manual validation checklist、focused docs tests | Current owned slice。只记录 manual assistive-technology validation steps；本 slice 不做 live-region/runtime behavior changes、UI changes、public API changes、retained API removal 或 broad screen-reader certification claim。 |
-| #135 | `avalonia-node-map-h7c` | Phase 506: broader shell visual coverage planning | P3 | shell visual docs/tests planning | Current owned slice。规划后续 flyout capture、popup capture、context-menu capture、additional language/theme variants 和 pixel-baseline drift measurement；本 slice 不新增 manifest rows、strict pixel baselines、runtime UI changes、public API changes、retained API removal 或 broad visual/language/theme certification。 |
+| #137 | `avalonia-node-map-3tw` | Phase 507: post-Phase-506 visual queue refresh | P3 | parity roadmap docs 和 focused docs tests | Current owned slice。只修复 stale tracker wording；不做 runtime UI behavior changes、shell-state manifest rows、strict pixel baselines、public API changes、retained API removal 或 broad visual/language/theme certification。 |
+| #139 | `avalonia-node-map-2nu` | Phase 508: shell flyout visual capture | P3 | shell visual gate harness、manifest/docs/tests、generated artifact metadata | Phase 507 之后的候选项。只隔离一条 flyout capture path，并证明 full-window artifact metadata，不声明 broad shell certification。 |
+| #140 | `avalonia-node-map-0ff` | Phase 509: popup visual capture | P3 | shell visual gate harness、manifest/docs/tests、generated artifact metadata | flyout capture 之后的候选项。popup coverage 与 context-menu coverage 分开推进，除非另有 tracker，不做 runtime redesign。 |
+| #141 | `avalonia-node-map-8lu` | Phase 510: context-menu visual capture | P3 | context-menu visual harness/docs/tests、generated artifact metadata | popup capture 之后的候选项。复用现有 context-menu presenter route，不做 public API changes 或 retained hook removal。 |
+| #142 | `avalonia-node-map-9rq` | Phase 511: additional language/theme shell variants | P3 | 有界 language/theme rows 的 shell state manifest/docs/tests | overlay capture 形状明确后的候选项。只增加明确 variants，不声明 broad visual/language/theme certification。 |
+| #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement | P3 | drift measurement docs/tests/artifact metadata | 必须先于任何 strict pixel baseline。比较记录的 `PngSha256` 和 host metadata 作为 evidence，而不是引入 pass/fail hash policy。 |
 
 ## 推荐并行 Worktree 计划
 
@@ -267,6 +275,12 @@ Phase 506 现在通过 GitHub #135 / `avalonia-node-map-h7c` 承接 broader shel
 - `docs/phase-504-layout-provider-evidence`：已负责 #131 / `avalonia-node-map-8lf`；只隔离 layout provider proof docs/tests，不修改 provider runtime behavior。
 - `docs/phase-505-accessibility-manual-validation`：负责 #133 / `avalonia-node-map-b4z`；写集限制在 accessibility docs、manual validation checklist wording 和 focused docs tests。
 - `docs/phase-506-shell-visual-coverage-planning`：负责 #135 / `avalonia-node-map-h7c`；写集限制在 shell visual planning docs/tests，不编辑 shell-state manifest rows。
+- `docs/phase-507-visual-queue-refresh`：负责 #137 / `avalonia-node-map-3tw`；写集只限本 parity roadmap 和 focused docs tests。
+- `visual/phase-508-shell-flyout-capture`：负责 #139 / `avalonia-node-map-2nu`；用于第一条 tracker-backed flyout visual capture 的候选 worktree。
+- `visual/phase-509-popup-capture`：负责 #140 / `avalonia-node-map-0ff`；popup visual capture 候选 worktree，与 context-menu capture 分离。
+- `visual/phase-510-context-menu-capture`：负责 #141 / `avalonia-node-map-8lu`；通过现有 context-menu presenter route 做 context-menu visual capture 的候选 worktree。
+- `visual/phase-511-language-theme-shell-variants`：负责 #142 / `avalonia-node-map-9rq`；overlay capture 形状稳定后，为有界 language/theme shell-state rows 准备的候选 worktree。
+- `visual/phase-512-pixel-drift-measurement`：负责 #143 / `avalonia-node-map-1j4`；任何 strict pixel-baseline gate 前，用于 drift measurement 的候选 worktree。
 
 ## UI 验证策略
 
@@ -293,6 +307,11 @@ Phase 506 现在通过 GitHub #135 / `avalonia-node-map-h7c` 承接 broader shel
 - Phase 499 现在通过 GitHub #121 / `avalonia-node-map-9x7` 承接 renderer virtualization execution-boundary proof；它只记录 proof criteria，不做 renderer implementation。
 - Phase 500 已通过 GitHub #123 / `avalonia-node-map-66t` 关闭 selected runtime shell visual gate state；它只记录一条 runtime closed-shell state，不做 broad visual certification。
 - Phase 501 已通过 GitHub #125 / `avalonia-node-map-38n` 关闭 post-Phase-500 parity follow-up queue refresh；它只记录 next issue split，不做 implementation。
-- Phase 502 现在通过 GitHub #127 / `avalonia-node-map-mai` 承接 renderer virtualization execution proof；它只记录 proof-command 与 artifact-metadata criteria，不做 renderer implementation。
-- Phase 503 现在通过 GitHub #129 / `avalonia-node-map-mzu` 承接 declarative API ergonomics audit；它只记录当前可复制 API 路线，不新增 DSL 或 public API。
-- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502 和 Phase 503 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
+- Phase 502 已通过 GitHub #127 / `avalonia-node-map-mai` 关闭 renderer virtualization execution proof；它只记录 proof-command 与 artifact-metadata criteria，不做 renderer implementation。
+- Phase 503 已通过 GitHub #129 / `avalonia-node-map-mzu` 关闭 declarative API ergonomics audit；它只记录当前可复制 API 路线，不新增 DSL 或 public API。
+- Phase 504 已通过 GitHub #131 / `avalonia-node-map-8lf` 关闭 layout provider evidence expansion；它记录当前同步且由宿主拥有的 layout provider seam。
+- Phase 505 已通过 GitHub #133 / `avalonia-node-map-b4z` 关闭 accessibility manual assistive-technology validation planning；它只记录 manual AT checks，不声明 certification。
+- Phase 506 已通过 GitHub #135 / `avalonia-node-map-h7c` 关闭 broader shell visual coverage planning；它只记录未来 visual candidates，不新增 manifest rows。
+- Phase 507 现在通过 GitHub #137 / `avalonia-node-map-3tw` 承接 post-Phase-506 visual queue refresh；它把 Phases 508-512 分配到真实 tracker IDs。
+- Phase 508 / #139 / `avalonia-node-map-2nu`、Phase 509 / #140 / `avalonia-node-map-0ff`、Phase 510 / #141 / `avalonia-node-map-8lu`、Phase 511 / #142 / `avalonia-node-map-9rq` 和 Phase 512 / #143 / `avalonia-node-map-1j4` 是下一轮具体 visual-coverage candidates。
+- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506 和 Phase 507 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
