@@ -1,6 +1,6 @@
 # Custom Node Host Recipe
 
-This recipe shows the host-centric path for registering custom node definitions, declaring ports with grouping and validation, sizing defaults, replacing node visuals through `IGraphNodeVisualPresenter`, and wiring `PortAnchors` for edge geometry.
+This recipe shows the host-centric path for registering custom node definitions, declaring ports with grouping and validation, sizing defaults, choosing `NodeBodyPresenter` or `NodeVisualPresenter`, marking drag handles with `NodeDragHandle`, and wiring anchors for edge geometry.
 
 Use it when your host owns the node catalog and wants custom presentation on the canonical Avalonia route.
 
@@ -93,7 +93,68 @@ defaultHeight: 180d
 
 The stock canvas respects these as the initial size. Hosts can mutate size later through `IGraphEditorSession.Commands.TrySetNodeSize(...)` or `TrySetNodeWidth(...)`.
 
-## 4. Replacing Node Visuals
+## 4. Choose the Presentation Seam
+
+Pick the smallest supported presentation seam that matches the amount of visual ownership your host needs:
+
+| Need | Use | What stays stock |
+| --- | --- | --- |
+| Keep the stock shell, title, ports, selection chrome, resize/drag behavior, and only replace the body content | `AsterGraphPresentationOptions.NodeBodyPresenter` / `IGraphNodeBodyPresenter` | `DefaultGraphNodeVisualPresenter`, `GraphNodeVisual.PortAnchors`, stock node drag, stock committed-edge rendering |
+| Replace the entire node visual tree, including custom port placement and pointer routing | `AsterGraphPresentationOptions.NodeVisualPresenter` / `IGraphNodeVisualPresenter` | Runtime/session contracts, connection geometry snapshots, persistence, undo/redo |
+
+Use `NodeBodyPresenter` first when your custom node is mostly custom content inside the standard AsterGraph node frame. Use `NodeVisualPresenter` only when you need to own the full root visual, port controls, layout, or pointer behavior.
+
+### Stock Shell Body Customization
+
+Implement `IGraphNodeBodyPresenter` when you want a React Flow-style custom body without giving up the stock AsterGraph shell:
+
+```csharp
+using Avalonia.Controls;
+using AsterGraph.Avalonia.Presentation;
+
+public sealed class MyNodeBodyPresenter : IGraphNodeBodyPresenter
+{
+    public GraphNodeBodyVisual Create(GraphNodeVisualContext context)
+    {
+        var handle = new Border { Name = "PART_ReviewDragHandle" };
+        NodeDragHandle.SetIsDragHandle(handle, true);
+
+        var body = new StackPanel
+        {
+            Children =
+            {
+                handle,
+                new TextBlock { Text = context.Node.DisplayName },
+            },
+        };
+
+        return new GraphNodeBodyVisual(body);
+    }
+
+    public void Update(GraphNodeBodyVisual visual, GraphNodeVisualContext context)
+    {
+        // Refresh body-only state from context.Node.
+    }
+}
+```
+
+Wire the body presenter without replacing the full node visual presenter:
+
+```csharp
+Presentation = new AsterGraphPresentationOptions
+{
+    NodeBodyPresenter = new MyNodeBodyPresenter(),
+}
+```
+
+Drag handle boundary:
+
+- `NodeDragHandle.SetIsDragHandle(control, true)` marks a control that can start node dragging inside the stock shell.
+- If a stock-shell node contains any marked drag handle, dragging starts only from that handle or its descendants.
+- Unmarked body content remains available for text selection, buttons, sliders, parameter editors, or other host-owned interactions.
+- Full `NodeVisualPresenter` replacements own their root pointer routing and can read the same attached property if they choose to mirror the stock-shell rule.
+
+## 5. Replacing Full Node Visuals
 
 Replace the visual tree by implementing `IGraphNodeVisualPresenter`:
 
@@ -156,7 +217,7 @@ Lifecycle boundary:
 - A custom presenter should delegate to `DefaultGraphNodeVisualPresenter` for nodes it does not own.
 - Presenter state stays host-owned; persisted graph changes still go through `IGraphEditorSession.Commands`.
 
-## 5. PortAnchors, TargetAnchors, and Edge Geometry
+## 6. PortAnchors, TargetAnchors, and Edge Geometry
 
 `GraphNodeVisual.PortAnchors` is the anchor map the stock canvas uses for committed connections.
 
@@ -179,7 +240,7 @@ Each snapshot contains source/target anchor positions and route vertices. Hosts 
 
 The supported custom edge path is stock edge styling plus an optional host-owned overlay from geometry snapshots. There is no public `IGraphEdgeVisualPresenter`, and `NodeCanvas` internal layers such as `OverlayLayer` are intentionally not part of this recipe.
 
-## 6. Proof Validation
+## 7. Proof Validation
 
 Close the custom-node handoff with the defended proof run:
 
@@ -204,12 +265,13 @@ Expect:
 
 1. Define `NodeDefinition` with inputs, outputs, parameters, `defaultWidth`, and `defaultHeight`
 2. Register the provider in the catalog or through a plugin
-3. Implement `IGraphNodeVisualPresenter` for custom visuals
-4. Populate `GraphNodeVisual.PortAnchors` with port-id-to-control mappings
-5. Populate `GraphNodeVisual.ConnectionTargetAnchors` for typed parameter endpoints when needed
-6. Render custom edge badges or labels from `GetConnectionGeometrySnapshots()` if stock styling is not enough
-7. Wire the presenter into `AsterGraphPresentationOptions.NodeVisualPresenter`
-8. Validate with `src/AsterGraph.Demo -- --proof` and expect `AUTHORING_SURFACE_OK:True` plus `CUSTOM_EXTENSION_SURFACE_OK:True`
+3. Use `IGraphNodeBodyPresenter` plus `AsterGraphPresentationOptions.NodeBodyPresenter` when the stock shell should own title, ports, resize, drag, and selection chrome
+4. Mark body drag handles with `NodeDragHandle.SetIsDragHandle(control, true)` when only part of the body should start node dragging
+5. Use `IGraphNodeVisualPresenter` plus `AsterGraphPresentationOptions.NodeVisualPresenter` only when the host must replace the full visual tree
+6. Populate `GraphNodeVisual.PortAnchors` with port-id-to-control mappings in full visual replacements
+7. Populate `GraphNodeVisual.ConnectionTargetAnchors` for typed parameter endpoints when needed
+8. Render custom edge badges or labels from `GetConnectionGeometrySnapshots()` if stock styling is not enough
+9. Validate with `src/AsterGraph.Demo -- --proof` and expect `AUTHORING_SURFACE_OK:True` plus `CUSTOM_EXTENSION_SURFACE_OK:True`
 
 ## Related Docs
 

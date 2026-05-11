@@ -1,6 +1,6 @@
 # Custom Node Host Recipe
 
-这份 recipe 展示的是宿主视角的自定义节点定义注册、带分组和校验的端口声明、默认尺寸设置、通过 `IGraphNodeVisualPresenter` 替换节点视觉树，以及为边几何提供 `PortAnchors` 的完整路线。
+这份 recipe 展示的是宿主视角的自定义节点定义注册、带分组和校验的端口声明、默认尺寸设置、选择 `NodeBodyPresenter` 或 `NodeVisualPresenter`、通过 `NodeDragHandle` 标记拖拽手柄，以及为边几何提供 anchors 的完整路线。
 
 当宿主管着 node catalog 并想在 canonical Avalonia 路线上做自定义展示时，使用本文档。
 
@@ -93,7 +93,68 @@ defaultHeight: 180d
 
 默认画布会以此作为初始尺寸。宿主之后可通过 `IGraphEditorSession.Commands.TrySetNodeSize(...)` 或 `TrySetNodeWidth(...)` 改变尺寸。
 
-## 4. 替换节点视觉树
+## 4. 选择 presentation seam
+
+先选择能满足需求的最小 presentation seam：
+
+| 需求 | 使用 | 继续由 stock 路线负责 |
+| --- | --- | --- |
+| 保留 stock shell、标题、端口、selection chrome、resize/drag 行为，只替换 body 内容 | `AsterGraphPresentationOptions.NodeBodyPresenter` / `IGraphNodeBodyPresenter` | `DefaultGraphNodeVisualPresenter`、`GraphNodeVisual.PortAnchors`、stock node drag、stock committed-edge rendering |
+| 替换整棵节点视觉树，包括自定义端口位置和 pointer routing | `AsterGraphPresentationOptions.NodeVisualPresenter` / `IGraphNodeVisualPresenter` | runtime/session contracts、connection geometry snapshots、persistence、undo/redo |
+
+当自定义节点主要是标准 AsterGraph 节点框架内的自定义内容时，优先使用 `NodeBodyPresenter`。只有当宿主必须拥有完整 root visual、port controls、layout 或 pointer behavior 时，才使用 `NodeVisualPresenter`。
+
+### Stock shell body 自定义
+
+当你想要 React Flow-style custom body，但仍保留 stock AsterGraph shell 时，实现 `IGraphNodeBodyPresenter`：
+
+```csharp
+using Avalonia.Controls;
+using AsterGraph.Avalonia.Presentation;
+
+public sealed class MyNodeBodyPresenter : IGraphNodeBodyPresenter
+{
+    public GraphNodeBodyVisual Create(GraphNodeVisualContext context)
+    {
+        var handle = new Border { Name = "PART_ReviewDragHandle" };
+        NodeDragHandle.SetIsDragHandle(handle, true);
+
+        var body = new StackPanel
+        {
+            Children =
+            {
+                handle,
+                new TextBlock { Text = context.Node.DisplayName },
+            },
+        };
+
+        return new GraphNodeBodyVisual(body);
+    }
+
+    public void Update(GraphNodeBodyVisual visual, GraphNodeVisualContext context)
+    {
+        // 从 context.Node 刷新 body-only state。
+    }
+}
+```
+
+接入 body presenter，不替换完整节点视觉 presenter：
+
+```csharp
+Presentation = new AsterGraphPresentationOptions
+{
+    NodeBodyPresenter = new MyNodeBodyPresenter(),
+}
+```
+
+拖拽手柄边界：
+
+- `NodeDragHandle.SetIsDragHandle(control, true)` 标记 stock shell 内可启动节点拖拽的 control。
+- 如果 stock-shell 节点里存在任何已标记 drag handle，节点拖拽只能从该 handle 或其 descendants 启动。
+- 未标记的 body 内容仍可用于文本选择、按钮、滑块、parameter editors 或其他宿主自有交互。
+- 完整 `NodeVisualPresenter` 替换拥有自己的 root pointer routing；如果要复用 stock-shell 规则，可以读取同一个 attached property。
+
+## 5. 替换完整节点视觉树
 
 实现 `IGraphNodeVisualPresenter` 来替换视觉树：
 
@@ -156,7 +217,7 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - 自定义 presenter 对不归自己管理的节点应委托给 `DefaultGraphNodeVisualPresenter`。
 - presenter state 归宿主管；持久化图变化仍然走 `IGraphEditorSession.Commands`。
 
-## 5. PortAnchors、TargetAnchors 与边几何
+## 6. PortAnchors、TargetAnchors 与边几何
 
 `GraphNodeVisual.PortAnchors` 是默认画布用于已提交连线的锚点映射。
 
@@ -179,7 +240,7 @@ var geometries = session.Queries.GetConnectionGeometrySnapshots();
 
 受支持的自定义边路径是 stock edge styling 加可选的、基于 geometry snapshots 的宿主自管 overlay。这里没有 public `IGraphEdgeVisualPresenter`；`NodeCanvas` 的内部层（包括 `OverlayLayer`）也不是这条 recipe 的一部分。
 
-## 6. Proof 验证
+## 7. Proof 验证
 
 用受防守的 proof run 收口自定义节点 handoff：
 
@@ -204,12 +265,13 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 
 1. 用 `NodeDefinition` 定义输入、输出、参数、`defaultWidth` 和 `defaultHeight`
 2. 在 catalog 里注册 provider，或通过插件注册
-3. 实现 `IGraphNodeVisualPresenter` 做自定义视觉树
-4. 在 `GraphNodeVisual.PortAnchors` 里填入 port-id 到 control 的映射
-5. 需要 typed parameter endpoints 时，在 `GraphNodeVisual.ConnectionTargetAnchors` 里填入目标锚点
-6. 当 stock styling 不够时，用 `GetConnectionGeometrySnapshots()` 渲染自定义 edge badge 或 label
-7. 把 presenter 接入 `AsterGraphPresentationOptions.NodeVisualPresenter`
-8. 用 `src/AsterGraph.Demo -- --proof` 验证，期待 `AUTHORING_SURFACE_OK:True` 和 `CUSTOM_EXTENSION_SURFACE_OK:True`
+3. 当 stock shell 应继续拥有 title、ports、resize、drag 和 selection chrome 时，使用 `IGraphNodeBodyPresenter` 加 `AsterGraphPresentationOptions.NodeBodyPresenter`
+4. 当只有 body 的一部分应启动节点拖拽时，用 `NodeDragHandle.SetIsDragHandle(control, true)` 标记 body drag handle
+5. 只有宿主必须替换完整视觉树时，才使用 `IGraphNodeVisualPresenter` 加 `AsterGraphPresentationOptions.NodeVisualPresenter`
+6. 在完整 visual replacement 中，用 `GraphNodeVisual.PortAnchors` 填入 port-id 到 control 的映射
+7. 需要 typed parameter endpoints 时，在 `GraphNodeVisual.ConnectionTargetAnchors` 里填入目标锚点
+8. 当 stock styling 不够时，用 `GetConnectionGeometrySnapshots()` 渲染自定义 edge badge 或 label
+9. 用 `src/AsterGraph.Demo -- --proof` 验证，期待 `AUTHORING_SURFACE_OK:True` 和 `CUSTOM_EXTENSION_SURFACE_OK:True`
 
 ## 相关文档
 
