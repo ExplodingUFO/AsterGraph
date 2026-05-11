@@ -116,6 +116,42 @@ public sealed class RendererVirtualizationProofDocsTests
         Assert.Contains("单独的 implementation issue", chineseScale, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ScaleDocs_RecordPhase502ExecutableProofContractWithoutSupportClaimExpansion()
+    {
+        var englishScale = ReadRepoFile("docs/en/scale-baseline.md");
+        var chineseScale = ReadRepoFile("docs/zh-CN/scale-baseline.md");
+
+        foreach (var contents in new[] { englishScale, chineseScale })
+        {
+            Assert.Contains("Phase 502", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #127", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-mai", contents, StringComparison.Ordinal);
+            Assert.Contains("renderer virtualization execution proof", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("RENDERER_VIRTUALIZATION_PROOF_CONTRACT", contents, StringComparison.Ordinal);
+            Assert.Contains("RENDERER_VIRTUALIZATION_PROOF_COMMAND", contents, StringComparison.Ordinal);
+            Assert.Contains("RENDERER_VIRTUALIZATION_ARTIFACT_METADATA", contents, StringComparison.Ordinal);
+            Assert.Contains("graphSize", contents, StringComparison.Ordinal);
+            Assert.Contains("viewport", contents, StringComparison.Ordinal);
+            Assert.Contains("zoom", contents, StringComparison.Ordinal);
+            Assert.Contains("overscan", contents, StringComparison.Ordinal);
+            Assert.Contains("visibleVisualCounts", contents, StringComparison.Ordinal);
+            Assert.Contains("invalidationCounts", contents, StringComparison.Ordinal);
+            Assert.Contains("measuredTimings", contents, StringComparison.Ordinal);
+            Assert.Contains("non-informational renderer thresholds", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("full collection scan", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("full scene rebuild", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no support-claim expansion", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.False(
+            HasLineWithAll(englishScale, "Phase 502", "authorizes", "ItemsRepeater"),
+            "Phase 502 must not authorize ItemsRepeater-style renderer virtualization implementation.");
+        Assert.False(
+            HasLineWithAll(chineseScale, "Phase 502", "授权", "ItemsRepeater"),
+            "Phase 502 must not authorize ItemsRepeater-style renderer virtualization implementation.");
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 

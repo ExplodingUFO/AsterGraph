@@ -126,6 +126,16 @@ Phase 489 先定义最低 renderer virtualization contract，后续 issue 才能
 
 Phase 499 记录这份未来 proof 的 execution boundary。本 slice 是 docs/tests-only，不授权 benchmark harness implementation、renderer rewrite、public API change、runtime behavior change、UI change 或 support-claim expansion。第一份可执行 proof 仍必须由单独的 implementation issue 创建，并且在公开声明变化前为这些 surface 产出 CI-repeatable evidence：non-informational renderer thresholds、repeatable proof command output、artifact metadata、incremental visual lifecycle evidence、invalidation evidence、connection preview preservation，以及证明被声明操作不会依赖 full collection scan 和 full scene rebuild 的证据。
 
+Phase 502 是 GitHub #127 / `avalonia-node-map-mai`，承接 Phase 501 queue refresh 选出的 renderer virtualization execution proof contract。本 slice 仍是 docs/tests-only contract slice：它只命名未来 implementation work 必须满足的 executable proof shape，不实现 renderer virtualization，不把 non-informational renderer thresholds 标记为已防守，也不扩大 support claim。
+
+Phase 502 proof contract 为未来 proof artifact 预留这些机器可读 marker：
+
+- `RENDERER_VIRTUALIZATION_PROOF_CONTRACT:phase=502:scope=contract-only:no-support-claim-expansion`
+- `RENDERER_VIRTUALIZATION_PROOF_COMMAND:phase=502:command=dotnet test tests\AsterGraph.Editor.Tests\AsterGraph.Editor.Tests.csproj --configuration Release --filter FullyQualifiedName~RendererVirtualizationProof`
+- `RENDERER_VIRTUALIZATION_ARTIFACT_METADATA:phase=502:fields=graphSize,viewport,zoom,overscan,visibleVisualCounts,invalidationCounts,measuredTimings`
+
+任何后续要声明 true renderer virtualization 的 implementation PR，都必须写入包含 `graphSize`、`viewport`、`zoom`、`overscan`、`visibleVisualCounts`、`invalidationCounts` 和 `measuredTimings` 的 artifact metadata；同时配套 focused renderer tests；定义 non-informational renderer thresholds；并证明被声明的操作同时避开 full collection scan 和 full scene rebuild。在这些证据存在前，公开表述仍只限于 viewport-budgeted scene projection/rendering，`xlarge` 继续是 telemetry-only，Phase 502 只记录 no support-claim expansion。
+
 ## 运行方式
 
 ```powershell

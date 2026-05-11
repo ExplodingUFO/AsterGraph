@@ -310,8 +310,38 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.DoesNotContain("| TBD | TBD | Phase 501: choose next bounded parity follow-up", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains("Phase 501 now owns the post-Phase-500 parity follow-up queue refresh", englishParity, StringComparison.Ordinal);
-        Assert.Contains("Phase 501 现在通过 GitHub #125 / `avalonia-node-map-38n` 承接 post-Phase-500 parity follow-up queue refresh", chineseParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 501 closed the post-Phase-500 parity follow-up queue refresh", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 501 已通过 GitHub #125 / `avalonia-node-map-38n` 关闭 post-Phase-500 parity follow-up queue refresh", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase502RendererVirtualizationExecutionProofInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 502", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #127", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-mai", contents, StringComparison.Ordinal);
+            Assert.Contains("renderer virtualization execution proof", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("focused renderer tests", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("scale docs", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("proof command", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("artifact metadata", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("viewport-budgeted scene projection/rendering", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("true renderer virtualization", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("non-informational renderer thresholds", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 502: renderer virtualization execution proof", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Phase 502 now owns the renderer virtualization execution proof", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 502 现在通过 GitHub #127 / `avalonia-node-map-mai` 承接 renderer virtualization execution proof", chineseParity, StringComparison.Ordinal);
     }
 
     private static string ReadRepoFile(string relativePath)
