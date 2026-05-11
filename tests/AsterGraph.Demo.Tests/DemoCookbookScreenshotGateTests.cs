@@ -7,6 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using AsterGraph.Demo.Cookbook;
 using AsterGraph.Demo.ViewModels;
 using AsterGraph.Demo.Views;
@@ -290,7 +291,7 @@ public sealed class DemoCookbookScreenshotGateTests
             ],
             shellState.RequiredShellParts);
         Assert.Equal("shell-runtime-diagnostics-closed.png", shellState.OutputFileName);
-        Assert.Equal(6, shellStates.Count);
+        Assert.Equal(7, shellStates.Count);
     }
 
     [Fact]
@@ -321,6 +322,28 @@ public sealed class DemoCookbookScreenshotGateTests
     }
 
     [Fact]
+    public void CookbookScreenshotGate_IncludesPhase509HostCommandTooltipPopupShellState()
+    {
+        var shellStates = LoadShellStates(GetRepositoryRoot());
+        var shellState = Assert.Single(shellStates, state =>
+            string.Equals(state.Id, "shell-cookbook-default-host-command-tooltip-popup", StringComparison.Ordinal));
+
+        Assert.Equal("cookbook-default-starter-host-ai-pipeline", shellState.RouteId);
+        Assert.Equal("cookbook", shellState.HostGroup);
+        Assert.Equal("en", shellState.Language);
+        Assert.Equal("canonical-dark", shellState.Theme);
+        Assert.True(shellState.ExpectedPaneOpen);
+        Assert.Equal("PART_HostCommand_history.undo", shellState.PopupTargetPartName);
+        Assert.Equal(
+            [
+                "Nothing to undo yet.",
+            ],
+            shellState.RequiredPopupText);
+        Assert.Contains("PART_CommandRail", shellState.RequiredShellParts, StringComparer.Ordinal);
+        Assert.Equal("shell-cookbook-default-host-command-tooltip-popup.png", shellState.OutputFileName);
+    }
+
+    [Fact]
     public void CookbookScreenshotGate_DocumentationNamesCommandArtifactsAndCiPosture()
     {
         var english = ReadRepoFile("docs/en/demo-cookbook.md");
@@ -343,6 +366,9 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains("shell-cookbook-default-view-menu-flyout", contents, StringComparison.Ordinal);
             Assert.Contains("full-window-shell-flyout-state", contents, StringComparison.Ordinal);
             Assert.Contains("PART_ViewMenu", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-host-command-tooltip-popup", contents, StringComparison.Ordinal);
+            Assert.Contains("full-window-shell-popup-state", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_HostCommand_history.undo", contents, StringComparison.Ordinal);
             Assert.Contains("language/theme", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("builtin-standalone-controls-route", contents, StringComparison.Ordinal);
             Assert.Contains("builtin-standalone-panel-route", contents, StringComparison.Ordinal);
@@ -406,6 +432,13 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.StartsWith("PART_", shellState.FlyoutMenuPartName, StringComparison.Ordinal);
             Assert.NotEmpty(shellState.RequiredFlyoutHeaders);
             Assert.All(shellState.RequiredFlyoutHeaders, header => Assert.False(string.IsNullOrWhiteSpace(header)));
+        }
+
+        if (!string.IsNullOrWhiteSpace(shellState.PopupTargetPartName))
+        {
+            Assert.StartsWith("PART_", shellState.PopupTargetPartName, StringComparison.Ordinal);
+            Assert.NotEmpty(shellState.RequiredPopupText);
+            Assert.All(shellState.RequiredPopupText, text => Assert.False(string.IsNullOrWhiteSpace(text)));
         }
     }
 
@@ -485,11 +518,12 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Equal(shellState.ExpectedPaneOpen, shellSplitView.IsPaneOpen);
             foreach (var partName in shellState.RequiredShellParts)
             {
-                var control = Assert.IsAssignableFrom<Control>(window.FindControl<Control>(partName));
+                var control = Assert.IsAssignableFrom<Control>(FindShellControl(window, partName));
                 Assert.True(control.IsVisible, $"{shellState.Id} expected visible shell part: {partName}");
             }
 
             var openedFlyout = OpenRequestedFlyout(window, shellState);
+            var openedPopup = OpenRequestedPopup(window, shellState);
 
             using var frame = window.CaptureRenderedFrame();
             Assert.NotNull(frame);
@@ -516,7 +550,7 @@ public sealed class DemoCookbookScreenshotGateTests
                 imageSize.Width,
                 imageSize.Height,
                 "headless-avalonia-window",
-                openedFlyout is null ? "full-window-shell-state" : "full-window-shell-flyout-state",
+                ResolveShellCaptureScope(openedFlyout, openedPopup),
                 ToRepoRelativePath(repoRoot, imagePath),
                 ShellStateManifestRelativePath,
                 viewModel.SelectedHostMenuGroupTitle,
@@ -526,6 +560,9 @@ public sealed class DemoCookbookScreenshotGateTests
                 openedFlyout?.Name,
                 openedFlyout?.IsSubMenuOpen ?? false,
                 shellState.RequiredFlyoutHeaders,
+                openedPopup?.Name,
+                openedPopup is not null && ToolTip.GetIsOpen(openedPopup),
+                shellState.RequiredPopupText,
                 pixelInspection.NonTransparentPixelCount,
                 pixelInspection.DistinctColorCount,
                 Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant());
@@ -540,12 +577,7 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains(route.RecipeId, metadataJson, StringComparison.Ordinal);
             Assert.Contains(shellState.Language, metadataJson, StringComparison.Ordinal);
             Assert.Contains(shellState.Theme, metadataJson, StringComparison.Ordinal);
-            Assert.Contains(
-                string.IsNullOrWhiteSpace(shellState.FlyoutMenuPartName)
-                    ? "full-window-shell-state"
-                    : "full-window-shell-flyout-state",
-                metadataJson,
-                StringComparison.Ordinal);
+            Assert.Contains(ResolveShellCaptureScope(openedFlyout, openedPopup), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ToRepoRelativePath(repoRoot, imagePath), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ShellStateManifestRelativePath, metadataJson, StringComparison.Ordinal);
             foreach (var partName in shellState.RequiredShellParts)
@@ -560,11 +592,31 @@ public sealed class DemoCookbookScreenshotGateTests
                 Assert.Contains("\"IsFlyoutOpen\": true", metadataJson, StringComparison.Ordinal);
                 Assert.All(shellState.RequiredFlyoutHeaders, header => Assert.Contains(header, metadataJson, StringComparison.Ordinal));
             }
+
+            if (!string.IsNullOrWhiteSpace(shellState.PopupTargetPartName))
+            {
+                Assert.Contains("full-window-shell-popup-state", metadataJson, StringComparison.Ordinal);
+                Assert.Contains(shellState.PopupTargetPartName, metadataJson, StringComparison.Ordinal);
+                Assert.Contains("\"IsPopupOpen\": true", metadataJson, StringComparison.Ordinal);
+                Assert.All(shellState.RequiredPopupText, text => Assert.Contains(text, metadataJson, StringComparison.Ordinal));
+            }
         }
         finally
         {
             window.Close();
         }
+    }
+
+    private static string ResolveShellCaptureScope(MenuItem? openedFlyout, Control? openedPopup)
+    {
+        if (openedPopup is not null)
+        {
+            return "full-window-shell-popup-state";
+        }
+
+        return openedFlyout is null
+            ? "full-window-shell-state"
+            : "full-window-shell-flyout-state";
     }
 
     private static MenuItem? OpenRequestedFlyout(MainWindow window, CookbookShellVisualGateState shellState)
@@ -593,6 +645,36 @@ public sealed class DemoCookbookScreenshotGateTests
         Assert.True(menuItem.IsSubMenuOpen, $"{shellState.Id} expected open flyout: {shellState.FlyoutMenuPartName}");
         return menuItem;
     }
+
+    private static Control? OpenRequestedPopup(MainWindow window, CookbookShellVisualGateState shellState)
+    {
+        if (string.IsNullOrWhiteSpace(shellState.PopupTargetPartName))
+        {
+            return null;
+        }
+
+        var target = Assert.IsAssignableFrom<Control>(FindShellControl(window, shellState.PopupTargetPartName));
+        var tip = ToolTip.GetTip(target);
+        Assert.NotNull(tip);
+        var tipText = tip.ToString() ?? string.Empty;
+        foreach (var requiredText in shellState.RequiredPopupText)
+        {
+            Assert.Contains(requiredText, tipText, StringComparison.Ordinal);
+        }
+
+        ToolTip.SetIsOpen(target, true);
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Loaded);
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.True(ToolTip.GetIsOpen(target), $"{shellState.Id} expected open tooltip popup: {shellState.PopupTargetPartName}");
+        return target;
+    }
+
+    private static Control? FindShellControl(MainWindow window, string partName)
+        => window.FindControl<Control>(partName)
+           ?? window.GetVisualDescendants()
+               .OfType<Control>()
+               .SingleOrDefault(control => string.Equals(control.Name, partName, StringComparison.Ordinal));
 
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
@@ -698,6 +780,8 @@ public sealed class DemoCookbookScreenshotGateTests
         bool ExpectedPaneOpen,
         string? FlyoutMenuPartName,
         string[] RequiredFlyoutHeaders,
+        string? PopupTargetPartName,
+        string[] RequiredPopupText,
         string[] RequiredShellParts,
         string OutputFileName);
 
@@ -745,6 +829,9 @@ public sealed class DemoCookbookScreenshotGateTests
         string? FlyoutMenuPartName,
         bool IsFlyoutOpen,
         string[] CoveredFlyoutHeaders,
+        string? PopupTargetPartName,
+        bool IsPopupOpen,
+        string[] CoveredPopupText,
         int NonTransparentPixelCount,
         int DistinctColorCount,
         string PngSha256);
