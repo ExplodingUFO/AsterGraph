@@ -6,9 +6,17 @@ This document started as the Phase 0 audit for the `0.11.0-beta` baseline. Phase
 
 The scope of this refresh is docs and tracker state only. It does not change product code, runtime behavior, renderer contracts, or public support claims.
 
+## Phase 484 Update
+
+Phase 484 refreshes the roadmap after the Phase 478-483 wave closed and after Phase 480 delivered the rotatable-node surface. The previous next-wave queue was stale because GitHub #80 / `avalonia-node-map-p480` is now closed. This update keeps the work docs-only, replaces the one-item queue with a prioritized split plan, and keeps public claims tied to current source, tests, docs, and CI evidence.
+
 ## Phase 481 Update
 
 Phase 481 adds a deterministic full-window Cookbook shell capture alongside the existing scene PNG gate. The new gate covers the default Cookbook shell route, writes artifacts under `artifacts/test-results/cookbook-shell-visual-gate`, and validates dimensions, nonblank pixels, shell-part coverage, and metadata. Strict pixel-baseline comparison remains intentionally deferred until Skia/native drift is measured across CI hosts.
+
+## Phase 480 Update
+
+Phase 480 closes GitHub #80 by adding persisted node rotation as an explicit surface contract. The supported route is `GraphNodeSurfaceState.RotationDegrees` in the persisted model, `IGraphEditorCommands.TrySetNodeRotation(...)` for mutation, and `GraphEditorNodeSurfaceSnapshot.RotationDegrees` for host projection. `GraphNodeRotationGeometry` remains a geometry helper; public guidance points hosts at the command/query state contract instead of treating the helper as the primary integration API.
 
 ## Phase 479 Update
 
@@ -36,7 +44,7 @@ Phase 483 closes GitHub #82 by choosing the bounded-docs path instead of a rende
 | Persisted data model and serialization | `src/AsterGraph.Core` | `GraphDocument`, groups, scopes, edge presentation, schema migration helpers, and legacy import boundary. | Compatibility cleanup from #48 is complete; new model fields such as rotation must name schema behavior up front. |
 | Session, commands, queries, state services | `src/AsterGraph.Editor` | Selection, undo/redo, clipboard, workspace save/load, connection authoring, validation, layout, events, mutations, and presentation snapshots. | Strong canonical route. New parity work should go through commands/queries rather than bypassing session ownership. |
 | Layout integration | `src/AsterGraph.Editor/Runtime` and services | `GraphLayoutRequest`, `GraphLayoutPlan`, `IGraphLayoutProvider`, preview/apply/cancel evidence, and snap/grid commands. | Provider seam exists; background/cancel/provider examples need continued proof when layout claims expand. |
-| Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`, scene host projection, edge renderer, interaction coordinators, automation peers, MiniMap, Background, Controls, Panel, NodeToolbar, EdgeToolbar, NodeResizer, and `NodeDragHandle`. | Built-ins are now reusable public components. Remaining UI parity gaps are rotation and broader full-window visual regression coverage. |
+| Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`, scene host projection, edge renderer, interaction coordinators, automation peers, MiniMap, Background, Controls, Panel, NodeToolbar, EdgeToolbar, NodeResizer, `NodeDragHandle`, and stock rotation projection. | Built-ins are now reusable public components. Remaining UI parity gaps are broader full-window visual regression coverage, Cookbook example ergonomics, and any future claim that would require true renderer virtualization. |
 | Hosted workbench shell | `GraphEditorView` and hosted factories | Header, library, canvas, inspector, validation panel, authoring tools, minimap, command projection, and status chrome. | Useful supported route, but new public features should avoid making Demo shell chrome a hidden dependency. |
 | Demo/Cookbook | `src/AsterGraph.Demo` | 25 recipes, route clarity docs, built-in/interaction/lifecycle batches, scene PNG screenshot gate metadata, and default full-window shell visual metadata. | Cookbook breadth, scene coverage, and the first shell-level capture are covered. Pixel-baseline comparison and broader shell-state coverage remain bounded future work. |
 | CI and release gates | `.github/workflows`, `eng/ci.ps1`, test projects | Build/test/maintenance/contract/release/hygiene lanes, public API baseline, package validation, docs route checks, scene PNG gate tests, and default full-window shell gate tests. | Strong text/API/scene/shell gates. Keep strict pixel baselines deferred until deterministic drift is measured. |
@@ -48,7 +56,7 @@ Phase 483 closes GitHub #82 by choosing the bounded-docs path instead of a rende
 | Custom nodes with arbitrary Avalonia content | Partial / supported through AsterGraph idioms | Node definitions, `IGraphNodeVisualPresenter`, authoring-surface docs, templates, and hosted controls exist. The public story is still less direct than React Flow's custom node component model. | Keep improving docs and samples with concrete host-owned visual presenter examples. |
 | Node drag handles | Present / guarded | `NodeDragHandle` exposes a public Avalonia attached property for custom node visual/body presenters. Focused headless tests cover drag from marked handles and suppression from unmarked body surfaces when a handle exists. | Keep guarded with `StandaloneCanvas_NodeDragHandle_*` tests and public API baseline checks. |
 | Node resizer | Present | `NodeResizer`, `TrySetNodeSize`, built-in component catalog, Cookbook route, and focused tests exist. | Keep guarded by built-in tests and screenshot route. |
-| Rotatable nodes | Missing | Source search found viewport transforms and selection transforms, but no persisted node rotation model, command, renderer contract, or tests. | GitHub #80 / `avalonia-node-map-p480`. |
+| Rotatable nodes | Present / guarded | `GraphNodeSurfaceState.RotationDegrees`, `IGraphEditorCommands.TrySetNodeRotation(...)`, `GraphEditorNodeSurfaceSnapshot.RotationDegrees`, serializer compatibility, renderer/hit-test geometry, public API baseline, and bilingual host docs are in place. | Keep guarded by model/session/Avalonia tests, public API validation, and command/query guidance. |
 | Custom edges | Present / guarded | `GraphEdgePresentation`, connection geometry snapshots, route vertices, reconnect/edit commands, labels, path kinds, markers, animation flag, and floating endpoints exist. | Keep API and renderer tests current when edge claims change. |
 | Bezier, SmoothStep, Step, Straight edges | Present | `GraphEdgePathKind` maps through `GraphEditorConnectionGeometryProjector` into route styles. | Keep guarded. |
 | Animated and floating edges | Present / proof-bounded | `IsAnimated` and `UsesFloatingEndpoints` flow through edge presentation and geometry snapshots. Visual animation proof remains narrower than static geometry proof. | Keep visual proof bounded; widen only with screenshot/full-window evidence. |
@@ -95,20 +103,32 @@ The original first wave is no longer the next work queue. These tracker items ar
 | #84 | `avalonia-node-map-p482` | Guarded cycle-prevention connection policy. |
 | #81 | `avalonia-node-map-p479` | Public hosted-Avalonia node drag-handle API through `NodeDragHandle`. |
 | #82 | `avalonia-node-map-p483` | Large-graph virtualization claim bounded to viewport-budgeted scene projection/rendering; no renderer virtualization or 10000-node support claim. |
+| #80 | `avalonia-node-map-p480` | Rotatable node model, command/query projection, renderer geometry, compatibility overloads, API baseline, and docs. |
 
 ## Next Issue Wave
 
+Phase 484 is the active planning issue for turning the now-empty queue into the next implementation wave. Follow-up issues should be created only after this docs refresh lands, so their titles, write sets, and dependencies reflect the current matrix instead of the stale Phase 478 snapshot.
+
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #80 | `avalonia-node-map-p480` | Phase 480: add rotatable node model and rendering contract | P2 | `AsterGraph.Core`, `AsterGraph.Editor`, `AsterGraph.Avalonia`, serialization/API/tests/docs | Keep separate from drag-handle work because both may touch node hit testing and adorners. |
+| #91 | `avalonia-node-map-4xr` | Phase 484: refresh React Flow parity roadmap after rotatable nodes | P1 | `docs/en/phase-0-reactflow-parity-audit.md`, `docs/zh-CN/phase-0-reactflow-parity-audit.md`, GitHub/Beads tracker state | Current docs-only issue. No product code or public API changes. |
+| TBD | TBD | Cookbook example architecture refresh | P1 | `src/AsterGraph.Demo/Cookbook`, `docs/en/demo-cookbook.md`, `docs/zh-CN/demo-cookbook.md`, screenshot route metadata if examples are renamed or split | Parallel with visual gate decision if route IDs and screenshots stay stable. Avoid core/editor API changes. |
+| TBD | TBD | Full-window visual coverage expansion decision | P1 | `tests/AsterGraph.Demo.Tests`, screenshot metadata/docs, possibly `src/AsterGraph.Demo` only for deterministic shell states | Independent from API/model work. Keep strict pixel baselines deferred unless drift data is measured. |
+| TBD | TBD | Custom node copyable-host recipe hardening | P2 | host recipe docs, templates, Demo cookbook route text, possibly `AsterGraphPresentationOptions` examples if a missing seam is proven | Parallel with Cookbook/docs work; do not touch node interaction internals unless the issue is explicitly widened. |
+| TBD | TBD | Layout provider and background/cancel proof refresh | P2 | layout provider docs/tests, Demo routes, command guidance around preview/apply/cancel | Parallel with visual/docs work. Keep runtime API stable unless tests prove a missing provider contract. |
+| TBD | TBD | Renderer virtualization design spike | P2 | docs/tests first; `AsterGraph.Avalonia` renderer/projection only if a true virtualization contract is approved | Sequential with any claim expansion. Do not claim 10000-node support from xlarge telemetry. |
+| TBD | TBD | Accessibility breadth audit | P3 | Avalonia built-ins, automation peer tests, docs for keyboard/screen-reader coverage | Parallel after visual routes are stable; keep claims bounded to audited controls. |
+| TBD | TBD | Retained migration removal roadmap | P3 | public API inventory, stabilization support matrix, retained migration docs/tests | Sequential with v1 policy and public API baseline work. Do not delete retained surfaces as a side effect of unrelated parity work. |
 
-Recommended next branch after Phase 483: `avalonia-node-map-p480` / GitHub #80 for rotatable nodes if the next branch can touch node transforms and hit testing.
+Recommended next branch after Phase 480: `feature/reactflow-parity-roadmap` for #91 / `avalonia-node-map-4xr`. Recommended first implementation branch after #91 should be whichever P1 item the refreshed plan promotes, likely either Cookbook example architecture or full-window visual coverage expansion.
 
 ## Recommended Parallel Worktree Plan
 
-- `docs/phase478-parity-refresh`: owns this audit refresh, Chinese mirror, tracker split, and Phase 478 closure only.
-- `feature/cycle-prevention-policy`: owns #84 / `avalonia-node-map-p482`. Avoid Avalonia shell work except docs/examples.
-- `feature/rotatable-nodes`: owns #80 / `avalonia-node-map-p480`. Do not mix with drag-handle API unless a shared transform abstraction is explicitly approved.
+- `feature/reactflow-parity-roadmap`: owns #91 / `avalonia-node-map-4xr`; docs and tracker plan only.
+- `docs/cookbook-example-architecture`: candidate P1; owns Cookbook catalog/docs/example ergonomics only.
+- `ui/full-window-visual-coverage`: candidate P1; owns shell-state captures, metadata, and visual verification docs only.
+- `docs/custom-node-copyable-recipes`: candidate P2; owns host-copy custom-node guidance and templates only unless a missing public seam is proven.
+- `perf/renderer-virtualization-spike`: candidate P2; owns proof design and claim boundaries before any renderer implementation.
 
 ## UI Verification Policy
 
@@ -125,5 +145,5 @@ Current coverage includes scene-level route captures and the first default full-
 ## Tracker Notes
 
 - GitHub #79 and Beads `avalonia-node-map-p478` were created with `.planning/*` in the write set. Because `.planning/` is ignored and absent from this worktree, this refresh records that as tracker drift instead of force-adding local planning files.
-- Beads is the durable local tracker for this repository. The refreshed next wave has explicit Beads IDs and GitHub issue links.
-- Product code remains out of scope for Phase 478.
+- Beads is the durable local tracker for this repository. Phase 484 reopens the queue with GitHub #91 / `avalonia-node-map-4xr`; later follow-ups should get explicit GitHub and Beads IDs before code changes.
+- Product code remains out of scope for Phase 478 and Phase 484.

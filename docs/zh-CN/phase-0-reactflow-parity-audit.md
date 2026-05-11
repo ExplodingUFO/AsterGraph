@@ -6,9 +6,17 @@
 
 本次刷新只修改文档和 tracker 状态，不修改产品代码、运行时行为、渲染器契约或公开支持声明。
 
+## Phase 484 更新
+
+Phase 484 在 Phase 478-483 wave 全部关闭、Phase 480 rotatable-node surface 已合入后重新刷新路线图。此前的下一轮队列已经过期，因为 GitHub #80 / `avalonia-node-map-p480` 已关闭。本次更新保持 docs-only，改用优先级明确的拆分计划替换单项队列，并继续把公开声明绑定到当前 source、tests、docs 和 CI 证据。
+
 ## Phase 481 更新
 
 Phase 481 在现有 scene PNG gate 之外新增了确定性的 full-window Cookbook shell capture。新 gate 覆盖 default Cookbook shell route，把 artifact 写到 `artifacts/test-results/cookbook-shell-visual-gate`，并验证 dimensions、nonblank pixels、shell-part coverage 和 metadata。严格 pixel-baseline comparison 仍然等 Skia/native drift 在 CI hosts 上测量清楚后再做。
+
+## Phase 480 更新
+
+Phase 480 通过新增明确的持久化节点旋转 surface contract 关闭 GitHub #80。受支持路线是持久化模型中的 `GraphNodeSurfaceState.RotationDegrees`、用于 mutation 的 `IGraphEditorCommands.TrySetNodeRotation(...)`，以及宿主投影中的 `GraphEditorNodeSurfaceSnapshot.RotationDegrees`。`GraphNodeRotationGeometry` 仍是 geometry helper；公开指引要求宿主优先使用 command/query state contract，而不是把 helper 当作主要集成 API。
 
 ## Phase 479 更新
 
@@ -36,7 +44,7 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 | 持久化模型和序列化 | `src/AsterGraph.Core` | `GraphDocument`、groups、scopes、edge presentation、schema migration helpers 和 legacy import boundary。 | #48 的兼容面清理已完成；新增模型字段例如 rotation 必须先说明 schema 行为。 |
 | Session、commands、queries、state services | `src/AsterGraph.Editor` | Selection、undo/redo、clipboard、workspace save/load、connection authoring、validation、layout、events、mutations 和 presentation snapshots。 | canonical route 已经较强；后续 parity 工作应走 commands/queries，不绕开 session ownership。 |
 | Layout integration | `src/AsterGraph.Editor/Runtime` 和 services | `GraphLayoutRequest`、`GraphLayoutPlan`、`IGraphLayoutProvider`、preview/apply/cancel evidence 和 snap/grid commands。 | Provider seam 已存在；扩展 layout 声明时仍需明确 background/cancel/provider proof。 |
-| Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`、scene host projection、edge renderer、interaction coordinators、automation peers、MiniMap、Background、Controls、Panel、NodeToolbar、EdgeToolbar、NodeResizer 和 `NodeDragHandle`。 | Built-ins 已成为可复用 public components。剩余 UI parity 缺口集中在 rotation 和更广的 full-window visual regression。 |
+| Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`、scene host projection、edge renderer、interaction coordinators、automation peers、MiniMap、Background、Controls、Panel、NodeToolbar、EdgeToolbar、NodeResizer、`NodeDragHandle` 和 stock rotation projection。 | Built-ins 已成为可复用 public components。剩余 UI parity 缺口集中在更广的 full-window visual regression、Cookbook 示例易用性，以及任何未来需要真正 renderer virtualization 证明的声明。 |
 | Hosted workbench shell | `GraphEditorView` 和 hosted factories | Header、library、canvas、inspector、validation panel、authoring tools、minimap、command projection 和 status chrome。 | 是有用的 supported route，但新增公开功能不应把 Demo shell chrome 变成隐藏依赖。 |
 | Demo/Cookbook | `src/AsterGraph.Demo` | 25 个 recipes、route clarity docs、built-in/interaction/lifecycle batches、scene PNG screenshot gate metadata 和 default full-window shell visual metadata。 | Cookbook breadth、scene coverage 和第一条 shell-level capture 已覆盖。Pixel-baseline comparison 与更广的 shell-state coverage 仍作为后续有界工作。 |
 | CI and release gates | `.github/workflows`、`eng/ci.ps1`、test projects | Build/test/maintenance/contract/release/hygiene lanes、public API baseline、package validation、docs route checks、scene PNG gate tests 和 default full-window shell gate tests。 | Text/API/scene/shell gates 较强。严格 pixel baseline 继续等 deterministic drift 测量后再做。 |
@@ -48,7 +56,7 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 | Custom nodes with arbitrary Avalonia content | Partial / AsterGraph idiom 下支持 | Node definitions、`IGraphNodeVisualPresenter`、authoring-surface docs、templates 和 hosted controls 已存在。公开故事仍不如 React Flow custom node component 直接。 | 用具体 host-owned visual presenter 示例继续补文档。 |
 | Node drag handles | Present / guarded | `NodeDragHandle` 为 custom node visual/body presenter 暴露 public Avalonia attached property。Focused headless tests 覆盖从标记 handle 拖动，以及存在 handle 时未标记 body surface 不启动拖动。 | 继续用 `StandaloneCanvas_NodeDragHandle_*` tests 和 public API baseline checks 守住。 |
 | Node resizer | Present | `NodeResizer`、`TrySetNodeSize`、built-in component catalog、Cookbook route 和 focused tests 已存在。 | 继续用 built-in tests 与 screenshot route 守住。 |
-| Rotatable nodes | Missing | 只发现 viewport transforms 和 selection transforms；未发现持久化 node rotation model、command、renderer contract 或 tests。 | GitHub #80 / `avalonia-node-map-p480`。 |
+| Rotatable nodes | Present / guarded | `GraphNodeSurfaceState.RotationDegrees`、`IGraphEditorCommands.TrySetNodeRotation(...)`、`GraphEditorNodeSurfaceSnapshot.RotationDegrees`、serializer compatibility、renderer/hit-test geometry、public API baseline 和中英文 host docs 已到位。 | 继续用 model/session/Avalonia tests、public API validation 和 command/query 指引守住。 |
 | Custom edges | Present / guarded | `GraphEdgePresentation`、connection geometry snapshots、route vertices、reconnect/edit commands、labels、path kinds、markers、animation flag 和 floating endpoints 已存在。 | Edge claims 变化时同步维护 API 与 renderer tests。 |
 | Bezier、SmoothStep、Step、Straight edges | Present | `GraphEdgePathKind` 通过 `GraphEditorConnectionGeometryProjector` 映射为 route styles。 | Keep guarded。 |
 | Animated and floating edges | Present / proof-bounded | `IsAnimated` 和 `UsesFloatingEndpoints` 已进入 edge presentation 与 geometry snapshots。视觉动画 proof 比静态 geometry proof 更窄。 | 保持声明边界；只有补足 screenshot/full-window evidence 后再扩大。 |
@@ -95,20 +103,32 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 | #84 | `avalonia-node-map-p482` | Guarded cycle-prevention connection policy。 |
 | #81 | `avalonia-node-map-p479` | 通过 `NodeDragHandle` 提供 public hosted-Avalonia node drag-handle API。 |
 | #82 | `avalonia-node-map-p483` | Large-graph virtualization claim 已收窄到 viewport-budgeted scene projection/rendering；不声明 renderer virtualization 或 10000 节点支持。 |
+| #80 | `avalonia-node-map-p480` | Rotatable node model、command/query projection、renderer geometry、compatibility overloads、API baseline 和 docs。 |
 
 ## 下一轮 Issue Wave
 
+Phase 484 是当前 active planning issue，负责把已经清空的队列转换成下一轮 implementation wave。后续 issue 应在本次 docs refresh 合入后再创建，确保标题、write set 和依赖关系基于当前矩阵，而不是 Phase 478 的旧快照。
+
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #80 | `avalonia-node-map-p480` | Phase 480: add rotatable node model and rendering contract | P2 | `AsterGraph.Core`、`AsterGraph.Editor`、`AsterGraph.Avalonia`、serialization/API/tests/docs | 与 drag-handle 分开，因为两者都可能触碰 node hit testing 与 adorners。 |
+| #91 | `avalonia-node-map-4xr` | Phase 484: refresh React Flow parity roadmap after rotatable nodes | P1 | `docs/en/phase-0-reactflow-parity-audit.md`、`docs/zh-CN/phase-0-reactflow-parity-audit.md`、GitHub/Beads tracker state | 当前 docs-only issue。不修改产品代码或 public API。 |
+| TBD | TBD | Cookbook example architecture refresh | P1 | `src/AsterGraph.Demo/Cookbook`、`docs/en/demo-cookbook.md`、`docs/zh-CN/demo-cookbook.md`，如果重命名/拆分示例则包含 screenshot route metadata | 可与 visual gate decision 并行，但 route ID 和截图要保持稳定。避免 Core/Editor API 修改。 |
+| TBD | TBD | Full-window visual coverage expansion decision | P1 | `tests/AsterGraph.Demo.Tests`、screenshot metadata/docs，必要时只触碰 `src/AsterGraph.Demo` 的确定性 shell states | 独立于 API/model 工作。除非已测量 drift，否则继续延后严格 pixel baseline。 |
+| TBD | TBD | Custom node copyable-host recipe hardening | P2 | host recipe docs、templates、Demo cookbook route text；只有证明缺失 public seam 时才触碰 `AsterGraphPresentationOptions` 示例 | 可与 Cookbook/docs work 并行；除非明确扩大 issue，否则不触碰 node interaction internals。 |
+| TBD | TBD | Layout provider and background/cancel proof refresh | P2 | layout provider docs/tests、Demo routes、preview/apply/cancel 的 command guidance | 可与 visual/docs work 并行。除非测试证明 provider contract 缺失，否则保持 runtime API 稳定。 |
+| TBD | TBD | Renderer virtualization design spike | P2 | 先做 docs/tests；只有真正 virtualization contract 被批准后才触碰 `AsterGraph.Avalonia` renderer/projection | 与任何 claim expansion 串行。不能用 xlarge telemetry 声明 10000 节点支持。 |
+| TBD | TBD | Accessibility breadth audit | P3 | Avalonia built-ins、automation peer tests、keyboard/screen-reader coverage docs | visual routes 稳定后可并行；公开声明仅限已审计 controls。 |
+| TBD | TBD | Retained migration removal roadmap | P3 | public API inventory、stabilization support matrix、retained migration docs/tests | 必须与 v1 policy 和 public API baseline work 串行；不要在无关 parity work 中顺手删除 retained surfaces。 |
 
-Phase 483 之后的推荐下一条分支：如果下一条可以触碰 node transform 与 hit testing，做 `avalonia-node-map-p480` / GitHub #80 的 rotatable nodes。
+Phase 480 之后推荐下一条分支：`feature/reactflow-parity-roadmap`，对应 #91 / `avalonia-node-map-4xr`。#91 之后的第一条 implementation branch 应由本次刷新后的 P1 结论决定，最可能是 Cookbook example architecture 或 full-window visual coverage expansion。
 
 ## 推荐并行 Worktree 计划
 
-- `docs/phase478-parity-refresh`：只负责本审计刷新、中文镜像、tracker split 和 Phase 478 关闭。
-- `feature/cycle-prevention-policy`：负责 #84 / `avalonia-node-map-p482`，除文档/示例外避免 Avalonia shell 工作。
-- `feature/rotatable-nodes`：负责 #80 / `avalonia-node-map-p480`，除非明确批准共享 transform abstraction，否则不要混入 drag-handle API。
+- `feature/reactflow-parity-roadmap`：负责 #91 / `avalonia-node-map-4xr`；只做 docs 和 tracker plan。
+- `docs/cookbook-example-architecture`：候选 P1；只负责 Cookbook catalog/docs/example ergonomics。
+- `ui/full-window-visual-coverage`：候选 P1；只负责 shell-state captures、metadata 和 visual verification docs。
+- `docs/custom-node-copyable-recipes`：候选 P2；只负责 host-copy custom-node guidance 和 templates，除非证明缺失 public seam。
+- `perf/renderer-virtualization-spike`：候选 P2；在任何 renderer implementation 前先负责 proof design 和 claim boundaries。
 
 ## UI 验证策略
 
@@ -125,5 +145,5 @@ Phase 483 之后的推荐下一条分支：如果下一条可以触碰 node tran
 ## Tracker 备注
 
 - GitHub #79 和 Beads `avalonia-node-map-p478` 创建时把 `.planning/*` 列入 write set。由于 `.planning/` 被 ignore 且当前 worktree 中不存在，本次刷新将它记录为 tracker drift，而不是 force-add 本地 planning 文件。
-- Beads 是本仓库的持久本地 tracker。刷新后的下一轮 wave 已同时创建 Beads ID 与 GitHub issue 链接。
-- Phase 478 不修改产品代码。
+- Beads 是本仓库的持久本地 tracker。Phase 484 通过 GitHub #91 / `avalonia-node-map-4xr` 重新打开队列；后续 follow-up 在代码修改前也必须先拿到明确的 GitHub 与 Beads ID。
+- Phase 478 和 Phase 484 都不修改产品代码。
