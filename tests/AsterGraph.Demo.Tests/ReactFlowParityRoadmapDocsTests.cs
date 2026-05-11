@@ -176,6 +176,37 @@ public sealed class ReactFlowParityRoadmapDocsTests
             StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase494LocalizedShellVisualGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 494", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #111", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-p5z", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-open-zh-cn", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-state language/theme metadata", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("manifest-driven full-window shell", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("strict pixel baselines", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("runtime UI changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("broad language/theme certification", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("three manifest-driven full-window shell captures", englishParity, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("三条 manifest-driven full-window shell", chineseParity, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(
+            "| #111 | `avalonia-node-map-p5z` | Phase 494: add localized full-window shell visual gate state",
+            englishParity,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "| #111 | `avalonia-node-map-p5z` | Phase 494: add localized full-window shell visual gate state",
+            chineseParity,
+            StringComparison.Ordinal);
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 

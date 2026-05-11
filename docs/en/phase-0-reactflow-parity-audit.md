@@ -22,6 +22,10 @@ Phase 492 is GitHub #107 / `avalonia-node-map-j8v`, the retained migration remov
 
 Phase 493 is GitHub #109 / `avalonia-node-map-8qv`, the custom node presenter cookbook parity proof selected after the retained migration roadmap closed. This slice is docs/tests only: it ties the partial custom-node parity row to the defended host-owned presenter route in the Custom Node Host Recipe, including `NodeBodyPresenter`, `NodeVisualPresenter`, `NodeDragHandle`, anchor maps, host-owned edge overlays, and `CUSTOM_EXTENSION_SURFACE_OK` proof markers. It does not authorize runtime behavior changes, public API changes, React Flow hooks/components parity claims, Demo UI redesign, or screenshot-gate expansion.
 
+## Phase 494 Update
+
+Phase 494 is GitHub #111 / `avalonia-node-map-p5z`, a localized full-window shell visual gate expansion after the custom-node presenter parity proof closed. This slice is docs/tests only: it adds shell-state-owned language/theme metadata and a Chinese Cookbook drawer capture, `shell-cookbook-default-open-zh-cn`, beside the existing English Cookbook and runtime diagnostics captures. It does not authorize strict pixel hash baselines, runtime UI changes, broad language/theme certification, flyout capture, popup capture, or context-menu capture.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -70,7 +74,7 @@ Phase 483 closes GitHub #82 by choosing the bounded-docs path instead of a rende
 - `src/AsterGraph.Demo/Cookbook/DemoCookbookCatalog.Recipes.cs` currently contains 25 `DemoCookbookRecipe` entries.
 - `tests/AsterGraph.Demo.Tests/CookbookScreenshotGateRoutes.json` currently defines 15 deterministic scene PNG capture routes.
 - `tests/AsterGraph.Demo.Tests/DemoCookbookScreenshotGateTests.cs` captures canonical graph scenes through `GraphSceneImageExportService`, writes `artifacts/test-results/cookbook-screenshot-gate/metadata.json`, validates route metadata, and captures manifest-driven full-window shell states under `artifacts/test-results/cookbook-shell-visual-gate`.
-- `tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json` currently defines `shell-cookbook-default-open` and `shell-runtime-diagnostics-open`.
+- `tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json` currently defines `shell-cookbook-default-open`, `shell-cookbook-default-open-zh-cn`, and `shell-runtime-diagnostics-open`.
 - `.planning/` and `docs/plans/` are gitignored in this repository. Phase 478 treats the `.planning/*` write-set references in GitHub #79 and Beads `avalonia-node-map-p478` as tracker drift; durable planning state for this slice lives in tracked docs plus GitHub/Beads issues.
 
 ## Architecture Inventory
@@ -83,7 +87,7 @@ Phase 483 closes GitHub #82 by choosing the bounded-docs path instead of a rende
 | Layout integration | `src/AsterGraph.Editor/Runtime` and services | `GraphLayoutRequest`, `GraphLayoutPlan`, `IGraphLayoutProvider`, preview/apply evidence, command-surface cancel evidence, and snap/grid commands. | Provider seam exists and is synchronous; background/provider examples need continued proof when layout claims expand, and cancellation wording must not imply async layout cancellation. |
 | Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`, scene host projection, edge renderer, interaction coordinators, automation peers, MiniMap, Background, Controls, Panel, NodeToolbar, EdgeToolbar, NodeResizer, `NodeDragHandle`, and stock rotation projection. | Built-ins are now reusable public components. Remaining UI parity gaps are broader full-window visual regression coverage, Cookbook example ergonomics, and any future claim that would require true renderer virtualization. |
 | Hosted workbench shell | `GraphEditorView` and hosted factories | Header, library, canvas, inspector, validation panel, authoring tools, minimap, command projection, and status chrome. | Useful supported route, but new public features should avoid making Demo shell chrome a hidden dependency. |
-| Demo/Cookbook | `src/AsterGraph.Demo` | 25 recipes, route clarity docs, built-in/interaction/lifecycle batches, scene PNG screenshot gate metadata, and two manifest-driven full-window shell visual states. | Cookbook breadth, scene coverage, and default Cookbook/runtime drawer shell captures are covered. Pixel-baseline comparison and broader flyout/theme/language shell-state coverage remain bounded future work. |
+| Demo/Cookbook | `src/AsterGraph.Demo` | 25 recipes, route clarity docs, built-in/interaction/lifecycle batches, scene PNG screenshot gate metadata, and three manifest-driven full-window shell visual states. | Cookbook breadth, scene coverage, English default/runtime drawer shell captures, and a Chinese Cookbook drawer capture are covered. Pixel-baseline comparison plus broader flyout/popup/context-menu/theme/language shell-state coverage remain bounded future work. |
 | CI and release gates | `.github/workflows`, `eng/ci.ps1`, test projects | Build/test/maintenance/contract/release/hygiene lanes, public API baseline, package validation, docs route checks, scene PNG gate tests, and manifest-driven full-window shell gate tests. | Strong text/API/scene/shell gates. Keep strict pixel baselines deferred until deterministic drift is measured. |
 
 ## React Flow Parity Matrix
@@ -119,7 +123,7 @@ Phase 483 closes GitHub #82 by choosing the bounded-docs path instead of a rende
 | Declarative + code-first API | Partial | Host builder, definitions, builders, templates, and session APIs exist. Avalonia markup-first ergonomics are not equivalent to React Flow hooks/components. | Keep docs honest; do not claim React hook parity. |
 | Accessibility breadth | Partial / audited breadth in progress | Keyboard navigation, automation peers, built-in action names, and shell-state focus routes are covered in targeted tests. Phase 491 adds an explicit breadth contract for standalone built-ins and hosted shell states; dynamic screen-reader announcement behavior still needs manual assistive-technology validation before any stronger claim. | Keep Phase 491 bounded to docs/tests and source-backed controls; file a separate follow-up before changing runtime announcement behavior. |
 | Host events | Present | `IGraphEditorEvents`, mutation batching, and host-event Cookbook route exist. | Keep guarded. |
-| Screenshot-driven UI quality | Partial / guarded | Scene PNG gate exists for canonical graph scenes. The full-window shell gate now captures default Cookbook drawer state plus the runtime diagnostics drawer state, including host menu, drawer, graph host, named shell parts, and artifact metadata. Pixel-baseline comparison and broader flyout/theme/language coverage are not yet covered. | Keep Phase 486 bounded to manifest-driven shell states; add follow-ups only if visual drift evidence requires broader baselines. |
+| Screenshot-driven UI quality | Partial / guarded | Scene PNG gate exists for canonical graph scenes. The full-window shell gate now captures English default Cookbook drawer, Chinese default Cookbook drawer, and English runtime diagnostics drawer states, including host menu, drawer, graph host, named shell parts, selected language/theme metadata, and artifact metadata. Pixel-baseline comparison and broader flyout/popup/context-menu/theme/language coverage are not yet covered. | Keep Phase 494 bounded to manifest-driven shell states; add follow-ups only if visual drift evidence requires broader baselines. |
 
 ## Completed Phase 0 Issue Wave
 
@@ -174,19 +178,23 @@ Phase 491 closed the accessibility breadth audit while keeping live screen-reade
 
 Phase 492 now owns the retained migration removal roadmap as an inventory now, remove later slice. It can classify retained and compatibility-only surfaces, but any actual deletion needs a later API-change tracker tied to the v1 policy and `eng/public-api-baseline.txt`.
 
-Phase 493 now owns the custom node presenter cookbook parity proof. It records that the supported custom-node route is host-owned `NodeBodyPresenter` / `NodeVisualPresenter` guidance plus existing proof markers, not a runtime API expansion or React Flow component/hook parity claim.
+Phase 493 closed the custom node presenter cookbook parity proof. It records that the supported custom-node route is host-owned `NodeBodyPresenter` / `NodeVisualPresenter` guidance plus existing proof markers, not a runtime API expansion or React Flow component/hook parity claim.
+
+Phase 494 now owns localized full-window shell visual gate coverage. It adds one Chinese Cookbook drawer state and shell-state language/theme metadata while leaving strict pixel baselines and broad flyout/theme/language coverage for later tracker-backed work.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
 | #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states | P2 | Avalonia built-ins, automation/focus tests, docs for keyboard/screen-reader coverage boundaries | Current docs/tests-first accessibility audit. No runtime, public API, or visual changes unless evidence proves a specific missing contract. |
 | #107 | `avalonia-node-map-j8v` | Phase 492: inventory retained migration surfaces and define removal roadmap | P3 | public API inventory, stabilization support matrix, retained migration docs/tests | Docs/tests-first inventory now, remove later slice. Sequential with v1 policy and public API baseline work; do not delete retained surfaces as a side effect of parity docs work. |
 | #109 | `avalonia-node-map-8qv` | Phase 493: strengthen custom node presenter cookbook parity proof | P2 | React Flow parity audit docs and focused docs tests | Docs/tests-first traceability slice. Do not change runtime behavior, public API, Demo visuals, or screenshot gates unless a later tracker proves a missing presenter contract. |
+| #111 | `avalonia-node-map-p5z` | Phase 494: add localized full-window shell visual gate state | P2 | shell visual gate manifest, screenshot docs/tests, parity audit docs | Docs/tests-first visual gate coverage slice. Do not add runtime UI changes, strict pixel baselines, flyout capture, or broad language/theme certification. |
 
 ## Recommended Parallel Worktree Plan
 
 - `docs/phase-491-accessibility-breadth-audit`: owns #105 / `avalonia-node-map-44i`; audits accessibility docs/tests across Avalonia built-ins and shell states only.
 - `docs/phase-492-retained-migration-roadmap`: owns #107 / `avalonia-node-map-j8v`; inventories retained migration surfaces and removal gates only. Deletion or baseline updates need a later API-change tracker.
 - `docs/phase-493-custom-node-presenter-proof`: owns #109 / `avalonia-node-map-8qv`; binds the custom-node parity row to the defended host recipe and docs tests only.
+- `docs/phase-494-localized-shell-visual-gate`: owns #111 / `avalonia-node-map-p5z`; adds shell-state language/theme metadata and a Chinese full-window Cookbook shell capture only.
 
 ## UI Verification Policy
 
@@ -198,7 +206,7 @@ All future UI changes to `src/AsterGraph.Avalonia` or `src/AsterGraph.Demo` shou
 - a Cookbook route for each new public UI component or interaction;
 - an explicit note when a UI change is structural-only and does not alter pixels.
 
-Current coverage includes scene-level route captures plus two manifest-driven full-window shell captures. `DemoCookbookScreenshotGateTests`, `CookbookScreenshotGateRoutes.json`, and `CookbookShellVisualGateStates.json` prove canonical graph scenes, route metadata, the default Cookbook shell artifact, and the runtime diagnostics shell artifact; they still do not provide strict pixel-baseline comparisons or broad flyout/theme/language coverage.
+Current coverage includes scene-level route captures plus three manifest-driven full-window shell captures. `DemoCookbookScreenshotGateTests`, `CookbookScreenshotGateRoutes.json`, and `CookbookShellVisualGateStates.json` prove canonical graph scenes, route metadata, the English default Cookbook shell artifact, the Chinese default Cookbook shell artifact, and the English runtime diagnostics shell artifact; they still do not provide strict pixel-baseline comparisons or broad flyout/popup/context-menu/theme/language coverage.
 
 ## Tracker Notes
 
@@ -206,4 +214,5 @@ Current coverage includes scene-level route captures plus two manifest-driven fu
 - Beads is the durable local tracker for this repository. Phase 491 now owns the accessibility breadth audit with GitHub #105 / `avalonia-node-map-44i`; later follow-ups should get explicit GitHub and Beads IDs before code changes.
 - Phase 492 now owns retained migration removal planning with GitHub #107 / `avalonia-node-map-j8v`; it records classification and gates, not API removal.
 - Phase 493 now owns custom node presenter cookbook parity proof with GitHub #109 / `avalonia-node-map-8qv`; it records route traceability, not a presenter API expansion.
-- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, and Phase 493 unless a focused test proves a specific missing contract.
+- Phase 494 now owns localized full-window shell visual gate coverage with GitHub #111 / `avalonia-node-map-p5z`; it records one localized shell visual state, not a broad visual certification.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, and Phase 494 unless a focused test proves a specific missing contract.
