@@ -23,6 +23,7 @@ C:AsterGraph.Abstractions.Styling.NodeStyleOverride(AsterGraph.Abstractions.Iden
 C:AsterGraph.Abstractions.Styling.PortStyleOptions()
 C:AsterGraph.Abstractions.Styling.PortStyleOverride(AsterGraph.Abstractions.Identifiers.PortTypeId,AsterGraph.Abstractions.Styling.PortStyleOptions)
 C:AsterGraph.Abstractions.Styling.ShellStyleOptions()
+C:AsterGraph.Avalonia.Controls.AsterGraphPanel()
 C:AsterGraph.Avalonia.Controls.EdgeToolbar()
 C:AsterGraph.Avalonia.Controls.GraphEditorView()
 C:AsterGraph.Avalonia.Controls.GraphInspectorView()
@@ -292,6 +293,17 @@ F:AsterGraph.Abstractions.Definitions.ParameterEditorKind.Enum:AsterGraph.Abstra
 F:AsterGraph.Abstractions.Definitions.ParameterEditorKind.List:AsterGraph.Abstractions.Definitions.ParameterEditorKind
 F:AsterGraph.Abstractions.Definitions.ParameterEditorKind.Number:AsterGraph.Abstractions.Definitions.ParameterEditorKind
 F:AsterGraph.Abstractions.Definitions.ParameterEditorKind.Text:AsterGraph.Abstractions.Definitions.ParameterEditorKind
+F:AsterGraph.Avalonia.Controls.AsterGraphPanel.OffsetProperty:Avalonia.StyledProperty<Avalonia.Thickness>
+F:AsterGraph.Avalonia.Controls.AsterGraphPanel.PositionProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Controls.AsterGraphPanelPosition>
+F:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition.BottomCenter:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition
+F:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition.BottomLeft:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition
+F:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition.BottomRight:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition
+F:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition.Center:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition
+F:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition.CenterLeft:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition
+F:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition.CenterRight:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition
+F:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition.TopCenter:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition
+F:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition.TopLeft:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition
+F:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition.TopRight:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition
 F:AsterGraph.Avalonia.Controls.EdgeToolbar.ConnectionIdProperty:Avalonia.StyledProperty<System.String>
 F:AsterGraph.Avalonia.Controls.EdgeToolbar.PrimarySelectedNodeIdProperty:Avalonia.StyledProperty<System.String>
 F:AsterGraph.Avalonia.Controls.EdgeToolbar.SelectedNodeIdsProperty:Avalonia.StyledProperty<System.Collections.Generic.IReadOnlyList<System.String>>
@@ -349,6 +361,7 @@ F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.Inspector:System
 F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.MiniMap:System.String
 F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.NodeResizer:System.String
 F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.NodeToolbar:System.String
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.Panel:System.String
 F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus.InternalWorkbench:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus
 F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus.Planned:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus
 F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus.Public:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus
@@ -2426,6 +2439,8 @@ P:AsterGraph.Abstractions.Styling.ShellStyleOptions.LibraryPanelWidth:System.Dou
 P:AsterGraph.Abstractions.Styling.ShellStyleOptions.PanelBackgroundHex:System.String:get,set
 P:AsterGraph.Abstractions.Styling.ShellStyleOptions.PanelBorderHex:System.String:get,set
 P:AsterGraph.Abstractions.Styling.ShellStyleOptions.TitleFontSize:System.Double:get,set
+P:AsterGraph.Avalonia.Controls.AsterGraphPanel.Offset:Avalonia.Thickness:get,set
+P:AsterGraph.Avalonia.Controls.AsterGraphPanel.Position:AsterGraph.Avalonia.Controls.AsterGraphPanelPosition:get,set
 P:AsterGraph.Avalonia.Controls.EdgeToolbar.ConnectionId:System.String:get,set
 P:AsterGraph.Avalonia.Controls.EdgeToolbar.PrimarySelectedNodeId:System.String:get,set
 P:AsterGraph.Avalonia.Controls.EdgeToolbar.SelectedNodeIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
@@ -3875,6 +3890,7 @@ T:class AsterGraph.Abstractions.Styling.NodeStyleOverride
 T:class AsterGraph.Abstractions.Styling.PortStyleOptions
 T:class AsterGraph.Abstractions.Styling.PortStyleOverride
 T:class AsterGraph.Abstractions.Styling.ShellStyleOptions
+T:class AsterGraph.Avalonia.Controls.AsterGraphPanel
 T:class AsterGraph.Avalonia.Controls.EdgeToolbar
 T:class AsterGraph.Avalonia.Controls.GraphEditorView
 T:class AsterGraph.Avalonia.Controls.GraphInspectorView
@@ -4094,6 +4110,7 @@ T:class CompiledAvaloniaXaml.!AvaloniaResources
 T:class CompiledAvaloniaXaml.!XamlLoader
 T:enum AsterGraph.Abstractions.Compatibility.PortCompatibilityKind
 T:enum AsterGraph.Abstractions.Definitions.ParameterEditorKind
+T:enum AsterGraph.Avalonia.Controls.AsterGraphPanelPosition
 T:enum AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode
 T:enum AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus
 T:enum AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset
