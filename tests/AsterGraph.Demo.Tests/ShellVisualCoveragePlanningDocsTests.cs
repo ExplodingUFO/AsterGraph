@@ -61,7 +61,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(7, document.RootElement.GetArrayLength());
+        Assert.Equal(8, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -74,7 +74,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(7, document.RootElement.GetArrayLength());
+        Assert.Equal(8, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -94,6 +94,36 @@ public sealed class ShellVisualCoveragePlanningDocsTests
             Assert.Contains("PART_HostCommand_history.undo", contents, StringComparison.Ordinal);
             Assert.Contains("full-window-shell-popup-state", contents, StringComparison.Ordinal);
             Assert.Contains("Nothing to undo yet.", contents, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void ShellVisualCoveragePlanningDocs_RecordPhase510CanvasContextMenuRow()
+    {
+        var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
+        using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
+        Assert.Equal(8, document.RootElement.GetArrayLength());
+        Assert.Contains(
+            document.RootElement.EnumerateArray(),
+            state =>
+                string.Equals(state.GetProperty("id").GetString(), "shell-cookbook-default-canvas-context-menu", StringComparison.Ordinal)
+                && string.Equals(state.GetProperty("contextMenuTargetPartName").GetString(), "PART_NodeCanvas", StringComparison.Ordinal)
+                && state.GetProperty("requiredContextMenuHeaders").EnumerateArray().Any(text =>
+                    string.Equals(text.GetString(), "Add Node", StringComparison.Ordinal)));
+
+        var englishCookbook = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chineseCookbook = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+        foreach (var contents in new[] { englishCookbook, chineseCookbook })
+        {
+            Assert.Contains("Phase 510", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #141", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-8lu", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-canvas-context-menu", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_NodeCanvas", contents, StringComparison.Ordinal);
+            Assert.Contains("full-window-shell-context-menu-state", contents, StringComparison.Ordinal);
+            Assert.Contains("Add Node", contents, StringComparison.Ordinal);
+            Assert.Contains("Fit View", contents, StringComparison.Ordinal);
+            Assert.Contains("Reset View", contents, StringComparison.Ordinal);
         }
     }
 

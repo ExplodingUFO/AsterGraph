@@ -340,6 +340,34 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase510ContextMenuVisualCaptureInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 510", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #141", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-8lu", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-canvas-context-menu", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_NodeCanvas", contents, StringComparison.Ordinal);
+            Assert.Contains("full-window-shell-context-menu-state", contents, StringComparison.Ordinal);
+            Assert.Contains("Add Node", contents, StringComparison.Ordinal);
+            Assert.Contains("Fit View", contents, StringComparison.Ordinal);
+            Assert.Contains("Reset View", contents, StringComparison.Ordinal);
+            Assert.Contains("strict pixel baselines", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("broad context-menu coverage", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("broad language/theme certification", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 510", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Phase 510 now owns the context-menu visual capture", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 510 现在通过 GitHub #141 / `avalonia-node-map-8lu` 承接 context-menu visual capture", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
