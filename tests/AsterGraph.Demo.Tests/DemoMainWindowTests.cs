@@ -10,6 +10,7 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Platform.Storage;
+using Avalonia.Skia;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls;
@@ -346,7 +347,11 @@ public sealed class DemoMainWindowTestsAppBuilder
 {
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<DemoMainWindowTestsApp>()
-            .UseHeadless(new AvaloniaHeadlessPlatformOptions());
+            .UseSkia()
+            .UseHeadless(new AvaloniaHeadlessPlatformOptions
+            {
+                UseHeadlessDrawing = false,
+            });
 }
 
 public sealed class DemoMainWindowTestsApp : Application
