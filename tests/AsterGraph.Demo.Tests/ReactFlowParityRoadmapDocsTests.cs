@@ -314,6 +314,32 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase509PopupVisualCaptureInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 509", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #140", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-0ff", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-host-command-tooltip-popup", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_HostCommand_history.undo", contents, StringComparison.Ordinal);
+            Assert.Contains("full-window-shell-popup-state", contents, StringComparison.Ordinal);
+            Assert.Contains("Nothing to undo yet.", contents, StringComparison.Ordinal);
+            Assert.Contains("strict pixel baselines", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("context-menu", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("broad language/theme certification", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 509", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Phase 509 now owns the popup visual capture", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 509 现在通过 GitHub #140 / `avalonia-node-map-0ff` 承接 popup visual capture", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");

@@ -58,6 +58,28 @@
     "outputFileName": "shell-cookbook-default-view-menu-flyout.png"
   },
   {
+    "id": "shell-cookbook-default-host-command-tooltip-popup",
+    "routeId": "cookbook-default-starter-host-ai-pipeline",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "expectedPaneOpen": true,
+    "popupTargetPartName": "PART_HostCommand_history.undo",
+    "requiredPopupText": [
+      "Nothing to undo yet."
+    ],
+    "requiredShellParts": [
+      "PART_HostMenu",
+      "PART_HostShellSplitView",
+      "PART_CookbookWorkspaceNavigationPanel",
+      "PART_CommandRail",
+      "PART_HostCommand_history.undo",
+      "PART_MainGraphEditorHost",
+      "PART_CookbookWorkspaceRecipeContentPanel"
+    ],
+    "outputFileName": "shell-cookbook-default-host-command-tooltip-popup.png"
+  },
+  {
     "id": "shell-cookbook-default-closed",
     "routeId": "cookbook-default-starter-host-ai-pipeline",
     "hostGroup": "cookbook",
