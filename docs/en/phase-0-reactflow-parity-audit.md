@@ -6,6 +6,10 @@ This document started as the Phase 0 audit for the `0.11.0-beta` baseline. Phase
 
 The scope of this refresh is docs and tracker state only. It does not change product code, runtime behavior, renderer contracts, or public support claims.
 
+## Phase 486 Update
+
+Phase 486 expands the full-window shell gate without adding strict pixel baselines or Demo runtime changes. `CookbookShellVisualGateStates.json` now drives two deterministic shell states, `shell-cookbook-default-open` and `shell-runtime-diagnostics-open`, against the same default `starter-host-route` / `ai-pipeline` fixture. The gate validates drawer state, dimensions, nonblank pixels, distinct colors, output metadata, and required named shell parts while leaving flyouts, context menus, language/theme variants, and hash baselines out of scope.
+
 ## Phase 484 Update
 
 Phase 484 refreshes the roadmap after the Phase 478-483 wave closed and after Phase 480 delivered the rotatable-node surface. The previous next-wave queue was stale because GitHub #80 / `avalonia-node-map-p480` is now closed. This update keeps the work docs-only, replaces the one-item queue with a prioritized split plan, and keeps public claims tied to current source, tests, docs, and CI evidence.
@@ -33,7 +37,8 @@ Phase 483 closes GitHub #82 by choosing the bounded-docs path instead of a rende
 - `AsterGraph.Demo` remains the visible demo host and Cookbook proof surface.
 - `src/AsterGraph.Demo/Cookbook/DemoCookbookCatalog.Recipes.cs` currently contains 25 `DemoCookbookRecipe` entries.
 - `tests/AsterGraph.Demo.Tests/CookbookScreenshotGateRoutes.json` currently defines 15 deterministic scene PNG capture routes.
-- `tests/AsterGraph.Demo.Tests/DemoCookbookScreenshotGateTests.cs` captures canonical graph scenes through `GraphSceneImageExportService`, writes `artifacts/test-results/cookbook-screenshot-gate/metadata.json`, validates route metadata, and now captures the default Cookbook full-window shell under `artifacts/test-results/cookbook-shell-visual-gate`.
+- `tests/AsterGraph.Demo.Tests/DemoCookbookScreenshotGateTests.cs` captures canonical graph scenes through `GraphSceneImageExportService`, writes `artifacts/test-results/cookbook-screenshot-gate/metadata.json`, validates route metadata, and captures manifest-driven full-window shell states under `artifacts/test-results/cookbook-shell-visual-gate`.
+- `tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json` currently defines `shell-cookbook-default-open` and `shell-runtime-diagnostics-open`.
 - `.planning/` and `docs/plans/` are gitignored in this repository. Phase 478 treats the `.planning/*` write-set references in GitHub #79 and Beads `avalonia-node-map-p478` as tracker drift; durable planning state for this slice lives in tracked docs plus GitHub/Beads issues.
 
 ## Architecture Inventory
@@ -46,8 +51,8 @@ Phase 483 closes GitHub #82 by choosing the bounded-docs path instead of a rende
 | Layout integration | `src/AsterGraph.Editor/Runtime` and services | `GraphLayoutRequest`, `GraphLayoutPlan`, `IGraphLayoutProvider`, preview/apply/cancel evidence, and snap/grid commands. | Provider seam exists; background/cancel/provider examples need continued proof when layout claims expand. |
 | Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`, scene host projection, edge renderer, interaction coordinators, automation peers, MiniMap, Background, Controls, Panel, NodeToolbar, EdgeToolbar, NodeResizer, `NodeDragHandle`, and stock rotation projection. | Built-ins are now reusable public components. Remaining UI parity gaps are broader full-window visual regression coverage, Cookbook example ergonomics, and any future claim that would require true renderer virtualization. |
 | Hosted workbench shell | `GraphEditorView` and hosted factories | Header, library, canvas, inspector, validation panel, authoring tools, minimap, command projection, and status chrome. | Useful supported route, but new public features should avoid making Demo shell chrome a hidden dependency. |
-| Demo/Cookbook | `src/AsterGraph.Demo` | 25 recipes, route clarity docs, built-in/interaction/lifecycle batches, scene PNG screenshot gate metadata, and default full-window shell visual metadata. | Cookbook breadth, scene coverage, and the first shell-level capture are covered. Pixel-baseline comparison and broader shell-state coverage remain bounded future work. |
-| CI and release gates | `.github/workflows`, `eng/ci.ps1`, test projects | Build/test/maintenance/contract/release/hygiene lanes, public API baseline, package validation, docs route checks, scene PNG gate tests, and default full-window shell gate tests. | Strong text/API/scene/shell gates. Keep strict pixel baselines deferred until deterministic drift is measured. |
+| Demo/Cookbook | `src/AsterGraph.Demo` | 25 recipes, route clarity docs, built-in/interaction/lifecycle batches, scene PNG screenshot gate metadata, and two manifest-driven full-window shell visual states. | Cookbook breadth, scene coverage, and default Cookbook/runtime drawer shell captures are covered. Pixel-baseline comparison and broader flyout/theme/language shell-state coverage remain bounded future work. |
+| CI and release gates | `.github/workflows`, `eng/ci.ps1`, test projects | Build/test/maintenance/contract/release/hygiene lanes, public API baseline, package validation, docs route checks, scene PNG gate tests, and manifest-driven full-window shell gate tests. | Strong text/API/scene/shell gates. Keep strict pixel baselines deferred until deterministic drift is measured. |
 
 ## React Flow Parity Matrix
 
@@ -82,7 +87,7 @@ Phase 483 closes GitHub #82 by choosing the bounded-docs path instead of a rende
 | Declarative + code-first API | Partial | Host builder, definitions, builders, templates, and session APIs exist. Avalonia markup-first ergonomics are not equivalent to React Flow hooks/components. | Keep docs honest; do not claim React hook parity. |
 | Accessibility breadth | Partial | Keyboard navigation and automation peers are covered in targeted tests. A broad accessibility audit across all built-ins and shell states remains weaker. | Add issue only if adopter/release evidence needs it. |
 | Host events | Present | `IGraphEditorEvents`, mutation batching, and host-event Cookbook route exist. | Keep guarded. |
-| Screenshot-driven UI quality | Partial / guarded | Scene PNG gate exists for canonical graph scenes. The default Cookbook full-window shell route now captures host menu, drawer, left navigation, graph host, and recipe panel metadata. Pixel-baseline comparison and broader flyout/shell-state coverage are not yet covered. | Keep #83 focused on the first shell gate; add follow-ups only if visual drift evidence requires broader baselines. |
+| Screenshot-driven UI quality | Partial / guarded | Scene PNG gate exists for canonical graph scenes. The full-window shell gate now captures default Cookbook drawer state plus the runtime diagnostics drawer state, including host menu, drawer, graph host, named shell parts, and artifact metadata. Pixel-baseline comparison and broader flyout/theme/language coverage are not yet covered. | Keep Phase 486 bounded to manifest-driven shell states; add follow-ups only if visual drift evidence requires broader baselines. |
 
 ## Completed Phase 0 Issue Wave
 
@@ -113,7 +118,7 @@ Phase 484 is the active planning issue for turning the now-empty queue into the 
 | --- | --- | --- | --- | --- | --- |
 | #91 | `avalonia-node-map-4xr` | Phase 484: refresh React Flow parity roadmap after rotatable nodes | P1 | `docs/en/phase-0-reactflow-parity-audit.md`, `docs/zh-CN/phase-0-reactflow-parity-audit.md`, GitHub/Beads tracker state | Current docs-only issue. No product code or public API changes. |
 | TBD | TBD | Cookbook example architecture refresh | P1 | `src/AsterGraph.Demo/Cookbook`, `docs/en/demo-cookbook.md`, `docs/zh-CN/demo-cookbook.md`, screenshot route metadata if examples are renamed or split | Parallel with visual gate decision if route IDs and screenshots stay stable. Avoid core/editor API changes. |
-| TBD | TBD | Full-window visual coverage expansion decision | P1 | `tests/AsterGraph.Demo.Tests`, screenshot metadata/docs, possibly `src/AsterGraph.Demo` only for deterministic shell states | Independent from API/model work. Keep strict pixel baselines deferred unless drift data is measured. |
+| #95 | `avalonia-node-map-0xr` | Phase 486: decide full-window visual coverage expansion | P1 | `tests/AsterGraph.Demo.Tests`, screenshot metadata/docs | Independent from API/model work. Keep strict pixel baselines deferred unless drift data is measured. |
 | TBD | TBD | Custom node copyable-host recipe hardening | P2 | host recipe docs, templates, Demo cookbook route text, possibly `AsterGraphPresentationOptions` examples if a missing seam is proven | Parallel with Cookbook/docs work; do not touch node interaction internals unless the issue is explicitly widened. |
 | TBD | TBD | Layout provider and background/cancel proof refresh | P2 | layout provider docs/tests, Demo routes, command guidance around preview/apply/cancel | Parallel with visual/docs work. Keep runtime API stable unless tests prove a missing provider contract. |
 | TBD | TBD | Renderer virtualization design spike | P2 | docs/tests first; `AsterGraph.Avalonia` renderer/projection only if a true virtualization contract is approved | Sequential with any claim expansion. Do not claim 10000-node support from xlarge telemetry. |
@@ -140,7 +145,7 @@ All future UI changes to `src/AsterGraph.Avalonia` or `src/AsterGraph.Demo` shou
 - a Cookbook route for each new public UI component or interaction;
 - an explicit note when a UI change is structural-only and does not alter pixels.
 
-Current coverage includes scene-level route captures and the first default full-window Cookbook shell capture. `DemoCookbookScreenshotGateTests` and `CookbookScreenshotGateRoutes.json` prove canonical graph scenes, route metadata, and the default hosted shell artifact; they still do not provide strict pixel-baseline comparisons or broad flyout/state coverage.
+Current coverage includes scene-level route captures plus two manifest-driven full-window shell captures. `DemoCookbookScreenshotGateTests`, `CookbookScreenshotGateRoutes.json`, and `CookbookShellVisualGateStates.json` prove canonical graph scenes, route metadata, the default Cookbook shell artifact, and the runtime diagnostics shell artifact; they still do not provide strict pixel-baseline comparisons or broad flyout/theme/language coverage.
 
 ## Tracker Notes
 

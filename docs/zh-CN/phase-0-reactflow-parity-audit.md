@@ -6,6 +6,10 @@
 
 本次刷新只修改文档和 tracker 状态，不修改产品代码、运行时行为、渲染器契约或公开支持声明。
 
+## Phase 486 更新
+
+Phase 486 扩展 full-window shell gate，但不加入 strict pixel baselines，也不改 Demo runtime。`CookbookShellVisualGateStates.json` 现在基于同一条 default `starter-host-route` / `ai-pipeline` fixture 驱动两条确定性 shell state：`shell-cookbook-default-open` 和 `shell-runtime-diagnostics-open`。这个 gate 会验证 drawer state、dimensions、nonblank pixels、distinct colors、output metadata 和 required named shell parts；flyouts、context menus、language/theme variants 和 hash baselines 仍然不在本阶段范围内。
+
 ## Phase 484 更新
 
 Phase 484 在 Phase 478-483 wave 全部关闭、Phase 480 rotatable-node surface 已合入后重新刷新路线图。此前的下一轮队列已经过期，因为 GitHub #80 / `avalonia-node-map-p480` 已关闭。本次更新保持 docs-only，改用优先级明确的拆分计划替换单项队列，并继续把公开声明绑定到当前 source、tests、docs 和 CI 证据。
@@ -33,7 +37,8 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 - `AsterGraph.Demo` 仍是可见 demo host 和 Cookbook proof surface。
 - `src/AsterGraph.Demo/Cookbook/DemoCookbookCatalog.Recipes.cs` 当前包含 25 个 `DemoCookbookRecipe` 条目。
 - `tests/AsterGraph.Demo.Tests/CookbookScreenshotGateRoutes.json` 当前定义 15 条确定性的 scene PNG 捕获路线。
-- `tests/AsterGraph.Demo.Tests/DemoCookbookScreenshotGateTests.cs` 通过 `GraphSceneImageExportService` 捕获规范 graph scene，写入 `artifacts/test-results/cookbook-screenshot-gate/metadata.json`，验证 route metadata，并且现在会把 default Cookbook full-window shell 捕获到 `artifacts/test-results/cookbook-shell-visual-gate`。
+- `tests/AsterGraph.Demo.Tests/DemoCookbookScreenshotGateTests.cs` 通过 `GraphSceneImageExportService` 捕获规范 graph scene，写入 `artifacts/test-results/cookbook-screenshot-gate/metadata.json`，验证 route metadata，并且会把 manifest-driven full-window shell states 捕获到 `artifacts/test-results/cookbook-shell-visual-gate`。
+- `tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json` 当前定义 `shell-cookbook-default-open` 和 `shell-runtime-diagnostics-open`。
 - `.planning/` 和 `docs/plans/` 在本仓库中被 gitignore。Phase 478 将 GitHub #79 和 Beads `avalonia-node-map-p478` 中的 `.planning/*` write set 视为 tracker drift；本 slice 的持久规划状态放在 tracked docs 与 GitHub/Beads issues 中。
 
 ## 架构盘点
@@ -46,8 +51,8 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 | Layout integration | `src/AsterGraph.Editor/Runtime` 和 services | `GraphLayoutRequest`、`GraphLayoutPlan`、`IGraphLayoutProvider`、preview/apply/cancel evidence 和 snap/grid commands。 | Provider seam 已存在；扩展 layout 声明时仍需明确 background/cancel/provider proof。 |
 | Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`、scene host projection、edge renderer、interaction coordinators、automation peers、MiniMap、Background、Controls、Panel、NodeToolbar、EdgeToolbar、NodeResizer、`NodeDragHandle` 和 stock rotation projection。 | Built-ins 已成为可复用 public components。剩余 UI parity 缺口集中在更广的 full-window visual regression、Cookbook 示例易用性，以及任何未来需要真正 renderer virtualization 证明的声明。 |
 | Hosted workbench shell | `GraphEditorView` 和 hosted factories | Header、library、canvas、inspector、validation panel、authoring tools、minimap、command projection 和 status chrome。 | 是有用的 supported route，但新增公开功能不应把 Demo shell chrome 变成隐藏依赖。 |
-| Demo/Cookbook | `src/AsterGraph.Demo` | 25 个 recipes、route clarity docs、built-in/interaction/lifecycle batches、scene PNG screenshot gate metadata 和 default full-window shell visual metadata。 | Cookbook breadth、scene coverage 和第一条 shell-level capture 已覆盖。Pixel-baseline comparison 与更广的 shell-state coverage 仍作为后续有界工作。 |
-| CI and release gates | `.github/workflows`、`eng/ci.ps1`、test projects | Build/test/maintenance/contract/release/hygiene lanes、public API baseline、package validation、docs route checks、scene PNG gate tests 和 default full-window shell gate tests。 | Text/API/scene/shell gates 较强。严格 pixel baseline 继续等 deterministic drift 测量后再做。 |
+| Demo/Cookbook | `src/AsterGraph.Demo` | 25 个 recipes、route clarity docs、built-in/interaction/lifecycle batches、scene PNG screenshot gate metadata，以及两条 manifest-driven full-window shell visual states。 | Cookbook breadth、scene coverage、default Cookbook drawer 和 runtime diagnostics drawer shell captures 已覆盖。Pixel-baseline comparison 与更广的 flyout/theme/language shell-state coverage 仍作为后续有界工作。 |
+| CI and release gates | `.github/workflows`、`eng/ci.ps1`、test projects | Build/test/maintenance/contract/release/hygiene lanes、public API baseline、package validation、docs route checks、scene PNG gate tests 和 manifest-driven full-window shell gate tests。 | Text/API/scene/shell gates 较强。严格 pixel baseline 继续等 deterministic drift 测量后再做。 |
 
 ## React Flow 对齐矩阵
 
@@ -82,7 +87,7 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 | Declarative + code-first API | Partial | Host builder、definitions、builders、templates 和 session APIs 已存在。Avalonia markup-first ergonomics 不等同 React Flow hooks/components。 | 文档保持诚实，不声明 React hook parity。 |
 | Accessibility breadth | Partial | Keyboard navigation 与 automation peers 有目标测试。所有 built-ins 与 shell states 的广泛 accessibility audit 仍偏弱。 | 仅在 adopter/release evidence 需要时再开 issue。 |
 | Host events | Present | `IGraphEditorEvents`、mutation batching 和 host-event Cookbook route 已存在。 | Keep guarded。 |
-| Screenshot-driven UI quality | Partial / guarded | Scene PNG gate 已覆盖规范 graph scenes。Default Cookbook full-window shell route 现在会捕获 host menu、drawer、left navigation、graph host 和 recipe panel metadata。Pixel-baseline comparison 与更广的 flyout/shell-state coverage 尚未覆盖。 | #83 先保持为第一条 shell gate；只有 visual drift evidence 需要时再追加更广的 baseline follow-up。 |
+| Screenshot-driven UI quality | Partial / guarded | Scene PNG gate 已覆盖规范 graph scenes。Full-window shell gate 现在会捕获 default Cookbook drawer state 和 runtime diagnostics drawer state，包含 host menu、drawer、graph host、named shell parts 和 artifact metadata。Pixel-baseline comparison 与更广的 flyout/theme/language coverage 尚未覆盖。 | Phase 486 保持在 manifest-driven shell states 范围内；只有 visual drift evidence 需要时再追加更广的 baseline follow-up。 |
 
 ## 已完成的 Phase 0 Issue Wave
 
@@ -113,7 +118,7 @@ Phase 484 是当前 active planning issue，负责把已经清空的队列转换
 | --- | --- | --- | --- | --- | --- |
 | #91 | `avalonia-node-map-4xr` | Phase 484: refresh React Flow parity roadmap after rotatable nodes | P1 | `docs/en/phase-0-reactflow-parity-audit.md`、`docs/zh-CN/phase-0-reactflow-parity-audit.md`、GitHub/Beads tracker state | 当前 docs-only issue。不修改产品代码或 public API。 |
 | TBD | TBD | Cookbook example architecture refresh | P1 | `src/AsterGraph.Demo/Cookbook`、`docs/en/demo-cookbook.md`、`docs/zh-CN/demo-cookbook.md`，如果重命名/拆分示例则包含 screenshot route metadata | 可与 visual gate decision 并行，但 route ID 和截图要保持稳定。避免 Core/Editor API 修改。 |
-| TBD | TBD | Full-window visual coverage expansion decision | P1 | `tests/AsterGraph.Demo.Tests`、screenshot metadata/docs，必要时只触碰 `src/AsterGraph.Demo` 的确定性 shell states | 独立于 API/model 工作。除非已测量 drift，否则继续延后严格 pixel baseline。 |
+| #95 | `avalonia-node-map-0xr` | Phase 486: decide full-window visual coverage expansion | P1 | `tests/AsterGraph.Demo.Tests`、screenshot metadata/docs | 独立于 API/model 工作。除非已测量 drift，否则继续延后严格 pixel baseline。 |
 | TBD | TBD | Custom node copyable-host recipe hardening | P2 | host recipe docs、templates、Demo cookbook route text；只有证明缺失 public seam 时才触碰 `AsterGraphPresentationOptions` 示例 | 可与 Cookbook/docs work 并行；除非明确扩大 issue，否则不触碰 node interaction internals。 |
 | TBD | TBD | Layout provider and background/cancel proof refresh | P2 | layout provider docs/tests、Demo routes、preview/apply/cancel 的 command guidance | 可与 visual/docs work 并行。除非测试证明 provider contract 缺失，否则保持 runtime API 稳定。 |
 | TBD | TBD | Renderer virtualization design spike | P2 | 先做 docs/tests；只有真正 virtualization contract 被批准后才触碰 `AsterGraph.Avalonia` renderer/projection | 与任何 claim expansion 串行。不能用 xlarge telemetry 声明 10000 节点支持。 |
@@ -140,7 +145,7 @@ Phase 480 之后推荐下一条分支：`feature/reactflow-parity-roadmap`，对
 - 每个新的 public UI component 或 interaction 都应有 Cookbook route；
 - 如果 UI 变更只是 structural-only 且不改变像素，需要显式说明。
 
-当前覆盖包含 scene-level route captures 和第一条 default full-window Cookbook shell capture。`DemoCookbookScreenshotGateTests` 和 `CookbookScreenshotGateRoutes.json` 能证明规范 graph scenes、route metadata 和 default hosted shell artifact；它们仍不提供严格 pixel-baseline comparisons 或广泛 flyout/state coverage。
+当前覆盖包含 scene-level route captures 和两条 manifest-driven full-window shell captures。`DemoCookbookScreenshotGateTests`、`CookbookScreenshotGateRoutes.json` 和 `CookbookShellVisualGateStates.json` 能证明规范 graph scenes、route metadata、default Cookbook shell artifact 和 runtime diagnostics shell artifact；它们仍不提供严格 pixel-baseline comparisons 或广泛 flyout/theme/language coverage。
 
 ## Tracker 备注
 
