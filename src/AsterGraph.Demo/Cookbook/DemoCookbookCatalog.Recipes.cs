@@ -489,7 +489,7 @@ public static partial class DemoCookbookCatalog
                     "ToBudgetMarker"),
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.GraphOperations,
-                    "Layout preview/apply and snap-to-grid commands move through the canonical session route.",
+                    "Host-owned layout providers create synchronous preview plans; apply and snap commands move through the canonical session route.",
                     "TryApplyLayoutRequest"),
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.ValidationRuntimeOverlay,
@@ -520,23 +520,31 @@ public static partial class DemoCookbookCatalog
             ],
             ["MINIMAP_LIGHTWEIGHT_PROJECTION_OK", "PROJECTION_PERFORMANCE_EVIDENCE_OK", "SCALE_PERFORMANCE_BUDGET_OK", "LAYOUT_PROVIDER_SEAM_OK", "LAYOUT_PREVIEW_APPLY_CANCEL_OK", "LAYOUT_UNDO_TRANSACTION_OK"],
             new DemoCookbookRouteClarity(
-                "Performance route: ViewportVisibleSceneProjector.Project(...) plus AsterGraphWorkbenchPerformancePolicy.FromMode(...) and IGraphEditorSession layout preview/apply and snap commands.",
-                "Supported seams live in `AsterGraph.Editor` viewport projection, layout command contracts, and `AsterGraph.Avalonia` hosted workbench policy contracts.",
-                "Demo cookbook projection is a graph-above-code teaching surface only; Editor tests remain the proof sources."),
-            "Performance and layout proof reports projection, layout command, and budget evidence; it does not add a background graph index, second renderer, or runtime execution mode.",
+                "Performance route: ViewportVisibleSceneProjector.Project(...) plus AsterGraphWorkbenchPerformancePolicy.FromMode(...) and host-owned IGraphLayoutProvider preview/apply/snap commands.",
+                "Supported seams live in `AsterGraph.Editor` viewport projection, `IGraphLayoutProvider`, layout command contracts, and `AsterGraph.Avalonia` hosted workbench policy contracts.",
+                "Demo cookbook projection is a graph-above-code teaching surface only; Editor tests remain the proof sources, and the layout provider seam is synchronous rather than async-cancellable."),
+            "Performance and layout proof reports projection, provider preview/apply, snap command, and budget evidence; it does not add a background graph index, second renderer, cancellable layout engine, or runtime execution mode.",
             CodeSample: """
-            // Project visible scene with budget limits
-            var projection = editor.Session.Queries.GetViewportSnapshot();
-            var budgetMarker = AsterGraphWorkbenchPerformancePolicy
-                .ToMiniMapBudgetMarker(projection);
+            var view = AsterGraphHostBuilder.Create()
+                .UseDocument(document)
+                .UseCatalog(catalog)
+                .UseDefaultCompatibility()
+                .UseLayoutProvider(layoutProvider)
+                .BuildAvaloniaView();
 
-            // Configure large-graph performance policy
-            var policy = new WorkbenchPerformancePolicy
+            var request = new GraphLayoutRequest
             {
-                MaxVisibleNodes = 500,
-                MinimapUpdateCadenceMs = 100,
+                Mode = GraphLayoutRequestMode.All,
+                Orientation = GraphLayoutOrientation.LeftToRight,
             };
-            editor.Session.ApplyPerformancePolicy(policy);
+
+            var plan = view.Editor.Session.Commands.PreviewLayoutPlan(request);
+            if (plan.IsAvailable)
+            {
+                view.Editor.Session.Commands.TryApplyLayoutPlan(plan);
+            }
+
+            view.Editor.Session.Commands.TrySnapSelectedNodesToGrid(20);
             """
             ),
         new DemoCookbookRecipe(

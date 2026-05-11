@@ -10,6 +10,10 @@
 
 Phase 486 扩展 full-window shell gate，但不加入 strict pixel baselines，也不改 Demo runtime。`CookbookShellVisualGateStates.json` 现在基于同一条 default `starter-host-route` / `ai-pipeline` fixture 驱动两条确定性 shell state：`shell-cookbook-default-open` 和 `shell-runtime-diagnostics-open`。这个 gate 会验证 drawer state、dimensions、nonblank pixels、distinct colors、output metadata 和 required named shell parts；flyouts、context menus、language/theme variants 和 hash baselines 仍然不在本阶段范围内。
 
+## Phase 488 更新
+
+Phase 488 为 P2 的 layout provider 与 background/cancel proof refresh 打开 GitHub #99 / `avalonia-node-map-ce1`。本 slice 先做 docs/tests：把 `IGraphLayoutProvider`、`PreviewLayoutPlan`、`TryApplyLayoutPlan`、`TryApplyLayoutRequest`、snap-to-grid commands 和 `background-grid-density` route 继续绑定到现有 source-backed proof。不要在这个 issue 中把同步 provider seam 扩大成异步或可取消的 layout execution。
+
 ## Phase 484 更新
 
 Phase 484 在 Phase 478-483 wave 全部关闭、Phase 480 rotatable-node surface 已合入后重新刷新路线图。此前的下一轮队列已经过期，因为 GitHub #80 / `avalonia-node-map-p480` 已关闭。本次更新保持 docs-only，改用优先级明确的拆分计划替换单项队列，并继续把公开声明绑定到当前 source、tests、docs 和 CI 证据。
@@ -48,7 +52,7 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 | Host-facing identifiers and contracts | `src/AsterGraph.Abstractions` | Node definitions、catalogs、styling、builder helpers、compatibility policies 和 plugin-neutral extension points。 | 仍是 host 的最低依赖层；新增 parity contract 应保持薄而明确。 |
 | 持久化模型和序列化 | `src/AsterGraph.Core` | `GraphDocument`、groups、scopes、edge presentation、schema migration helpers 和 legacy import boundary。 | #48 的兼容面清理已完成；新增模型字段例如 rotation 必须先说明 schema 行为。 |
 | Session、commands、queries、state services | `src/AsterGraph.Editor` | Selection、undo/redo、clipboard、workspace save/load、connection authoring、validation、layout、events、mutations 和 presentation snapshots。 | canonical route 已经较强；后续 parity 工作应走 commands/queries，不绕开 session ownership。 |
-| Layout integration | `src/AsterGraph.Editor/Runtime` 和 services | `GraphLayoutRequest`、`GraphLayoutPlan`、`IGraphLayoutProvider`、preview/apply/cancel evidence 和 snap/grid commands。 | Provider seam 已存在；扩展 layout 声明时仍需明确 background/cancel/provider proof。 |
+| Layout integration | `src/AsterGraph.Editor/Runtime` 和 services | `GraphLayoutRequest`、`GraphLayoutPlan`、`IGraphLayoutProvider`、preview/apply evidence、command-surface cancel evidence 和 snap/grid commands。 | Provider seam 已存在且是同步契约；扩展 layout 声明时仍需明确 background/provider proof，且 cancellation wording 不能暗示 async layout cancellation。 |
 | Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`、scene host projection、edge renderer、interaction coordinators、automation peers、MiniMap、Background、Controls、Panel、NodeToolbar、EdgeToolbar、NodeResizer、`NodeDragHandle` 和 stock rotation projection。 | Built-ins 已成为可复用 public components。剩余 UI parity 缺口集中在更广的 full-window visual regression、Cookbook 示例易用性，以及任何未来需要真正 renderer virtualization 证明的声明。 |
 | Hosted workbench shell | `GraphEditorView` 和 hosted factories | Header、library、canvas、inspector、validation panel、authoring tools、minimap、command projection 和 status chrome。 | 是有用的 supported route，但新增公开功能不应把 Demo shell chrome 变成隐藏依赖。 |
 | Demo/Cookbook | `src/AsterGraph.Demo` | 25 个 recipes、route clarity docs、built-in/interaction/lifecycle batches、scene PNG screenshot gate metadata，以及两条 manifest-driven full-window shell visual states。 | Cookbook breadth、scene coverage、default Cookbook drawer 和 runtime diagnostics drawer shell captures 已覆盖。Pixel-baseline comparison 与更广的 flyout/theme/language shell-state coverage 仍作为后续有界工作。 |
@@ -82,7 +86,7 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 | Panel | Present | `AsterGraphPanel`、position enum、catalog entry、tests 和 Cookbook route 已存在。 | Keep guarded。 |
 | NodeToolbar / EdgeToolbar | Present | Standalone `NodeToolbar` 与 `EdgeToolbar` 投影 canonical node/connection actions，并有 tests/routes。 | Keep guarded。 |
 | Groups / subflows | Present / proof-bounded | Groups、composite scopes、hierarchy snapshots、promotion/expose commands 和 Cookbook route 已存在。 | Keep guarded。 |
-| Auto layout integration | Partial | `IGraphLayoutProvider`、preview/apply/cancel、snap-to-grid 和 route evidence 已存在。Provider examples 与 long-running cancellation semantics 仍需明确。 | 除非 adopter evidence 提升优先级，否则排在高风险 parity gap 之后。 |
+| Auto layout integration | Partial | `IGraphLayoutProvider`、preview/apply、snap-to-grid、command-surface cancel evidence 和 route evidence 已存在。Provider example 由宿主拥有，当前 layout planning 是同步契约，不是 async-cancellable。 | Phase 488 保持 docs/tests proof 边界；除非 adopter evidence 证明需要新的 provider contract issue。 |
 | Virtualization / thousands of nodes | Partial / bounded | Scale baseline、visible-scene projection、MiniMap lightweight projection 和 hosted performance policy 已存在。当前被防守的是 viewport-budgeted scene projection/rendering contract，不是 ItemsRepeater/Skia-style renderer virtualization，xlarge evidence 也只是 telemetry-only。 | 继续维护 scale docs 和 renderer projection tests；扩大声明前先开新 issue。 |
 | Declarative + code-first API | Partial | Host builder、definitions、builders、templates 和 session APIs 已存在。Avalonia markup-first ergonomics 不等同 React Flow hooks/components。 | 文档保持诚实，不声明 React hook parity。 |
 | Accessibility breadth | Partial | Keyboard navigation 与 automation peers 有目标测试。所有 built-ins 与 shell states 的广泛 accessibility audit 仍偏弱。 | 仅在 adopter/release evidence 需要时再开 issue。 |
@@ -119,8 +123,8 @@ Phase 484 是当前 active planning issue，负责把已经清空的队列转换
 | #91 | `avalonia-node-map-4xr` | Phase 484: refresh React Flow parity roadmap after rotatable nodes | P1 | `docs/en/phase-0-reactflow-parity-audit.md`、`docs/zh-CN/phase-0-reactflow-parity-audit.md`、GitHub/Beads tracker state | 当前 docs-only issue。不修改产品代码或 public API。 |
 | TBD | TBD | Cookbook example architecture refresh | P1 | `src/AsterGraph.Demo/Cookbook`、`docs/en/demo-cookbook.md`、`docs/zh-CN/demo-cookbook.md`，如果重命名/拆分示例则包含 screenshot route metadata | 可与 visual gate decision 并行，但 route ID 和截图要保持稳定。避免 Core/Editor API 修改。 |
 | #95 | `avalonia-node-map-0xr` | Phase 486: decide full-window visual coverage expansion | P1 | `tests/AsterGraph.Demo.Tests`、screenshot metadata/docs | 独立于 API/model 工作。除非已测量 drift，否则继续延后严格 pixel baseline。 |
-| TBD | TBD | Custom node copyable-host recipe hardening | P2 | host recipe docs、templates、Demo cookbook route text；只有证明缺失 public seam 时才触碰 `AsterGraphPresentationOptions` 示例 | 可与 Cookbook/docs work 并行；除非明确扩大 issue，否则不触碰 node interaction internals。 |
-| TBD | TBD | Layout provider and background/cancel proof refresh | P2 | layout provider docs/tests、Demo routes、preview/apply/cancel 的 command guidance | 可与 visual/docs work 并行。除非测试证明 provider contract 缺失，否则保持 runtime API 稳定。 |
+| #97 | `avalonia-node-map-i8s` | Phase 487: harden custom node copyable-host recipe | P2 | host recipe docs、templates、Demo cookbook route text、consistency tests | 已由 PR #98 关闭。未修改 Core/Editor/Avalonia API。 |
+| #99 | `avalonia-node-map-ce1` | Phase 488: refresh layout provider and background/cancel proof | P2 | layout provider docs/tests、Demo routes、preview/apply/cancel 的 command guidance | 当前 docs/tests slice。除非测试证明 provider contract 缺失，否则保持 runtime API 稳定。 |
 | TBD | TBD | Renderer virtualization design spike | P2 | 先做 docs/tests；只有真正 virtualization contract 被批准后才触碰 `AsterGraph.Avalonia` renderer/projection | 与任何 claim expansion 串行。不能用 xlarge telemetry 声明 10000 节点支持。 |
 | TBD | TBD | Accessibility breadth audit | P3 | Avalonia built-ins、automation peer tests、keyboard/screen-reader coverage docs | visual routes 稳定后可并行；公开声明仅限已审计 controls。 |
 | TBD | TBD | Retained migration removal roadmap | P3 | public API inventory、stabilization support matrix、retained migration docs/tests | 必须与 v1 policy 和 public API baseline work 串行；不要在无关 parity work 中顺手删除 retained surfaces。 |
