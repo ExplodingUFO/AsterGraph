@@ -26,6 +26,10 @@ Phase 493 是 GitHub #109 / `avalonia-node-map-8qv`，承接 retained migration 
 
 Phase 494 是 GitHub #111 / `avalonia-node-map-p5z`，承接 custom-node presenter parity proof 关闭后的 localized full-window shell visual gate expansion。本 slice 是 docs/tests only：新增 shell-state-owned language/theme metadata，并在现有 English Cookbook 与 runtime diagnostics captures 之外增加 Chinese Cookbook drawer capture：`shell-cookbook-default-open-zh-cn`。不授权 strict pixel hash baselines、runtime UI changes、broad language/theme certification、flyout capture、popup capture 或 context-menu capture。
 
+## Phase 495 更新
+
+Phase 495 是 GitHub #113 / `avalonia-node-map-wzt`，在 Phase 494 关闭后刷新 post-Phase-494 roadmap refresh。本 slice 是 docs/tests only：基于当前 GitHub 与 Beads 证据刷新 active issue split，记录至少三个具体 follow-up candidates，并更新 worktree/parallelism guidance。不授权 Core/Editor/Avalonia runtime changes、public API changes、Demo UI redesign、retained API deletion、strict pixel baselines 或 broad React Flow parity claim expansion。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -180,21 +184,24 @@ Phase 492 现在负责 retained migration removal roadmap，边界是 inventory 
 
 Phase 493 已关闭 custom node presenter cookbook parity proof。它记录受支持的 custom-node 路线是 host-owned `NodeBodyPresenter` / `NodeVisualPresenter` 指引和既有 proof markers，不是 runtime API expansion，也不是 React Flow component/hook parity claim。
 
-Phase 494 现在负责 localized full-window shell visual gate coverage。它新增一条 Chinese Cookbook drawer state 和 shell-state language/theme metadata，同时把 strict pixel baselines 与更广的 flyout/theme/language coverage 留给后续 tracker-backed work。
+Phase 494 已关闭 localized full-window shell visual gate coverage。它新增一条 Chinese Cookbook drawer state 和 shell-state language/theme metadata，同时把 strict pixel baselines 与更广的 flyout/theme/language coverage 留给后续 tracker-backed work。
+
+Phase 495 在 GitHub 与 Beads 都回到零 open issues 后刷新 active queue。下面的 next wave 是 planning split，不是 implementation claim；每一行仍需要独立 GitHub issue、Beads issue、worktree、validation plan 和 PR，才能开始修改 code 或 docs。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states | P2 | Avalonia built-ins、automation/focus tests、keyboard/screen-reader coverage boundaries docs | 当前 docs/tests-first accessibility audit。除非证据证明具体 missing contract，否则不做 runtime、public API 或 visual changes。 |
-| #107 | `avalonia-node-map-j8v` | Phase 492: inventory retained migration surfaces and define removal roadmap | P3 | public API inventory、stabilization support matrix、retained migration docs/tests | Docs/tests-first inventory now, remove later slice。必须与 v1 policy 和 public API baseline work 串行；不要在 parity docs work 中顺手删除 retained surfaces。 |
-| #109 | `avalonia-node-map-8qv` | Phase 493: strengthen custom node presenter cookbook parity proof | P2 | React Flow parity audit docs 和 focused docs tests | Docs/tests-first traceability slice。除非后续 tracker 证明 presenter contract 缺失，否则不修改 runtime behavior、public API、Demo visuals 或 screenshot gates。 |
-| #111 | `avalonia-node-map-p5z` | Phase 494: add localized full-window shell visual gate state | P2 | shell visual gate manifest、screenshot docs/tests、parity audit docs | Docs/tests-first visual gate coverage slice。不加入 runtime UI changes、strict pixel baselines、flyout capture 或 broad language/theme certification。 |
+| TBD | TBD | Phase 496: document Cookbook example architecture contract | P1 | `docs/en/demo-cookbook.md`、`docs/zh-CN/demo-cookbook.md`、`tests/AsterGraph.Demo.Tests/DemoCookbookDocsTests.cs` | Docs/tests-only，可与 shell visual breadth 并行。澄清 catalog/projection/ViewModel/docs/manifest ownership、category-derived route posture、doc-only aliases 和 duplicate related-doc hygiene。No Core/Editor/Avalonia runtime changes。 |
+| TBD | TBD | Phase 497: expand shell visual gate breadth without pixel baselines | P2 | `tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json`、`tests/AsterGraph.Demo.Tests/DemoCookbookScreenshotGateTests.cs`、双语 screenshot docs | Phase 495 后可启动；如果 shell manifest 写集隔离，可与 Cookbook docs 工作并行。只增加 closed drawer、selected non-Cookbook host group 或 search/filter state 等有界 state；仍不做 strict pixel baselines、flyout capture、popup capture 或 broad language/theme certification。 |
+| TBD | TBD | Phase 498: define retained migration removal execution gate | P3 | public API inventory docs/tests、retained migration recipe/docs、`eng/public-api-baseline.txt` analysis only，除非后续 API-change issue 被批准 | 与 v1 policy 顺序执行。本行只定义 gate，不删除 API：列出 exact symbols、blocker tests、support-window criteria 和 migration evidence。 |
+| TBD | TBD | Phase 499: prove renderer virtualization execution boundary | P2 | renderer projection tests/docs、scale baseline docs、可能的 spike-only benchmark harness | 与 retained migration 独立。除非 focused implementation issue 在 CI-repeatable performance evidence 下证明 true renderer virtualization，否则继续把声明限制为 viewport-budgeted projection。 |
 
 ## 推荐并行 Worktree 计划
 
-- `docs/phase-491-accessibility-breadth-audit`：负责 #105 / `avalonia-node-map-44i`；只审计 Avalonia built-ins 和 shell states 的 accessibility docs/tests。
-- `docs/phase-492-retained-migration-roadmap`：负责 #107 / `avalonia-node-map-j8v`；只盘点 retained migration surfaces 和 removal gates。删除或 baseline 更新需要后续 API-change tracker。
-- `docs/phase-493-custom-node-presenter-proof`：负责 #109 / `avalonia-node-map-8qv`；只把 custom-node parity row 绑定到受防守 host recipe 和 docs tests。
-- `docs/phase-494-localized-shell-visual-gate`：负责 #111 / `avalonia-node-map-p5z`；只新增 shell-state language/theme metadata 和一条 Chinese full-window Cookbook shell capture。
+- `docs/phase-495-roadmap-refresh`：负责 #113 / `avalonia-node-map-wzt`；刷新本 roadmap，并在不改 runtime 或 public API 的前提下给出至少三个具体 follow-up candidates。
+- `docs/phase-496-cookbook-architecture-contract`：应负责 Cookbook example architecture contract row；docs/tests-only，可与 shell visual 工作并行。
+- `docs/phase-497-shell-visual-breadth`：应负责 bounded shell visual gate breadth；写集限制在 shell manifest、screenshot tests 和 screenshot docs。
+- `docs/phase-498-retained-removal-gate`：应负责 retained migration removal execution criteria；必须与 v1/API-baseline policy 顺序推进。
+- `perf/phase-499-renderer-virtualization-boundary`：应负责 renderer virtualization execution proof。除非 performance evidence 支撑 implementation，否则按 spike/contract branch 处理。
 
 ## UI 验证策略
 
@@ -215,4 +222,5 @@ Phase 494 现在负责 localized full-window shell visual gate coverage。它新
 - Phase 492 现在通过 GitHub #107 / `avalonia-node-map-j8v` 承接 retained migration removal planning；它只记录分类和 gates，不删除 API。
 - Phase 493 现在通过 GitHub #109 / `avalonia-node-map-8qv` 承接 custom node presenter cookbook parity proof；它只记录 route traceability，不扩大 presenter API。
 - Phase 494 现在通过 GitHub #111 / `avalonia-node-map-p5z` 承接 localized full-window shell visual gate coverage；它只记录一条 localized shell visual state，不做 broad visual certification。
-- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493 和 Phase 494 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
+- Phase 495 现在通过 GitHub #113 / `avalonia-node-map-wzt` 承接 post-Phase-494 roadmap refresh；它只记录 next issue split，不做 implementation。
+- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494 和 Phase 495 都不修改产品代码；除非 focused test 证明存在具体 missing contract。

@@ -110,14 +110,8 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.DoesNotContain("| TBD | TBD | Accessibility breadth audit", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains(
-            "| #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states",
-            englishParity,
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "| #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states",
-            chineseParity,
-            StringComparison.Ordinal);
+        Assert.Contains("Phase 491 closed the accessibility breadth audit", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 491 已关闭 accessibility breadth audit", chineseParity, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -136,14 +130,8 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.DoesNotContain("| TBD | TBD | Retained migration removal roadmap", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains(
-            "| #107 | `avalonia-node-map-j8v` | Phase 492: inventory retained migration surfaces and define removal roadmap",
-            englishParity,
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "| #107 | `avalonia-node-map-j8v` | Phase 492: inventory retained migration surfaces and define removal roadmap",
-            chineseParity,
-            StringComparison.Ordinal);
+        Assert.Contains("Phase 492 now owns the retained migration removal roadmap", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 492 现在负责 retained migration removal roadmap", chineseParity, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -166,14 +154,8 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.DoesNotContain("用具体 host-owned visual presenter 示例继续补文档", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains(
-            "| #109 | `avalonia-node-map-8qv` | Phase 493: strengthen custom node presenter cookbook parity proof",
-            englishParity,
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "| #109 | `avalonia-node-map-8qv` | Phase 493: strengthen custom node presenter cookbook parity proof",
-            chineseParity,
-            StringComparison.Ordinal);
+        Assert.Contains("Phase 493 closed the custom node presenter cookbook parity proof", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 493 已关闭 custom node presenter cookbook parity proof", chineseParity, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -197,14 +179,37 @@ public sealed class ReactFlowParityRoadmapDocsTests
 
         Assert.Contains("three manifest-driven full-window shell captures", englishParity, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("三条 manifest-driven full-window shell", chineseParity, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains(
-            "| #111 | `avalonia-node-map-p5z` | Phase 494: add localized full-window shell visual gate state",
-            englishParity,
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "| #111 | `avalonia-node-map-p5z` | Phase 494: add localized full-window shell visual gate state",
-            chineseParity,
-            StringComparison.Ordinal);
+        Assert.Contains("Phase 494 closed localized full-window shell visual gate coverage", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 494 已关闭 localized full-window shell visual gate coverage", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase495PostShellGateIssueWaveRefreshInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 495", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #113", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-wzt", contents, StringComparison.Ordinal);
+            Assert.Contains("post-Phase-494 roadmap refresh", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Cookbook example architecture contract", contents, StringComparison.Ordinal);
+            Assert.Contains("shell visual gate breadth", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("retained migration removal execution gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Core/Editor/Avalonia runtime changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("docs/phase-495-roadmap-refresh", contents, StringComparison.Ordinal);
+
+            Assert.DoesNotContain("| #105 | `avalonia-node-map-44i` | Phase 491", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("| #107 | `avalonia-node-map-j8v` | Phase 492", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("| #109 | `avalonia-node-map-8qv` | Phase 493", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("| #111 | `avalonia-node-map-p5z` | Phase 494", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("at least three concrete follow-up candidates", englishParity, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("至少三个具体 follow-up candidates", chineseParity, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string ReadRepoFile(string relativePath)
