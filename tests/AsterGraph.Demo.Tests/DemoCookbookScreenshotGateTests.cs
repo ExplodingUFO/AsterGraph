@@ -287,6 +287,8 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains("CI", contents, StringComparison.Ordinal);
             Assert.Contains("before/after", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("shell-runtime-diagnostics-open", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-open-zh-cn", contents, StringComparison.Ordinal);
+            Assert.Contains("language/theme", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("builtin-standalone-controls-route", contents, StringComparison.Ordinal);
             Assert.Contains("builtin-standalone-panel-route", contents, StringComparison.Ordinal);
             Assert.Contains("builtin-node-toolbar-route", contents, StringComparison.Ordinal);
@@ -338,6 +340,8 @@ public sealed class DemoCookbookScreenshotGateTests
         Assert.False(string.IsNullOrWhiteSpace(shellState.Id));
         Assert.Contains(routes, route => string.Equals(route.Id, shellState.RouteId, StringComparison.Ordinal));
         Assert.Contains(shellState.HostGroup, new[] { "cookbook", "runtime" });
+        Assert.Contains(shellState.Language, new[] { "en", "zh-CN" });
+        Assert.False(string.IsNullOrWhiteSpace(shellState.Theme));
         Assert.NotEmpty(shellState.RequiredShellParts);
         Assert.All(shellState.RequiredShellParts, part => Assert.StartsWith("PART_", part, StringComparison.Ordinal));
         Assert.StartsWith("shell-", shellState.OutputFileName, StringComparison.Ordinal);
@@ -389,7 +393,7 @@ public sealed class DemoCookbookScreenshotGateTests
             RestoreLastWorkspaceOnStartup: false,
             InitialScenario: route.Scenario));
 
-        viewModel.SelectLanguage(route.Language);
+        viewModel.SelectLanguage(shellState.Language);
         viewModel.SelectedCookbookRecipe = viewModel.CookbookRecipes.Single(recipe =>
             string.Equals(recipe.Id, route.RecipeId, StringComparison.Ordinal));
         viewModel.Session.Commands.UpdateViewportSize(route.ViewportWidth, route.ViewportHeight);
@@ -438,8 +442,8 @@ public sealed class DemoCookbookScreenshotGateTests
                 route.RecipeId,
                 route.Scenario,
                 shellState.HostGroup,
-                route.Language,
-                route.Theme,
+                shellState.Language,
+                shellState.Theme,
                 route.ViewportWidth,
                 route.ViewportHeight,
                 imageSize.Width,
@@ -464,6 +468,8 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains(shellState.Id, metadataJson, StringComparison.Ordinal);
             Assert.Contains(route.Id, metadataJson, StringComparison.Ordinal);
             Assert.Contains(route.RecipeId, metadataJson, StringComparison.Ordinal);
+            Assert.Contains(shellState.Language, metadataJson, StringComparison.Ordinal);
+            Assert.Contains(shellState.Theme, metadataJson, StringComparison.Ordinal);
             Assert.Contains("full-window-shell-state", metadataJson, StringComparison.Ordinal);
             Assert.Contains(ToRepoRelativePath(repoRoot, imagePath), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ShellStateManifestRelativePath, metadataJson, StringComparison.Ordinal);
@@ -577,6 +583,8 @@ public sealed class DemoCookbookScreenshotGateTests
         string Id,
         string RouteId,
         string HostGroup,
+        string Language,
+        string Theme,
         bool ExpectedPaneOpen,
         string[] RequiredShellParts,
         string OutputFileName);

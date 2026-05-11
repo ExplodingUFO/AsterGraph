@@ -3,6 +3,8 @@
     "id": "shell-cookbook-default-open",
     "routeId": "cookbook-default-starter-host-ai-pipeline",
     "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
     "expectedPaneOpen": true,
     "requiredShellParts": [
       "PART_HostMenu",
@@ -14,9 +16,27 @@
     "outputFileName": "shell-cookbook-default-open.png"
   },
   {
+    "id": "shell-cookbook-default-open-zh-cn",
+    "routeId": "cookbook-default-starter-host-ai-pipeline",
+    "hostGroup": "cookbook",
+    "language": "zh-CN",
+    "theme": "canonical-dark",
+    "expectedPaneOpen": true,
+    "requiredShellParts": [
+      "PART_HostMenu",
+      "PART_HostShellSplitView",
+      "PART_CookbookWorkspaceNavigationPanel",
+      "PART_MainGraphEditorHost",
+      "PART_CookbookWorkspaceRecipeContentPanel"
+    ],
+    "outputFileName": "shell-cookbook-default-open-zh-cn.png"
+  },
+  {
     "id": "shell-runtime-diagnostics-open",
     "routeId": "cookbook-default-starter-host-ai-pipeline",
     "hostGroup": "runtime",
+    "language": "en",
+    "theme": "canonical-dark",
     "expectedPaneOpen": true,
     "requiredShellParts": [
       "PART_HostMenu",
