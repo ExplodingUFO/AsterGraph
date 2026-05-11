@@ -206,6 +206,14 @@ The first gate route is `starter-host-route` with the `ai-pipeline` scenario, `1
 
 CI posture: both the scene PNG gate and the full-window shell visual gate are wired into `AsterGraph.Demo.Tests`, so the normal net9 validation lane runs them. The scene gate checks deterministic artifact generation, PNG validity, route metadata, and minimum image invariants. The shell gate additionally fails when a full-window artifact is missing, blank, undersized, has the wrong drawer state, misses the expected language/theme metadata, or no longer covers the expected shell parts. Both gates record `PngSha256` for evidence but avoid a strict pixel hash baseline until Skia/native drift is measured across CI hosts. Flyouts, popups, context menus, broad language/theme variants beyond the listed shell states, and strict pixel baselines remain outside this gate; Phase 500 / GitHub #123 / `avalonia-node-map-66t` only adds the selected runtime closed-shell manifest state.
 
+### Shell Visual Coverage Planning
+
+`SHELL_VISUAL_COVERAGE_PLANNING` is Phase 506 / GitHub #135 / `avalonia-node-map-h7c`. It does not add manifest rows; it records the next bounded visual-coverage candidates after the current five full-window shell states: `shell-cookbook-default-open`, `shell-cookbook-default-open-zh-cn`, `shell-cookbook-default-closed`, `shell-runtime-diagnostics-open`, and `shell-runtime-diagnostics-closed`.
+
+Future tracker-backed slices should split the next coverage into flyout capture, popup capture, context-menu capture, additional language/theme variants, and pixel-baseline drift measurement. The drift-measurement step must run before any strict pixel baseline is introduced, because the current gate records `PngSha256` as evidence rather than a pass/fail hash.
+
+This planning slice is intentionally narrow: no manifest rows, no strict pixel baselines, no runtime UI changes, no public API changes, no retained API removal, and no broad visual/language/theme certification.
+
 ## Related Docs
 
 - [Demo Guide](./demo-guide.md)
