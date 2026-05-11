@@ -19,6 +19,7 @@ namespace AsterGraph.Demo.Tests;
 public sealed class DemoCookbookScreenshotGateTests
 {
     private const string ManifestRelativePath = "tests/AsterGraph.Demo.Tests/CookbookScreenshotGateRoutes.json";
+    private const string ShellStateManifestRelativePath = "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json";
     private const string OutputRootRelativePath = "artifacts/test-results/cookbook-screenshot-gate";
     private const string ShellOutputRootRelativePath = "artifacts/test-results/cookbook-shell-visual-gate";
     private const int ShellMinimumBytes = 8192;
@@ -131,127 +132,24 @@ public sealed class DemoCookbookScreenshotGateTests
     public void CookbookScreenshotGate_CapturesFullWindowShellAndWritesMetadata()
     {
         var repoRoot = GetRepositoryRoot();
-        var route = LoadRoutes(repoRoot).Single(candidate =>
-            string.Equals(candidate.Id, "cookbook-default-starter-host-ai-pipeline", StringComparison.Ordinal));
-        AssertRouteReferencesCatalog(route);
+        var routes = LoadRoutes(repoRoot);
+        var shellStates = LoadShellStates(repoRoot);
+        Assert.NotEmpty(shellStates);
 
-        var outputDirectory = Path.Combine(repoRoot, ShellOutputRootRelativePath, route.Id);
-        if (Directory.Exists(outputDirectory))
+        foreach (var shellState in shellStates)
         {
-            Directory.Delete(outputDirectory, recursive: true);
-        }
+            AssertShellStateReferencesRoute(shellState, routes);
+            var route = routes.Single(candidate => string.Equals(candidate.Id, shellState.RouteId, StringComparison.Ordinal));
+            AssertRouteReferencesCatalog(route);
 
-        Directory.CreateDirectory(outputDirectory);
-        var imagePath = Path.Combine(
-            outputDirectory,
-            Path.GetFileNameWithoutExtension(route.OutputFileName) + "-shell.png");
-        var metadataPath = Path.Combine(outputDirectory, "metadata.json");
-        var storageRootPath = Path.Combine(
-            Path.GetTempPath(),
-            "AsterGraph.Demo.Tests",
-            nameof(DemoCookbookScreenshotGateTests),
-            "shell",
-            Guid.NewGuid().ToString("N"));
-        var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
-            StorageRootPath: storageRootPath,
-            EnableStatePersistence: false,
-            RestoreLastWorkspaceOnStartup: false,
-            InitialScenario: route.Scenario));
+            var outputDirectory = Path.Combine(repoRoot, ShellOutputRootRelativePath, shellState.Id);
+            if (Directory.Exists(outputDirectory))
+            {
+                Directory.Delete(outputDirectory, recursive: true);
+            }
 
-        viewModel.SelectLanguage(route.Language);
-        viewModel.SelectedCookbookRecipe = viewModel.CookbookRecipes.Single(recipe =>
-            string.Equals(recipe.Id, route.RecipeId, StringComparison.Ordinal));
-        viewModel.Session.Commands.UpdateViewportSize(route.ViewportWidth, route.ViewportHeight);
-        viewModel.Session.Commands.FitToViewport(updateStatus: false);
-        viewModel.PreferredWindowWidth = route.ViewportWidth;
-        viewModel.PreferredWindowHeight = route.ViewportHeight;
-        viewModel.OpenHostMenuGroup(route.HostGroup);
-
-        var window = new MainWindow
-        {
-            Width = route.ViewportWidth,
-            Height = route.ViewportHeight,
-            DataContext = viewModel,
-        };
-
-        try
-        {
-            window.Show();
-            window.UpdateLayout();
-            Dispatcher.UIThread.RunJobs(DispatcherPriority.Loaded);
-            Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
-
-            var hostMenu = Assert.IsType<Menu>(window.FindControl<Menu>("PART_HostMenu"));
-            var shellSplitView = Assert.IsType<SplitView>(window.FindControl<SplitView>("PART_HostShellSplitView"));
-            var navigationPanel = Assert.IsType<Border>(window.FindControl<Border>("PART_CookbookWorkspaceNavigationPanel"));
-            var graphHost = Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost"));
-            var recipeContentPanel = Assert.IsType<Border>(window.FindControl<Border>("PART_CookbookWorkspaceRecipeContentPanel"));
-
-            Assert.NotNull(hostMenu);
-            Assert.True(shellSplitView.IsPaneOpen);
-            Assert.True(navigationPanel.IsVisible);
-            Assert.NotNull(graphHost.Content);
-            Assert.True(recipeContentPanel.IsVisible);
-
-            using var frame = window.CaptureRenderedFrame();
-            Assert.NotNull(frame);
-            frame!.Save(imagePath);
-
-            var bytes = File.ReadAllBytes(imagePath);
-            var imageSize = AssertPngArtifact(bytes, ShellMinimumBytes);
-            Assert.True(imageSize.Width >= route.ViewportWidth);
-            Assert.True(imageSize.Height >= route.ViewportHeight);
-            var pixelInspection = InspectNonBlankPng(imagePath);
-            Assert.True(pixelInspection.NonTransparentPixelCount > imageSize.Width * imageSize.Height / 4);
-            Assert.True(pixelInspection.DistinctColorCount > 1);
-
-            var metadata = new CookbookShellVisualGateMetadata(
-                route.Id,
-                route.RecipeId,
-                route.Scenario,
-                route.HostGroup,
-                route.Language,
-                route.Theme,
-                route.ViewportWidth,
-                route.ViewportHeight,
-                imageSize.Width,
-                imageSize.Height,
-                "headless-avalonia-window",
-                "full-window-shell",
-                ToRepoRelativePath(repoRoot, imagePath),
-                ManifestRelativePath,
-                viewModel.SelectedHostMenuGroupTitle,
-                viewModel.SelectedCookbookRecipe.Title,
-                shellSplitView.IsPaneOpen,
-                [
-                    "PART_HostMenu",
-                    "PART_HostShellSplitView",
-                    "PART_CookbookWorkspaceNavigationPanel",
-                    "PART_MainGraphEditorHost",
-                    "PART_CookbookWorkspaceRecipeContentPanel",
-                ],
-                pixelInspection.NonTransparentPixelCount,
-                pixelInspection.DistinctColorCount,
-                Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant());
-
-            File.WriteAllText(
-                metadataPath,
-                JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
-
-            var metadataJson = File.ReadAllText(metadataPath);
-            Assert.Contains(route.Id, metadataJson, StringComparison.Ordinal);
-            Assert.Contains(route.RecipeId, metadataJson, StringComparison.Ordinal);
-            Assert.Contains("full-window-shell", metadataJson, StringComparison.Ordinal);
-            Assert.Contains("PART_HostMenu", metadataJson, StringComparison.Ordinal);
-            Assert.Contains("PART_HostShellSplitView", metadataJson, StringComparison.Ordinal);
-            Assert.Contains("PART_CookbookWorkspaceNavigationPanel", metadataJson, StringComparison.Ordinal);
-            Assert.Contains("PART_MainGraphEditorHost", metadataJson, StringComparison.Ordinal);
-            Assert.Contains(ToRepoRelativePath(repoRoot, imagePath), metadataJson, StringComparison.Ordinal);
-            Assert.Contains(ManifestRelativePath, metadataJson, StringComparison.Ordinal);
-        }
-        finally
-        {
-            window.Close();
+            Directory.CreateDirectory(outputDirectory);
+            CaptureShellVisualState(repoRoot, route, shellState, outputDirectory);
         }
     }
 
@@ -382,11 +280,13 @@ public sealed class DemoCookbookScreenshotGateTests
         {
             Assert.Contains("DemoCookbookScreenshotGateTests", contents, StringComparison.Ordinal);
             Assert.Contains("CookbookScreenshotGateRoutes.json", contents, StringComparison.Ordinal);
+            Assert.Contains("CookbookShellVisualGateStates.json", contents, StringComparison.Ordinal);
             Assert.Contains(OutputRootRelativePath, contents, StringComparison.Ordinal);
             Assert.Contains(ShellOutputRootRelativePath, contents, StringComparison.Ordinal);
             Assert.Contains("full-window", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("CI", contents, StringComparison.Ordinal);
             Assert.Contains("before/after", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("shell-runtime-diagnostics-open", contents, StringComparison.Ordinal);
             Assert.Contains("builtin-standalone-controls-route", contents, StringComparison.Ordinal);
             Assert.Contains("builtin-standalone-panel-route", contents, StringComparison.Ordinal);
             Assert.Contains("builtin-node-toolbar-route", contents, StringComparison.Ordinal);
@@ -431,6 +331,19 @@ public sealed class DemoCookbookScreenshotGateTests
         Assert.NotEmpty(route.RequiredNodeIds);
     }
 
+    private static void AssertShellStateReferencesRoute(
+        CookbookShellVisualGateState shellState,
+        IReadOnlyList<CookbookScreenshotGateRoute> routes)
+    {
+        Assert.False(string.IsNullOrWhiteSpace(shellState.Id));
+        Assert.Contains(routes, route => string.Equals(route.Id, shellState.RouteId, StringComparison.Ordinal));
+        Assert.Contains(shellState.HostGroup, new[] { "cookbook", "runtime" });
+        Assert.NotEmpty(shellState.RequiredShellParts);
+        Assert.All(shellState.RequiredShellParts, part => Assert.StartsWith("PART_", part, StringComparison.Ordinal));
+        Assert.StartsWith("shell-", shellState.OutputFileName, StringComparison.Ordinal);
+        Assert.EndsWith(".png", shellState.OutputFileName, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static IReadOnlyList<CookbookScreenshotGateRoute> LoadRoutes(string repoRoot)
     {
         var manifestPath = Path.Combine(repoRoot, ManifestRelativePath);
@@ -441,6 +354,128 @@ public sealed class DemoCookbookScreenshotGateTests
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
         return routes ?? [];
+    }
+
+    private static IReadOnlyList<CookbookShellVisualGateState> LoadShellStates(string repoRoot)
+    {
+        var manifestPath = Path.Combine(repoRoot, ShellStateManifestRelativePath);
+        Assert.True(File.Exists(manifestPath), $"Missing Cookbook shell visual state manifest: {ShellStateManifestRelativePath}");
+
+        var states = JsonSerializer.Deserialize<CookbookShellVisualGateState[]>(
+            File.ReadAllText(manifestPath),
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        return states ?? [];
+    }
+
+    private static void CaptureShellVisualState(
+        string repoRoot,
+        CookbookScreenshotGateRoute route,
+        CookbookShellVisualGateState shellState,
+        string outputDirectory)
+    {
+        var imagePath = Path.Combine(outputDirectory, shellState.OutputFileName);
+        var metadataPath = Path.Combine(outputDirectory, "metadata.json");
+        var storageRootPath = Path.Combine(
+            Path.GetTempPath(),
+            "AsterGraph.Demo.Tests",
+            nameof(DemoCookbookScreenshotGateTests),
+            "shell",
+            shellState.Id,
+            Guid.NewGuid().ToString("N"));
+        var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: storageRootPath,
+            EnableStatePersistence: false,
+            RestoreLastWorkspaceOnStartup: false,
+            InitialScenario: route.Scenario));
+
+        viewModel.SelectLanguage(route.Language);
+        viewModel.SelectedCookbookRecipe = viewModel.CookbookRecipes.Single(recipe =>
+            string.Equals(recipe.Id, route.RecipeId, StringComparison.Ordinal));
+        viewModel.Session.Commands.UpdateViewportSize(route.ViewportWidth, route.ViewportHeight);
+        viewModel.Session.Commands.FitToViewport(updateStatus: false);
+        viewModel.PreferredWindowWidth = route.ViewportWidth;
+        viewModel.PreferredWindowHeight = route.ViewportHeight;
+        viewModel.OpenHostMenuGroup(shellState.HostGroup);
+
+        var window = new MainWindow
+        {
+            Width = route.ViewportWidth,
+            Height = route.ViewportHeight,
+            DataContext = viewModel,
+        };
+
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Loaded);
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+            var shellSplitView = Assert.IsType<SplitView>(window.FindControl<SplitView>("PART_HostShellSplitView"));
+            Assert.Equal(shellState.ExpectedPaneOpen, shellSplitView.IsPaneOpen);
+            foreach (var partName in shellState.RequiredShellParts)
+            {
+                var control = Assert.IsAssignableFrom<Control>(window.FindControl<Control>(partName));
+                Assert.True(control.IsVisible, $"{shellState.Id} expected visible shell part: {partName}");
+            }
+
+            using var frame = window.CaptureRenderedFrame();
+            Assert.NotNull(frame);
+            frame!.Save(imagePath);
+
+            var bytes = File.ReadAllBytes(imagePath);
+            var imageSize = AssertPngArtifact(bytes, ShellMinimumBytes);
+            Assert.True(imageSize.Width >= route.ViewportWidth);
+            Assert.True(imageSize.Height >= route.ViewportHeight);
+            var pixelInspection = InspectNonBlankPng(imagePath);
+            Assert.True(pixelInspection.NonTransparentPixelCount > imageSize.Width * imageSize.Height / 4);
+            Assert.True(pixelInspection.DistinctColorCount > 1);
+
+            var metadata = new CookbookShellVisualGateMetadata(
+                shellState.Id,
+                route.Id,
+                route.RecipeId,
+                route.Scenario,
+                shellState.HostGroup,
+                route.Language,
+                route.Theme,
+                route.ViewportWidth,
+                route.ViewportHeight,
+                imageSize.Width,
+                imageSize.Height,
+                "headless-avalonia-window",
+                "full-window-shell-state",
+                ToRepoRelativePath(repoRoot, imagePath),
+                ShellStateManifestRelativePath,
+                viewModel.SelectedHostMenuGroupTitle,
+                viewModel.SelectedCookbookRecipe.Title,
+                shellSplitView.IsPaneOpen,
+                shellState.RequiredShellParts,
+                pixelInspection.NonTransparentPixelCount,
+                pixelInspection.DistinctColorCount,
+                Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant());
+
+            File.WriteAllText(
+                metadataPath,
+                JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
+
+            var metadataJson = File.ReadAllText(metadataPath);
+            Assert.Contains(shellState.Id, metadataJson, StringComparison.Ordinal);
+            Assert.Contains(route.Id, metadataJson, StringComparison.Ordinal);
+            Assert.Contains(route.RecipeId, metadataJson, StringComparison.Ordinal);
+            Assert.Contains("full-window-shell-state", metadataJson, StringComparison.Ordinal);
+            Assert.Contains(ToRepoRelativePath(repoRoot, imagePath), metadataJson, StringComparison.Ordinal);
+            Assert.Contains(ShellStateManifestRelativePath, metadataJson, StringComparison.Ordinal);
+            foreach (var partName in shellState.RequiredShellParts)
+            {
+                Assert.Contains(partName, metadataJson, StringComparison.Ordinal);
+            }
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 
     private static string ReadRepoFile(string relativePath)
@@ -538,6 +573,14 @@ public sealed class DemoCookbookScreenshotGateTests
         string[] RequiredNodeIds,
         string OutputFileName);
 
+    private sealed record CookbookShellVisualGateState(
+        string Id,
+        string RouteId,
+        string HostGroup,
+        bool ExpectedPaneOpen,
+        string[] RequiredShellParts,
+        string OutputFileName);
+
     private sealed record CookbookScreenshotGateMetadata(
         string Id,
         string RecipeId,
@@ -561,6 +604,7 @@ public sealed class DemoCookbookScreenshotGateTests
 
     private sealed record CookbookShellVisualGateMetadata(
         string Id,
+        string RouteId,
         string RecipeId,
         string Scenario,
         string HostGroup,
