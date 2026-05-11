@@ -145,14 +145,18 @@ public sealed class GraphEditorDiagnosticsContractsTests
     public void PendingConnectionAndStatusSnapshots_ArePublicAndImmutable()
     {
         var pendingConnectionType = GetRequiredType("AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot");
+        var rejectionReasonType = GetRequiredType("AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason");
         var statusSnapshotType = GetRequiredType("AsterGraph.Editor.Diagnostics.GraphEditorStatusSnapshot");
 
         Assert.True(pendingConnectionType.IsPublic);
+        Assert.True(rejectionReasonType.IsEnum);
         Assert.True(statusSnapshotType.IsPublic);
 
         AssertProperty(pendingConnectionType, "HasPendingConnection", typeof(bool));
         AssertProperty(pendingConnectionType, "SourceNodeId", typeof(string));
         AssertProperty(pendingConnectionType, "SourcePortId", typeof(string));
+        AssertProperty(pendingConnectionType, "RejectionReason", rejectionReasonType);
+        Assert.Contains("WouldCreateCycle", Enum.GetNames(rejectionReasonType));
 
         AssertProperty(statusSnapshotType, "Message", typeof(string));
     }

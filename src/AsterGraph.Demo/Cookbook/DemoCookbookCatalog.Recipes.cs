@@ -1659,6 +1659,10 @@ public static partial class DemoCookbookCatalog
                     "src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs",
                     "GetPendingConnectionSnapshot"),
                 new DemoCookbookAnchor(
+                    "Pending connection rejection reason",
+                    "src/AsterGraph.Editor/Diagnostics/GraphEditorPendingConnectionRejectionReason.cs",
+                    "WouldCreateCycle"),
+                new DemoCookbookAnchor(
                     "Validation repair command",
                     "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
                     "TryApplyValidationRepair"),
@@ -1676,6 +1680,18 @@ public static partial class DemoCookbookCatalog
                     "Pending connection invalid-target proof",
                     "tests/AsterGraph.Editor.Tests/GraphEditorSessionTests.cs",
                     "RuntimeSession_PendingConnectionSnapshot_CapturesInvalidTargetFeedback"),
+                new DemoCookbookAnchor(
+                    "Direct cycle rejection proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionTests.cs",
+                    "RuntimeSession_CompleteConnection_RejectsDirectCycleWithStableReason"),
+                new DemoCookbookAnchor(
+                    "Indirect cycle rejection proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionTests.cs",
+                    "RuntimeSession_CompleteConnection_RejectsIndirectCycleThroughNormalCommandPath"),
+                new DemoCookbookAnchor(
+                    "Command route cycle rejection proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorSessionTests.cs",
+                    "RuntimeSession_TryExecuteCommand_RejectsCycleThroughConnectionsConnectRoute"),
                 new DemoCookbookAnchor(
                     "Route reset repair proof",
                     "tests/AsterGraph.Editor.Tests/GraphEditorValidationSnapshotTests.cs",
@@ -1698,13 +1714,13 @@ public static partial class DemoCookbookCatalog
                     "GetValidationSnapshot"),
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.SupportEvidence,
-                    "Pending connection invalid-target feedback backs helper-line review.",
-                    "RuntimeSession_PendingConnectionSnapshot_CapturesInvalidTargetFeedback"),
+                    "Pending connection invalid-target and cycle-rejection feedback back helper-line review.",
+                    "WouldCreateCycle"),
             ],
             [
                 new DemoCookbookInteractionFacet(
                     DemoCookbookInteractionKind.Connection,
-                    "Pending connection snapshots expose invalid target feedback for helper-line UI.",
+                    "Pending connection snapshots expose invalid target feedback and stable rejection reasons for helper-line UI.",
                     "GetPendingConnectionSnapshot"),
                 new DemoCookbookInteractionFacet(
                     DemoCookbookInteractionKind.Inspection,
@@ -1725,9 +1741,9 @@ public static partial class DemoCookbookCatalog
             ],
             new DemoCookbookRouteClarity(
                 "Lifecycle validation helper route: launch `validation-prevent-cycle` and inspect validation snapshots, pending connection feedback, and repair action evidence.",
-                "Supported seams live in `AsterGraph.Editor` validation queries, pending connection snapshots, and validation repair commands.",
+                "Supported seams live in `AsterGraph.Editor` validation queries, pending connection snapshots, validation repair commands, and the canonical connection completion policy. Cyclic attempts are rejected through `StartConnection` / `CompleteConnection` and descriptor-driven `connections.connect`; hosts inspect `GraphEditorPendingConnectionSnapshot.RejectionReason` for `WouldCreateCycle`. Compatible-target queries remain type-compatibility discovery, and completion is the final policy authority.",
                 "Demo cookbook provides a validation helper fixture and screenshot-gate coverage only; Demo does not add a cycle-prevention engine or alternate connection validator."),
-            "Validation lifecycle fixture coverage is limited to existing validation queries, pending connection feedback, and repair commands; it does not add a cycle-prevention engine, alternate validator, workflow engine, or rule DSL.",
+            "Validation lifecycle fixture coverage is limited to existing validation queries, pending connection feedback, cycle-rejection reason snapshots, and repair commands; it does not add a separate cycle-prevention engine, alternate validator, workflow engine, or rule DSL.",
             CodeSample: """
             // Inspect validation and helper-line state from the session.
             var validation = editor.Session.Queries.GetValidationSnapshot();

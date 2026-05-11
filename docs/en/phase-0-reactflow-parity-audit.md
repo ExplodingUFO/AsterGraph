@@ -48,13 +48,13 @@ Phase 481 adds a deterministic full-window Cookbook shell capture alongside the 
 | Edge labels and markers | Present | Labels and source/target marker fields are modeled in edge presentation/geometry snapshots. | Keep guarded. |
 | Drag, pan, zoom | Present | Canvas pointer/wheel coordinators and viewport commands exist. | Keep guarded. |
 | Marquee/box selection and multi-select | Present | `GetSelectionRectangleSnapshot`, overlay coordinator marquee selection, `SelectAll`, `SelectNone`, and `InvertSelection` have tests and Cookbook routes. | Keep guarded. |
-| Connection preview and validation | Present / policy gap | Pending connection, compatible targets, validation snapshots, repair commands, and `validation-prevent-cycle` fixture exist. Hard cycle-prevention policy still needs an explicit public contract. | GitHub #84 / `avalonia-node-map-p482`. |
+| Connection preview and validation | Present / guarded | Pending connection, compatible targets, validation snapshots, repair commands, and `validation-prevent-cycle` fixture exist. Cycle prevention is enforced by the canonical connection completion path and exposes `GraphEditorPendingConnectionRejectionReason.WouldCreateCycle` through pending snapshots. | Keep `RuntimeSession_CompleteConnection_RejectsDirectCycleWithStableReason`, `RuntimeSession_CompleteConnection_RejectsIndirectCycleThroughNormalCommandPath`, and `RuntimeSession_TryExecuteCommand_RejectsCycleThroughConnectionsConnectRoute` guarded. |
 | Context menu | Present | Menu descriptors and hosted context menu plumbing exist. | Keep guarded. |
 | Undo/redo | Present | Session commands and history tests cover normal command semantics. | Keep guarded. |
 | Copy/paste | Present | Clipboard commands, fragment serialization, and compatibility payload tests exist. | Keep guarded. |
 | Save/restore | Present | Workspace save/load commands, serializer contracts, and compatibility import boundary exist. | Keep guarded. |
 | Helper lines / snap guides | Present / proof-bounded | Snap/grid commands and projection evidence exist; docs should keep the claim tied to supported command routes. | Keep guarded. |
-| Prevent cycles | Partial | Validation examples and route fixtures exist, but a hard policy and invalid-reason contract need dedicated tests. | GitHub #84 / `avalonia-node-map-p482`. |
+| Prevent cycles | Present / guarded | Direct and indirect cycles are rejected through `StartConnection` / `CompleteConnection` and descriptor-driven `connections.connect`; rejected attempts keep the pending connection, do not mutate the document, and expose `WouldCreateCycle` as the stable reason. Compatible-target queries remain type-compatibility discovery; completion is the final policy authority. | Keep guarded by Phase 482 session and diagnostics contract tests. |
 | MiniMap | Present | `GraphMiniMap`, `AsterGraphMiniMapViewFactory`, lightweight projection, and Cookbook route exist. | Keep guarded. |
 | Controls | Present | Standalone `AsterGraphControls`, hosted action factory, built-in catalog entry, and tests exist. | Keep guarded. |
 | Background | Present | `GridBackground`, style options, grid-density tests, and Cookbook route exist. | Keep guarded. |
@@ -91,10 +91,10 @@ The original first wave is no longer the next work queue. These tracker items ar
 | --- | --- | --- | --- | --- | --- |
 | #81 | `avalonia-node-map-p479` | Phase 479: define public node drag-handle API | P1 | `AsterGraph.Abstractions` or `AsterGraph.Avalonia`, canvas interaction routing, tests, docs | Can start after Phase 478. Avoid overlapping with rotation changes in node transform/hit-test code. |
 | #80 | `avalonia-node-map-p480` | Phase 480: add rotatable node model and rendering contract | P2 | `AsterGraph.Core`, `AsterGraph.Editor`, `AsterGraph.Avalonia`, serialization/API/tests/docs | Keep separate from drag-handle work because both may touch node hit testing and adorners. |
-| #84 | `avalonia-node-map-p482` | Phase 482: harden cycle-prevention connection policy | P1 | `AsterGraph.Editor` validation policy, tests, Demo/Cookbook docs | Smallest product-code parity slice; can run independently of UI work. |
+| #84 | `avalonia-node-map-p482` | Phase 482: harden cycle-prevention connection policy | P1 | `AsterGraph.Editor` validation policy, tests, Demo/Cookbook docs | Implemented as a guarded policy contract; close after PR evidence is merged. |
 | #82 | `avalonia-node-map-p483` | Phase 483: prove or bound large-graph rendering virtualization | P1 | `AsterGraph.Avalonia` renderer/projection if implementing; otherwise scale docs/tests | Start as an evidence/decision branch before any renderer rewrite. |
 
-Recommended next branch: `avalonia-node-map-p482` / GitHub #84 if the next branch should stay editor-only, because it hardens the cycle-prevention policy without overlapping the drag-handle or rotation hit-test paths. If the next milestone will touch visible UI, start `avalonia-node-map-p479` / GitHub #81 after reviewing the new full-window shell gate artifacts.
+Recommended next branch after Phase 482: `avalonia-node-map-p479` / GitHub #81 for the public node drag-handle API if the next branch can touch Avalonia interaction routing, or `avalonia-node-map-p483` / GitHub #82 if the next branch should stay evidence/docs-first around virtualization claims.
 
 ## Recommended Parallel Worktree Plan
 
