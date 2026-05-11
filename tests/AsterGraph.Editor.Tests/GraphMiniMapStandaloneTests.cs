@@ -37,6 +37,39 @@ public sealed class GraphMiniMapStandaloneTests
     }
 
     [AvaloniaFact]
+    public void StandaloneMiniMap_StockSurfaceStaysOutOfKeyboardFocusPath()
+    {
+        var editor = CreateEditor();
+        var miniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
+        {
+            Session = editor.Session,
+        });
+        var window = new Window
+        {
+            Width = 320,
+            Height = 220,
+            Content = miniMap,
+        };
+        window.Show();
+
+        try
+        {
+            var focusableDescendants = miniMap.GetVisualDescendants()
+                .OfType<Control>()
+                .Where(control => control.Focusable)
+                .Select(control => control.GetType().Name)
+                .ToArray();
+
+            Assert.False(miniMap.Focusable);
+            Assert.Empty(focusableDescendants);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void HostedMiniMap_UsesLightweightProjectionInThroughputMode()
     {
         var editor = CreateEditor();

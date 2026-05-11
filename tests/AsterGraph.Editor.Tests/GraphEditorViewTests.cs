@@ -363,6 +363,50 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void ShellStateAccessibilityBreadth_ExposesNamedInteractiveControlsAndBoundedDecorativeSurfaces()
+    {
+        var editor = CreateValidationParameterFeedbackEditor();
+        editor.Session.Commands.SetSelection(["parameter-001"], "parameter-001", updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var miniMap = FindRequiredControl<GraphMiniMap>(view, "PART_MiniMapSurface");
+        var validationProblemRow = FindRequiredDescendant<Button>(
+            view,
+            "PART_ProblemsIssue_parameter-001_node.parameter-invalid_prompt");
+        var validationFocusButton = FindRequiredDescendant<Button>(
+            view,
+            "PART_ValidationFocus_parameter-001_node.parameter-invalid_prompt");
+        var exportFormatPicker = FindRequiredControl<ComboBox>(view, "PART_ExportFormatPicker");
+        var exportScopePicker = FindRequiredControl<ComboBox>(view, "PART_ExportScopePicker");
+        var exportRunButton = FindRequiredControl<Button>(view, "PART_ExportRunButton");
+        var exportCancelButton = FindRequiredControl<Button>(view, "PART_ExportCancelButton");
+        var fragmentTemplatePicker = FindRequiredControl<ComboBox>(view, "PART_FragmentTemplatePicker");
+        var fragmentImportButton = FindRequiredDescendant<Button>(view, "PART_FragmentTemplateImportButton");
+        var fragmentDeleteButton = FindRequiredDescendant<Button>(view, "PART_FragmentTemplateDeleteButton");
+        var nodeInspectButton = FindRequiredDescendant<Button>(view, "PART_NodeToolInspectButton");
+        var nodeDuplicateButton = FindRequiredDescendant<Button>(view, "PART_NodeToolDuplicateButton");
+
+        Assert.False(miniMap.Focusable);
+        Assert.DoesNotContain(miniMap.GetVisualDescendants().OfType<Control>(), control => control.Focusable);
+
+        AssertNamedFocusable(validationProblemRow, "Problem node.parameter-invalid");
+        AssertNamedFocusable(validationFocusButton, "Focus node.parameter-invalid");
+        AssertNamedFocusable(exportFormatPicker, "Export format");
+        AssertNamedFocusable(exportScopePicker, "Export scope");
+        AssertNamedFocusable(exportRunButton, "Run scene export");
+        AssertNamedFocusable(exportCancelButton, "Cancel scene export");
+        Assert.True(fragmentTemplatePicker.Focusable);
+        AssertNamedFocusable(fragmentImportButton, "Import Template");
+        AssertNamedFocusable(fragmentDeleteButton, "Delete Template");
+        AssertNamedFocusable(nodeInspectButton, "Inspect Validation Parameters");
+        AssertNamedFocusable(nodeDuplicateButton, "Duplicate Node");
+    }
+
+    [AvaloniaFact]
     public void ShortcutHelp_AndKeyboardRouting_ProjectCommandPaletteFromSharedActionSource()
     {
         var editor = CreateEditor();
@@ -1435,6 +1479,12 @@ public sealed class GraphEditorViewTests
         => root.GetVisualDescendants()
             .OfType<T>()
             .FirstOrDefault(control => string.Equals(control.Name, name, StringComparison.Ordinal));
+
+    private static void AssertNamedFocusable(Control control, string automationName)
+    {
+        Assert.True(control.Focusable);
+        Assert.Equal(automationName, AutomationProperties.GetName(control));
+    }
 
     private static void AssertFocusRoundTrip(
         GraphEditorView view,

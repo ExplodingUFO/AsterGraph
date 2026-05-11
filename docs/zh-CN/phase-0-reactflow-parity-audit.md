@@ -10,6 +10,10 @@
 
 Phase 490 是 GitHub #103 / `avalonia-node-map-3x0`，用于在 Phases 485-489 全部关闭后做 stale-roadmap repair。本 slice 是 docs/tests only：更新中英文 parity roadmap，把已完成工作移出候选队列，并选择 Accessibility breadth audit 是下一项 open parity gap。No Core/Editor/Avalonia runtime or public API changes。
 
+## Phase 491 更新
+
+Phase 491 是 GitHub #105 / `avalonia-node-map-44i`，承接 Phase 490 选出的 accessibility breadth audit。本 slice 仍然是 docs/tests first：按现有 automation name、focusability、keyboard routes 和 intentionally decorative surfaces 审计 public Avalonia built-ins 与 hosted shell states。不授权 retained migration removal、public API changes、visual redesign，也不在缺少人工 assistive-technology 验证时声明 full screen-reader certification。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -105,7 +109,7 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 | Auto layout integration | Partial | `IGraphLayoutProvider`、preview/apply、snap-to-grid、command-surface cancel evidence 和 route evidence 已存在。Provider example 由宿主拥有，当前 layout planning 是同步契约，不是 async-cancellable。 | Phase 488 保持 docs/tests proof 边界；除非 adopter evidence 证明需要新的 provider contract issue。 |
 | Virtualization / thousands of nodes | Partial / bounded | Scale baseline、visible-scene projection、MiniMap lightweight projection 和 hosted performance policy 已存在。当前被防守的是 viewport-budgeted scene projection/rendering contract，不是 ItemsRepeater/Skia-style renderer virtualization，xlarge evidence 也只是 telemetry-only。 | 继续维护 scale docs 和 renderer projection tests；扩大声明前先开新 issue。 |
 | Declarative + code-first API | Partial | Host builder、definitions、builders、templates 和 session APIs 已存在。Avalonia markup-first ergonomics 不等同 React Flow hooks/components。 | 文档保持诚实，不声明 React hook parity。 |
-| Accessibility breadth | Partial | Keyboard navigation 与 automation peers 有目标测试。所有 built-ins 与 shell states 的广泛 accessibility audit 仍偏弱。 | 仅在 adopter/release evidence 需要时再开 issue。 |
+| Accessibility breadth | Partial / audited breadth in progress | Keyboard navigation、automation peers、built-in action names 与 shell-state focus routes 已有目标测试。Phase 491 补上 standalone built-ins 与 hosted shell states 的明确 breadth contract；dynamic screen-reader announcement behavior 仍需人工 assistive-technology validation 后才能扩大声明。 | Phase 491 保持 docs/tests 和 source-backed controls 范围；修改 runtime announcement behavior 前另开 follow-up。 |
 | Host events | Present | `IGraphEditorEvents`、mutation batching 和 host-event Cookbook route 已存在。 | Keep guarded。 |
 | Screenshot-driven UI quality | Partial / guarded | Scene PNG gate 已覆盖规范 graph scenes。Full-window shell gate 现在会捕获 default Cookbook drawer state 和 runtime diagnostics drawer state，包含 host menu、drawer、graph host、named shell parts 和 artifact metadata。Pixel-baseline comparison 与更广的 flyout/theme/language coverage 尚未覆盖。 | Phase 486 保持在 manifest-driven shell states 范围内；只有 visual drift evidence 需要时再追加更广的 baseline follow-up。 |
 
@@ -135,23 +139,39 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 | #97 | `avalonia-node-map-i8s` | Phase 487 custom-node copyable-host recipe hardening；已由 PR #98 关闭。 |
 | #99 | `avalonia-node-map-ce1` | Phase 488 layout provider 与 background/cancel proof refresh；已由 PR #100 关闭。 |
 | #101 | `avalonia-node-map-6sc` | Phase 489 renderer virtualization proof-contract design spike；已由 PR #102 关闭。 |
+| #103 | `avalonia-node-map-3x0` | Phase 490 stale React Flow parity roadmap repair；已由 PR #104 关闭。 |
+
+## Phase 491 Accessibility Breadth Audit
+
+Phase 491 把当前 accessibility posture 记录成 source-backed contract，而不是笼统声明。现有覆盖最强的是 hosted shell、canvas、nodes、ports、connections、inspector 和 command surfaces。本次 breadth audit 为 standalone built-ins 与 hosted shell states 增加明确检查，不改变 runtime behavior。
+
+| Surface | Accessibility posture | Guarded evidence |
+| --- | --- | --- |
+| `AsterGraphControls` | Container 不进入 focus path；zoom/fit/reset buttons 保持 keyboard-focusable，并暴露 action names。 | `AsterGraphBuiltInControlsTests` |
+| `NodeToolbar` / `EdgeToolbar` | Container 不进入 focus path；投影出来的 node/connection action buttons 保持 keyboard-focusable，并从 descriptors 暴露名称。 | `AsterGraphBuiltInToolbarTests` |
+| `NodeResizer` | Resize handles 是有名称的 buttons，并继续由 focused built-in tests 守住。 | `AsterGraphBuiltInNodeResizerTests` |
+| `GraphMiniMap` | Pointer-only overview surface；stock MiniMap 与 stock drawing surface 不进入 keyboard focus path。 | `GraphMiniMapStandaloneTests` |
+| `AsterGraphPanel` | Overlay layout container 不抢焦点，同时保留 host-owned focusable children。 | `AsterGraphBuiltInPanelTests` |
+| `GridBackground` | Decorative canvas grid 保持 non-focusable。 | `GridBackgroundTests` |
+| Hosted validation/problems shell | Problem rows 与 focus buttons 暴露 automation names 和绑定 validation targets 的 help text。 | `GraphEditorViewTests` |
+| Hosted export、fragment、command-palette、authoring shells | 现有 interactive controls 暴露 names 并保持 keyboard-focusable；command-palette focus recovery 由单独测试守住。 | `GraphEditorViewTests`、`GraphEditorNavigationFocusWorkflowTests` |
+
+剩余有界缺口：headless tests 可以守住 names、peers、focusability 和 focus return，但不能证明 dynamic validation/export status changes 的实时 screen-reader announcements。未来 live-region 或 assistive-technology certification 工作需要新的 GitHub/Beads tracker。
 
 ## 下一轮 Issue Wave
 
-Phase 490 在 Phase 485-489 已关闭后修复过期的 Phase 484 队列。GitHub #103 / `avalonia-node-map-3x0` 是当前 docs/tests only 的 stale-roadmap repair，不授权 runtime 或 public API 修改。
+Phase 490 在 Phase 485-489 已关闭后修复过期的 Phase 484 队列。GitHub #103 / `avalonia-node-map-3x0` 已由 PR #104 关闭，并且不授权 runtime 或 public API 修改。
 
-Accessibility breadth audit 是下一项 open parity gap，因为当前矩阵仍把 accessibility breadth 标为 Partial，而 visual、Cookbook architecture、layout proof 和 renderer proof-contract slices 都已有关闭的 tracker。Retained migration removal 仍是 later future tracker item，因为它依赖 v1 policy 和 public API baseline work。
+Phase 491 现在负责 accessibility breadth audit，因为当前矩阵仍把 accessibility breadth 标为 Partial，而 visual、Cookbook architecture、layout proof 和 renderer proof-contract slices 都已有关闭的 tracker。Retained migration removal 仍是 later future tracker item，因为它依赖 v1 policy 和 public API baseline work。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #103 | `avalonia-node-map-3x0` | Phase 490: repair stale React Flow parity roadmap after Phase 489 | P1 | `docs/en/phase-0-reactflow-parity-audit.md`、`docs/zh-CN/phase-0-reactflow-parity-audit.md`、focused docs tests、GitHub/Beads tracker state | 当前 docs/tests only stale-roadmap repair。No Core/Editor/Avalonia runtime or public API changes。 |
-| TBD | TBD | Accessibility breadth audit | P2 | Avalonia built-ins、automation peer tests、keyboard/screen-reader coverage docs | Next open parity gap。代码或 UI 修改前先创建 future tracker item；公开声明仅限已审计 controls。 |
+| #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states | P2 | Avalonia built-ins、automation/focus tests、keyboard/screen-reader coverage boundaries docs | 当前 docs/tests-first accessibility audit。除非证据证明具体 missing contract，否则不做 runtime、public API 或 visual changes。 |
 | TBD | TBD | Retained migration removal roadmap | P3 | public API inventory、stabilization support matrix、retained migration docs/tests | Later future tracker item。必须与 v1 policy 和 public API baseline work 串行；不要在 parity docs work 中顺手删除 retained surfaces。 |
 
 ## 推荐并行 Worktree 计划
 
-- `docs/phase-490-parity-roadmap-repair`：负责 #103 / `avalonia-node-map-3x0`；只修复双语 roadmap docs 和 focused docs tests。
-- Future accessibility branch name 应在新的 GitHub/Beads tracker item 创建后再确定；预期 ownership 是 Avalonia built-ins 和 shell states 的 accessibility docs/tests。
+- `docs/phase-491-accessibility-breadth-audit`：负责 #105 / `avalonia-node-map-44i`；只审计 Avalonia built-ins 和 shell states 的 accessibility docs/tests。
 - Future retained-migration branch name 应在 v1 policy 和 public API baseline 范围明确后再确定；预期 ownership 是 public API inventory 与 stabilization docs/tests。
 
 ## UI 验证策略
@@ -169,5 +189,5 @@ Accessibility breadth audit 是下一项 open parity gap，因为当前矩阵仍
 ## Tracker 备注
 
 - GitHub #79 和 Beads `avalonia-node-map-p478` 创建时把 `.planning/*` 列入 write set。由于 `.planning/` 被 ignore 且当前 worktree 中不存在，本次刷新将它记录为 tracker drift，而不是 force-add 本地 planning 文件。
-- Beads 是本仓库的持久本地 tracker。Phase 490 通过 GitHub #103 / `avalonia-node-map-3x0` 修复队列；后续 follow-up 在代码修改前也必须先拿到明确的 GitHub 与 Beads ID。
-- Phase 478、Phase 484 和 Phase 490 都不修改产品代码。
+- Beads 是本仓库的持久本地 tracker。Phase 491 现在通过 GitHub #105 / `avalonia-node-map-44i` 承接 accessibility breadth audit；后续 follow-up 在代码修改前也必须先拿到明确的 GitHub 与 Beads ID。
+- Phase 478、Phase 484、Phase 490 和 Phase 491 都不修改产品代码；除非 focused test 证明存在具体 missing contract。

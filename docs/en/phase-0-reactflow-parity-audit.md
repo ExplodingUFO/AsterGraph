@@ -10,6 +10,10 @@ The scope of this refresh is docs and tracker state only. It does not change pro
 
 Phase 490 is GitHub #103 / `avalonia-node-map-3x0`, a stale-roadmap repair after Phases 485-489 closed. This slice is docs/tests only: it updates the bilingual parity roadmap, removes completed work from the candidate queue, and selects the accessibility breadth audit as the next open parity gap. No Core/Editor/Avalonia runtime or public API changes are in scope.
 
+## Phase 491 Update
+
+Phase 491 is GitHub #105 / `avalonia-node-map-44i`, the accessibility breadth audit selected by Phase 490. This slice remains docs/tests first: it audits built-in public Avalonia controls and hosted shell states against existing automation names, focusability, keyboard routes, and intentionally decorative surfaces. It does not authorize retained migration removal, public API changes, visual redesign, or full screen-reader certification claims without manual assistive-technology validation.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -105,7 +109,7 @@ Phase 483 closes GitHub #82 by choosing the bounded-docs path instead of a rende
 | Auto layout integration | Partial | `IGraphLayoutProvider`, preview/apply, snap-to-grid, command-surface cancel evidence, and route evidence exist. Provider examples are host-owned, and current layout planning is synchronous rather than async-cancellable. | Keep Phase 488 bounded to docs/tests proof unless adopter evidence justifies a new provider contract issue. |
 | Virtualization / thousands of nodes | Partial / bounded | Scale baseline, visible-scene projection, MiniMap lightweight projection, and hosted performance policy exist. The current defended contract is viewport-budgeted scene projection/rendering, not ItemsRepeater/Skia-style renderer virtualization, and xlarge evidence is telemetry-only. | Keep scale docs and renderer projection tests current; add a new issue before widening this claim. |
 | Declarative + code-first API | Partial | Host builder, definitions, builders, templates, and session APIs exist. Avalonia markup-first ergonomics are not equivalent to React Flow hooks/components. | Keep docs honest; do not claim React hook parity. |
-| Accessibility breadth | Partial | Keyboard navigation and automation peers are covered in targeted tests. A broad accessibility audit across all built-ins and shell states remains weaker. | Add issue only if adopter/release evidence needs it. |
+| Accessibility breadth | Partial / audited breadth in progress | Keyboard navigation, automation peers, built-in action names, and shell-state focus routes are covered in targeted tests. Phase 491 adds an explicit breadth contract for standalone built-ins and hosted shell states; dynamic screen-reader announcement behavior still needs manual assistive-technology validation before any stronger claim. | Keep Phase 491 bounded to docs/tests and source-backed controls; file a separate follow-up before changing runtime announcement behavior. |
 | Host events | Present | `IGraphEditorEvents`, mutation batching, and host-event Cookbook route exist. | Keep guarded. |
 | Screenshot-driven UI quality | Partial / guarded | Scene PNG gate exists for canonical graph scenes. The full-window shell gate now captures default Cookbook drawer state plus the runtime diagnostics drawer state, including host menu, drawer, graph host, named shell parts, and artifact metadata. Pixel-baseline comparison and broader flyout/theme/language coverage are not yet covered. | Keep Phase 486 bounded to manifest-driven shell states; add follow-ups only if visual drift evidence requires broader baselines. |
 
@@ -135,23 +139,39 @@ The original first wave is no longer the next work queue. These tracker items ar
 | #97 | `avalonia-node-map-i8s` | Phase 487 custom-node copyable-host recipe hardening; Closed by PR #98. |
 | #99 | `avalonia-node-map-ce1` | Phase 488 layout provider and background/cancel proof refresh; Closed by PR #100. |
 | #101 | `avalonia-node-map-6sc` | Phase 489 renderer virtualization proof-contract design spike; Closed by PR #102. |
+| #103 | `avalonia-node-map-3x0` | Phase 490 stale React Flow parity roadmap repair; Closed by PR #104. |
+
+## Phase 491 Accessibility Breadth Audit
+
+Phase 491 records the current accessibility posture as a source-backed contract instead of a broad claim. Existing coverage is strongest for the hosted shell, canvas, nodes, ports, connections, inspector, and command surfaces. The new breadth audit adds explicit checks for standalone built-ins and hosted shell states without changing runtime behavior.
+
+| Surface | Accessibility posture | Guarded evidence |
+| --- | --- | --- |
+| `AsterGraphControls` | Non-focusable container; zoom/fit/reset buttons stay keyboard-focusable and expose action names. | `AsterGraphBuiltInControlsTests` |
+| `NodeToolbar` / `EdgeToolbar` | Non-focusable containers; projected node/connection action buttons stay keyboard-focusable and named from descriptors. | `AsterGraphBuiltInToolbarTests` |
+| `NodeResizer` | Resize handles are named buttons and remain covered by focused built-in tests. | `AsterGraphBuiltInNodeResizerTests` |
+| `GraphMiniMap` | Pointer-only overview surface; stock MiniMap and its stock drawing surface stay out of the keyboard focus path. | `GraphMiniMapStandaloneTests` |
+| `AsterGraphPanel` | Overlay layout container stays non-focusable while preserving host-owned focusable children. | `AsterGraphBuiltInPanelTests` |
+| `GridBackground` | Decorative canvas grid remains non-focusable. | `GridBackgroundTests` |
+| Hosted validation/problems shell | Problem rows and focus buttons expose automation names and help text tied to validation targets. | `GraphEditorViewTests` |
+| Hosted export, fragment, command-palette, and authoring shells | Existing interactive controls expose names and stay keyboard-focusable; command-palette focus recovery remains guarded separately. | `GraphEditorViewTests`, `GraphEditorNavigationFocusWorkflowTests` |
+
+Remaining bounded gap: headless tests can guard names, peers, focusability, and focus return, but they do not prove live screen-reader announcements for dynamic validation/export status changes. Any future live-region or assistive-technology certification work needs a new GitHub/Beads tracker.
 
 ## Next Issue Wave
 
-Phase 490 repairs the stale Phase 484 queue after the closed Phase 485-489 work. GitHub #103 / `avalonia-node-map-3x0` is the current docs/tests only stale-roadmap repair and does not authorize runtime or public API changes.
+Phase 490 repaired the stale Phase 484 queue after the closed Phase 485-489 work. GitHub #103 / `avalonia-node-map-3x0` is closed by PR #104 and did not authorize runtime or public API changes.
 
-The accessibility breadth audit is the next open parity gap because the current matrix still marks accessibility breadth as partial while the visual, Cookbook architecture, layout proof, and renderer proof-contract slices now have closed trackers. Retained migration removal remains a later future tracker item because it depends on v1 policy and public API baseline work.
+Phase 491 now owns the accessibility breadth audit because the matrix still marks accessibility breadth as partial while the visual, Cookbook architecture, layout proof, and renderer proof-contract slices have closed trackers. Retained migration removal remains a later future tracker item because it depends on v1 policy and public API baseline work.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #103 | `avalonia-node-map-3x0` | Phase 490: repair stale React Flow parity roadmap after Phase 489 | P1 | `docs/en/phase-0-reactflow-parity-audit.md`, `docs/zh-CN/phase-0-reactflow-parity-audit.md`, focused docs tests, GitHub/Beads tracker state | Current docs/tests only stale-roadmap repair. No Core/Editor/Avalonia runtime or public API changes. |
-| TBD | TBD | Accessibility breadth audit | P2 | Avalonia built-ins, automation peer tests, docs for keyboard/screen-reader coverage | Next open parity gap. Create a future tracker item before code or UI changes; keep claims bounded to audited controls. |
+| #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states | P2 | Avalonia built-ins, automation/focus tests, docs for keyboard/screen-reader coverage boundaries | Current docs/tests-first accessibility audit. No runtime, public API, or visual changes unless evidence proves a specific missing contract. |
 | TBD | TBD | Retained migration removal roadmap | P3 | public API inventory, stabilization support matrix, retained migration docs/tests | Later future tracker item. Sequential with v1 policy and public API baseline work; do not delete retained surfaces as a side effect of parity docs work. |
 
 ## Recommended Parallel Worktree Plan
 
-- `docs/phase-490-parity-roadmap-repair`: owns #103 / `avalonia-node-map-3x0`; repairs bilingual roadmap docs and focused docs tests only.
-- Future accessibility branch name should be chosen only after a new GitHub/Beads tracker item exists; expected ownership is accessibility docs/tests across Avalonia built-ins and shell states.
+- `docs/phase-491-accessibility-breadth-audit`: owns #105 / `avalonia-node-map-44i`; audits accessibility docs/tests across Avalonia built-ins and shell states only.
 - Future retained-migration branch name should be chosen only after v1 policy and public API baseline scope are explicit; expected ownership is public API inventory and stabilization docs/tests.
 
 ## UI Verification Policy
@@ -169,5 +189,5 @@ Current coverage includes scene-level route captures plus two manifest-driven fu
 ## Tracker Notes
 
 - GitHub #79 and Beads `avalonia-node-map-p478` were created with `.planning/*` in the write set. Because `.planning/` is ignored and absent from this worktree, this refresh records that as tracker drift instead of force-adding local planning files.
-- Beads is the durable local tracker for this repository. Phase 490 repairs the queue with GitHub #103 / `avalonia-node-map-3x0`; later follow-ups should get explicit GitHub and Beads IDs before code changes.
-- Product code remains out of scope for Phase 478, Phase 484, and Phase 490.
+- Beads is the durable local tracker for this repository. Phase 491 now owns the accessibility breadth audit with GitHub #105 / `avalonia-node-map-44i`; later follow-ups should get explicit GitHub and Beads IDs before code changes.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, and Phase 491 unless a focused test proves a specific missing contract.
