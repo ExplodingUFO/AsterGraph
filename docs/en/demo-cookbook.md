@@ -4,6 +4,14 @@ The Demo cookbook is the copyable code-plus-demo index for AsterGraph evaluators
 
 Use it when you want to move from "I can see the Demo" to "I know which code and proof path to copy next."
 
+## Host-copy architecture path
+
+`DEMO_COOKBOOK_ARCHITECTURE_PATH_OK` means the Cookbook has one defended copy path before the full recipe index:
+
+1. Start with `starter-host-route` when you want the shipped Avalonia host shell. Copy `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` or the starter host ladder, then add your catalog, style, and window ownership around that view.
+2. Branch to `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` when the host owns its own shell, tools, panels, or native UI. Use the authoring and runtime-only routes as API anchors for that custom shell.
+3. Use `DemoCookbookCatalog`, Demo anchors, and screenshot routes as proof and navigation evidence only. `src/AsterGraph.Demo` is not a supported package boundary. Do not copy Demo ViewModel code into a production host; copy the public `AsterGraph.Avalonia` / `AsterGraph.Editor` seams named by each recipe.
+
 ## Recipe Index
 
 | Recipe | Category | Code anchors | Demo anchors | Docs | Proof markers |

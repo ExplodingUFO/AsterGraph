@@ -117,6 +117,26 @@ public sealed class DemoCookbookDocsTests
     }
 
     [Fact]
+    public void DemoCookbookDocs_DefineArchitectureCopyPath()
+    {
+        var english = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chinese = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+
+        foreach (var contents in new[] { english, chinese })
+        {
+            Assert.Contains("DEMO_COOKBOOK_ARCHITECTURE_PATH_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("Host-copy architecture path", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphHostBuilder.Create", contents, StringComparison.Ordinal);
+            Assert.Contains("BuildAvaloniaView", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphEditorFactory.CreateSession", contents, StringComparison.Ordinal);
+            Assert.Contains("IGraphEditorSession", contents, StringComparison.Ordinal);
+            Assert.Contains("DemoCookbookCatalog", contents, StringComparison.Ordinal);
+            Assert.Contains("not a supported package boundary", contents, StringComparison.Ordinal);
+            Assert.Contains("Do not copy Demo ViewModel", contents, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void HostRecipeDocs_ClarifyDefendedRouteAndConsumerSampleMarkers()
     {
         var hostIntegration = ReadRepoFile("docs/en/host-integration.md");

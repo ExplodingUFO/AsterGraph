@@ -4,6 +4,14 @@ Demo cookbook 是面向 AsterGraph 评估者的“代码 + 演示”索引。它
 
 当你已经能看到 Demo，但还需要知道“下一步复制哪段代码、跑哪条 proof”时，看这页。
 
+## Host-copy architecture path
+
+`DEMO_COOKBOOK_ARCHITECTURE_PATH_OK` 表示 Cookbook 在完整 recipe 索引之前固定了一条可复制的架构路径：
+
+1. 需要已发布的 Avalonia host shell 时，先看 `starter-host-route`。复制 `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` 或 starter host ladder，然后把你的 catalog、style 和 Window 所有权放在这个 view 周围。
+2. 如果宿主自己拥有 shell、tools、panels 或 native UI，再分支到 `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`。自定义 shell 应把 Authoring 和 runtime-only routes 当成 API 锚点。
+3. `DemoCookbookCatalog`、Demo anchors 和 screenshot routes 只作为 proof 与导航证据。`src/AsterGraph.Demo` is not a supported package boundary。Do not copy Demo ViewModel code into a production host；应复制每条 recipe 指向的 public `AsterGraph.Avalonia` / `AsterGraph.Editor` seams。
+
 ## Recipe 索引
 
 | Recipe | 分类 | 代码锚点 | Demo 锚点 | 文档 | Proof marker |
