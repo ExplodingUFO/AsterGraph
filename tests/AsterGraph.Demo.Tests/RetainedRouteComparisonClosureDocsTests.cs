@@ -111,6 +111,47 @@ public sealed class RetainedRouteComparisonClosureDocsTests
         Assert.Contains("只有在现有 retained 宿主切片上才复制这份 recipe。", retainedRecipeZh, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void RetainedMigrationRemovalGate_RequiresEvidenceBeforeAnyApiRemoval()
+    {
+        var retainedRecipeEn = ReadRepoFile("docs/en/retained-migration-recipe.md");
+        var retainedRecipeZh = ReadRepoFile("docs/zh-CN/retained-migration-recipe.md");
+
+        foreach (var retainedRecipe in new[] { retainedRecipeEn, retainedRecipeZh })
+        {
+            Assert.Contains("Phase 498", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("GitHub #119", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-3um", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorViewModel", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorView", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorViewModel.Session", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("GraphDocumentSerializer.ImportLegacy(...)", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("IGraphContextMenuAugmentor.Augment(GraphEditorViewModel, ...)", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("INodePresentationProvider.GetNodePresentation(NodeViewModel)", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("NodeViewModel.ExpansionState", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("NodeViewModel.IsExpanded", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("TrySetNodeExpansionState(...)", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("TrySetNodeGroupExtraPadding(...)", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("eng/public-api-baseline.txt", retainedRecipe, StringComparison.Ordinal);
+            Assert.Contains("no retained API removal", retainedRecipe, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API baseline change", retainedRecipe, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior change", retainedRecipe, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI change", retainedRecipe, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("## Phase 498 removal execution gate", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("exact public API metadata lines", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("blocker tests", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("support-window decision", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("migration evidence", retainedRecipeEn, StringComparison.Ordinal);
+
+        Assert.Contains("## Phase 498 removal execution gate", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("exact public API metadata lines", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("blocker tests", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("support-window decision", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("migration evidence", retainedRecipeZh, StringComparison.Ordinal);
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 

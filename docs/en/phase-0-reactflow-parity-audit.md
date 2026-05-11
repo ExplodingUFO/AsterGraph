@@ -34,6 +34,10 @@ Phase 495 is GitHub #113 / `avalonia-node-map-wzt`, a post-Phase-494 roadmap ref
 
 Phase 497 is GitHub #117 / `avalonia-node-map-5nl`, a closed-drawer shell visual gate expansion after the Cookbook architecture contract closed. This slice is docs/tests/manifest only: it adds `shell-cookbook-default-closed` beside the open Cookbook and runtime shell captures, asserts `expectedPaneOpen: false`, and limits required parts to visible closed-shell chrome. It does not authorize runtime UI changes, public API changes, strict pixel baselines, flyout capture, popup capture, context-menu capture, or broad language/theme certification.
 
+## Phase 498 Update
+
+Phase 498 is GitHub #119 / `avalonia-node-map-3um`, the retained migration removal execution gate selected after the closed-drawer shell visual gate closed. This slice is docs/tests only: it turns the Phase 492 inventory into an execution gate with exact symbols, blocker tests, support-window criteria, migration evidence, and the later `eng/public-api-baseline.txt` approval path required before any removal PR. It authorizes no retained API removal, no public API baseline change, no runtime behavior change, and no UI change.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -190,21 +194,22 @@ Phase 493 closed the custom node presenter cookbook parity proof. It records tha
 
 Phase 494 closed localized full-window shell visual gate coverage. It added one Chinese Cookbook drawer state and shell-state language/theme metadata while leaving strict pixel baselines and broad flyout/theme/language coverage for later tracker-backed work.
 
-Phase 495 refreshed the active queue after GitHub and Beads returned to zero open issues. Phase 496 then closed the Cookbook example architecture contract. Phase 497 now owns the closed-drawer shell visual gate breadth slice through GitHub #117 / `avalonia-node-map-5nl`; it is current/owned work, not a broad shell certification.
+Phase 495 refreshed the active queue after GitHub and Beads returned to zero open issues. Phase 496 then closed the Cookbook example architecture contract. Phase 497 closed the closed-drawer shell visual gate breadth slice through GitHub #117 / `avalonia-node-map-5nl`; it added one bounded closed shell state, not broad shell certification.
+
+Phase 498 now owns the retained migration removal execution gate through GitHub #119 / `avalonia-node-map-3um`. It is current/owned work and only defines the gate for a later API-change issue: exact symbols, blocker tests, support-window criteria, migration evidence, and `eng/public-api-baseline.txt` approval are required before any removal PR. The current slice authorizes no retained API removal, no public API baseline change, no runtime behavior change, and no UI change.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #117 | `avalonia-node-map-5nl` | Phase 497: expand shell visual gate with closed drawer state | P2 | `tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json`, `tests/AsterGraph.Demo.Tests/DemoCookbookScreenshotGateTests.cs`, bilingual screenshot docs | Current owned slice. Add only `shell-cookbook-default-closed` for the default route with `expectedPaneOpen: false`; still no strict pixel baselines, flyout capture, popup capture, context-menu capture, or broad language/theme certification. |
-| TBD | TBD | Phase 498: define retained migration removal execution gate | P3 | public API inventory docs/tests, retained migration recipe/docs, `eng/public-api-baseline.txt` analysis only unless a later API-change issue is approved | Sequential with v1 policy. This is a gate definition, not deletion: identify exact symbols, blocker tests, support-window criteria, and migration evidence needed before any retained API removal PR. |
+| #119 | `avalonia-node-map-3um` | Phase 498: define retained migration removal execution gate | P3 | public API inventory docs/tests, retained migration recipe/docs, `eng/public-api-baseline.txt` analysis only unless a later API-change issue is approved | Current owned slice. Sequential with v1 policy. This is a gate definition, not deletion: identify exact symbols, blocker tests, support-window criteria, and migration evidence needed before any retained API removal PR. |
 | TBD | TBD | Phase 499: prove renderer virtualization execution boundary | P2 | renderer projection tests/docs, scale baseline docs, possible spike-only benchmark harness | Independent from retained migration. Keep claims bounded to viewport-budgeted projection unless a focused implementation issue proves true renderer virtualization under CI-repeatable performance evidence. |
-| TBD | TBD | Phase 500: choose next shell visual breadth state | P3 | shell manifest/docs/tests only | Only after Phase 497 closes. Pick one bounded state such as a selected non-Cookbook host group or search/filter state; keep flyouts, popups, context menus, broad language/theme certification, and strict pixel baselines out of scope. |
+| TBD | TBD | Phase 500: choose next shell visual breadth state | P3 | shell manifest/docs/tests only | Pick one bounded state such as a selected non-Cookbook host group or search/filter state; keep flyouts, popups, context menus, broad language/theme certification, and strict pixel baselines out of scope. |
 
 ## Recommended Parallel Worktree Plan
 
 - `docs/phase-495-roadmap-refresh`: owns #113 / `avalonia-node-map-wzt`; refreshes this roadmap and creates at least three concrete follow-up candidates without runtime or public API changes.
 - `docs/phase-496-cookbook-architecture-contract`: owned the Cookbook example architecture contract row; docs/tests-only and independent from shell visual work.
-- `docs/phase-497-shell-closed-drawer-gate`: owns #117 / `avalonia-node-map-5nl`; isolate writes to shell manifest, screenshot tests, and screenshot docs.
-- `docs/phase-498-retained-removal-gate`: should own retained migration removal execution criteria; keep sequential with v1/API-baseline policy work.
+- `docs/phase-497-shell-closed-drawer-gate`: owned #117 / `avalonia-node-map-5nl`; isolated writes to shell manifest, screenshot tests, and screenshot docs.
+- `docs/phase-498-retained-removal-gate`: owns #119 / `avalonia-node-map-3um`; isolate writes to retained migration removal execution criteria and keep sequential with v1/API-baseline policy work.
 - `perf/phase-499-renderer-virtualization-boundary`: should own any renderer virtualization execution proof. Treat as a spike/contract branch until performance evidence justifies implementation.
 
 ## UI Verification Policy
@@ -228,4 +233,5 @@ Current coverage includes scene-level route captures plus four manifest-driven f
 - Phase 494 now owns localized full-window shell visual gate coverage with GitHub #111 / `avalonia-node-map-p5z`; it records one localized shell visual state, not a broad visual certification.
 - Phase 495 now owns the post-Phase-494 roadmap refresh with GitHub #113 / `avalonia-node-map-wzt`; it records the next issue split, not implementation.
 - Phase 497 now owns the closed-drawer shell visual gate expansion with GitHub #117 / `avalonia-node-map-5nl`; it records one closed state, not broad visual certification.
-- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, and Phase 497 unless a focused test proves a specific missing contract.
+- Phase 498 now owns retained migration removal execution-gate definition with GitHub #119 / `avalonia-node-map-3um`; it records pre-removal evidence criteria, not removal.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, and Phase 498 unless a focused test proves a specific missing contract.

@@ -234,6 +234,36 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("Current owned slice", chineseParity, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase498RetainedRemovalGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 498", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #119", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-3um", contents, StringComparison.Ordinal);
+            Assert.Contains("retained migration removal execution gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Current owned slice", contents, StringComparison.Ordinal);
+            Assert.Contains("exact symbols", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("blocker tests", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("support-window", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("migration evidence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("eng/public-api-baseline.txt", contents, StringComparison.Ordinal);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API baseline change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("docs/phase-498-retained-removal-gate", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("| TBD | TBD | Phase 498", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Phase 498 now owns the retained migration removal execution gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 498 现在通过 GitHub #119 / `avalonia-node-map-3um` 承接 retained migration removal execution gate", chineseParity, StringComparison.Ordinal);
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 
