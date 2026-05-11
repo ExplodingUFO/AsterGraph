@@ -16,7 +16,7 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 - `NodeCanvas`
 - `GraphInspectorView`
 - `GraphMiniMap`
-- `NodeToolbar` and `EdgeToolbar`
+- `NodeToolbar`, `EdgeToolbar`, and `NodeResizer`
 - stock Avalonia menu and presentation wiring
 - stock tiered node cards with persisted width/height, node-side parameter editors gated by tier and connection state, fixed user-owned group frames, and geometry-based group membership
 - stock grouped inspector sections plus text/number/boolean/enum/list editors
@@ -45,12 +45,13 @@ Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, `As
 - standalone mini map: `AsterGraphMiniMapViewFactory.Create(...)`
 - standalone node toolbar: `new NodeToolbar { Session = session, NodeId = nodeId }`
 - standalone edge toolbar: `new EdgeToolbar { Session = session, ConnectionId = connectionId }`
+- standalone node resizer: `new NodeResizer { Session = session, NodeId = nodeId }`
 - built-in component catalog: `AsterGraphBuiltInComponentCatalog.Components` or `AsterGraphBuiltInComponentCatalog.TryGet(...)`
 - retained compatibility: `new GraphEditorView { Editor = editor }`
 
 For new hosted work, prefer `AsterGraphHostBuilder` when the default composition is enough, and use the factory-based routes when you need explicit service wiring. `CreateSession(...)` plus `IGraphEditorSession` remain the canonical runtime surface; this package composes the current Avalonia adapter on top of the retained hosted-UI facade. Treat the direct `GraphEditorView` constructor path as retained compatibility.
 
-The built-in catalog is a discovery surface, not a renderer switch. It reports current entries such as `canvas`, `minimap`, `background-grid`, `inspector`, `controls-panel`, `command-tool-projection`, `node-toolbar`, and `edge-toolbar`. `NodeToolbar` and `EdgeToolbar` are standalone public controls over `AsterGraphAuthoringToolActionFactory.CreateNodeActions(...)` and `CreateConnectionActions(...)`; `node-resizer` remains an internal workbench track in this slice.
+The built-in catalog is a discovery surface, not a renderer switch. It reports current entries such as `canvas`, `minimap`, `background-grid`, `inspector`, `controls-panel`, `command-tool-projection`, `node-toolbar`, `edge-toolbar`, and `node-resizer`. `NodeToolbar` and `EdgeToolbar` are standalone public controls over `AsterGraphAuthoringToolActionFactory.CreateNodeActions(...)` and `CreateConnectionActions(...)`; `NodeResizer` is a standalone public control over `IGraphEditorSession.Commands.TrySetNodeSize(...)`.
 
 ## Hosted Builder Cookbook
 

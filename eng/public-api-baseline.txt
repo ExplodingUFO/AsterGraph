@@ -30,6 +30,7 @@ C:AsterGraph.Avalonia.Controls.GraphMiniMap()
 C:AsterGraph.Avalonia.Controls.GridBackground()
 C:AsterGraph.Avalonia.Controls.NodeCanvas()
 C:AsterGraph.Avalonia.Controls.NodeParameterEditorHost()
+C:AsterGraph.Avalonia.Controls.NodeResizer()
 C:AsterGraph.Avalonia.Controls.NodeToolbar()
 C:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions()
 C:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor(System.String,System.String,AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus,System.String,System.String,System.String,System.String,System.String,System.String)
@@ -330,6 +331,11 @@ F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.NodeParameterEditorRegist
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.ParameterProperty:Avalonia.StyledProperty<AsterGraph.Editor.ViewModels.NodeParameterViewModel>
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.TemplateKeyProperty:Avalonia.StyledProperty<System.String>
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.UsageProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage>
+F:AsterGraph.Avalonia.Controls.NodeResizer.MinimumHeightProperty:Avalonia.StyledProperty<System.Double>
+F:AsterGraph.Avalonia.Controls.NodeResizer.MinimumWidthProperty:Avalonia.StyledProperty<System.Double>
+F:AsterGraph.Avalonia.Controls.NodeResizer.NodeIdProperty:Avalonia.StyledProperty<System.String>
+F:AsterGraph.Avalonia.Controls.NodeResizer.ResizeStepProperty:Avalonia.StyledProperty<System.Double>
+F:AsterGraph.Avalonia.Controls.NodeResizer.SessionProperty:Avalonia.StyledProperty<AsterGraph.Editor.Runtime.IGraphEditorSession>
 F:AsterGraph.Avalonia.Controls.NodeToolbar.NodeIdProperty:Avalonia.StyledProperty<System.String>
 F:AsterGraph.Avalonia.Controls.NodeToolbar.PrimarySelectedNodeIdProperty:Avalonia.StyledProperty<System.String>
 F:AsterGraph.Avalonia.Controls.NodeToolbar.SelectedNodeIdsProperty:Avalonia.StyledProperty<System.Collections.Generic.IReadOnlyList<System.String>>
@@ -2458,6 +2464,11 @@ P:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.NodeParameterEditorRegist
 P:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.Parameter:AsterGraph.Editor.ViewModels.NodeParameterViewModel:get,set
 P:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.TemplateKey:System.String:get,set
 P:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.Usage:AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage:get,set
+P:AsterGraph.Avalonia.Controls.NodeResizer.MinimumHeight:System.Double:get,set
+P:AsterGraph.Avalonia.Controls.NodeResizer.MinimumWidth:System.Double:get,set
+P:AsterGraph.Avalonia.Controls.NodeResizer.NodeId:System.String:get,set
+P:AsterGraph.Avalonia.Controls.NodeResizer.ResizeStep:System.Double:get,set
+P:AsterGraph.Avalonia.Controls.NodeResizer.Session:AsterGraph.Editor.Runtime.IGraphEditorSession:get,set
 P:AsterGraph.Avalonia.Controls.NodeToolbar.NodeId:System.String:get,set
 P:AsterGraph.Avalonia.Controls.NodeToolbar.PrimarySelectedNodeId:System.String:get,set
 P:AsterGraph.Avalonia.Controls.NodeToolbar.SelectedNodeIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
@@ -3871,6 +3882,7 @@ T:class AsterGraph.Avalonia.Controls.GraphMiniMap
 T:class AsterGraph.Avalonia.Controls.GridBackground
 T:class AsterGraph.Avalonia.Controls.NodeCanvas
 T:class AsterGraph.Avalonia.Controls.NodeParameterEditorHost
+T:class AsterGraph.Avalonia.Controls.NodeResizer
 T:class AsterGraph.Avalonia.Controls.NodeToolbar
 T:class AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions
 T:class AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor
