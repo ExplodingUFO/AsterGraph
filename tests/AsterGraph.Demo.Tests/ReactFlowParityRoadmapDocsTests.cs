@@ -282,8 +282,36 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.DoesNotContain("| TBD | TBD | Phase 500", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains("Phase 500 now owns the selected runtime shell visual gate state", englishParity, StringComparison.Ordinal);
-        Assert.Contains("Phase 500 现在通过 GitHub #123 / `avalonia-node-map-66t` 承接 selected runtime shell visual gate state", chineseParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 500 closed the selected runtime shell visual gate state", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 500 已通过 GitHub #123 / `avalonia-node-map-66t` 关闭 selected runtime shell visual gate state", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 501", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #125", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-38n", contents, StringComparison.Ordinal);
+            Assert.Contains("post-Phase-500 parity follow-up queue", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("renderer virtualization execution proof", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("declarative API ergonomics", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("layout provider evidence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("manual assistive-technology validation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("strict pixel baselines", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 501: choose next bounded parity follow-up", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Phase 501 now owns the post-Phase-500 parity follow-up queue refresh", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 501 现在通过 GitHub #125 / `avalonia-node-map-38n` 承接 post-Phase-500 parity follow-up queue refresh", chineseParity, StringComparison.Ordinal);
     }
 
     private static string ReadRepoFile(string relativePath)
