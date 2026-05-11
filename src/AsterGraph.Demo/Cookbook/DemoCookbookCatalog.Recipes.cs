@@ -2016,5 +2016,409 @@ public static partial class DemoCookbookCatalog
             var panels = AsterGraphWorkbenchPanelState.Default;
             """
             ),
+        new DemoCookbookRecipe(
+            "builtin-standalone-controls-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Built-in standalone Controls route",
+            "Capture the standalone viewport controls component and its zoom, fit, and reset command evidence without relying on hosted shell chrome.",
+            [
+                new DemoCookbookAnchor(
+                    "Standalone viewport controls",
+                    "src/AsterGraph.Avalonia/Controls/AsterGraphControls.cs",
+                    "AsterGraphControls"),
+                new DemoCookbookAnchor(
+                    "Viewport command projection",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphHostedActionFactory.cs",
+                    "CreateCommandActions"),
+                new DemoCookbookAnchor(
+                    "Built-in catalog controls entry",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphBuiltInComponentCatalog.cs",
+                    "builtin-standalone-controls-route"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Controls screenshot fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "keyboard-navigation-lab"),
+                new DemoCookbookAnchor(
+                    "Standalone controls proof",
+                    "tests/AsterGraph.Editor.Tests/AsterGraphBuiltInControlsTests.cs",
+                    "AsterGraphControls_RendersViewportActionsAndExecutesCanonicalCommands"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Standalone controls cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "BUILTIN_STANDALONE_CONTROLS_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.HostCodeExample,
+                    "Hosts compose viewport controls directly with a shared session.",
+                    "AsterGraphControls"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The keyboard-navigation-lab fixture keeps zoom and focus routes visible for screenshot evidence.",
+                    "keyboard-navigation-lab"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Focused tests prove the control renders and executes canonical viewport commands.",
+                    "BUILTIN_STANDALONE_CONTROLS_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Viewport controls preserve selected graph context while routing commands through the session.",
+                    "AsterGraphControls_RendersViewportActionsAndExecutesCanonicalCommands"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Stable button names keep the standalone controls surface inspectable.",
+                    "AsterGraphControls"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Disabled viewport commands carry recovery text from command descriptors.",
+                    "CreateCommandActions"),
+            ],
+            [
+                "BUILTIN_STANDALONE_CONTROLS_OK",
+                "AsterGraphControls_RendersViewportActionsAndExecutesCanonicalCommands",
+            ],
+            new DemoCookbookRouteClarity(
+                "Built-in standalone Controls route: compose `AsterGraphControls` with an `IGraphEditorSession` and inspect viewport zoom, fit, and reset command evidence.",
+                "Supported seams live in `AsterGraph.Avalonia` AsterGraphControls and hosted action projection over `AsterGraph.Editor` command descriptors.",
+                "Demo cookbook provides a screenshot fixture and proof anchors only; Demo does not make hosted workbench chrome required for standalone Controls."),
+            "Standalone Controls coverage is limited to the public AsterGraphControls component, command descriptors, and screenshot fixture; it does not add a new viewport runtime, shell dependency, or workflow engine.",
+            CodeSample: """
+            // Compose standalone viewport controls over an existing session.
+            var controls = new AsterGraphControls
+            {
+                Session = editor.Session,
+            };
+            """
+            ),
+        new DemoCookbookRecipe(
+            "builtin-standalone-panel-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Built-in standalone Panel route",
+            "Capture the standalone overlay panel primitive for host-owned built-in chrome without relying on the full workbench shell.",
+            [
+                new DemoCookbookAnchor(
+                    "Standalone overlay panel",
+                    "src/AsterGraph.Avalonia/Controls/AsterGraphPanel.cs",
+                    "AsterGraphPanel"),
+                new DemoCookbookAnchor(
+                    "Panel position contract",
+                    "src/AsterGraph.Avalonia/Controls/AsterGraphPanel.cs",
+                    "AsterGraphPanelPosition"),
+                new DemoCookbookAnchor(
+                    "Built-in catalog panel entry",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphBuiltInComponentCatalog.cs",
+                    "builtin-standalone-panel-route"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Panel screenshot fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "host-event-inspector"),
+                new DemoCookbookAnchor(
+                    "Standalone panel proof",
+                    "tests/AsterGraph.Editor.Tests/AsterGraphBuiltInPanelTests.cs",
+                    "AsterGraphPanel_ArrangesContentAtRequestedOverlayPosition"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Standalone panel cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "BUILTIN_STANDALONE_PANEL_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.HostCodeExample,
+                    "Hosts place their own content inside the positional overlay primitive.",
+                    "AsterGraphPanel"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.NodeMetadata,
+                    "Panel position stays host-owned through AsterGraphPanelPosition.",
+                    "AsterGraphPanelPosition"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Focused layout tests prove requested overlay placement.",
+                    "BUILTIN_STANDALONE_PANEL_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "Panel placement is bounded by explicit overlay positions.",
+                    "AsterGraphPanelPosition"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "The host-event-inspector fixture keeps panel evidence separate from hosted shell chrome.",
+                    "host-event-inspector"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "The panel primitive carries host-owned content without adding command behavior.",
+                    "AsterGraphPanel_ArrangesContentAtRequestedOverlayPosition"),
+            ],
+            [
+                "BUILTIN_STANDALONE_PANEL_OK",
+                "AsterGraphPanel_ArrangesContentAtRequestedOverlayPosition",
+            ],
+            new DemoCookbookRouteClarity(
+                "Built-in standalone Panel route: compose `AsterGraphPanel` with host-owned content and inspect AsterGraphPanelPosition placement evidence.",
+                "Supported seams live in `AsterGraph.Avalonia` AsterGraphPanel positional layout and host-owned content composition.",
+                "Demo cookbook provides a screenshot fixture and proof anchors only; Demo does not turn Panel into a state store or hosted workbench requirement."),
+            "Standalone Panel coverage is limited to the public AsterGraphPanel positional overlay primitive and screenshot fixture; it does not add panel persistence, remote sync, or a workflow engine.",
+            CodeSample: """
+            // Position host-owned chrome without taking the full workbench shell.
+            var panel = new AsterGraphPanel
+            {
+                Position = AsterGraphPanelPosition.TopRight,
+                Content = controls,
+            };
+            """
+            ),
+        new DemoCookbookRecipe(
+            "builtin-node-toolbar-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Built-in NodeToolbar route",
+            "Capture the standalone node toolbar component and canonical node action projection.",
+            [
+                new DemoCookbookAnchor(
+                    "Standalone node toolbar",
+                    "src/AsterGraph.Avalonia/Controls/NodeToolbar.cs",
+                    "NodeToolbar"),
+                new DemoCookbookAnchor(
+                    "Node action projection",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphAuthoringToolActionFactory.cs",
+                    "CreateNodeActions"),
+                new DemoCookbookAnchor(
+                    "Built-in catalog node toolbar entry",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphBuiltInComponentCatalog.cs",
+                    "builtin-node-toolbar-route"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Node toolbar screenshot fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "selection-marquee-workbench"),
+                new DemoCookbookAnchor(
+                    "Node toolbar proof",
+                    "tests/AsterGraph.Editor.Tests/AsterGraphBuiltInToolbarTests.cs",
+                    "NodeToolbar_RendersCanonicalNodeActionsAndExecutesDuplicateCommand"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Node toolbar cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "BUILTIN_NODE_TOOLBAR_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.HostCodeExample,
+                    "Hosts bind NodeToolbar to a node id and shared session.",
+                    "NodeToolbar"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Node toolbar actions are projected by CreateNodeActions.",
+                    "CreateNodeActions"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Focused tests prove node toolbar actions execute through canonical commands.",
+                    "BUILTIN_NODE_TOOLBAR_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "NodeToolbar follows the selected node context supplied by the host.",
+                    "NodeToolbar_RendersCanonicalNodeActionsAndExecutesDuplicateCommand"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Stable toolbar button names keep node actions inspectable.",
+                    "NodeToolbar"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Disabled node actions keep recovery hints source-backed by action descriptors.",
+                    "CreateNodeActions"),
+            ],
+            [
+                "BUILTIN_NODE_TOOLBAR_OK",
+                "NodeToolbar_RendersCanonicalNodeActionsAndExecutesDuplicateCommand",
+            ],
+            new DemoCookbookRouteClarity(
+                "Built-in NodeToolbar route: compose `NodeToolbar` with an `IGraphEditorSession` and node id, then inspect CreateNodeActions evidence.",
+                "Supported seams live in `AsterGraph.Avalonia` NodeToolbar and AsterGraphAuthoringToolActionFactory over `AsterGraph.Editor` command descriptors.",
+                "Demo cookbook provides a screenshot fixture and proof anchors only; Demo does not add node-local command logic."),
+            "NodeToolbar coverage is limited to the public NodeToolbar control, action projection, and screenshot fixture; it does not add node-local command logic, telemetry, or workflow automation.",
+            CodeSample: """
+            // Bind node actions to a host-selected node.
+            var toolbar = new NodeToolbar
+            {
+                Session = editor.Session,
+                NodeId = nodeId,
+            };
+            """
+            ),
+        new DemoCookbookRecipe(
+            "builtin-edge-toolbar-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Built-in EdgeToolbar route",
+            "Capture the standalone edge toolbar component and canonical connection action projection.",
+            [
+                new DemoCookbookAnchor(
+                    "Standalone edge toolbar",
+                    "src/AsterGraph.Avalonia/Controls/EdgeToolbar.cs",
+                    "EdgeToolbar"),
+                new DemoCookbookAnchor(
+                    "Connection action projection",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphAuthoringToolActionFactory.cs",
+                    "CreateConnectionActions"),
+                new DemoCookbookAnchor(
+                    "Built-in catalog edge toolbar entry",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphBuiltInComponentCatalog.cs",
+                    "builtin-edge-toolbar-route"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Edge toolbar screenshot fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "clipboard-fragment-roundtrip"),
+                new DemoCookbookAnchor(
+                    "Edge toolbar proof",
+                    "tests/AsterGraph.Editor.Tests/AsterGraphBuiltInToolbarTests.cs",
+                    "EdgeToolbar_RendersCanonicalEdgeActionsAndExecutesDisconnectCommand"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Edge toolbar cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "BUILTIN_EDGE_TOOLBAR_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.HostCodeExample,
+                    "Hosts bind EdgeToolbar to a connection id and shared session.",
+                    "EdgeToolbar"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Connection toolbar actions are projected by CreateConnectionActions.",
+                    "CreateConnectionActions"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Focused tests prove edge toolbar actions execute through canonical commands.",
+                    "BUILTIN_EDGE_TOOLBAR_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Connection,
+                    "EdgeToolbar follows a host-selected connection id.",
+                    "EdgeToolbar_RendersCanonicalEdgeActionsAndExecutesDisconnectCommand"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Stable toolbar button names keep connection actions inspectable.",
+                    "EdgeToolbar"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Disabled edge actions keep recovery hints source-backed by action descriptors.",
+                    "CreateConnectionActions"),
+            ],
+            [
+                "BUILTIN_EDGE_TOOLBAR_OK",
+                "EdgeToolbar_RendersCanonicalEdgeActionsAndExecutesDisconnectCommand",
+            ],
+            new DemoCookbookRouteClarity(
+                "Built-in EdgeToolbar route: compose `EdgeToolbar` with an `IGraphEditorSession` and connection id, then inspect CreateConnectionActions evidence.",
+                "Supported seams live in `AsterGraph.Avalonia` EdgeToolbar and AsterGraphAuthoringToolActionFactory over `AsterGraph.Editor` command descriptors.",
+                "Demo cookbook provides a screenshot fixture and proof anchors only; Demo does not add connection-local command logic."),
+            "EdgeToolbar coverage is limited to the public EdgeToolbar control, action projection, and screenshot fixture; it does not add connection-local command logic, telemetry, or workflow automation.",
+            CodeSample: """
+            // Bind connection actions to a host-selected edge.
+            var toolbar = new EdgeToolbar
+            {
+                Session = editor.Session,
+                ConnectionId = connectionId,
+            };
+            """
+            ),
+        new DemoCookbookRecipe(
+            "builtin-node-resizer-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Built-in NodeResizer route",
+            "Capture the standalone node resizer component and canonical node-size command route.",
+            [
+                new DemoCookbookAnchor(
+                    "Standalone node resizer",
+                    "src/AsterGraph.Avalonia/Controls/NodeResizer.cs",
+                    "NodeResizer"),
+                new DemoCookbookAnchor(
+                    "Canonical resize command",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TrySetNodeSize"),
+                new DemoCookbookAnchor(
+                    "Built-in catalog node resizer entry",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphBuiltInComponentCatalog.cs",
+                    "builtin-node-resizer-route"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Node resizer screenshot fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "validation-prevent-cycle"),
+                new DemoCookbookAnchor(
+                    "Node resizer proof",
+                    "tests/AsterGraph.Editor.Tests/AsterGraphBuiltInNodeResizerTests.cs",
+                    "NodeResizer_RendersStableHandlesAndCommitsResizeThroughSessionCommand"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Node resizer cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "BUILTIN_NODE_RESIZER_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.HostCodeExample,
+                    "Hosts bind NodeResizer to a node id and shared session.",
+                    "NodeResizer"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Resize commits stay on TrySetNodeSize.",
+                    "TrySetNodeSize"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "Focused tests prove resize handles commit through the session command route.",
+                    "BUILTIN_NODE_RESIZER_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "NodeResizer keeps size changes explicit and bounded by handle actions.",
+                    "NodeResizer_RendersStableHandlesAndCommitsResizeThroughSessionCommand"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "Stable handle names keep resize affordances inspectable.",
+                    "NodeResizer"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "Resize mutations remain source-backed by TrySetNodeSize.",
+                    "TrySetNodeSize"),
+            ],
+            [
+                "BUILTIN_NODE_RESIZER_OK",
+                "NodeResizer_RendersStableHandlesAndCommitsResizeThroughSessionCommand",
+            ],
+            new DemoCookbookRouteClarity(
+                "Built-in NodeResizer route: compose `NodeResizer` with an `IGraphEditorSession` and node id, then inspect TrySetNodeSize evidence.",
+                "Supported seams live in `AsterGraph.Avalonia` NodeResizer and `AsterGraph.Editor` node surface size commands.",
+                "Demo cookbook provides a screenshot fixture and proof anchors only; Demo does not add an alternate resize engine."),
+            "NodeResizer coverage is limited to the public NodeResizer control, TrySetNodeSize, and screenshot fixture; it does not add an alternate resize engine, layout runtime, or workflow automation.",
+            CodeSample: """
+            // Resize a host-selected node through the canonical session.
+            var resizer = new NodeResizer
+            {
+                Session = editor.Session,
+                NodeId = nodeId,
+            };
+            """
+            ),
     ];
 }

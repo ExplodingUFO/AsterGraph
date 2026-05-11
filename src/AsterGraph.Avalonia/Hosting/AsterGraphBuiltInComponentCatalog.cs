@@ -124,7 +124,7 @@ public static class AsterGraphBuiltInComponentCatalog
             typeof(AsterGraphControls).FullName!,
             null,
             "AsterGraphControls",
-            "builtin-hosted-controls-route",
+            "builtin-standalone-controls-route",
             "docs/en/demo-cookbook.md",
             "Standalone viewport controls for zoom in, zoom out, fit view, and reset view commands."),
         new(
@@ -134,7 +134,7 @@ public static class AsterGraphBuiltInComponentCatalog
             typeof(AsterGraphPanel).FullName!,
             null,
             "AsterGraphPanel",
-            "builtin-hosted-controls-route",
+            "builtin-standalone-panel-route",
             "docs/en/demo-cookbook.md",
             "Standalone positional overlay panel for hosts composing their own built-in chrome."),
         new(
@@ -154,7 +154,7 @@ public static class AsterGraphBuiltInComponentCatalog
             typeof(Controls.NodeToolbar).FullName!,
             typeof(AsterGraphAuthoringToolActionFactory).FullName!,
             "NodeToolbar",
-            "builtin-hosted-controls-route",
+            "builtin-node-toolbar-route",
             "docs/en/demo-cookbook.md",
             "Standalone node toolbar control backed by AsterGraphAuthoringToolActionFactory.CreateNodeActions(...)."),
         new(
@@ -164,7 +164,7 @@ public static class AsterGraphBuiltInComponentCatalog
             typeof(Controls.EdgeToolbar).FullName!,
             typeof(AsterGraphAuthoringToolActionFactory).FullName!,
             "EdgeToolbar",
-            "v078-custom-node-edge-route",
+            "builtin-edge-toolbar-route",
             "docs/en/demo-cookbook.md",
             "Standalone edge toolbar control backed by AsterGraphAuthoringToolActionFactory.CreateConnectionActions(...)."),
         new(
@@ -174,8 +174,8 @@ public static class AsterGraphBuiltInComponentCatalog
             typeof(Controls.NodeResizer).FullName!,
             null,
             "NodeResizer",
-            "v078-custom-node-edge-route",
-            "docs/en/custom-node-host-recipe.md",
+            "builtin-node-resizer-route",
+            "docs/en/demo-cookbook.md",
             "Standalone node resizer control backed by IGraphEditorSession.Commands.TrySetNodeSize(...)."),
     ];
 

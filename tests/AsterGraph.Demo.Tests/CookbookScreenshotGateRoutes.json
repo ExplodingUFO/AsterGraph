@@ -84,6 +84,111 @@
     "outputFileName": "cookbook-builtin-hosted-controls.png"
   },
   {
+    "id": "cookbook-builtin-standalone-controls",
+    "recipeId": "builtin-standalone-controls-route",
+    "scenario": "keyboard-navigation-lab",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Keyboard Navigation Fixture",
+    "minimumNodeCount": 7,
+    "minimumConnectionCount": 8,
+    "requiredNodeIds": [
+      "key-clock",
+      "key-output"
+    ],
+    "outputFileName": "cookbook-builtin-standalone-controls.png"
+  },
+  {
+    "id": "cookbook-builtin-standalone-panel",
+    "recipeId": "builtin-standalone-panel-route",
+    "scenario": "host-event-inspector",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Host Event Inspector Fixture",
+    "minimumNodeCount": 8,
+    "minimumConnectionCount": 7,
+    "requiredNodeIds": [
+      "event-input",
+      "event-output"
+    ],
+    "outputFileName": "cookbook-builtin-standalone-panel.png"
+  },
+  {
+    "id": "cookbook-builtin-node-toolbar",
+    "recipeId": "builtin-node-toolbar-route",
+    "scenario": "selection-marquee-workbench",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Selection Rectangle Fixture",
+    "minimumNodeCount": 8,
+    "minimumConnectionCount": 10,
+    "requiredNodeIds": [
+      "select-clock",
+      "select-output"
+    ],
+    "outputFileName": "cookbook-builtin-node-toolbar.png"
+  },
+  {
+    "id": "cookbook-builtin-edge-toolbar",
+    "recipeId": "builtin-edge-toolbar-route",
+    "scenario": "clipboard-fragment-roundtrip",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Clipboard Fragment Roundtrip Fixture",
+    "minimumNodeCount": 8,
+    "minimumConnectionCount": 9,
+    "requiredNodeIds": [
+      "clip-source-a",
+      "clip-output"
+    ],
+    "outputFileName": "cookbook-builtin-edge-toolbar.png"
+  },
+  {
+    "id": "cookbook-builtin-node-resizer",
+    "recipeId": "builtin-node-resizer-route",
+    "scenario": "validation-prevent-cycle",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Validation Prevent Cycle Fixture",
+    "minimumNodeCount": 7,
+    "minimumConnectionCount": 9,
+    "requiredNodeIds": [
+      "validate-clock",
+      "validate-output"
+    ],
+    "outputFileName": "cookbook-builtin-node-resizer.png"
+  },
+  {
     "id": "cookbook-interaction-selection-marquee",
     "recipeId": "interaction-selection-marquee-route",
     "scenario": "selection-marquee-workbench",
