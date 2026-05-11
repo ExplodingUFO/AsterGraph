@@ -61,5 +61,19 @@
       "PART_MainGraphEditorHost"
     ],
     "outputFileName": "shell-runtime-diagnostics-open.png"
+  },
+  {
+    "id": "shell-runtime-diagnostics-closed",
+    "routeId": "cookbook-default-starter-host-ai-pipeline",
+    "hostGroup": "runtime",
+    "language": "en",
+    "theme": "canonical-dark",
+    "expectedPaneOpen": false,
+    "requiredShellParts": [
+      "PART_HostMenu",
+      "PART_HostShellSplitView",
+      "PART_MainGraphEditorHost"
+    ],
+    "outputFileName": "shell-runtime-diagnostics-closed.png"
   }
 ]
