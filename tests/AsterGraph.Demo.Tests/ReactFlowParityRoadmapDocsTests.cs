@@ -228,10 +228,8 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.Contains("docs/phase-497-shell-closed-drawer-gate", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains("four manifest-driven full-window shell captures", englishParity, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("四条 manifest-driven full-window shell", chineseParity, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Current owned slice", englishParity, StringComparison.Ordinal);
-        Assert.Contains("Current owned slice", chineseParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 497 closed the closed-drawer shell visual gate breadth slice", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 497 已通过 GitHub #117 / `avalonia-node-map-5nl` 关闭 closed-drawer shell visual gate breadth slice", chineseParity, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -261,6 +259,31 @@ public sealed class ReactFlowParityRoadmapDocsTests
 
         Assert.Contains("Phase 498 closed the retained migration removal execution gate", englishParity, StringComparison.Ordinal);
         Assert.Contains("Phase 498 已通过 GitHub #119 / `avalonia-node-map-3um` 关闭 retained migration removal execution gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase500SelectedRuntimeShellStateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 500", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #123", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-66t", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-runtime-diagnostics-closed", contents, StringComparison.Ordinal);
+            Assert.Contains("expectedPaneOpen: false", contents, StringComparison.Ordinal);
+            Assert.Contains("manifest/docs/tests only", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("five manifest-driven full-window shell captures", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("strict pixel baselines", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("broad language/theme certification", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("runtime behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 500", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Phase 500 now owns the selected runtime shell visual gate state", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 500 现在通过 GitHub #123 / `avalonia-node-map-66t` 承接 selected runtime shell visual gate state", chineseParity, StringComparison.Ordinal);
     }
 
     private static string ReadRepoFile(string relativePath)

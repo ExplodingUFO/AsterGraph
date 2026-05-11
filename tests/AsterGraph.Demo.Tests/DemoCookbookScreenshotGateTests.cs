@@ -271,6 +271,29 @@ public sealed class DemoCookbookScreenshotGateTests
     }
 
     [Fact]
+    public void CookbookScreenshotGate_IncludesSelectedRuntimeClosedShellState()
+    {
+        var shellStates = LoadShellStates(GetRepositoryRoot());
+        var shellState = Assert.Single(shellStates, state =>
+            string.Equals(state.Id, "shell-runtime-diagnostics-closed", StringComparison.Ordinal));
+
+        Assert.Equal("cookbook-default-starter-host-ai-pipeline", shellState.RouteId);
+        Assert.Equal("runtime", shellState.HostGroup);
+        Assert.Equal("en", shellState.Language);
+        Assert.Equal("canonical-dark", shellState.Theme);
+        Assert.False(shellState.ExpectedPaneOpen);
+        Assert.Equal(
+            [
+                "PART_HostMenu",
+                "PART_HostShellSplitView",
+                "PART_MainGraphEditorHost",
+            ],
+            shellState.RequiredShellParts);
+        Assert.Equal("shell-runtime-diagnostics-closed.png", shellState.OutputFileName);
+        Assert.Equal(5, shellStates.Count);
+    }
+
+    [Fact]
     public void CookbookScreenshotGate_DocumentationNamesCommandArtifactsAndCiPosture()
     {
         var english = ReadRepoFile("docs/en/demo-cookbook.md");
@@ -287,6 +310,7 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains("CI", contents, StringComparison.Ordinal);
             Assert.Contains("before/after", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("shell-runtime-diagnostics-open", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-runtime-diagnostics-closed", contents, StringComparison.Ordinal);
             Assert.Contains("shell-cookbook-default-open-zh-cn", contents, StringComparison.Ordinal);
             Assert.Contains("shell-cookbook-default-closed", contents, StringComparison.Ordinal);
             Assert.Contains("language/theme", contents, StringComparison.OrdinalIgnoreCase);
