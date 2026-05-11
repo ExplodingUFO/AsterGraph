@@ -52,6 +52,18 @@ Use this page with [Host Integration](./host-integration.md) and [Extension Cont
 | Hosted workbench layout state | Supported hosted helper | `AsterGraphWorkbenchLayoutPreset`, `AsterGraphWorkbenchPanelState`, `AsterGraphWorkbenchOptions.ForPreset(...)`, `AsterGraphWorkbenchOptions.ResetLayout()` | Persists and resets stock Avalonia workbench preset/panel state only; it is not a runtime layout engine, execution mode, or WPF parity promise. |
 | Thin definition builders | Stable canonical | `NodeDefinitionBuilder`, `PortDefinitionBuilder`, `PortDefinition.HandleId`, `PortDefinition.ConnectionHint`, `GraphPort.HandleId`, `GraphPort.ConnectionHint`, `NodeParameterDefinitionBuilder`, `ImplicitConversionRuleBuilder` | Convenience constructors and stable port/handle metadata only; each builder terminates in existing DTOs and does not create a second authoring schema or runtime model. |
 | Retained migration bridge | Retained migration | `GraphEditorViewModel`, `GraphEditorView`, `GraphEditorViewModel.Session` | Only for older hosts migrating in batches. |
+
+## Phase 492 retained migration removal roadmap
+
+Phase 492 is inventory now, remove later. It records the current retained and compatibility-only boundary so future removal work can be reviewed against source-backed classifications instead of deleting APIs from a parity roadmap side effect.
+
+| Surface family | Current classification | Removal gate |
+| --- | --- | --- |
+| Retained editor facade | `GraphEditorViewModel`, `GraphEditorView`, `GraphEditorViewModel.Session` | Do not delete retained migration surfaces before a later API-change tracker proves existing hosts have a documented canonical replacement, updates `eng/public-api-baseline.txt`, and keeps host-integration docs aligned. |
+| Explicit legacy import | `GraphDocumentSerializer.ImportLegacy(...)` | Keep as a bounded migration entry point until a later v1 policy issue proves the legacy import support window can close and documents the import/export replacement path. |
+| Retired compatibility-only shims | `IGraphEditorCommands.BeginConnection(...)`, `IGraphEditorQueries.GetCompatibleTargets(...)`, `CompatiblePortTarget`, and obsolete `GraphEditorCapabilitySnapshot` positional members | Already removed from the primary public contracts; keep listed in the V1 compatibility removal policy so replacement guidance stays discoverable. |
+| Retained facade wording in hosted helpers | `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphAvaloniaViewOptions`, and `AsterGraphEditorFactory.Create(...)` docs that mention the retained facade | Keep as supported hosted helpers over the canonical route; do not reclassify as compatibility-only unless a later API-change tracker updates route docs and the public API baseline. |
+
 ## Release Handoff
 
 - Release handoff: stable canonical surfaces are the default route, retained migration surfaces are bridge-only, and obsolete retired compatibility-only surfaces must stay classified in the v1 removal policy with replacement guidance.

@@ -14,6 +14,10 @@ Phase 490 is GitHub #103 / `avalonia-node-map-3x0`, a stale-roadmap repair after
 
 Phase 491 is GitHub #105 / `avalonia-node-map-44i`, the accessibility breadth audit selected by Phase 490. This slice remains docs/tests first: it audits built-in public Avalonia controls and hosted shell states against existing automation names, focusability, keyboard routes, and intentionally decorative surfaces. It does not authorize retained migration removal, public API changes, visual redesign, or full screen-reader certification claims without manual assistive-technology validation.
 
+## Phase 492 Update
+
+Phase 492 is GitHub #107 / `avalonia-node-map-j8v`, the retained migration removal roadmap selected after the Phase 491 accessibility breadth audit closed. This slice is inventory now, remove later: it records the retained bridge, explicit legacy import, and already-retired compatibility-only surfaces that must stay classified before any removal issue changes API shape. It does not authorize runtime behavior changes, public API deletion, public API baseline updates, or UI changes.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -164,15 +168,17 @@ Phase 490 repaired the stale Phase 484 queue after the closed Phase 485-489 work
 
 Phase 491 now owns the accessibility breadth audit because the matrix still marks accessibility breadth as partial while the visual, Cookbook architecture, layout proof, and renderer proof-contract slices have closed trackers. Retained migration removal remains a later future tracker item because it depends on v1 policy and public API baseline work.
 
+Phase 492 now owns the retained migration removal roadmap as an inventory now, remove later slice. It can classify retained and compatibility-only surfaces, but any actual deletion needs a later API-change tracker tied to the v1 policy and `eng/public-api-baseline.txt`.
+
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
 | #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states | P2 | Avalonia built-ins, automation/focus tests, docs for keyboard/screen-reader coverage boundaries | Current docs/tests-first accessibility audit. No runtime, public API, or visual changes unless evidence proves a specific missing contract. |
-| TBD | TBD | Retained migration removal roadmap | P3 | public API inventory, stabilization support matrix, retained migration docs/tests | Later future tracker item. Sequential with v1 policy and public API baseline work; do not delete retained surfaces as a side effect of parity docs work. |
+| #107 | `avalonia-node-map-j8v` | Phase 492: inventory retained migration surfaces and define removal roadmap | P3 | public API inventory, stabilization support matrix, retained migration docs/tests | Docs/tests-first inventory now, remove later slice. Sequential with v1 policy and public API baseline work; do not delete retained surfaces as a side effect of parity docs work. |
 
 ## Recommended Parallel Worktree Plan
 
 - `docs/phase-491-accessibility-breadth-audit`: owns #105 / `avalonia-node-map-44i`; audits accessibility docs/tests across Avalonia built-ins and shell states only.
-- Future retained-migration branch name should be chosen only after v1 policy and public API baseline scope are explicit; expected ownership is public API inventory and stabilization docs/tests.
+- `docs/phase-492-retained-migration-roadmap`: owns #107 / `avalonia-node-map-j8v`; inventories retained migration surfaces and removal gates only. Deletion or baseline updates need a later API-change tracker.
 
 ## UI Verification Policy
 
@@ -190,4 +196,5 @@ Current coverage includes scene-level route captures plus two manifest-driven fu
 
 - GitHub #79 and Beads `avalonia-node-map-p478` were created with `.planning/*` in the write set. Because `.planning/` is ignored and absent from this worktree, this refresh records that as tracker drift instead of force-adding local planning files.
 - Beads is the durable local tracker for this repository. Phase 491 now owns the accessibility breadth audit with GitHub #105 / `avalonia-node-map-44i`; later follow-ups should get explicit GitHub and Beads IDs before code changes.
-- Product code remains out of scope for Phase 478, Phase 484, Phase 490, and Phase 491 unless a focused test proves a specific missing contract.
+- Phase 492 now owns retained migration removal planning with GitHub #107 / `avalonia-node-map-j8v`; it records classification and gates, not API removal.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, and Phase 492 unless a focused test proves a specific missing contract.

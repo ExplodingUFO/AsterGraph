@@ -91,6 +91,25 @@ public sealed class CompatibilitySurfacePolicyTests
         }
     }
 
+    [Fact]
+    public void PublicApiDocs_PublishRetainedMigrationRemovalRoadmapGate()
+    {
+        var english = ReadRepoFile("docs/en/public-api-inventory.md");
+        var chinese = ReadRepoFile("docs/zh-CN/public-api-inventory.md");
+
+        foreach (var contents in new[] { english, chinese })
+        {
+            Assert.Contains("Phase 492 retained migration removal roadmap", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorViewModel", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorView", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorViewModel.Session", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphDocumentSerializer.ImportLegacy(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("inventory now, remove later", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Do not delete retained migration surfaces before", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("eng/public-api-baseline.txt", contents, StringComparison.Ordinal);
+        }
+    }
+
     private static string ReadRepoFile(string relativePath)
     {
         var fullPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../", relativePath));
