@@ -126,6 +126,16 @@ Until those items exist, `xlarge` remains telemetry-only. Its 10000-node markers
 
 Phase 499 records the execution boundary for that future proof. This slice is docs/tests-only and does not authorize a benchmark harness implementation, renderer rewrite, public API change, runtime behavior change, UI change, or support-claim expansion. The first executable proof must still be created by a separate implementation issue and must produce CI-repeatable evidence for all of these surfaces before the public claim changes: non-informational renderer thresholds, repeatable proof command output, artifact metadata, incremental visual lifecycle evidence, invalidation evidence, connection preview preservation, and proof that the claimed operation avoids full collection scans and full scene rebuilds.
 
+Phase 502 is GitHub #127 / `avalonia-node-map-mai`, the renderer virtualization execution proof contract selected after the Phase 501 queue refresh. This remains a docs/tests-only contract slice: it names the executable proof shape future implementation work must satisfy, but it does not implement renderer virtualization, does not defend non-informational renderer thresholds yet, and makes no support-claim expansion.
+
+The Phase 502 proof contract reserves these machine-readable markers for the future proof artifact:
+
+- `RENDERER_VIRTUALIZATION_PROOF_CONTRACT:phase=502:scope=contract-only:no-support-claim-expansion`
+- `RENDERER_VIRTUALIZATION_PROOF_COMMAND:phase=502:command=dotnet test tests\AsterGraph.Editor.Tests\AsterGraph.Editor.Tests.csproj --configuration Release --filter FullyQualifiedName~RendererVirtualizationProof`
+- `RENDERER_VIRTUALIZATION_ARTIFACT_METADATA:phase=502:fields=graphSize,viewport,zoom,overscan,visibleVisualCounts,invalidationCounts,measuredTimings`
+
+Any future implementation PR that claims true renderer virtualization must write artifact metadata with `graphSize`, `viewport`, `zoom`, `overscan`, `visibleVisualCounts`, `invalidationCounts`, and `measuredTimings`; pair those artifacts with focused renderer tests; define non-informational renderer thresholds; and prove the claimed operation avoids both a full collection scan and a full scene rebuild. Until that proof exists, the current public statement stays viewport-budgeted scene projection/rendering only, `xlarge` remains telemetry-only, and Phase 502 records no support-claim expansion.
+
 ## Commands
 
 ```powershell

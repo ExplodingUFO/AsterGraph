@@ -50,6 +50,10 @@ Phase 500 是 GitHub #123 / `avalonia-node-map-66t`，承接 renderer virtualiza
 
 Phase 501 是 GitHub #125 / `avalonia-node-map-38n`，承接 Phase 500 关闭后的 post-Phase-500 parity follow-up queue refresh。本 slice 是 docs/tests only：把 generic Phase 501 placeholder 替换为来自当前 React Flow parity matrix 的具体 next candidates，并把 renderer virtualization execution proof、declarative API ergonomics、layout provider evidence、manual assistive-technology validation 和 broader shell visual coverage 拆成可单独追踪的 follow-ups。它明确保持 no runtime behavior change、no public API change、no UI redesign、no strict pixel baselines、no retained API removal 和 no renderer virtualization implementation 的边界。
 
+## Phase 502 更新
+
+Phase 502 是 GitHub #127 / `avalonia-node-map-mai`，承接 post-Phase-500 queue refresh 选出的 renderer virtualization execution proof。本 slice 仍是 docs/tests only：把 focused renderer tests、scale docs、proof command 和 artifact metadata 串成后续工作必须满足的 executable proof contract，同时把当前声明继续限制为 viewport-budgeted scene projection/rendering，而不是 true renderer virtualization。任何后续 support claim 之前都需要 non-informational renderer thresholds；本 slice 不授权 no runtime behavior change、no public API change、no UI redesign、no retained API removal 或 no renderer virtualization implementation。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -214,12 +218,13 @@ Phase 499 已通过 GitHub #121 / `avalonia-node-map-9x7` 关闭 renderer virtua
 
 Phase 500 已通过 GitHub #123 / `avalonia-node-map-66t` 关闭 selected runtime shell visual gate state。它新增一条有界 runtime closed-shell capture，验证 `expectedPaneOpen: false`，并继续把 runtime behavior changes、strict pixel baselines、flyouts、popups、context menus、broad language/theme certification、retained API removal 和 renderer virtualization work 排除在外。
 
-Phase 501 现在通过 GitHub #125 / `avalonia-node-map-38n` 承接 post-Phase-500 parity follow-up queue refresh。它是 Current owned slice，并保持 docs/tests only：把当前 partial gaps 转成具体队列，同时把 broad React Flow parity claims、runtime behavior changes、public API changes、UI redesign、strict pixel baselines、retained API removal 和 renderer virtualization implementation 排除在外。
+Phase 501 已通过 GitHub #125 / `avalonia-node-map-38n` 关闭 post-Phase-500 parity follow-up queue refresh。它把当前 partial gaps 转成具体队列，同时把 broad React Flow parity claims、runtime behavior changes、public API changes、UI redesign、strict pixel baselines、retained API removal 和 renderer virtualization implementation 排除在外。
+
+Phase 502 现在通过 GitHub #127 / `avalonia-node-map-mai` 承接 renderer virtualization execution proof。它是 Current owned slice，并保持 docs/tests only：定义任何 true renderer virtualization 声明前必须具备的 proof command 和 artifact metadata contract，同时把 implementation、runtime behavior change、public API change、UI redesign、retained API removal 和 support-claim expansion 排除在外。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #125 | `avalonia-node-map-38n` | Phase 501: refresh post-Phase-500 parity follow-up queue | P3 | 仅 parity roadmap docs/tests | Current owned slice。把 placeholder 转成具体 next candidates，不授权 runtime behavior、API、UI、strict pixel baseline、retained API 或 renderer implementation 变更。 |
-| TBD | TBD | Phase 502: renderer virtualization execution proof | P2 | focused renderer tests、scale docs、proof command、artifact metadata | 必须顺序承接 Phase 499 proof contract。任何 renderer virtualization support claim 之前都要证明 non-informational thresholds。 |
+| #127 | `avalonia-node-map-mai` | Phase 502: renderer virtualization execution proof | P2 | focused renderer tests、scale docs、proof command、artifact metadata | Current owned slice。顺序承接 Phase 499 proof contract；只记录 executable proof contract，不授权 runtime behavior、API、UI、retained API、renderer implementation 或 support-claim expansion。 |
 | TBD | TBD | Phase 503: declarative API ergonomics audit | P3 | host API docs、examples、API-surface tests | 可独立 docs/tests audit declarative API ergonomics；没有后续 implementation tracker 时不引入 public API changes。 |
 | TBD | TBD | Phase 504: layout provider evidence expansion | P3 | layout docs/tests、Cookbook route evidence | 与 shell visual work 独立。除非 adopter evidence 支持 API-change issue，否则保持当前 provider seam 同步。 |
 | TBD | TBD | Phase 505: accessibility manual assistive-technology validation plan | P3 | accessibility docs、manual validation checklist、focused docs tests | 只记录 manual assistive-technology validation steps；本 slice 不做 live-region/runtime behavior changes。 |
@@ -234,6 +239,7 @@ Phase 501 现在通过 GitHub #125 / `avalonia-node-map-38n` 承接 post-Phase-5
 - `perf/phase-499-renderer-virtualization-boundary`：已负责 #121 / `avalonia-node-map-9x7`；已按 docs/tests-only 关闭 renderer virtualization execution boundary proof。
 - `docs/phase-500-selected-runtime-shell-state`：负责 #123 / `avalonia-node-map-66t`；写集限制在 shell state manifest、screenshot docs/tests 和 parity roadmap text。
 - `docs/phase-501-post-phase500-queue`：负责 #125 / `avalonia-node-map-38n`；写集限制在 parity roadmap docs/tests，并产出下一轮具体队列。
+- `perf/phase-502-renderer-proof`：负责 #127 / `avalonia-node-map-mai`；写集限制在 renderer proof docs/tests、proof-command wording 和 artifact metadata contract。
 
 ## UI 验证策略
 
@@ -259,5 +265,6 @@ Phase 501 现在通过 GitHub #125 / `avalonia-node-map-38n` 承接 post-Phase-5
 - Phase 498 现在通过 GitHub #119 / `avalonia-node-map-3um` 承接 retained migration removal execution-gate definition；它只记录 removal 前置证据标准，不执行 removal。
 - Phase 499 现在通过 GitHub #121 / `avalonia-node-map-9x7` 承接 renderer virtualization execution-boundary proof；它只记录 proof criteria，不做 renderer implementation。
 - Phase 500 已通过 GitHub #123 / `avalonia-node-map-66t` 关闭 selected runtime shell visual gate state；它只记录一条 runtime closed-shell state，不做 broad visual certification。
-- Phase 501 现在通过 GitHub #125 / `avalonia-node-map-38n` 承接 post-Phase-500 parity follow-up queue refresh；它只记录 next issue split，不做 implementation。
-- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500 和 Phase 501 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
+- Phase 501 已通过 GitHub #125 / `avalonia-node-map-38n` 关闭 post-Phase-500 parity follow-up queue refresh；它只记录 next issue split，不做 implementation。
+- Phase 502 现在通过 GitHub #127 / `avalonia-node-map-mai` 承接 renderer virtualization execution proof；它只记录 proof-command 与 artifact-metadata criteria，不做 renderer implementation。
+- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501 和 Phase 502 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
