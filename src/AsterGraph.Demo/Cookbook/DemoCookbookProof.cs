@@ -15,6 +15,7 @@ public sealed record DemoCookbookProofResult(
     bool LayoutServicesOk,
     bool DesignerWorkbenchOk,
     bool OwnershipBoundaryOk,
+    bool ArchitecturePathOk,
     int RecipeCount,
     int RequiredCategoryCount)
 {
@@ -32,7 +33,7 @@ public sealed record DemoCookbookProofResult(
         && ScenarioDepthOk
         && LayoutServicesOk
         && DesignerWorkbenchOk
-        && OwnershipBoundaryOk;
+        && OwnershipBoundaryOk && ArchitecturePathOk;
 }
 
 public static class DemoCookbookProof
@@ -53,6 +54,7 @@ public static class DemoCookbookProof
         "DEMO_COOKBOOK_LAYOUT_SERVICES_OK",
         "DEMO_COOKBOOK_DESIGNER_WORKBENCH_OK",
         "DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK",
+        "DEMO_COOKBOOK_ARCHITECTURE_PATH_OK",
     ];
 
     public static DemoCookbookProofResult Run()
@@ -159,6 +161,13 @@ public static class DemoCookbookProof
         var designerWorkbenchOk = true;
         var ownershipBoundaryOk = workspaceSnapshots.Length == DemoCookbookCatalog.Recipes.Count
             && PublicSuccessMarkerIds.All(marker => marker.StartsWith("DEMO_COOKBOOK_", StringComparison.Ordinal));
+        var starterRecipe = DemoCookbookCatalog.Recipes.Single(recipe => recipe.Id == "starter-host-route");
+        var architecturePathOk =
+            starterRecipe.RouteClarity.SupportedRoute.Contains("AsterGraphHostBuilder.Create", StringComparison.Ordinal)
+            && starterRecipe.RouteClarity.SupportedRoute.Contains("BuildAvaloniaView", StringComparison.Ordinal)
+            && starterRecipe.RouteClarity.DemoBoundary.Contains("copy the starter host code instead of Demo ViewModel code", StringComparison.Ordinal)
+            && workspaceSnapshots.Any(snapshot => string.Equals(snapshot.SelectedRecipe.RouteStatus, "Supported SDK route", StringComparison.Ordinal))
+            && workspaceSnapshots.Any(snapshot => string.Equals(snapshot.SelectedRecipe.RouteStatus, "Proof/demo route", StringComparison.Ordinal));
 
         return new DemoCookbookProofResult(
             contractOk,
@@ -175,6 +184,7 @@ public static class DemoCookbookProof
             layoutServicesOk,
             designerWorkbenchOk,
             ownershipBoundaryOk,
+            architecturePathOk,
             DemoCookbookCatalog.Recipes.Count,
             DemoCookbookCatalog.RequiredCategories.Count);
     }
@@ -199,6 +209,7 @@ public static class DemoCookbookProof
             $"DEMO_COOKBOOK_LAYOUT_SERVICES_OK:{result.LayoutServicesOk}",
             $"DEMO_COOKBOOK_DESIGNER_WORKBENCH_OK:{result.DesignerWorkbenchOk}",
             $"DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK:{result.OwnershipBoundaryOk}",
+            $"DEMO_COOKBOOK_ARCHITECTURE_PATH_OK:{result.ArchitecturePathOk}",
             $"DEMO_COOKBOOK_RECIPE_COUNT:{result.RecipeCount}",
             $"DEMO_COOKBOOK_REQUIRED_CATEGORY_COUNT:{result.RequiredCategoryCount}",
         ];
