@@ -33,6 +33,11 @@ public static class AsterGraphBuiltInComponentCatalog
     public const string ControlsPanel = "controls-panel";
 
     /// <summary>
+    /// Stable identifier for the standalone viewport controls entry.
+    /// </summary>
+    public const string Controls = "controls";
+
+    /// <summary>
     /// Stable identifier for the standalone overlay panel entry.
     /// </summary>
     public const string Panel = "panel";
@@ -112,6 +117,16 @@ public static class AsterGraphBuiltInComponentCatalog
             "builtin-hosted-controls-route",
             "docs/en/demo-cookbook.md",
             "Default hosted workbench chrome, command controls, panels, and shell composition."),
+        new(
+            Controls,
+            "Controls",
+            AsterGraphBuiltInComponentStatus.Public,
+            typeof(AsterGraphControls).FullName!,
+            null,
+            "AsterGraphControls",
+            "builtin-hosted-controls-route",
+            "docs/en/demo-cookbook.md",
+            "Standalone viewport controls for zoom in, zoom out, fit view, and reset view commands."),
         new(
             Panel,
             "Panel",

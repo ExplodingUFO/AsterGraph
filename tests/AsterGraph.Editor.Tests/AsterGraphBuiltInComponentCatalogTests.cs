@@ -17,6 +17,7 @@ public sealed class AsterGraphBuiltInComponentCatalogTests
         Assert.Contains(AsterGraphBuiltInComponentCatalog.BackgroundGrid, ids);
         Assert.Contains(AsterGraphBuiltInComponentCatalog.Inspector, ids);
         Assert.Contains(AsterGraphBuiltInComponentCatalog.ControlsPanel, ids);
+        Assert.Contains(AsterGraphBuiltInComponentCatalog.Controls, ids);
         Assert.Contains(AsterGraphBuiltInComponentCatalog.Panel, ids);
         Assert.Contains(AsterGraphBuiltInComponentCatalog.CommandToolProjection, ids);
         Assert.Contains(AsterGraphBuiltInComponentCatalog.NodeToolbar, ids);
@@ -81,6 +82,9 @@ public sealed class AsterGraphBuiltInComponentCatalogTests
             AsterGraphBuiltInComponentCatalog.NodeResizer,
             "AsterGraph.Avalonia.Controls.NodeResizer");
         AssertPublicSurfaceType(
+            AsterGraphBuiltInComponentCatalog.Controls,
+            "AsterGraph.Avalonia.Controls.AsterGraphControls");
+        AssertPublicSurfaceType(
             AsterGraphBuiltInComponentCatalog.Panel,
             "AsterGraph.Avalonia.Controls.AsterGraphPanel");
     }
@@ -98,6 +102,7 @@ public sealed class AsterGraphBuiltInComponentCatalogTests
             Assert.Contains("node-toolbar", contents, StringComparison.Ordinal);
             Assert.Contains("edge-toolbar", contents, StringComparison.Ordinal);
             Assert.Contains("node-resizer", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphControls", contents, StringComparison.Ordinal);
             Assert.Contains("AsterGraphPanel", contents, StringComparison.Ordinal);
         }
     }
