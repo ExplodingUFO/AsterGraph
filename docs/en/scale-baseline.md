@@ -124,6 +124,8 @@ Phase 489 defines the minimum renderer virtualization contract before any future
 
 Until those items exist, `xlarge` remains telemetry-only. Its 10000-node markers are not renderer virtualization evidence, not a background graph index proof, and not a support-tier expansion.
 
+Phase 499 records the execution boundary for that future proof. This slice is docs/tests-only and does not authorize a benchmark harness implementation, renderer rewrite, public API change, runtime behavior change, UI change, or support-claim expansion. The first executable proof must still be created by a separate implementation issue and must produce CI-repeatable evidence for all of these surfaces before the public claim changes: non-informational renderer thresholds, repeatable proof command output, artifact metadata, incremental visual lifecycle evidence, invalidation evidence, connection preview preservation, and proof that the claimed operation avoids full collection scans and full scene rebuilds.
+
 ## Commands
 
 ```powershell

@@ -124,6 +124,8 @@ Phase 489 先定义最低 renderer virtualization contract，后续 issue 才能
 
 在这些证据存在前，`xlarge` 仍是 telemetry-only。它的 10000 节点 marker 不是 renderer virtualization evidence，不是 background graph index proof，也不是 support-tier expansion。
 
+Phase 499 记录这份未来 proof 的 execution boundary。本 slice 是 docs/tests-only，不授权 benchmark harness implementation、renderer rewrite、public API change、runtime behavior change、UI change 或 support-claim expansion。第一份可执行 proof 仍必须由单独的 implementation issue 创建，并且在公开声明变化前为这些 surface 产出 CI-repeatable evidence：non-informational renderer thresholds、repeatable proof command output、artifact metadata、incremental visual lifecycle evidence、invalidation evidence、connection preview preservation，以及证明被声明操作不会依赖 full collection scan 和 full scene rebuild 的证据。
+
 ## 运行方式
 
 ```powershell
