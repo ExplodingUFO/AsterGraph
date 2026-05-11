@@ -14,6 +14,10 @@ Phase 486 扩展 full-window shell gate，但不加入 strict pixel baselines，
 
 Phase 488 为 P2 的 layout provider 与 background/cancel proof refresh 打开 GitHub #99 / `avalonia-node-map-ce1`。本 slice 先做 docs/tests：把 `IGraphLayoutProvider`、`PreviewLayoutPlan`、`TryApplyLayoutPlan`、`TryApplyLayoutRequest`、snap-to-grid commands 和 `background-grid-density` route 继续绑定到现有 source-backed proof。不要在这个 issue 中把同步 provider seam 扩大成异步或可取消的 layout execution。
 
+## Phase 489 更新
+
+Phase 489 通过 GitHub #101 / `avalonia-node-map-6sc` 在 `perf/renderer-virtualization-spike` 分支上打开 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
+
 ## Phase 484 更新
 
 Phase 484 在 Phase 478-483 wave 全部关闭、Phase 480 rotatable-node surface 已合入后重新刷新路线图。此前的下一轮队列已经过期，因为 GitHub #80 / `avalonia-node-map-p480` 已关闭。本次更新保持 docs-only，改用优先级明确的拆分计划替换单项队列，并继续把公开声明绑定到当前 source、tests、docs 和 CI 证据。
@@ -116,7 +120,7 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 
 ## 下一轮 Issue Wave
 
-Phase 484 是当前 active planning issue，负责把已经清空的队列转换成下一轮 implementation wave。后续 issue 应在本次 docs refresh 合入后再创建，确保标题、write set 和依赖关系基于当前矩阵，而不是 Phase 478 的旧快照。
+Phase 484 已经把清空后的队列重新转换成下一轮 implementation wave。Phase 489 是当前 active P2 item，并且在新的 implementation issue 批准真正 renderer virtualization contract 前保持 docs/tests-only。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
@@ -124,12 +128,12 @@ Phase 484 是当前 active planning issue，负责把已经清空的队列转换
 | TBD | TBD | Cookbook example architecture refresh | P1 | `src/AsterGraph.Demo/Cookbook`、`docs/en/demo-cookbook.md`、`docs/zh-CN/demo-cookbook.md`，如果重命名/拆分示例则包含 screenshot route metadata | 可与 visual gate decision 并行，但 route ID 和截图要保持稳定。避免 Core/Editor API 修改。 |
 | #95 | `avalonia-node-map-0xr` | Phase 486: decide full-window visual coverage expansion | P1 | `tests/AsterGraph.Demo.Tests`、screenshot metadata/docs | 独立于 API/model 工作。除非已测量 drift，否则继续延后严格 pixel baseline。 |
 | #97 | `avalonia-node-map-i8s` | Phase 487: harden custom node copyable-host recipe | P2 | host recipe docs、templates、Demo cookbook route text、consistency tests | 已由 PR #98 关闭。未修改 Core/Editor/Avalonia API。 |
-| #99 | `avalonia-node-map-ce1` | Phase 488: refresh layout provider and background/cancel proof | P2 | layout provider docs/tests、Demo routes、preview/apply/cancel 的 command guidance | 当前 docs/tests slice。除非测试证明 provider contract 缺失，否则保持 runtime API 稳定。 |
-| TBD | TBD | Renderer virtualization design spike | P2 | 先做 docs/tests；只有真正 virtualization contract 被批准后才触碰 `AsterGraph.Avalonia` renderer/projection | 与任何 claim expansion 串行。不能用 xlarge telemetry 声明 10000 节点支持。 |
+| #99 | `avalonia-node-map-ce1` | Phase 488: refresh layout provider and background/cancel proof | P2 | layout provider docs/tests、Demo routes、preview/apply/cancel 的 command guidance | 已由 PR #100 关闭。除非测试证明 provider contract 缺失，否则保持 runtime API 稳定。 |
+| #101 | `avalonia-node-map-6sc` | Phase 489: renderer virtualization design spike | P2 | scale/parity docs 和 focused consistency tests | 当前 docs/tests design spike。与任何 claim expansion 串行。不能用 xlarge telemetry 声明 10000 节点支持。 |
 | TBD | TBD | Accessibility breadth audit | P3 | Avalonia built-ins、automation peer tests、keyboard/screen-reader coverage docs | visual routes 稳定后可并行；公开声明仅限已审计 controls。 |
 | TBD | TBD | Retained migration removal roadmap | P3 | public API inventory、stabilization support matrix、retained migration docs/tests | 必须与 v1 policy 和 public API baseline work 串行；不要在无关 parity work 中顺手删除 retained surfaces。 |
 
-Phase 480 之后推荐下一条分支：`feature/reactflow-parity-roadmap`，对应 #91 / `avalonia-node-map-4xr`。#91 之后的第一条 implementation branch 应由本次刷新后的 P1 结论决定，最可能是 Cookbook example architecture 或 full-window visual coverage expansion。
+当前 active branch 是 `perf/renderer-virtualization-spike`，对应 #101 / `avalonia-node-map-6sc`。后续如果要扩大 renderer 声明，必须先由新的 tracker item 满足下面定义的 proof contract，再创建 implementation branch。
 
 ## 推荐并行 Worktree 计划
 
@@ -137,7 +141,7 @@ Phase 480 之后推荐下一条分支：`feature/reactflow-parity-roadmap`，对
 - `docs/cookbook-example-architecture`：候选 P1；只负责 Cookbook catalog/docs/example ergonomics。
 - `ui/full-window-visual-coverage`：候选 P1；只负责 shell-state captures、metadata 和 visual verification docs。
 - `docs/custom-node-copyable-recipes`：候选 P2；只负责 host-copy custom-node guidance 和 templates，除非证明缺失 public seam。
-- `perf/renderer-virtualization-spike`：候选 P2；在任何 renderer implementation 前先负责 proof design 和 claim boundaries。
+- `perf/renderer-virtualization-spike`：#101 / `avalonia-node-map-6sc` 的 active Phase 489 branch；在任何 renderer implementation 前先负责 proof design 和 claim boundaries。
 
 ## UI 验证策略
 
