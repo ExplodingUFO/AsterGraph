@@ -23,12 +23,14 @@ C:AsterGraph.Abstractions.Styling.NodeStyleOverride(AsterGraph.Abstractions.Iden
 C:AsterGraph.Abstractions.Styling.PortStyleOptions()
 C:AsterGraph.Abstractions.Styling.PortStyleOverride(AsterGraph.Abstractions.Identifiers.PortTypeId,AsterGraph.Abstractions.Styling.PortStyleOptions)
 C:AsterGraph.Abstractions.Styling.ShellStyleOptions()
+C:AsterGraph.Avalonia.Controls.EdgeToolbar()
 C:AsterGraph.Avalonia.Controls.GraphEditorView()
 C:AsterGraph.Avalonia.Controls.GraphInspectorView()
 C:AsterGraph.Avalonia.Controls.GraphMiniMap()
 C:AsterGraph.Avalonia.Controls.GridBackground()
 C:AsterGraph.Avalonia.Controls.NodeCanvas()
 C:AsterGraph.Avalonia.Controls.NodeParameterEditorHost()
+C:AsterGraph.Avalonia.Controls.NodeToolbar()
 C:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions()
 C:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor(System.String,System.String,AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus,System.String,System.String,System.String,System.String,System.String,System.String)
 C:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions()
@@ -289,6 +291,10 @@ F:AsterGraph.Abstractions.Definitions.ParameterEditorKind.Enum:AsterGraph.Abstra
 F:AsterGraph.Abstractions.Definitions.ParameterEditorKind.List:AsterGraph.Abstractions.Definitions.ParameterEditorKind
 F:AsterGraph.Abstractions.Definitions.ParameterEditorKind.Number:AsterGraph.Abstractions.Definitions.ParameterEditorKind
 F:AsterGraph.Abstractions.Definitions.ParameterEditorKind.Text:AsterGraph.Abstractions.Definitions.ParameterEditorKind
+F:AsterGraph.Avalonia.Controls.EdgeToolbar.ConnectionIdProperty:Avalonia.StyledProperty<System.String>
+F:AsterGraph.Avalonia.Controls.EdgeToolbar.PrimarySelectedNodeIdProperty:Avalonia.StyledProperty<System.String>
+F:AsterGraph.Avalonia.Controls.EdgeToolbar.SelectedNodeIdsProperty:Avalonia.StyledProperty<System.Collections.Generic.IReadOnlyList<System.String>>
+F:AsterGraph.Avalonia.Controls.EdgeToolbar.SessionProperty:Avalonia.StyledProperty<AsterGraph.Editor.Runtime.IGraphEditorSession>
 F:AsterGraph.Avalonia.Controls.GraphEditorView.ChromeModeProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode>
 F:AsterGraph.Avalonia.Controls.GraphEditorView.CommandShortcutPolicyProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy>
 F:AsterGraph.Avalonia.Controls.GraphEditorView.EditorProperty:Avalonia.StyledProperty<AsterGraph.Editor.ViewModels.GraphEditorViewModel>
@@ -324,6 +330,10 @@ F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.NodeParameterEditorRegist
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.ParameterProperty:Avalonia.StyledProperty<AsterGraph.Editor.ViewModels.NodeParameterViewModel>
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.TemplateKeyProperty:Avalonia.StyledProperty<System.String>
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.UsageProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage>
+F:AsterGraph.Avalonia.Controls.NodeToolbar.NodeIdProperty:Avalonia.StyledProperty<System.String>
+F:AsterGraph.Avalonia.Controls.NodeToolbar.PrimarySelectedNodeIdProperty:Avalonia.StyledProperty<System.String>
+F:AsterGraph.Avalonia.Controls.NodeToolbar.SelectedNodeIdsProperty:Avalonia.StyledProperty<System.Collections.Generic.IReadOnlyList<System.String>>
+F:AsterGraph.Avalonia.Controls.NodeToolbar.SessionProperty:Avalonia.StyledProperty<AsterGraph.Editor.Runtime.IGraphEditorSession>
 F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.BackgroundGrid:System.String
 F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.Canvas:System.String
 F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.CommandToolProjection:System.String
@@ -2410,6 +2420,10 @@ P:AsterGraph.Abstractions.Styling.ShellStyleOptions.LibraryPanelWidth:System.Dou
 P:AsterGraph.Abstractions.Styling.ShellStyleOptions.PanelBackgroundHex:System.String:get,set
 P:AsterGraph.Abstractions.Styling.ShellStyleOptions.PanelBorderHex:System.String:get,set
 P:AsterGraph.Abstractions.Styling.ShellStyleOptions.TitleFontSize:System.Double:get,set
+P:AsterGraph.Avalonia.Controls.EdgeToolbar.ConnectionId:System.String:get,set
+P:AsterGraph.Avalonia.Controls.EdgeToolbar.PrimarySelectedNodeId:System.String:get,set
+P:AsterGraph.Avalonia.Controls.EdgeToolbar.SelectedNodeIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
+P:AsterGraph.Avalonia.Controls.EdgeToolbar.Session:AsterGraph.Editor.Runtime.IGraphEditorSession:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.ChromeMode:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.CommandShortcutPolicy:AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.CurrentWorkbenchPerformancePolicy:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy:get
@@ -2444,6 +2458,10 @@ P:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.NodeParameterEditorRegist
 P:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.Parameter:AsterGraph.Editor.ViewModels.NodeParameterViewModel:get,set
 P:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.TemplateKey:System.String:get,set
 P:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.Usage:AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage:get,set
+P:AsterGraph.Avalonia.Controls.NodeToolbar.NodeId:System.String:get,set
+P:AsterGraph.Avalonia.Controls.NodeToolbar.PrimarySelectedNodeId:System.String:get,set
+P:AsterGraph.Avalonia.Controls.NodeToolbar.SelectedNodeIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
+P:AsterGraph.Avalonia.Controls.NodeToolbar.Session:AsterGraph.Editor.Runtime.IGraphEditorSession:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.ChromeMode:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.CommandShortcutPolicy:AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Editor:AsterGraph.Editor.ViewModels.GraphEditorViewModel:get,set
@@ -3846,12 +3864,14 @@ T:class AsterGraph.Abstractions.Styling.NodeStyleOverride
 T:class AsterGraph.Abstractions.Styling.PortStyleOptions
 T:class AsterGraph.Abstractions.Styling.PortStyleOverride
 T:class AsterGraph.Abstractions.Styling.ShellStyleOptions
+T:class AsterGraph.Avalonia.Controls.EdgeToolbar
 T:class AsterGraph.Avalonia.Controls.GraphEditorView
 T:class AsterGraph.Avalonia.Controls.GraphInspectorView
 T:class AsterGraph.Avalonia.Controls.GraphMiniMap
 T:class AsterGraph.Avalonia.Controls.GridBackground
 T:class AsterGraph.Avalonia.Controls.NodeCanvas
 T:class AsterGraph.Avalonia.Controls.NodeParameterEditorHost
+T:class AsterGraph.Avalonia.Controls.NodeToolbar
 T:class AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions
 T:class AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor
 T:class AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions
