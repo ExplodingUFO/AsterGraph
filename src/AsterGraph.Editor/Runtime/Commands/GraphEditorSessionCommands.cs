@@ -37,6 +37,7 @@ public sealed partial class GraphEditorSession
         "nodes.move",
         "selection.transform.move",
         "nodes.resize",
+        "nodes.rotate",
         "nodes.surface.expand",
         "nodes.inspect",
         "nodes.delete-by-id",
@@ -509,6 +510,19 @@ public sealed partial class GraphEditorSession
         if (edited)
         {
             PublishCommandExecuted("nodes.surface.expand");
+        }
+
+        return edited;
+    }
+
+    public bool TrySetNodeRotation(string nodeId, double rotationDegrees, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        var edited = _host.TrySetNodeRotation(nodeId, rotationDegrees, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("nodes.rotate");
         }
 
         return edited;

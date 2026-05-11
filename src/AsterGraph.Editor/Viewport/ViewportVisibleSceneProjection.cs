@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.Viewport;
@@ -128,12 +129,7 @@ public static class ViewportVisibleSceneProjector
 
         var worldBounds = ResolveVisibleWorldBounds(viewport, Math.Max(0d, overscanWorldUnits));
         var visibleNodeIds = document.Nodes
-            .Where(node => Intersects(
-                worldBounds,
-                node.Position.X,
-                node.Position.Y,
-                node.Size.Width,
-                node.Size.Height))
+            .Where(node => Intersects(worldBounds, CreateNodeBounds(node)))
             .Select(node => node.Id)
             .ToArray();
         var visibleNodeIdSet = visibleNodeIds.ToHashSet(StringComparer.Ordinal);
@@ -197,20 +193,24 @@ public static class ViewportVisibleSceneProjector
             Math.Max(topLeft.Y, bottomRight.Y) + overscanWorldUnits);
     }
 
-    private static bool Intersects(
-        VisibleWorldBounds bounds,
-        double x,
-        double y,
-        double width,
-        double height)
+    private static bool Intersects(VisibleWorldBounds bounds, NodeBounds itemBounds)
     {
-        var right = x + Math.Max(0d, width);
-        var bottom = y + Math.Max(0d, height);
-        return x <= bounds.Right
+        var right = itemBounds.X + Math.Max(0d, itemBounds.Width);
+        var bottom = itemBounds.Y + Math.Max(0d, itemBounds.Height);
+        return itemBounds.X <= bounds.Right
                && right >= bounds.Left
-               && y <= bounds.Bottom
+               && itemBounds.Y <= bounds.Bottom
                && bottom >= bounds.Top;
     }
+
+    private static bool Intersects(VisibleWorldBounds bounds, double x, double y, double width, double height)
+        => Intersects(bounds, new NodeBounds(x, y, width, height));
+
+    private static NodeBounds CreateNodeBounds(GraphNode node)
+        => GraphNodeRotationGeometry.GetAxisAlignedBounds(
+            node.Position,
+            node.Size,
+            node.Surface?.RotationDegrees ?? 0d);
 
     private readonly record struct VisibleWorldBounds(double Left, double Top, double Right, double Bottom);
 }

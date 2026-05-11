@@ -566,6 +566,46 @@ internal sealed class GraphEditorKernelDocumentMutator
                 updatedNode.Surface ?? GraphNodeSurfaceState.Default);
     }
 
+    public GraphEditorKernelNodeSurfaceMutationResult SetNodeRotation(
+        GraphDocument document,
+        string nodeId,
+        double rotationDegrees)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        var normalizedRotation = GraphNodeSurfaceState.NormalizeRotationDegrees(rotationDegrees);
+        GraphNode? updatedNode = null;
+        var updatedNodes = document.Nodes
+            .Select(node =>
+            {
+                if (!string.Equals(node.Id, nodeId, StringComparison.Ordinal))
+                {
+                    return node;
+                }
+
+                var currentSurface = (node.Surface ?? GraphNodeSurfaceState.Default).NormalizeRotation();
+                if (Math.Abs(currentSurface.RotationDegrees - normalizedRotation) < 0.0001d)
+                {
+                    return node;
+                }
+
+                updatedNode = node with
+                {
+                    Surface = currentSurface with { RotationDegrees = normalizedRotation },
+                };
+                return updatedNode;
+            })
+            .ToList();
+
+        return updatedNode is null
+            ? GraphEditorKernelNodeSurfaceMutationResult.Empty(document)
+            : new GraphEditorKernelNodeSurfaceMutationResult(
+                SyncNodeGroupMemberships(document with { Nodes = updatedNodes }),
+                updatedNode.Id,
+                updatedNode.Surface ?? GraphNodeSurfaceState.Default);
+    }
+
     public GraphEditorKernelNodeGroupMutationResult CreateNodeGroupFromSelection(
         GraphDocument document,
         IReadOnlyCollection<string> selectedNodeIds,
@@ -1171,7 +1211,7 @@ internal sealed class GraphEditorKernelDocumentMutator
         var surface = node.Surface ?? GraphNodeSurfaceState.Default;
         return node with
         {
-            Surface = surface with { GroupId = groupId },
+            Surface = surface.NormalizeRotation() with { GroupId = groupId },
         };
     }
 

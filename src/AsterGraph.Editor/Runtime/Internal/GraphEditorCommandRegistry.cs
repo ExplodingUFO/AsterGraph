@@ -179,6 +179,11 @@ internal static class GraphEditorCommandRegistry
                 ContextMenu("node", "node-toggle-surface-expansion", 20),
                 Tool("node", "node-toggle-surface-expansion", 20),
             ],
+            ["nodes.rotate"] =
+            [
+                ContextMenu("node", "node-rotate", 22),
+                Tool("node", "node-rotate", 22),
+            ],
             ["scopes.enter"] =
             [
                 Workbench("workbench.composite-workflow", "scopes.enter", 10),

@@ -73,6 +73,7 @@ C:AsterGraph.Core.Models.GraphDocument(System.String,System.String,System.Collec
 C:AsterGraph.Core.Models.GraphEdgePresentation(System.String,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphEdgePathKind,System.Boolean,System.Boolean,System.Boolean,System.Boolean,AsterGraph.Core.Models.GraphEdgeMarkerKind,AsterGraph.Core.Models.GraphEdgeMarkerKind)
 C:AsterGraph.Core.Models.GraphNode(System.String,System.String,System.String,System.String,System.String,AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPort>,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPort>,System.String,AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphParameterValue>,AsterGraph.Core.Models.GraphNodeSurfaceState,AsterGraph.Core.Models.GraphCompositeNode)
 C:AsterGraph.Core.Models.GraphNodeGroup(System.String,System.String,AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize,System.Collections.Generic.IReadOnlyList<System.String>,System.Boolean,AsterGraph.Core.Models.GraphPadding)
+C:AsterGraph.Core.Models.GraphNodeSurfaceState(AsterGraph.Core.Models.GraphNodeExpansionState,System.String,System.Double)
 C:AsterGraph.Core.Models.GraphNodeSurfaceState(AsterGraph.Core.Models.GraphNodeExpansionState,System.String)
 C:AsterGraph.Core.Models.GraphPadding(System.Double,System.Double,System.Double,System.Double)
 C:AsterGraph.Core.Models.GraphParameterValue(System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.Object)
@@ -197,6 +198,7 @@ C:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot(AsterGraph.Abstract
 C:AsterGraph.Editor.Runtime.GraphEditorNodeRuntimeOverlaySnapshot(System.String,AsterGraph.Editor.Runtime.GraphEditorRuntimeOverlayStatus,System.Nullable<System.Double>,System.String,System.Int32,System.Int32,System.String,System.Nullable<System.DateTimeOffset>)
 C:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceMeasurement(AsterGraph.Core.Models.GraphSize,System.Double,System.Double,System.Double,System.Int32,System.Int32,System.Boolean,System.Boolean)
 C:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceSnapshot(System.String,AsterGraph.Core.Models.GraphSize,AsterGraph.Core.Models.GraphNodeExpansionState,System.String)
+C:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceSnapshot(System.String,AsterGraph.Core.Models.GraphSize,AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceTierSnapshot,AsterGraph.Core.Models.GraphNodeExpansionState,System.String,System.Double)
 C:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceSnapshot(System.String,AsterGraph.Core.Models.GraphSize,AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceTierSnapshot,AsterGraph.Core.Models.GraphNodeExpansionState,System.String)
 C:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceTierSnapshot(System.String,System.Double,System.Double,System.Collections.Generic.IReadOnlyList<System.String>)
 C:AsterGraph.Editor.Runtime.GraphEditorNodeTemplateSnapshot(AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String,System.String,System.String,System.String,System.String,AsterGraph.Core.Models.GraphSize,System.String,System.Int32,System.Int32)
@@ -932,10 +934,13 @@ M:AsterGraph.Core.Models.GraphNodeGroup.Equals(System.Object):System.Boolean
 M:AsterGraph.Core.Models.GraphNodeGroup.GetHashCode():System.Int32
 M:AsterGraph.Core.Models.GraphNodeGroup.ToString():System.String
 M:AsterGraph.Core.Models.GraphNodeSurfaceState.<Clone>$():AsterGraph.Core.Models.GraphNodeSurfaceState
+M:AsterGraph.Core.Models.GraphNodeSurfaceState.Deconstruct(out AsterGraph.Core.Models.GraphNodeExpansionState&,out System.String&,out System.Double&):System.Void
 M:AsterGraph.Core.Models.GraphNodeSurfaceState.Deconstruct(out AsterGraph.Core.Models.GraphNodeExpansionState&,out System.String&):System.Void
 M:AsterGraph.Core.Models.GraphNodeSurfaceState.Equals(AsterGraph.Core.Models.GraphNodeSurfaceState):System.Boolean
 M:AsterGraph.Core.Models.GraphNodeSurfaceState.Equals(System.Object):System.Boolean
 M:AsterGraph.Core.Models.GraphNodeSurfaceState.GetHashCode():System.Int32
+M:AsterGraph.Core.Models.GraphNodeSurfaceState.NormalizeRotation():AsterGraph.Core.Models.GraphNodeSurfaceState
+M:AsterGraph.Core.Models.GraphNodeSurfaceState.NormalizeRotationDegrees(System.Double):System.Double
 M:AsterGraph.Core.Models.GraphNodeSurfaceState.ToString():System.String
 M:AsterGraph.Core.Models.GraphPadding.ClampNonNegative():AsterGraph.Core.Models.GraphPadding
 M:AsterGraph.Core.Models.GraphPadding.Deconstruct(out System.Double&,out System.Double&,out System.Double&,out System.Double&):System.Void
@@ -1149,6 +1154,9 @@ M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.BuildRoute(AsterGraph.Core.Mo
 M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.BuildRoutePoints(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle):System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPoint>
 M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.ResolveSegmentMidpoint(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint,System.Int32,AsterGraph.Editor.Runtime.GraphEditorConnectionRouteStyle):AsterGraph.Core.Models.GraphPoint
 M:AsterGraph.Editor.Geometry.ConnectionPathBuilder.ResolveSegmentMidpoint(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphConnectionRoute,AsterGraph.Core.Models.GraphPoint,System.Int32):AsterGraph.Core.Models.GraphPoint
+M:AsterGraph.Editor.Geometry.GraphNodeRotationGeometry.GetAxisAlignedBounds(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize,System.Double):AsterGraph.Editor.Geometry.NodeBounds
+M:AsterGraph.Editor.Geometry.GraphNodeRotationGeometry.TransformLocalToWorld(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize,System.Double,AsterGraph.Core.Models.GraphPoint):AsterGraph.Core.Models.GraphPoint
+M:AsterGraph.Editor.Geometry.GraphNodeRotationGeometry.TransformWorldToLocal(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize,System.Double,AsterGraph.Core.Models.GraphPoint):AsterGraph.Core.Models.GraphPoint
 M:AsterGraph.Editor.Geometry.NodeBounds.Deconstruct(out System.Double&,out System.Double&,out System.Double&,out System.Double&):System.Void
 M:AsterGraph.Editor.Geometry.NodeBounds.Equals(AsterGraph.Editor.Geometry.NodeBounds):System.Boolean
 M:AsterGraph.Editor.Geometry.NodeBounds.Equals(System.Object):System.Boolean
@@ -1766,6 +1774,7 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySetNodeGroupMemberships(System
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySetNodeGroupPosition(System.String,AsterGraph.Core.Models.GraphPoint,System.Boolean,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySetNodeGroupSize(System.String,AsterGraph.Core.Models.GraphSize,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySetNodeParameterValue(System.String,System.String,System.Object):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySetNodeRotation(System.String,System.Double,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySetNodeSize(System.String,AsterGraph.Core.Models.GraphSize,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySetNodeWidth(System.String,System.Double,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TrySetSelectedNodeParameterValue(System.String,System.Object):System.Boolean
@@ -1963,6 +1972,7 @@ M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySetNodeGroupMemberships(Syst
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySetNodeGroupPosition(System.String,AsterGraph.Core.Models.GraphPoint,System.Boolean,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySetNodeGroupSize(System.String,AsterGraph.Core.Models.GraphSize,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySetNodeParameterValue(System.String,System.String,System.Object):System.Boolean
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySetNodeRotation(System.String,System.Double,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySetNodeSize(System.String,AsterGraph.Core.Models.GraphSize,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySetNodeWidth(System.String,System.Double,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TrySetSelectedNodeParameterValue(System.String,System.Object):System.Boolean
@@ -2711,6 +2721,7 @@ P:AsterGraph.Core.Models.GraphNodeGroup.Title:System.String:get,set
 P:AsterGraph.Core.Models.GraphNodeSurfaceState.Default:AsterGraph.Core.Models.GraphNodeSurfaceState:get
 P:AsterGraph.Core.Models.GraphNodeSurfaceState.ExpansionState:AsterGraph.Core.Models.GraphNodeExpansionState:get,set
 P:AsterGraph.Core.Models.GraphNodeSurfaceState.GroupId:System.String:get,set
+P:AsterGraph.Core.Models.GraphNodeSurfaceState.RotationDegrees:System.Double:get,set
 P:AsterGraph.Core.Models.GraphPadding.Bottom:System.Double:get,set
 P:AsterGraph.Core.Models.GraphPadding.Left:System.Double:get,set
 P:AsterGraph.Core.Models.GraphPadding.Right:System.Double:get,set
@@ -3391,6 +3402,7 @@ P:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceSnapshot.ActiveTier:AsterGraph
 P:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceSnapshot.ExpansionState:AsterGraph.Core.Models.GraphNodeExpansionState:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceSnapshot.GroupId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceSnapshot.NodeId:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceSnapshot.RotationDegrees:System.Double:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceSnapshot.Size:AsterGraph.Core.Models.GraphSize:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceTierSnapshot.Key:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceTierSnapshot.MinHeight:System.Double:get,set
@@ -3852,6 +3864,7 @@ P:AsterGraph.Editor.ViewModels.NodeViewModel.Outputs:System.Collections.Generic.
 P:AsterGraph.Editor.ViewModels.NodeViewModel.ParameterEndpoints:System.Collections.ObjectModel.ObservableCollection<AsterGraph.Editor.ViewModels.NodeParameterEndpointViewModel>:get
 P:AsterGraph.Editor.ViewModels.NodeViewModel.ParameterValues:System.Collections.Generic.IReadOnlyDictionary<System.String,AsterGraph.Core.Models.GraphParameterValue>:get
 P:AsterGraph.Editor.ViewModels.NodeViewModel.Presentation:AsterGraph.Editor.Presentation.NodePresentationState:get,set
+P:AsterGraph.Editor.ViewModels.NodeViewModel.RotationDegrees:System.Double:get
 P:AsterGraph.Editor.ViewModels.NodeViewModel.Subtitle:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeViewModel.Surface:AsterGraph.Core.Models.GraphNodeSurfaceState:get,set
 P:AsterGraph.Editor.ViewModels.NodeViewModel.SurfaceMeasurement:AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceMeasurement:get,set
@@ -4230,6 +4243,7 @@ T:static class AsterGraph.Avalonia.Hosting.AsterGraphInspectorViewFactory
 T:static class AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewFactory
 T:static class AsterGraph.Core.Serialization.GraphDocumentSerializer
 T:static class AsterGraph.Editor.Geometry.ConnectionPathBuilder
+T:static class AsterGraph.Editor.Geometry.GraphNodeRotationGeometry
 T:static class AsterGraph.Editor.Geometry.PortAnchorCalculator
 T:static class AsterGraph.Editor.Hosting.AsterGraphEditorFactory
 T:static class AsterGraph.Editor.Hosting.GraphHostContextExtensions

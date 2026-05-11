@@ -219,6 +219,7 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
         var inspect = GetCommandDescriptor(commands, "nodes.inspect");
         var center = GetCommandDescriptor(commands, "viewport.center-node");
         var toggleExpansion = GetCommandDescriptor(commands, "nodes.surface.expand");
+        var rotate = GetCommandDescriptor(commands, "nodes.rotate");
         var delete = GetCommandDescriptor(commands, "nodes.delete-by-id");
         var duplicate = GetCommandDescriptor(commands, "nodes.duplicate");
         var disconnectIncoming = GetCommandDescriptor(commands, "connections.disconnect-incoming");
@@ -253,6 +254,16 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
                 iconKey: "expand",
                 isEnabled: toggleExpansion.IsEnabled,
                 disabledReason: toggleExpansion.DisabledReason),
+            new(
+                "node-rotate",
+                Localize("editor.menu.node.rotateClockwise", "Rotate 90 Degrees"),
+                CreateCommand(
+                    "nodes.rotate",
+                    ("nodeId", node.Id),
+                    ("rotationDegrees", GraphNodeSurfaceState.NormalizeRotationDegrees((node.Surface?.RotationDegrees ?? 0d) + 90d).ToString(CultureInfo.InvariantCulture))),
+                iconKey: "rotate",
+                isEnabled: rotate.IsEnabled,
+                disabledReason: rotate.DisabledReason),
         };
 
         if (node.Composite is not null)

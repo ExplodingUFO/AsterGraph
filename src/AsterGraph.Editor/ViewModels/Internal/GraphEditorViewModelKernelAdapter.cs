@@ -163,6 +163,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState)
         => _kernel.TrySetNodeExpansionState(nodeId, expansionState);
 
+    public bool TrySetNodeRotation(string nodeId, double rotationDegrees, bool updateStatus)
+        => _kernel.TrySetNodeRotation(nodeId, rotationDegrees, updateStatus);
+
     public string TryCreateNodeGroupFromSelection(string title)
         => _kernel.TryCreateNodeGroupFromSelection(title);
 

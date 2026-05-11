@@ -173,6 +173,9 @@ internal sealed partial class GraphEditorKernel
         bool IGraphEditorKernelCommandRouterHost.TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState)
             => _owner.TrySetNodeExpansionState(nodeId, expansionState);
 
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeRotation(string nodeId, double rotationDegrees, bool updateStatus)
+            => _owner.TrySetNodeRotation(nodeId, rotationDegrees, updateStatus);
+
         string IGraphEditorKernelCommandRouterHost.TryCreateNodeGroupFromSelection(string title)
             => _owner.TryCreateNodeGroupFromSelection(title);
 

@@ -76,8 +76,8 @@ internal static class GraphEditorConnectionGeometryProjector
             sourceNode.Id,
             connection.SourcePortId,
             GraphConnectionTargetKind.Port,
-            PortAnchorCalculator.GetAnchor(
-                CreateNodeBounds(sourceNode),
+            GetPortAnchor(
+                sourceNode,
                 PortDirection.Output,
                 sourcePortIndex,
                 sourceNode.Outputs.Count));
@@ -314,8 +314,8 @@ internal static class GraphEditorConnectionGeometryProjector
                 node.Id,
                 target.TargetId,
                 GraphConnectionTargetKind.Port,
-                PortAnchorCalculator.GetAnchor(
-                    CreateNodeBounds(node),
+                GetPortAnchor(
+                    node,
                     PortDirection.Input,
                     targetPortIndex,
                     node.Inputs.Count + ResolveVisibleParameterKeys(node, connectedParameterKeys, definitionResolver).Count));
@@ -333,8 +333,8 @@ internal static class GraphEditorConnectionGeometryProjector
             node.Id,
             target.TargetId,
             GraphConnectionTargetKind.Parameter,
-            PortAnchorCalculator.GetAnchor(
-                CreateNodeBounds(node),
+            GetPortAnchor(
+                node,
                 PortDirection.Input,
                 node.Inputs.Count + parameterIndex,
                 node.Inputs.Count + visibleParameterKeys.Count));
@@ -372,7 +372,24 @@ internal static class GraphEditorConnectionGeometryProjector
     }
 
     private static NodeBounds CreateNodeBounds(GraphNode node)
-        => new(node.Position.X, node.Position.Y, node.Size.Width, node.Size.Height);
+        => GraphNodeRotationGeometry.GetAxisAlignedBounds(
+            node.Position,
+            node.Size,
+            node.Surface?.RotationDegrees ?? 0d);
+
+    private static GraphPoint GetPortAnchor(GraphNode node, PortDirection direction, int index, int total)
+    {
+        var localAnchor = PortAnchorCalculator.GetAnchor(
+            new NodeBounds(0d, 0d, node.Size.Width, node.Size.Height),
+            direction,
+            index,
+            total);
+        return GraphNodeRotationGeometry.TransformLocalToWorld(
+            node.Position,
+            node.Size,
+            node.Surface?.RotationDegrees ?? 0d,
+            localAnchor);
+    }
 
     private static int FindPortIndex(IReadOnlyList<GraphPort> ports, string portId)
     {

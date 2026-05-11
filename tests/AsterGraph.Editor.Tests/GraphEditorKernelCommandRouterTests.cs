@@ -282,6 +282,14 @@ public sealed class GraphEditorKernelCommandRouterTests
         Assert.True(duplicateNode.CanExecute);
         Assert.True(duplicateNode.IsEnabled);
 
+        var rotateNode = descriptors["nodes.rotate"];
+        Assert.Equal("Rotate Node", rotateNode.Title);
+        Assert.Equal("nodes", rotateNode.Group);
+        Assert.Equal("rotate", rotateNode.IconKey);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, rotateNode.Source);
+        Assert.True(rotateNode.CanExecute);
+        Assert.True(rotateNode.IsEnabled);
+
         var deleteNode = descriptors["nodes.delete-by-id"];
         Assert.Equal("Delete Node", deleteNode.Title);
         Assert.Equal("nodes", deleteNode.Group);
@@ -1605,6 +1613,26 @@ public sealed class GraphEditorKernelCommandRouterTests
         kernel.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
         Assert.True(kernel.TryExecuteCommand(CreateCommand("selection.invert", ("updateStatus", "false"))));
         Assert.Equal(TargetNodeId, kernel.GetSelectionSnapshot().PrimarySelectedNodeId);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_RotatesNodeThroughCanonicalCommandRoute()
+    {
+        var kernel = CreateKernel();
+
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "nodes.rotate",
+                ("nodeId", SourceNodeId),
+                ("rotationDegrees", "-45"),
+                ("updateStatus", "false"))));
+
+        var node = Assert.Single(kernel.CreateDocumentSnapshot().Nodes, candidate => candidate.Id == SourceNodeId);
+        Assert.Equal(315d, node.Surface?.RotationDegrees);
+        Assert.Equal(315d, Assert.Single(kernel.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == SourceNodeId).RotationDegrees);
+
+        kernel.Undo();
+        Assert.Equal(0d, Assert.Single(kernel.CreateDocumentSnapshot().Nodes, candidate => candidate.Id == SourceNodeId).Surface?.RotationDegrees ?? 0d);
     }
 
     [Fact]

@@ -150,6 +150,7 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
         }
 
         var toggleExpansion = GetCommandDescriptor(commands, "nodes.surface.expand");
+        var rotate = GetCommandDescriptor(commands, "nodes.rotate");
         var inspect = GetCommandDescriptor(commands, "nodes.inspect");
         var center = GetCommandDescriptor(commands, "viewport.center-node");
         var delete = GetCommandDescriptor(commands, "nodes.delete-by-id");
@@ -189,6 +190,15 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
                     ("nodeId", node.Id),
                     ("expansionState", nextExpansionState.ToString())),
                 order: 20),
+            new(
+                "node-rotate",
+                GraphEditorToolContextKind.Node,
+                CreateContextualDescriptor(rotate, Localize("editor.tool.node.rotateClockwise", "Rotate 90 Degrees")),
+                CreateCommand(
+                    "nodes.rotate",
+                    ("nodeId", node.Id),
+                    ("rotationDegrees", GraphNodeSurfaceState.NormalizeRotationDegrees((node.Surface?.RotationDegrees ?? 0d) + 90d).ToString(CultureInfo.InvariantCulture))),
+                order: 22),
             new(
                 "node-delete",
                 GraphEditorToolContextKind.Node,

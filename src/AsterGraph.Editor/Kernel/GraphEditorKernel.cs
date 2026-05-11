@@ -648,6 +648,37 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         return true;
     }
 
+    public bool TrySetNodeRotation(string nodeId, double rotationDegrees, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Node surface editing is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodeRotation(CreateActiveScopeDocumentSnapshot(), nodeId, rotationDegrees);
+        if (mutation.NodeId is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching node rotation change was applied.";
+            }
+
+            return false;
+        }
+
+        ApplyActiveScopeDocument(mutation.Document);
+        CurrentStatusMessage = $"Rotated node to {mutation.Surface!.RotationDegrees:0.##} degrees.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, [mutation.NodeId], null, preserveStatus: !updateStatus);
+        return true;
+    }
+
     public string TryCreateNodeGroupFromSelection(string title)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
@@ -1706,7 +1737,13 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
                 var definition = GraphEditorNodeSurfaceTierResolver.ResolveDefinition(_nodeCatalog, node.DefinitionId);
                 var measurement = GraphEditorNodeSurfaceMeasurer.Measure(GraphEditorNodeSurfacePlanner.Create(node, definition));
                 var activeTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(node.Size, _behaviorOptions, definition, measurement);
-                return new GraphEditorNodeSurfaceSnapshot(node.Id, node.Size, activeTier, surface.ExpansionState, surface.GroupId);
+                return new GraphEditorNodeSurfaceSnapshot(
+                    node.Id,
+                    node.Size,
+                    activeTier,
+                    surface.ExpansionState,
+                    surface.GroupId,
+                    surface.RotationDegrees);
             })
             .ToList();
 

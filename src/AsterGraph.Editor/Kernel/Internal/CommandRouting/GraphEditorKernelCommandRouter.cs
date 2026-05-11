@@ -116,6 +116,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState);
 
+    bool TrySetNodeRotation(string nodeId, double rotationDegrees, bool updateStatus);
+
     string TryCreateNodeGroupFromSelection(string title);
 
     bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed);
@@ -421,6 +423,13 @@ internal sealed class GraphEditorKernelCommandRouter
                 "nodes.resize",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "nodes.rotate",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Nodes.AllowMove && _host.Document.Nodes.Count > 0,
+                _host.BehaviorOptions.Commands.Nodes.AllowMove
+                    ? _host.Document.Nodes.Count > 0 ? null : "Add one or more nodes before rotating."
+                    : "Node rotation is disabled by host permissions."),
             GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.surface.expand",
                 GraphEditorCommandSourceKind.Kernel,
@@ -1226,6 +1235,18 @@ internal sealed class GraphEditorKernelCommandRouter
                 }
 
                 return _host.TrySetNodeExpansionState(expansionNodeId, expansionState);
+
+            case "nodes.rotate":
+                if (!TryGetRequiredArgument(command, "nodeId", out var rotationNodeId)
+                    || !TryGetDoubleArgument(command, "rotationDegrees", out var rotationDegrees))
+                {
+                    return false;
+                }
+
+                return _host.TrySetNodeRotation(
+                    rotationNodeId,
+                    rotationDegrees,
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
 
             case "nodes.inspect":
                 if (!TryGetRequiredArgument(command, "nodeId", out var inspectNodeId))

@@ -21,6 +21,7 @@
 新接入默认走第 2 条（`AsterGraphAvaloniaViewFactory`），这样 WPF 保持 adapter-2 portability validation-only，不会变成单独上手路径或 parity 承诺。
 
 如果宿主管的是自己的 UI，那么第 1 条就是 canonical 的原生 / 自定义 UI 路线；你是在同一个 session/runtime owner 上组合自己的表面，而不是再引入一套第二模型。
+自定义 UI 宿主可以通过 `IGraphEditorCommands.TrySetNodeRotation(...)` 持久化节点旋转，并从 `GraphEditorNodeSurfaceSnapshot.RotationDegrees` 读取当前角度。
 
 `AsterGraphCanvasViewFactory`、`AsterGraphInspectorViewFactory`、`AsterGraphMiniMapViewFactory` 这些独立表面都属于第 2 条路线下的组合细节，不是第四条主路线。
 

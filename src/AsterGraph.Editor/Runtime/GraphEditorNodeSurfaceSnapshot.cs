@@ -22,9 +22,21 @@ public sealed record GraphEditorNodeSurfaceSnapshot(
         GraphEditorNodeSurfaceTierSnapshot ActiveTier,
         GraphNodeExpansionState ExpansionState,
         string? GroupId)
+        : this(NodeId, Size, ActiveTier, ExpansionState, GroupId, 0d)
+    {
+    }
+
+    public GraphEditorNodeSurfaceSnapshot(
+        string NodeId,
+        GraphSize Size,
+        GraphEditorNodeSurfaceTierSnapshot ActiveTier,
+        GraphNodeExpansionState ExpansionState,
+        string? GroupId,
+        double RotationDegrees)
         : this(NodeId, Size, ExpansionState, GroupId)
     {
         this.ActiveTier = ActiveTier ?? throw new ArgumentNullException(nameof(ActiveTier));
+        this.RotationDegrees = GraphNodeSurfaceState.NormalizeRotationDegrees(RotationDegrees);
     }
 
     /// <summary>
@@ -32,4 +44,9 @@ public sealed record GraphEditorNodeSurfaceSnapshot(
     /// </summary>
     public GraphEditorNodeSurfaceTierSnapshot ActiveTier { get; init; }
         = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(Size, NodeSurfaceTierProfile.Default);
+
+    /// <summary>
+    /// Clockwise node-card rotation in degrees.
+    /// </summary>
+    public double RotationDegrees { get; init; }
 }
