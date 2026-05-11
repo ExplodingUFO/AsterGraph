@@ -26,6 +26,17 @@ Pair it with `src/AsterGraph.Demo`, because that is the defended hosted proof ro
 - If you do local screen-reader-ready checks with Narrator, NVDA, or VoiceOver, keep them on the same named hosted surfaces and controls: `GraphEditorView`, `NodeCanvas`, `GraphInspectorView`, `PART_CommandPaletteSearchBox`, `PART_ParameterSearchBox`, projected command buttons, and projected node or edge tools.
 - This path is local evaluation evidence only. It does not widen support promises and it does not claim screen-reader certification.
 
+## Manual Assistive-Technology Validation Checklist
+
+`ACCESSIBILITY_MANUAL_AT_VALIDATION_PLAN` keeps manual assistive-technology validation separate from the existing headless automation proof. Start only after `HOSTED_ACCESSIBILITY_OK:True` and the release validation lane are green; that evidence proves automation names, focus routes, keyboard flow, and command surfaces, but it still leaves live announcements as unverified live screen-reader behavior.
+
+- Narrator on Windows: open the hosted Demo route, tab through `GraphEditorView`, `NodeCanvas`, `GraphInspectorView`, `PART_CommandPaletteSearchBox`, and projected command buttons; record whether names, focus movement, command-palette close, validation focus buttons, and export/status text are announced as expected.
+- NVDA on Windows: repeat the same named route and note whether browse/focus modes expose the same command labels, selected-node parameter metadata, edge text editor names, and validation target help text.
+- VoiceOver on macOS or the nearest platform-equivalent check for the current host: repeat the same named surfaces and record any divergence in focus order, command labels, and status announcements.
+- Attach the manual notes beside the Demo support bundle and keep failures as adopter evidence for a later implementation tracker.
+
+This checklist is planning evidence only: no live-region/runtime behavior change, no UI change, no public API change, no retained API removal, and no broad screen-reader certification claim.
+
 ## Proof Contract
 
 Validate the hosted route with:
