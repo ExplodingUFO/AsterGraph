@@ -133,6 +133,18 @@ public sealed class DemoCookbookDocsTests
             Assert.Contains("DemoCookbookCatalog", contents, StringComparison.Ordinal);
             Assert.Contains("not a supported package boundary", contents, StringComparison.Ordinal);
             Assert.Contains("Do not copy Demo ViewModel", contents, StringComparison.Ordinal);
+            Assert.All(new[]
+            {
+                "COOKBOOK_ARCHITECTURE_OWNERSHIP_CONTRACT_OK", "Catalog ownership", "Projection ownership",
+                "DemoCookbookWorkspaceProjection", "ViewModel ownership", "Docs ownership", "Manifest ownership",
+                "CookbookScreenshotGateRoutes.json", "CookbookShellVisualGateStates.json", "Related-doc hygiene",
+                "Category-derived route posture", "DemoCookbookRecipeCategory", "Recipe.Id", "navigation groups",
+                "filters", "reader posture", "do not create doc-only aliases",
+                "not a route key, API contract, or manifest key",
+            }, value => Assert.Contains(value, contents, StringComparison.Ordinal));
+            Assert.Equal(2, contents.Split("- [Demo Guide](./demo-guide.md)", StringSplitOptions.None).Length);
+            Assert.Equal(2, contents.Split("- [Feature Catalog](./feature-catalog.md)", StringSplitOptions.None).Length);
+            Assert.Equal(2, contents.Split("- [Support Bundle](./support-bundle.md)", StringSplitOptions.None).Length);
         }
     }
 

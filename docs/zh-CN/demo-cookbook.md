@@ -12,6 +12,17 @@ Demo cookbook 是面向 AsterGraph 评估者的“代码 + 演示”索引。它
 2. 如果宿主自己拥有 shell、tools、panels 或 native UI，再分支到 `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`。自定义 shell 应把 Authoring 和 runtime-only routes 当成 API 锚点。
 3. `DemoCookbookCatalog`、Demo anchors 和 screenshot routes 只作为 proof 与导航证据。`src/AsterGraph.Demo` is not a supported package boundary。Do not copy Demo ViewModel code into a production host；应复制每条 recipe 指向的 public `AsterGraph.Avalonia` / `AsterGraph.Editor` seams。
 
+## Cookbook architecture ownership contract
+
+`COOKBOOK_ARCHITECTURE_OWNERSHIP_CONTRACT_OK` 明确 Cookbook 架构的所有权切分：
+
+- Catalog ownership：`DemoCookbookCatalog` 拥有 recipe ID、title、category、support boundary、code anchor、demo anchor、docs anchor、proof marker 和 interaction facet。
+- Projection ownership：`DemoCookbookWorkspaceProjection` 与 route projection code 从 catalog data 派生 navigation groups、selected-recipe panels 和 screenshot route metadata；projection 不发明 supported SDK routes。
+- ViewModel ownership：Demo ViewModels 只拥有 search、category filters、selected recipe state、drawer state 和渲染给读者的 teaching text。它们不是 production host 的复制目标。
+- Docs ownership：双语文档解释 support boundaries、route posture、proof evidence 和 doc-only aliases。Docs 可以命名 localized titles 或面向读者的 aliases，但这些 alias 不是 supported route IDs、API names 或 screenshot manifest keys。
+- Manifest ownership：`CookbookScreenshotGateRoutes.json` 与 `CookbookShellVisualGateStates.json` 拥有 screenshot route/state rows 和 capture metadata。Manifest rows 只证明 visual fixtures，不扩大 package support、route posture 或 public API。
+- Related-doc hygiene：每个 related-doc link 只保留一次。重复 link 只是 documentation noise，不代表多条 route 或更强 support evidence。
+
 ## Recipe 索引
 
 | Recipe | 分类 | 代码锚点 | Demo 锚点 | 文档 | Proof marker |
@@ -47,6 +58,8 @@ Demo cookbook 是面向 AsterGraph 评估者的“代码 + 演示”索引。它
 - `Runtime-only route`: 宿主持有自己的 UI 时使用 `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`。
 - `Plugin route`: 使用 `DiscoverPluginCandidates(...)` / `StagePluginPackage(...)` 加宿主自有 `PluginTrustPolicy`；它仍是 trusted in-process，不是 sandbox。
 - `Migration route`: retained `GraphEditorViewModel` / `GraphEditorView` 是迁移桥，不是新的 primary runtime model。
+
+Category-derived route posture 来自 `DemoCookbookRecipeCategory` 和 `Recipe.Id`。Category 只创建 navigation groups、filters 和 reader posture；它们 do not create doc-only aliases 或新的 supported route IDs。Doc-only alias 是 localized title 或面向读者的说明标签，not a route key, API contract, or manifest key。
 
 ## Source-backed route clarity
 
@@ -197,7 +210,6 @@ CI 姿态：scene PNG gate 和 full-window shell visual gate 都已经接入 `As
 
 - [Demo Guide](./demo-guide.md)
 - [Feature Catalog](./feature-catalog.md)
-- [Demo Guide](./demo-guide.md)
 - [Host Recipe 阶梯](./host-recipe-ladder.md)
 - [Plugin Host Recipe](./plugin-host-recipe.md)
 - [Support Bundle](./support-bundle.md)

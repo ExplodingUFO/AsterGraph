@@ -12,6 +12,17 @@ Use it when you want to move from "I can see the Demo" to "I know which code and
 2. Branch to `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` when the host owns its own shell, tools, panels, or native UI. Use the authoring and runtime-only routes as API anchors for that custom shell.
 3. Use `DemoCookbookCatalog`, Demo anchors, and screenshot routes as proof and navigation evidence only. `src/AsterGraph.Demo` is not a supported package boundary. Do not copy Demo ViewModel code into a production host; copy the public `AsterGraph.Avalonia` / `AsterGraph.Editor` seams named by each recipe.
 
+## Cookbook Architecture Ownership Contract
+
+`COOKBOOK_ARCHITECTURE_OWNERSHIP_CONTRACT_OK` keeps the Cookbook architecture split explicit:
+
+- Catalog ownership: `DemoCookbookCatalog` owns recipe IDs, titles, categories, support boundaries, code anchors, demo anchors, docs anchors, proof markers, and interaction facets.
+- Projection ownership: `DemoCookbookWorkspaceProjection` and route projection code derive navigation groups, selected-recipe panels, and screenshot route metadata from catalog data; projection does not invent supported SDK routes.
+- ViewModel ownership: Demo ViewModels own search, category filters, selected recipe state, drawer state, and rendered teaching text only. They are not production host copy targets.
+- Docs ownership: bilingual docs explain support boundaries, route posture, proof evidence, and doc-only aliases. Docs may name localized titles or reader-facing aliases, but those aliases are not supported route IDs, API names, or screenshot manifest keys.
+- Manifest ownership: `CookbookScreenshotGateRoutes.json` and `CookbookShellVisualGateStates.json` own screenshot route/state rows and capture metadata. Manifest rows prove visual fixtures; they do not widen package support, route posture, or public API.
+- Related-doc hygiene: keep each related-doc link once. Duplicate links are removed as documentation noise, not interpreted as multiple routes or stronger support evidence.
+
 ## Recipe Index
 
 | Recipe | Category | Code anchors | Demo anchors | Docs | Proof markers |
@@ -47,6 +58,8 @@ Use it when you want to move from "I can see the Demo" to "I know which code and
 - `Runtime-only route`: use `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` when the host owns its UI.
 - `Plugin route`: use `DiscoverPluginCandidates(...)` / `StagePluginPackage(...)` plus host-owned `PluginTrustPolicy`; it remains trusted in-process, not sandboxed.
 - `Migration route`: retained `GraphEditorViewModel` / `GraphEditorView` is a migration bridge, not a new primary runtime model.
+
+Category-derived route posture comes from `DemoCookbookRecipeCategory` and `Recipe.Id`. Categories create navigation groups, filters, and reader posture; they do not create doc-only aliases or new supported route IDs. A doc-only alias is a localized title or explanatory label for readers, not a route key, API contract, or manifest key.
 
 ## Source-Backed Route Clarity
 
@@ -197,7 +210,6 @@ CI posture: both the scene PNG gate and the full-window shell visual gate are wi
 
 - [Demo Guide](./demo-guide.md)
 - [Feature Catalog](./feature-catalog.md)
-- [Demo Guide](./demo-guide.md)
 - [Host Recipe Ladder](./host-recipe-ladder.md)
 - [Plugin Host Recipe](./plugin-host-recipe.md)
 - [Support Bundle](./support-bundle.md)
