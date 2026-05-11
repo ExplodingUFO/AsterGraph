@@ -51,6 +51,18 @@
 | Hierarchy and group projection | Stable canonical | `GraphNodeGroup.IsContainer`、`GraphNodeGroup.ProjectsMemberNodes`、`GraphEditorNodeGroupSnapshot.IsContainer`、`GraphEditorNodeGroupSnapshot.ProjectsMemberNodes`、`GraphEditorHierarchyStateSnapshot.Connections`、`GraphEditorHierarchyConnectionSnapshot` | 为基于 session route 自建 UI 的宿主发布 collapsed-container visibility 和 boundary-connection projection。它不新增第二套 group model，也不新增 adapter-specific runtime API。 |
 | Thin definition builders | Stable canonical | `NodeDefinitionBuilder`、`PortDefinitionBuilder`、`PortDefinition.HandleId`、`PortDefinition.ConnectionHint`、`GraphPort.HandleId`、`GraphPort.ConnectionHint`、`NodeParameterDefinitionBuilder`、`ImplicitConversionRuleBuilder` | 只是 convenience constructor 和稳定 port/handle metadata；每个 builder 都落到现有 DTO，不创建第二套 authoring schema 或 runtime model。 |
 | Retained migration bridge | Retained migration | `GraphEditorViewModel`、`GraphEditorView`、`GraphEditorViewModel.Session` | 只给旧宿主分批迁移使用。 |
+
+## Phase 492 retained migration removal roadmap
+
+Phase 492 是 inventory now, remove later。它记录当前 retained 与 compatibility-only 边界，让后续 removal work 能按 source-backed classification 审查，而不是在 parity roadmap work 中顺手删除 API。
+
+| Surface family | Current classification | Removal gate |
+| --- | --- | --- |
+| Retained editor facade | `GraphEditorViewModel`、`GraphEditorView`、`GraphEditorViewModel.Session` | Do not delete retained migration surfaces before 后续 API-change tracker 证明现有宿主已有 documented canonical replacement、更新 `eng/public-api-baseline.txt`，并保持 host-integration docs 一致。 |
+| Explicit legacy import | `GraphDocumentSerializer.ImportLegacy(...)` | 作为 bounded migration entry point 保留，直到后续 v1 policy issue 证明 legacy import support window 可以关闭，并记录 import/export replacement path。 |
+| Retired compatibility-only shims | `IGraphEditorCommands.BeginConnection(...)`、`IGraphEditorQueries.GetCompatibleTargets(...)`、`CompatiblePortTarget` 和 obsolete `GraphEditorCapabilitySnapshot` positional members | 已从 primary public contracts 移除；继续列在 V1 compatibility removal policy 中，保证 replacement guidance 可发现。 |
+| Retained facade wording in hosted helpers | `AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphAvaloniaViewOptions`，以及提到 retained facade 的 `AsterGraphEditorFactory.Create(...)` 文档 | 继续作为 canonical route 上的 supported hosted helper；除非后续 API-change tracker 同步更新 route docs 与 public API baseline，否则不要重新归类为 compatibility-only。 |
+
 ## Release Handoff
 
 - release handoff：Stable canonical surface 是默认路线，Retained migration surface 只作为迁移桥，obsolete 已退役 compatibility-only surface 必须继续在 v1 removal policy 中带 replacement guidance。

@@ -84,13 +84,14 @@ public sealed class ReactFlowParityRoadmapDocsTests
         foreach (var contents in new[] { englishParity, chineseParity })
         {
             Assert.Contains("accessibility breadth audit", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("Retained migration removal roadmap", contents, StringComparison.Ordinal);
             Assert.Contains("Phase 491", contents, StringComparison.Ordinal);
             Assert.Contains("#105", contents, StringComparison.Ordinal);
         }
 
         Assert.Contains("Phase 491 now owns the accessibility breadth audit", englishParity, StringComparison.Ordinal);
         Assert.Contains("Phase 491 现在负责 accessibility breadth audit", chineseParity, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Accessibility breadth audit", englishParity, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Accessibility breadth audit", chineseParity, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -115,6 +116,32 @@ public sealed class ReactFlowParityRoadmapDocsTests
             StringComparison.Ordinal);
         Assert.Contains(
             "| #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states",
+            chineseParity,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase492RetainedMigrationRoadmapInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 492", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #107", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-j8v", contents, StringComparison.Ordinal);
+            Assert.Contains("Retained migration removal roadmap", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("inventory now, remove later", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Retained migration removal roadmap", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains(
+            "| #107 | `avalonia-node-map-j8v` | Phase 492: inventory retained migration surfaces and define removal roadmap",
+            englishParity,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "| #107 | `avalonia-node-map-j8v` | Phase 492: inventory retained migration surfaces and define removal roadmap",
             chineseParity,
             StringComparison.Ordinal);
     }
