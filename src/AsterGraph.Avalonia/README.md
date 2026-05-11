@@ -22,6 +22,7 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 - stock parameter-editor registry wiring through `AsterGraphPresentationOptions.NodeParameterEditorRegistry`
 - `AsterGraphAvaloniaViewFactory` plus standalone surface factories
 - `AsterGraphHostBuilder` as a thin hosted composition facade over `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`
+- `AsterGraphBuiltInComponentCatalog` as a discovery-only map of built-in component tracks and their current public availability
 - narrow `AsterGraphHostBuilder` pass-throughs for stable editor seams such as behavior options, context-menu augmentation, node presentation state, tool descriptors, runtime overlays, and layout plans
 - Avalonia theme resources, input handling, and control-level integration glue
 
@@ -41,9 +42,12 @@ Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, `As
 - standalone canvas: `AsterGraphCanvasViewFactory.Create(...)`
 - standalone inspector: `AsterGraphInspectorViewFactory.Create(...)`
 - standalone mini map: `AsterGraphMiniMapViewFactory.Create(...)`
+- built-in component catalog: `AsterGraphBuiltInComponentCatalog.Components` or `AsterGraphBuiltInComponentCatalog.TryGet(...)`
 - retained compatibility: `new GraphEditorView { Editor = editor }`
 
 For new hosted work, prefer `AsterGraphHostBuilder` when the default composition is enough, and use the factory-based routes when you need explicit service wiring. `CreateSession(...)` plus `IGraphEditorSession` remain the canonical runtime surface; this package composes the current Avalonia adapter on top of the retained hosted-UI facade. Treat the direct `GraphEditorView` constructor path as retained compatibility.
+
+The built-in catalog is a discovery surface, not a renderer switch. It reports current entries such as `canvas`, `minimap`, `background-grid`, `inspector`, `controls-panel`, and `command-tool-projection`, while `node-toolbar`, `edge-toolbar`, and `node-resizer` stay marked as planned or internal workbench tracks until standalone public controls exist.
 
 ## Hosted Builder Cookbook
 
