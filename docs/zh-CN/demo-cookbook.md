@@ -206,6 +206,14 @@ dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --configura
 
 CI 姿态：scene PNG gate 和 full-window shell visual gate 都已经接入 `AsterGraph.Demo.Tests`，所以正常 net9 validation lane 会执行它们。scene gate 验证确定性 artifact 生成、PNG 有效性、route metadata 和最小图片不变量；shell gate 还会在 full-window artifact 缺失、空白、尺寸过小、drawer state 错误、缺少预期 language/theme metadata 或未覆盖预期 shell parts 时失败。两个 gate 都会记录 `PngSha256`，但暂不做严格 pixel hash baseline，直到 Skia/native drift 在不同 CI host 上被测量清楚。Flyouts、popups、context menus、超出列明 shell states 的广泛 language/theme variants 和 strict pixel baselines 仍不属于这个 gate；Phase 500 / GitHub #123 / `avalonia-node-map-66t` 只新增 selected runtime closed-shell manifest state。
 
+### Shell Visual Coverage Planning
+
+`SHELL_VISUAL_COVERAGE_PLANNING` 是 Phase 506 / GitHub #135 / `avalonia-node-map-h7c`。它不新增 manifest rows；它只记录当前 five full-window shell states 之后的下一批有界 visual-coverage candidates：`shell-cookbook-default-open`、`shell-cookbook-default-open-zh-cn`、`shell-cookbook-default-closed`、`shell-runtime-diagnostics-open` 和 `shell-runtime-diagnostics-closed`。
+
+后续 tracker-backed slices 应把下一轮 coverage 拆成 flyout capture、popup capture、context-menu capture、additional language/theme variants 和 pixel-baseline drift measurement。drift-measurement step 必须先于任何 strict pixel baseline，因为当前 gate 只是把 `PngSha256` 作为 evidence 记录，而不是 pass/fail hash。
+
+这个 planning slice 刻意保持很窄：no manifest rows、no strict pixel baselines、no runtime UI changes、no public API changes、no retained API removal，也不做 no broad visual/language/theme certification。
+
 ## 相关文档
 
 - [Demo Guide](./demo-guide.md)
