@@ -30,6 +30,7 @@ C:AsterGraph.Avalonia.Controls.GridBackground()
 C:AsterGraph.Avalonia.Controls.NodeCanvas()
 C:AsterGraph.Avalonia.Controls.NodeParameterEditorHost()
 C:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions()
+C:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor(System.String,System.String,AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus,System.String,System.String,System.String,System.String,System.String,System.String)
 C:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions()
 C:AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy()
 C:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor(AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot,System.Func<System.Boolean>,System.String)
@@ -323,6 +324,18 @@ F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.NodeParameterEditorRegist
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.ParameterProperty:Avalonia.StyledProperty<AsterGraph.Editor.ViewModels.NodeParameterViewModel>
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.TemplateKeyProperty:Avalonia.StyledProperty<System.String>
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.UsageProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage>
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.BackgroundGrid:System.String
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.Canvas:System.String
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.CommandToolProjection:System.String
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.ControlsPanel:System.String
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.EdgeToolbar:System.String
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.Inspector:System.String
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.MiniMap:System.String
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.NodeResizer:System.String
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.NodeToolbar:System.String
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus.InternalWorkbench:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus.Planned:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus
+F:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus.Public:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus
 F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset.Authoring:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset
 F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset.CompactReview:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset
 F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset.Debugging:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset
@@ -670,6 +683,13 @@ M:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Equals(AsterGraph.Av
 M:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Equals(System.Object):System.Boolean
 M:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.GetHashCode():System.Int32
 M:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.ToString():System.String
+M:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.TryGet(System.String,out AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor&):System.Boolean
+M:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.<Clone>$():AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor
+M:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.Deconstruct(out System.String&,out System.String&,out AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus&,out System.String&,out System.String&,out System.String&,out System.String&,out System.String&,out System.String&):System.Void
+M:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.Equals(AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor):System.Boolean
+M:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.Equals(System.Object):System.Boolean
+M:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.GetHashCode():System.Int32
+M:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.ToString():System.String
 M:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewFactory.Create(AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions):AsterGraph.Avalonia.Controls.NodeCanvas
 M:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions.<Clone>$():AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions
 M:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions.Equals(AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions):System.Boolean
@@ -2430,6 +2450,16 @@ P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Editor:AsterGraph.Ed
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.EnableDefaultContextMenu:System.Boolean:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Presentation:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Workbench:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog.Components:System.Collections.Generic.IReadOnlyList<AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor>:get
+P:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.Boundary:System.String:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.CookbookRouteId:System.String:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.DocumentationPath:System.String:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.EntryPoint:System.String:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.FactoryTypeName:System.String:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.Id:System.String:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.Status:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.SurfaceTypeName:System.String:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor.Title:System.String:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions.CommandShortcutPolicy:AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions.Editor:AsterGraph.Editor.ViewModels.GraphEditorViewModel:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions.EnableDefaultContextMenu:System.Boolean:get,set
@@ -3823,6 +3853,7 @@ T:class AsterGraph.Avalonia.Controls.GridBackground
 T:class AsterGraph.Avalonia.Controls.NodeCanvas
 T:class AsterGraph.Avalonia.Controls.NodeParameterEditorHost
 T:class AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions
+T:class AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentDescriptor
 T:class AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions
 T:class AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy
 T:class AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
@@ -4032,6 +4063,7 @@ T:class CompiledAvaloniaXaml.!XamlLoader
 T:enum AsterGraph.Abstractions.Compatibility.PortCompatibilityKind
 T:enum AsterGraph.Abstractions.Definitions.ParameterEditorKind
 T:enum AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode
+T:enum AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentStatus
 T:enum AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset
 T:enum AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode
 T:enum AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind
@@ -4122,6 +4154,7 @@ T:interface AsterGraph.Editor.Services.IGraphWorkspaceService
 T:static class AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys
 T:static class AsterGraph.Avalonia.Hosting.AsterGraphAuthoringToolActionFactory
 T:static class AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewFactory
+T:static class AsterGraph.Avalonia.Hosting.AsterGraphBuiltInComponentCatalog
 T:static class AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewFactory
 T:static class AsterGraph.Avalonia.Hosting.AsterGraphHostedActionFactory
 T:static class AsterGraph.Avalonia.Hosting.AsterGraphHostedActionShortcutConflictDetector
