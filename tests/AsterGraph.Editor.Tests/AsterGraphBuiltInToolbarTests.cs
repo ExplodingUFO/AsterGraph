@@ -63,6 +63,8 @@ public sealed class AsterGraphBuiltInToolbarTests
         {
             var duplicate = FindButton(toolbar, "Duplicate Node");
 
+            Assert.False(toolbar.Focusable);
+            Assert.True(duplicate.Focusable);
             Assert.True(duplicate.IsEnabled);
             Assert.Equal("Duplicate Node", duplicate.Content);
             Assert.Equal("Duplicate Node", AutomationProperties.GetName(duplicate));
@@ -136,6 +138,9 @@ public sealed class AsterGraphBuiltInToolbarTests
             var disconnect = FindButton(toolbar, "Disconnect Connection");
             var clearNote = FindButton(toolbar, "Clear Connection Note");
 
+            Assert.False(toolbar.Focusable);
+            Assert.True(disconnect.Focusable);
+            Assert.True(clearNote.Focusable);
             Assert.Equal("Disconnect Connection", AutomationProperties.GetName(disconnect));
             Assert.Equal("Clear Connection Note", AutomationProperties.GetName(clearNote));
 

@@ -83,14 +83,40 @@ public sealed class ReactFlowParityRoadmapDocsTests
 
         foreach (var contents in new[] { englishParity, chineseParity })
         {
-            Assert.Contains("Accessibility breadth audit", contents, StringComparison.Ordinal);
+            Assert.Contains("accessibility breadth audit", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("Retained migration removal roadmap", contents, StringComparison.Ordinal);
-            Assert.Contains("next open parity gap", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("future tracker item", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Phase 491", contents, StringComparison.Ordinal);
+            Assert.Contains("#105", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains("accessibility breadth audit is the next open parity gap", englishParity, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Accessibility breadth audit 是下一项 open parity gap", chineseParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 491 now owns the accessibility breadth audit", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 491 现在负责 accessibility breadth audit", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase491AccessibilityBreadthAuditInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 491", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #105", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-44i", contents, StringComparison.Ordinal);
+            Assert.Contains("source-backed contract", contents, StringComparison.Ordinal);
+            Assert.Contains("dynamic screen-reader announcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Accessibility breadth audit", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains(
+            "| #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states",
+            englishParity,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "| #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states",
+            chineseParity,
+            StringComparison.Ordinal);
     }
 
     private static string ReadRepoFile(string relativePath)

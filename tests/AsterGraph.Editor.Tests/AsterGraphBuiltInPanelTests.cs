@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Layout;
@@ -49,6 +50,31 @@ public sealed class AsterGraphBuiltInPanelTests
             Assert.Equal(HorizontalAlignment.Stretch, panel.HorizontalAlignment);
             Assert.Equal(VerticalAlignment.Stretch, panel.VerticalAlignment);
             Assert.Equal(new Rect(170d, 126d, 120d, 48d), content.Bounds);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void AsterGraphPanel_DefaultsToNonFocusableOverlayContainerAndPreservesFocusableContent()
+    {
+        var action = new Button
+        {
+            Content = "Overlay action",
+        };
+        AutomationProperties.SetName(action, "Overlay action");
+        var panel = new AsterGraphPanel
+        {
+            Content = action,
+        };
+        var window = Show(panel);
+        try
+        {
+            Assert.False(panel.Focusable);
+            Assert.True(action.Focusable);
+            Assert.Equal("Overlay action", AutomationProperties.GetName(action));
         }
         finally
         {

@@ -49,12 +49,18 @@ public sealed class AsterGraphBuiltInControlsTests
             var zoomOut = FindButton(controls, "Zoom Out");
             var fitView = FindButton(controls, "Fit View");
             var resetView = FindButton(controls, "Reset View");
+            var buttons = new[] { zoomIn, zoomOut, fitView, resetView };
 
+            Assert.False(controls.Focusable);
             Assert.Equal("PART_AsterGraphControlsZoomInButton", zoomIn.Name);
             Assert.Equal("PART_AsterGraphControlsZoomOutButton", zoomOut.Name);
             Assert.Equal("PART_AsterGraphControlsFitViewButton", fitView.Name);
             Assert.Equal("PART_AsterGraphControlsResetViewButton", resetView.Name);
-            Assert.All(new[] { zoomIn, zoomOut, fitView, resetView }, button => Assert.True(button.IsEnabled));
+            Assert.All(buttons, button =>
+            {
+                Assert.True(button.Focusable);
+                Assert.True(button.IsEnabled);
+            });
 
             zoomIn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             zoomOut.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
