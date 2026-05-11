@@ -14,6 +14,10 @@ Phase 481 adds a deterministic full-window Cookbook shell capture alongside the 
 
 Phase 479 adds `NodeDragHandle` in `AsterGraph.Avalonia.Presentation` as the public hosted-Avalonia route for React Flow-style node drag handles. Hosts mark a control in a stock-shell custom node body presenter; the stock node shell then starts node dragging only from the marked handle or its descendants, without depending on Demo-only private hooks.
 
+## Phase 483 Update
+
+Phase 483 closes GitHub #82 by choosing the bounded-docs path instead of a renderer rewrite. Current evidence supports a viewport-budgeted scene projection/rendering contract: the visible-scene projector computes node/group/connection IDs, `NodeCanvasSceneHost` materializes visible node/group visuals when viewport dimensions and zoom are available, and `NodeCanvasConnectionSceneRenderer` scopes committed connection routes while preserving pending previews. This is not a true renderer virtualization contract or a 10000-node support tier; `xlarge` remains telemetry-only.
+
 ## Repository Baseline
 
 - Current package version is `0.11.0-beta` in `Directory.Build.props`; publishable libraries are `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and `AsterGraph.Avalonia`.
@@ -66,7 +70,7 @@ Phase 479 adds `NodeDragHandle` in `AsterGraph.Avalonia.Presentation` as the pub
 | NodeToolbar / EdgeToolbar | Present | Standalone `NodeToolbar` and `EdgeToolbar` project canonical node/connection actions and have tests/routes. | Keep guarded. |
 | Groups / subflows | Present / proof-bounded | Groups, composite scopes, hierarchy snapshots, promotion/expose commands, and Cookbook route exist. | Keep guarded. |
 | Auto layout integration | Partial | `IGraphLayoutProvider`, preview/apply/cancel, snap-to-grid, and route evidence exist. Provider examples and long-running cancellation semantics should stay explicit. | Backlog after higher-risk parity gaps unless adopter evidence raises it. |
-| Virtualization / thousands of nodes | Partial / bounded | Scale baseline, visible-scene projection, MiniMap lightweight projection, and hosted performance policy exist. A true renderer virtualization contract is not proven, and xlarge evidence is telemetry-only. | GitHub #82 / `avalonia-node-map-p483`. |
+| Virtualization / thousands of nodes | Partial / bounded | Scale baseline, visible-scene projection, MiniMap lightweight projection, and hosted performance policy exist. The current defended contract is viewport-budgeted scene projection/rendering, not ItemsRepeater/Skia-style renderer virtualization, and xlarge evidence is telemetry-only. | Keep scale docs and renderer projection tests current; add a new issue before widening this claim. |
 | Declarative + code-first API | Partial | Host builder, definitions, builders, templates, and session APIs exist. Avalonia markup-first ergonomics are not equivalent to React Flow hooks/components. | Keep docs honest; do not claim React hook parity. |
 | Accessibility breadth | Partial | Keyboard navigation and automation peers are covered in targeted tests. A broad accessibility audit across all built-ins and shell states remains weaker. | Add issue only if adopter/release evidence needs it. |
 | Host events | Present | `IGraphEditorEvents`, mutation batching, and host-event Cookbook route exist. | Keep guarded. |
@@ -90,22 +94,21 @@ The original first wave is no longer the next work queue. These tracker items ar
 | #83 | `avalonia-node-map-p481` | First full-window Cookbook shell visual gate with artifact metadata and CI lane coverage. |
 | #84 | `avalonia-node-map-p482` | Guarded cycle-prevention connection policy. |
 | #81 | `avalonia-node-map-p479` | Public hosted-Avalonia node drag-handle API through `NodeDragHandle`. |
+| #82 | `avalonia-node-map-p483` | Large-graph virtualization claim bounded to viewport-budgeted scene projection/rendering; no renderer virtualization or 10000-node support claim. |
 
 ## Next Issue Wave
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
 | #80 | `avalonia-node-map-p480` | Phase 480: add rotatable node model and rendering contract | P2 | `AsterGraph.Core`, `AsterGraph.Editor`, `AsterGraph.Avalonia`, serialization/API/tests/docs | Keep separate from drag-handle work because both may touch node hit testing and adorners. |
-| #82 | `avalonia-node-map-p483` | Phase 483: prove or bound large-graph rendering virtualization | P1 | `AsterGraph.Avalonia` renderer/projection if implementing; otherwise scale docs/tests | Start as an evidence/decision branch before any renderer rewrite. |
 
-Recommended next branch after Phase 479: `avalonia-node-map-p480` / GitHub #80 for rotatable nodes if the next branch can touch node transforms and hit testing, or `avalonia-node-map-p483` / GitHub #82 if the next branch should stay evidence/docs-first around virtualization claims.
+Recommended next branch after Phase 483: `avalonia-node-map-p480` / GitHub #80 for rotatable nodes if the next branch can touch node transforms and hit testing.
 
 ## Recommended Parallel Worktree Plan
 
 - `docs/phase478-parity-refresh`: owns this audit refresh, Chinese mirror, tracker split, and Phase 478 closure only.
 - `feature/cycle-prevention-policy`: owns #84 / `avalonia-node-map-p482`. Avoid Avalonia shell work except docs/examples.
 - `feature/rotatable-nodes`: owns #80 / `avalonia-node-map-p480`. Do not mix with drag-handle API unless a shared transform abstraction is explicitly approved.
-- `perf/rendering-virtualization-boundary`: owns #82 / `avalonia-node-map-p483`. Start by proving or bounding the claim before touching renderer internals.
 
 ## UI Verification Policy
 

@@ -101,6 +101,16 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 
 `stress` 层级现在防守 performance、authoring、PNG/JPEG raster export 和 export reload。5000 节点 SVG export 的序列化场景规模受运行环境影响较大，因此只保留 telemetry；第一版 raster 红线刻意保守，用于让 release validation 捕捉病态回归，而不是宣称 5000 节点 raster export 已经很快。
 
+## Renderer Virtualization 边界
+
+AsterGraph 当前防守的是 viewport-budgeted scene projection/rendering contract，不是 renderer virtualization contract。已测试路径是：
+
+- `ViewportVisibleSceneProjector.Project(...)` 基于当前 viewport 和 overscan 计算 visible node、group、connection ID。
+- `NodeCanvasSceneHost.RebuildScene()` 在 viewport size 和 zoom 可用时，用这份 budget 只 materialize 可见 node 和 group visual。
+- `NodeCanvasConnectionSceneRenderer.RenderConnections(...)` 对已提交 connection route 套用同一份 budget，同时保留 pending connection preview。
+
+这条路径仍会扫描当前 document/session collection，并在 scene rebuild 时重建可见 visual。不要把它宣传成 ItemsRepeater/Skia-style incremental renderer virtualization、background graph index 或新的 graph-size support tier。后续如果要扩大到这个声明，必须先补 renderer thresholds、可重复 proof command 和 focused renderer tests，再修改这条边界。
+
 ## 运行方式
 
 ```powershell
@@ -150,4 +160,4 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 
 对 `xlarge` 来说，`SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`、`SCALE_AUTHORING_BUDGET:xlarge:budget=informational-only` 和 `SCALE_EXPORT_BUDGET:xlarge:budget=informational-only` 都只是 telemetry marker。
 
-不要把这些 marker 解读成 10000 节点承诺，也不要解读成通用 virtualization 承诺。后续如果要提升 5000 节点 raster 承诺，必须先补非 informational 阈值和重复证明。
+不要把这些 marker 解读成 10000 节点承诺、renderer virtualization 证据或通用 virtualization 承诺。后续如果要提升 5000 节点 raster 承诺，必须先补非 informational 阈值和重复证明。
