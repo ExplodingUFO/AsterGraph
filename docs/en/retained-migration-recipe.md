@@ -89,6 +89,30 @@ For retained migration evidence, use the same defended hosted beta route as the 
 
 The retained bridge does not add a separate support boundary or a retained-only evidence lane, so maintainers can review evidence with the same public proof and bundle docs.
 
+## Phase 498 removal execution gate
+
+Phase 498 is GitHub #119 / `avalonia-node-map-3um`. It defines the retained migration removal execution gate only; this recipe update authorizes no retained API removal, no public API baseline change, no runtime behavior change, and no UI change.
+
+Any later removal PR must open a new API-change issue and include all of the following evidence before changing code or `eng/public-api-baseline.txt`:
+
+1. exact public API metadata lines from `eng/public-api-baseline.txt`, with the affected symbol list copied into the issue before deletion.
+2. Replacement route for each removed symbol, with docs pointing to the canonical session/runtime route or shipped Avalonia factory route.
+3. blocker tests that prove the replacement route covers the old retained use case, and that any remaining public docs no longer teach the removed API.
+4. support-window decision that names the version or milestone where the compatibility period ends.
+5. migration evidence from the defended hosted beta proof lane and support bundle, including any affected adopter notes.
+6. Public API baseline approval path that reviews the exact baseline diff in the later API-change issue.
+
+The removal candidate list starts with these retained or compatibility-only surfaces:
+
+| Surface | Replacement / evidence required before removal |
+| --- | --- |
+| `GraphEditorViewModel`, `GraphEditorView`, and `GraphEditorViewModel.Session` retained bridge usage | Prove hosts can use `AsterGraphEditorFactory.CreateSession(...)` for runtime-owned work or `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)` for shipped Avalonia UI. |
+| `GraphDocumentSerializer.ImportLegacy(...)` explicit import path | Prove no supported migration flow still needs direct legacy import, or keep it because legacy payload conversion is still a supported import boundary. |
+| `IGraphContextMenuAugmentor.Augment(GraphEditorViewModel, ...)` | Prove all host menu augmentors can implement `Augment(GraphContextMenuAugmentationContext)` instead. |
+| `INodePresentationProvider.GetNodePresentation(NodeViewModel)` | Prove host presenters can implement `GetNodePresentation(NodePresentationContext)` instead. |
+| `NodeViewModel.ExpansionState` and `NodeViewModel.IsExpanded` | Prove hosted UI decisions use `ActiveSurfaceTier`, `Surface.ExpansionState`, or session/query snapshots. |
+| `TrySetNodeExpansionState(...)` and `TrySetNodeGroupExtraPadding(...)` retained helpers | Prove callers moved to `Session.Commands.TrySetNodeExpansionState(...)`, size/group commands, and session query snapshots. |
+
 ## Success Criteria
 
 A host is effectively off the migration-critical path once:

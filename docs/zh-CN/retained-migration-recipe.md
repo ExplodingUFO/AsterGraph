@@ -88,6 +88,30 @@ retained 迁移的证据也走和其他 public 文档一样的 defended hosted b
 
 retained 桥接不会新增单独的 retained 支持边界，也不会引入 retained-only 的证据 lane，所以维护者可以直接用公开 proof 文档和 bundle 文档来审核。
 
+## Phase 498 removal execution gate
+
+Phase 498 是 GitHub #119 / `avalonia-node-map-3um`。本节只定义 retained migration removal execution gate；这次 recipe 更新不授权 no retained API removal、no public API baseline change、no runtime behavior change、no UI change。
+
+后续如果要真正删除 API，必须另开 API-change issue，并且在改代码或改 `eng/public-api-baseline.txt` 之前提供下面这些证据：
+
+1. 从 `eng/public-api-baseline.txt` 复制 exact public API metadata lines，并在 issue 中列出受影响 symbol list。
+2. 每个被删除 symbol 的 replacement route，文档必须指向 canonical session/runtime 路线或 shipped Avalonia factory 路线。
+3. blocker tests，证明 replacement route 覆盖旧 retained 用例，并证明公开文档不再教已删除 API。
+4. support-window decision，明确兼容期结束的版本或 milestone。
+5. migration evidence，来自 defended hosted beta proof lane 和 support bundle，并附上受影响 adopter notes。
+6. Public API baseline approval path，在后续 API-change issue 中审查 exact baseline diff。
+
+初始 removal candidate list 包含这些 retained 或 compatibility-only surfaces：
+
+| Surface | Replacement / evidence required before removal |
+| --- | --- |
+| `GraphEditorViewModel`、`GraphEditorView` 和 `GraphEditorViewModel.Session` retained bridge usage | 证明宿主可以用 `AsterGraphEditorFactory.CreateSession(...)` 承接 runtime-owned work，或用 `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` 承接 shipped Avalonia UI。 |
+| `GraphDocumentSerializer.ImportLegacy(...)` explicit import path | 证明受支持迁移流程已经不需要 direct legacy import；否则继续保留，因为 legacy payload conversion 仍是受支持 import boundary。 |
+| `IGraphContextMenuAugmentor.Augment(GraphEditorViewModel, ...)` | 证明所有 host menu augmentor 都可以改成 `Augment(GraphContextMenuAugmentationContext)`。 |
+| `INodePresentationProvider.GetNodePresentation(NodeViewModel)` | 证明 host presenter 都可以改成 `GetNodePresentation(NodePresentationContext)`。 |
+| `NodeViewModel.ExpansionState` 和 `NodeViewModel.IsExpanded` | 证明 hosted UI decisions 改用 `ActiveSurfaceTier`、`Surface.ExpansionState` 或 session/query snapshots。 |
+| `TrySetNodeExpansionState(...)` 和 `TrySetNodeGroupExtraPadding(...)` retained helpers | 证明调用方迁到 `Session.Commands.TrySetNodeExpansionState(...)`、size/group commands 和 session query snapshots。 |
+
 ## 成功标准
 
 宿主只要满足下面这些条件，就基本已经离开 migration-critical path：
