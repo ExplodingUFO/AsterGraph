@@ -1004,6 +1004,8 @@ public sealed class DemoProofReleaseSurfaceTests
     {
         var scaleBaseline = ReadRepoFile("docs/en/scale-baseline.md");
         var scaleBaselineZh = ReadRepoFile("docs/zh-CN/scale-baseline.md");
+        var parityAudit = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var parityAuditZh = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
         var checklist = ReadRepoFile("docs/en/public-launch-checklist.md");
         var checklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
 
@@ -1020,8 +1022,19 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("SCALE_AUTHORING_BUDGET_OK", contents, StringComparison.Ordinal);
             Assert.Contains("SCALE_EXPORT_BUDGET_OK", contents, StringComparison.Ordinal);
             Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("viewport-budgeted scene projection/rendering", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("renderer virtualization contract", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("ItemsRepeater/Skia-style", contents, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("10000-node support", contents, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("blanket virtualization", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { parityAudit, parityAuditZh })
+        {
+            Assert.Contains("Phase 483", contents, StringComparison.Ordinal);
+            Assert.Contains("viewport-budgeted scene projection/rendering", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("renderer virtualization", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("telemetry-only", contents, StringComparison.OrdinalIgnoreCase);
         }
 
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:...", checklist, StringComparison.Ordinal);

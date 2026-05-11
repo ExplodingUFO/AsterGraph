@@ -101,6 +101,16 @@ Pair the hosted tuning handoff with [Widened Surface Performance Recipe](./widen
 
 The `stress` tier now defends performance, authoring, PNG/JPEG raster export, and export reload. Stress SVG export remains telemetry-only because its 5000-node serialized scene size is environment-sensitive; the raster redlines are intentionally conservative so release validation can fail on pathological regressions without claiming that 5000-node raster export is fast.
 
+## Rendering Virtualization Boundary
+
+AsterGraph currently defends a viewport-budgeted scene projection/rendering contract, not a renderer virtualization contract. The tested path is:
+
+- `ViewportVisibleSceneProjector.Project(...)` computes visible node, group, and connection IDs from the current viewport plus overscan.
+- `NodeCanvasSceneHost.RebuildScene()` uses that budget to materialize visible node and group visuals when viewport size and zoom are available.
+- `NodeCanvasConnectionSceneRenderer.RenderConnections(...)` applies the same budget to committed connection routes while preserving the pending connection preview.
+
+This path still scans current document/session collections and rebuilds visible visuals during scene rebuilds. Do not market it as ItemsRepeater/Skia-style incremental renderer virtualization, a background graph index, or a new graph-size support tier. If a future release wants that claim, add renderer thresholds, repeatable proof commands, and focused renderer tests before changing this boundary.
+
 ## Commands
 
 ```powershell
@@ -150,4 +160,4 @@ Treat `SCALE_EXPORT_BUDGET:stress:svg=informational:png<=120000:jpeg<=100000:rel
 
 For `xlarge`, `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`, `SCALE_AUTHORING_BUDGET:xlarge:budget=informational-only`, and `SCALE_EXPORT_BUDGET:xlarge:budget=informational-only` are telemetry markers only.
 
-Do not read these markers as a 10000-node claim or a general virtualization commitment. Faster 5000-node raster commitments need their own tighter thresholds and repeated proof.
+Do not read these markers as a 10000-node claim, renderer virtualization evidence, or a general virtualization commitment. Faster 5000-node raster commitments need their own tighter thresholds and repeated proof.
