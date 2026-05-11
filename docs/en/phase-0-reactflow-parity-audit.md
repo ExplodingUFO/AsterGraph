@@ -46,6 +46,10 @@ Phase 499 is GitHub #121 / `avalonia-node-map-9x7`, the renderer virtualization 
 
 Phase 500 is GitHub #123 / `avalonia-node-map-66t`, the selected runtime shell visual gate state chosen after the renderer virtualization execution-boundary proof closed. This slice is manifest/docs/tests only: it adds `shell-runtime-diagnostics-closed` beside the existing runtime diagnostics open state, asserts `expectedPaneOpen: false`, and limits required parts to visible closed-shell chrome. It does not authorize runtime behavior change, public API change, styling redesign, strict pixel baselines, flyout capture, popup capture, context-menu capture, broad language/theme certification, retained API removal, or renderer virtualization work.
 
+## Phase 501 Update
+
+Phase 501 is GitHub #125 / `avalonia-node-map-38n`, the post-Phase-500 parity follow-up queue refresh. This slice is docs/tests only: it replaces the generic Phase 501 placeholder with concrete next candidates from the current React Flow parity matrix, separating renderer virtualization execution proof, declarative API ergonomics, layout provider evidence, manual assistive-technology validation, and broader shell visual coverage into independently trackable follow-ups. It authorizes no runtime behavior change, no public API change, no UI redesign, no strict pixel baselines, no retained API removal, and no renderer virtualization implementation.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -208,12 +212,18 @@ Phase 498 closed the retained migration removal execution gate through GitHub #1
 
 Phase 499 closed the renderer virtualization execution boundary through GitHub #121 / `avalonia-node-map-9x7`. It kept the current claim to viewport-budgeted scene projection/rendering. Any future implementation issue that widens the claim must introduce non-informational renderer thresholds, a repeatable proof command, focused renderer tests, artifact metadata, and evidence that the claimed operation avoids full collection scans and full scene rebuilds.
 
-Phase 500 now owns the selected runtime shell visual gate state through GitHub #123 / `avalonia-node-map-66t`. It is current/owned work and remains manifest/docs/tests only: add `shell-runtime-diagnostics-closed` as one bounded runtime closed-shell capture with `expectedPaneOpen: false`. Keep runtime behavior changes, strict pixel baselines, flyouts, popups, context menus, broad language/theme certification, retained API removal, and renderer virtualization work out of scope.
+Phase 500 closed the selected runtime shell visual gate state through GitHub #123 / `avalonia-node-map-66t`. It added one bounded runtime closed-shell capture with `expectedPaneOpen: false` and kept runtime behavior changes, strict pixel baselines, flyouts, popups, context menus, broad language/theme certification, retained API removal, and renderer virtualization work out of scope.
+
+Phase 501 now owns the post-Phase-500 parity follow-up queue refresh through GitHub #125 / `avalonia-node-map-38n`. It is current/owned work and remains docs/tests only: convert the current partial gaps into a concrete queue while keeping broad React Flow parity claims, runtime behavior changes, public API changes, UI redesign, strict pixel baselines, retained API removal, and renderer virtualization implementation out of scope.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #123 | `avalonia-node-map-66t` | Phase 500: add selected runtime shell visual gate state | P3 | shell manifest/docs/tests only | Current owned slice. Adds one selected runtime closed-shell state; keep flyouts, popups, context menus, broad language/theme certification, strict pixel baselines, runtime changes, and renderer virtualization out of scope. |
-| TBD | TBD | Phase 501: choose next bounded parity follow-up | P3 | docs/tests first unless evidence justifies implementation | Pick after Phase 500 closes; do not widen shell coverage or renderer claims without a focused tracker and proof plan. |
+| #125 | `avalonia-node-map-38n` | Phase 501: refresh post-Phase-500 parity follow-up queue | P3 | parity roadmap docs/tests only | Current owned slice. Converts the placeholder into concrete next candidates without runtime behavior, API, UI, strict pixel baseline, retained API, or renderer implementation changes. |
+| TBD | TBD | Phase 502: renderer virtualization execution proof | P2 | focused renderer tests, scale docs, proof command, artifact metadata | Sequential with the Phase 499 proof contract. Must prove non-informational thresholds before any renderer virtualization support claim. |
+| TBD | TBD | Phase 503: declarative API ergonomics audit | P3 | host API docs, examples, API-surface tests | Independent docs/tests audit for declarative API ergonomics; do not introduce public API changes without a later implementation tracker. |
+| TBD | TBD | Phase 504: layout provider evidence expansion | P3 | layout docs/tests, Cookbook route evidence | Independent from shell visual work. Keep current provider seam synchronous unless adopter evidence justifies an API-change issue. |
+| TBD | TBD | Phase 505: accessibility manual assistive-technology validation plan | P3 | accessibility docs, manual validation checklist, focused docs tests | Documents manual assistive-technology validation steps only; no live-region/runtime behavior changes in this slice. |
+| TBD | TBD | Phase 506: broader shell visual coverage planning | P3 | shell visual manifest docs/tests planning | Plans any future flyout/popup/context-menu/theme coverage; no strict pixel baselines or broad certification without measured drift evidence. |
 
 ## Recommended Parallel Worktree Plan
 
@@ -223,6 +233,7 @@ Phase 500 now owns the selected runtime shell visual gate state through GitHub #
 - `docs/phase-498-retained-removal-gate`: owns #119 / `avalonia-node-map-3um`; isolate writes to retained migration removal execution criteria and keep sequential with v1/API-baseline policy work.
 - `perf/phase-499-renderer-virtualization-boundary`: owned #121 / `avalonia-node-map-9x7`; it closed the renderer virtualization execution boundary proof as docs/tests-only.
 - `docs/phase-500-selected-runtime-shell-state`: owns #123 / `avalonia-node-map-66t`; isolate writes to shell state manifest, screenshot docs/tests, and parity roadmap text.
+- `docs/phase-501-post-phase500-queue`: owns #125 / `avalonia-node-map-38n`; isolate writes to parity roadmap docs/tests and produce the next concrete queue.
 
 ## UI Verification Policy
 
@@ -247,5 +258,6 @@ Current coverage includes scene-level route captures plus five manifest-driven f
 - Phase 497 now owns the closed-drawer shell visual gate expansion with GitHub #117 / `avalonia-node-map-5nl`; it records one closed state, not broad visual certification.
 - Phase 498 now owns retained migration removal execution-gate definition with GitHub #119 / `avalonia-node-map-3um`; it records pre-removal evidence criteria, not removal.
 - Phase 499 now owns renderer virtualization execution-boundary proof with GitHub #121 / `avalonia-node-map-9x7`; it records proof criteria, not renderer implementation.
-- Phase 500 now owns selected runtime shell visual gate state with GitHub #123 / `avalonia-node-map-66t`; it records one runtime closed-shell state, not broad visual certification.
-- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, Phase 499, and Phase 500 unless a focused test proves a specific missing contract.
+- Phase 500 closed selected runtime shell visual gate state with GitHub #123 / `avalonia-node-map-66t`; it records one runtime closed-shell state, not broad visual certification.
+- Phase 501 now owns post-Phase-500 parity follow-up queue refresh with GitHub #125 / `avalonia-node-map-38n`; it records the next issue split, not implementation.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, Phase 499, Phase 500, and Phase 501 unless a focused test proves a specific missing contract.
