@@ -88,8 +88,8 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.Contains("#105", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains("Phase 491 now owns the accessibility breadth audit", englishParity, StringComparison.Ordinal);
-        Assert.Contains("Phase 491 现在负责 accessibility breadth audit", chineseParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 491 closed the accessibility breadth audit", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 491 已关闭 accessibility breadth audit", chineseParity, StringComparison.Ordinal);
         Assert.DoesNotContain("| TBD | TBD | Accessibility breadth audit", englishParity, StringComparison.Ordinal);
         Assert.DoesNotContain("| TBD | TBD | Accessibility breadth audit", chineseParity, StringComparison.Ordinal);
     }
@@ -142,6 +142,36 @@ public sealed class ReactFlowParityRoadmapDocsTests
             StringComparison.Ordinal);
         Assert.Contains(
             "| #107 | `avalonia-node-map-j8v` | Phase 492: inventory retained migration surfaces and define removal roadmap",
+            chineseParity,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase493CustomNodePresenterProofInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 493", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #109", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-8qv", contents, StringComparison.Ordinal);
+            Assert.Contains("custom node presenter cookbook parity proof", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("NodeBodyPresenter", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeVisualPresenter", contents, StringComparison.Ordinal);
+            Assert.Contains("CUSTOM_EXTENSION_SURFACE_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("Keep improving docs and samples with concrete host-owned visual presenter examples", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("用具体 host-owned visual presenter 示例继续补文档", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains(
+            "| #109 | `avalonia-node-map-8qv` | Phase 493: strengthen custom node presenter cookbook parity proof",
+            englishParity,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "| #109 | `avalonia-node-map-8qv` | Phase 493: strengthen custom node presenter cookbook parity proof",
             chineseParity,
             StringComparison.Ordinal);
     }

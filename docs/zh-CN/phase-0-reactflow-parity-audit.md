@@ -18,6 +18,10 @@ Phase 491 是 GitHub #105 / `avalonia-node-map-44i`，承接 Phase 490 选出的
 
 Phase 492 是 GitHub #107 / `avalonia-node-map-j8v`，承接 Phase 491 accessibility breadth audit 关闭后的 retained migration removal roadmap。本 slice 是 inventory now, remove later：先记录 retained bridge、explicit legacy import 和已经退役的 compatibility-only surfaces，确保后续任何 removal issue 改变 API 形状前都有分类依据。不授权 runtime behavior changes、public API deletion、public API baseline updates 或 UI changes。
 
+## Phase 493 更新
+
+Phase 493 是 GitHub #109 / `avalonia-node-map-8qv`，承接 retained migration roadmap 关闭后的 custom node presenter cookbook parity proof。本 slice 是 docs/tests only：把 partial custom-node parity row 绑定到 Custom Node Host Recipe 中已经受防守的 host-owned presenter 路线，包括 `NodeBodyPresenter`、`NodeVisualPresenter`、`NodeDragHandle`、anchor maps、host-owned edge overlays 和 `CUSTOM_EXTENSION_SURFACE_OK` proof markers。不授权 runtime behavior changes、public API changes、React Flow hooks/components parity claims、Demo UI redesign 或 screenshot-gate expansion。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -86,7 +90,7 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 
 | 能力 | 当前状态 | 证据 / 剩余缺口 | 下一步 |
 | --- | --- | --- | --- |
-| Custom nodes with arbitrary Avalonia content | Partial / AsterGraph idiom 下支持 | Node definitions、`IGraphNodeVisualPresenter`、authoring-surface docs、templates 和 hosted controls 已存在。公开故事仍不如 React Flow custom node component 直接。 | 用具体 host-owned visual presenter 示例继续补文档。 |
+| Custom nodes with arbitrary Avalonia content | Partial / AsterGraph idiom 下支持 | Node definitions、`AsterGraphPresentationOptions.NodeBodyPresenter`、`AsterGraphPresentationOptions.NodeVisualPresenter`、`NodeDragHandle`、`GraphNodeVisual.PortAnchors`、`GraphNodeVisual.ConnectionTargetAnchors`、来自 `GetConnectionGeometrySnapshots()` 的 host-owned edge overlays、Custom Node Host Recipe 和 `CUSTOM_EXTENSION_SURFACE_OK` proof markers 已定义受防守路线。公开故事仍是 AsterGraph host-owned presenter guidance，不是 React Flow hooks/components parity。 | Phase 493 将 roadmap 绑定到受防守 recipe，并保持 docs/tests-only 边界；如果 presenter contracts 本身要变化，必须另开 tracker。 |
 | Node drag handles | Present / guarded | `NodeDragHandle` 为 custom node visual/body presenter 暴露 public Avalonia attached property。Focused headless tests 覆盖从标记 handle 拖动，以及存在 handle 时未标记 body surface 不启动拖动。 | 继续用 `StandaloneCanvas_NodeDragHandle_*` tests 和 public API baseline checks 守住。 |
 | Node resizer | Present | `NodeResizer`、`TrySetNodeSize`、built-in component catalog、Cookbook route 和 focused tests 已存在。 | 继续用 built-in tests 与 screenshot route 守住。 |
 | Rotatable nodes | Present / guarded | `GraphNodeSurfaceState.RotationDegrees`、`IGraphEditorCommands.TrySetNodeRotation(...)`、`GraphEditorNodeSurfaceSnapshot.RotationDegrees`、serializer compatibility、renderer/hit-test geometry、public API baseline 和中英文 host docs 已到位。 | 继续用 model/session/Avalonia tests、public API validation 和 command/query 指引守住。 |
@@ -166,19 +170,23 @@ Phase 491 把当前 accessibility posture 记录成 source-backed contract，而
 
 Phase 490 在 Phase 485-489 已关闭后修复过期的 Phase 484 队列。GitHub #103 / `avalonia-node-map-3x0` 已由 PR #104 关闭，并且不授权 runtime 或 public API 修改。
 
-Phase 491 现在负责 accessibility breadth audit，因为当前矩阵仍把 accessibility breadth 标为 Partial，而 visual、Cookbook architecture、layout proof 和 renderer proof-contract slices 都已有关闭的 tracker。Retained migration removal 仍是 later future tracker item，因为它依赖 v1 policy 和 public API baseline work。
+Phase 491 已关闭 accessibility breadth audit，同时把 live screen-reader announcement proof 保持为需要单独 tracker 的未来边界。
 
 Phase 492 现在负责 retained migration removal roadmap，边界是 inventory now, remove later。它可以分类 retained 和 compatibility-only surfaces，但真正删除 API 必须另开后续 API-change tracker，并绑定 v1 policy 与 `eng/public-api-baseline.txt`。
+
+Phase 493 现在负责 custom node presenter cookbook parity proof。它记录受支持的 custom-node 路线是 host-owned `NodeBodyPresenter` / `NodeVisualPresenter` 指引和既有 proof markers，不是 runtime API expansion，也不是 React Flow component/hook parity claim。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
 | #105 | `avalonia-node-map-44i` | Phase 491: audit accessibility breadth across built-ins and shell states | P2 | Avalonia built-ins、automation/focus tests、keyboard/screen-reader coverage boundaries docs | 当前 docs/tests-first accessibility audit。除非证据证明具体 missing contract，否则不做 runtime、public API 或 visual changes。 |
 | #107 | `avalonia-node-map-j8v` | Phase 492: inventory retained migration surfaces and define removal roadmap | P3 | public API inventory、stabilization support matrix、retained migration docs/tests | Docs/tests-first inventory now, remove later slice。必须与 v1 policy 和 public API baseline work 串行；不要在 parity docs work 中顺手删除 retained surfaces。 |
+| #109 | `avalonia-node-map-8qv` | Phase 493: strengthen custom node presenter cookbook parity proof | P2 | React Flow parity audit docs 和 focused docs tests | Docs/tests-first traceability slice。除非后续 tracker 证明 presenter contract 缺失，否则不修改 runtime behavior、public API、Demo visuals 或 screenshot gates。 |
 
 ## 推荐并行 Worktree 计划
 
 - `docs/phase-491-accessibility-breadth-audit`：负责 #105 / `avalonia-node-map-44i`；只审计 Avalonia built-ins 和 shell states 的 accessibility docs/tests。
 - `docs/phase-492-retained-migration-roadmap`：负责 #107 / `avalonia-node-map-j8v`；只盘点 retained migration surfaces 和 removal gates。删除或 baseline 更新需要后续 API-change tracker。
+- `docs/phase-493-custom-node-presenter-proof`：负责 #109 / `avalonia-node-map-8qv`；只把 custom-node parity row 绑定到受防守 host recipe 和 docs tests。
 
 ## UI 验证策略
 
@@ -197,4 +205,5 @@ Phase 492 现在负责 retained migration removal roadmap，边界是 inventory 
 - GitHub #79 和 Beads `avalonia-node-map-p478` 创建时把 `.planning/*` 列入 write set。由于 `.planning/` 被 ignore 且当前 worktree 中不存在，本次刷新将它记录为 tracker drift，而不是 force-add 本地 planning 文件。
 - Beads 是本仓库的持久本地 tracker。Phase 491 现在通过 GitHub #105 / `avalonia-node-map-44i` 承接 accessibility breadth audit；后续 follow-up 在代码修改前也必须先拿到明确的 GitHub 与 Beads ID。
 - Phase 492 现在通过 GitHub #107 / `avalonia-node-map-j8v` 承接 retained migration removal planning；它只记录分类和 gates，不删除 API。
-- Phase 478、Phase 484、Phase 490、Phase 491 和 Phase 492 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
+- Phase 493 现在通过 GitHub #109 / `avalonia-node-map-8qv` 承接 custom node presenter cookbook parity proof；它只记录 route traceability，不扩大 presenter API。
+- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492 和 Phase 493 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
