@@ -287,6 +287,33 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase508ShellFlyoutVisualCaptureInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 508", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #139", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-2nu", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-view-menu-flyout", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_ViewMenu", contents, StringComparison.Ordinal);
+            Assert.Contains("full-window-shell-flyout-state", contents, StringComparison.Ordinal);
+            Assert.Contains("View menu", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("strict pixel baselines", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("popup", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("context-menu", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("broad language/theme certification", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 508", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Phase 508 now owns the shell flyout visual capture", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 508 现在通过 GitHub #139 / `avalonia-node-map-2nu` 承接 shell flyout visual capture", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");

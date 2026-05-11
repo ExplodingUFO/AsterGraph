@@ -57,11 +57,16 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     }
 
     [Fact]
-    public void ShellVisualCoveragePlanningDocs_DoNotAddShellManifestRowsInPlanningSlice()
+    public void ShellVisualCoveragePlanningDocs_KeepPlanningSliceDistinctFromPhase508FlyoutRow()
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(5, document.RootElement.GetArrayLength());
+        Assert.Equal(6, document.RootElement.GetArrayLength());
+        Assert.Contains(
+            document.RootElement.EnumerateArray(),
+            state =>
+                string.Equals(state.GetProperty("id").GetString(), "shell-cookbook-default-view-menu-flyout", StringComparison.Ordinal)
+                && string.Equals(state.GetProperty("flyoutMenuPartName").GetString(), "PART_ViewMenu", StringComparison.Ordinal));
     }
 
     private static string ReadRepoFile(string relativePath)
