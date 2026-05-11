@@ -133,65 +133,19 @@ public sealed class DemoCookbookDocsTests
             Assert.Contains("DemoCookbookCatalog", contents, StringComparison.Ordinal);
             Assert.Contains("not a supported package boundary", contents, StringComparison.Ordinal);
             Assert.Contains("Do not copy Demo ViewModel", contents, StringComparison.Ordinal);
+            Assert.All(new[]
+            {
+                "COOKBOOK_ARCHITECTURE_OWNERSHIP_CONTRACT_OK", "Catalog ownership", "Projection ownership",
+                "DemoCookbookWorkspaceProjection", "ViewModel ownership", "Docs ownership", "Manifest ownership",
+                "CookbookScreenshotGateRoutes.json", "CookbookShellVisualGateStates.json", "Related-doc hygiene",
+                "Category-derived route posture", "DemoCookbookRecipeCategory", "Recipe.Id", "navigation groups",
+                "filters", "reader posture", "do not create doc-only aliases",
+                "not a route key, API contract, or manifest key",
+            }, value => Assert.Contains(value, contents, StringComparison.Ordinal));
+            Assert.Equal(2, contents.Split("- [Demo Guide](./demo-guide.md)", StringSplitOptions.None).Length);
+            Assert.Equal(2, contents.Split("- [Feature Catalog](./feature-catalog.md)", StringSplitOptions.None).Length);
+            Assert.Equal(2, contents.Split("- [Support Bundle](./support-bundle.md)", StringSplitOptions.None).Length);
         }
-    }
-
-    [Fact]
-    public void DemoCookbookDocs_DefineArchitectureOwnershipContract()
-    {
-        var english = ReadRepoFile("docs/en/demo-cookbook.md");
-        var chinese = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
-
-        foreach (var contents in new[] { english, chinese })
-        {
-            Assert.Contains("COOKBOOK_ARCHITECTURE_OWNERSHIP_CONTRACT_OK", contents, StringComparison.Ordinal);
-            Assert.Contains("Catalog ownership", contents, StringComparison.Ordinal);
-            Assert.Contains("DemoCookbookCatalog", contents, StringComparison.Ordinal);
-            Assert.Contains("Projection ownership", contents, StringComparison.Ordinal);
-            Assert.Contains("DemoCookbookWorkspaceProjection", contents, StringComparison.Ordinal);
-            Assert.Contains("ViewModel ownership", contents, StringComparison.Ordinal);
-            Assert.Contains("Docs ownership", contents, StringComparison.Ordinal);
-            Assert.Contains("doc-only aliases", contents, StringComparison.Ordinal);
-            Assert.Contains("Manifest ownership", contents, StringComparison.Ordinal);
-            Assert.Contains("CookbookScreenshotGateRoutes.json", contents, StringComparison.Ordinal);
-            Assert.Contains("CookbookShellVisualGateStates.json", contents, StringComparison.Ordinal);
-            Assert.Contains("Related-doc hygiene", contents, StringComparison.Ordinal);
-        }
-    }
-
-    [Fact]
-    public void DemoCookbookDocs_DefineCategoryDerivedRoutePostureWithoutDocOnlyAliases()
-    {
-        var english = ReadRepoFile("docs/en/demo-cookbook.md");
-        var chinese = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
-
-        foreach (var contents in new[] { english, chinese })
-        {
-            Assert.Contains("Category-derived route posture", contents, StringComparison.Ordinal);
-            Assert.Contains("DemoCookbookRecipeCategory", contents, StringComparison.Ordinal);
-            Assert.Contains("Recipe.Id", contents, StringComparison.Ordinal);
-            Assert.Contains("navigation groups", contents, StringComparison.Ordinal);
-            Assert.Contains("filters", contents, StringComparison.Ordinal);
-            Assert.Contains("reader posture", contents, StringComparison.Ordinal);
-            Assert.Contains("do not create doc-only aliases", contents, StringComparison.Ordinal);
-            Assert.Contains("not a route key, API contract, or manifest key", contents, StringComparison.Ordinal);
-        }
-    }
-
-    [Fact]
-    public void DemoCookbookDocs_DoNotDuplicateRelatedDocs()
-    {
-        var english = ReadRepoFile("docs/en/demo-cookbook.md");
-        var chinese = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
-        var englishRelatedDocs = ExtractSection(english, "## Related Docs");
-        var chineseRelatedDocs = ExtractSection(chinese, "## 相关文档");
-
-        Assert.Equal(1, CountOccurrences(englishRelatedDocs, "[Demo Guide](./demo-guide.md)"));
-        Assert.Equal(1, CountOccurrences(chineseRelatedDocs, "[Demo Guide](./demo-guide.md)"));
-        Assert.Equal(1, CountOccurrences(englishRelatedDocs, "[Feature Catalog](./feature-catalog.md)"));
-        Assert.Equal(1, CountOccurrences(chineseRelatedDocs, "[Feature Catalog](./feature-catalog.md)"));
-        Assert.Equal(1, CountOccurrences(englishRelatedDocs, "[Support Bundle](./support-bundle.md)"));
-        Assert.Equal(1, CountOccurrences(chineseRelatedDocs, "[Support Bundle](./support-bundle.md)"));
     }
 
     [Fact]
@@ -286,35 +240,6 @@ public sealed class DemoCookbookDocsTests
 
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
-
-    private static string ExtractSection(string contents, string heading)
-    {
-        var startIndex = contents.IndexOf(heading, StringComparison.Ordinal);
-        Assert.True(startIndex >= 0, $"Missing section heading: {heading}");
-
-        var nextHeadingIndex = contents.IndexOf("\n## ", startIndex + heading.Length, StringComparison.Ordinal);
-        return nextHeadingIndex < 0
-            ? contents[startIndex..]
-            : contents[startIndex..nextHeadingIndex];
-    }
-
-    private static int CountOccurrences(string contents, string value)
-    {
-        var count = 0;
-        var startIndex = 0;
-
-        while (true)
-        {
-            var index = contents.IndexOf(value, startIndex, StringComparison.Ordinal);
-            if (index < 0)
-            {
-                return count;
-            }
-
-            count++;
-            startIndex = index + value.Length;
-        }
-    }
 
     private static string GetRepositoryRoot()
     {
