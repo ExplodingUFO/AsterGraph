@@ -38,6 +38,10 @@ Phase 497 是 GitHub #117 / `avalonia-node-map-5nl`，承接 Cookbook architectu
 
 Phase 498 是 GitHub #119 / `avalonia-node-map-3um`，承接 closed-drawer shell visual gate 关闭后的 retained migration removal execution gate。本 slice 是 docs/tests only：把 Phase 492 的 inventory 转成执行 gate，明确任何 removal PR 之前必须具备 exact symbols、blocker tests、support-window criteria、migration evidence，以及后续修改 `eng/public-api-baseline.txt` 的 approval path。不授权 no retained API removal、no public API baseline change、no runtime behavior change、no UI change。
 
+## Phase 499 更新
+
+Phase 499 是 GitHub #121 / `avalonia-node-map-9x7`，承接 retained migration removal execution gate 关闭后的 renderer virtualization execution-boundary proof。本 slice 是 docs/tests only：把当前证据钉在 viewport-budgeted scene projection/rendering，记录任何 ItemsRepeater/Skia-style renderer virtualization、background graph index 或 graph-size support claim 扩大前必须具备的 execution proof，并保持 `xlarge` telemetry-only。不授权 renderer rewrite、benchmark harness implementation、public API change、runtime behavior change、UI change 或 support-claim expansion。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -196,12 +200,13 @@ Phase 494 已关闭 localized full-window shell visual gate coverage。它新增
 
 Phase 495 在 GitHub 与 Beads 都回到零 open issues 后刷新 active queue。Phase 496 已关闭 Cookbook example architecture contract。Phase 497 已通过 GitHub #117 / `avalonia-node-map-5nl` 关闭 closed-drawer shell visual gate breadth slice；它只增加一条有界 closed shell state，不是 broad shell certification。
 
-Phase 498 现在通过 GitHub #119 / `avalonia-node-map-3um` 承接 retained migration removal execution gate。它是 Current owned slice，只为后续 API-change issue 定义 gate：任何 removal PR 前都必须具备 exact symbols、blocker tests、support-window criteria、migration evidence，并通过 `eng/public-api-baseline.txt` approval。不授权 no retained API removal、no public API baseline change、no runtime behavior change、no UI change。
+Phase 498 已通过 GitHub #119 / `avalonia-node-map-3um` 关闭 retained migration removal execution gate。它只为后续 API-change issue 定义 gate：任何 removal PR 前都必须具备 exact symbols、blocker tests、support-window criteria、migration evidence，并通过 `eng/public-api-baseline.txt` approval。该 slice 不授权 no retained API removal、no public API baseline change、no runtime behavior change、no UI change。
+
+Phase 499 现在通过 GitHub #121 / `avalonia-node-map-9x7` 承接 renderer virtualization execution boundary。它是 Current owned slice，并保持 docs/tests only：当前声明仍是 viewport-budgeted scene projection/rendering。任何后续要扩大声明的 implementation issue，都必须引入 non-informational renderer thresholds、repeatable proof command、focused renderer tests、artifact metadata，并证明被声明的操作不会依赖 full collection scan 和 full scene rebuild。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #119 | `avalonia-node-map-3um` | Phase 498: define retained migration removal execution gate | P3 | public API inventory docs/tests、retained migration recipe/docs、`eng/public-api-baseline.txt` analysis only，除非后续 API-change issue 被批准 | Current owned slice。与 v1 policy 顺序执行。本行只定义 gate，不删除 API：列出 exact symbols、blocker tests、support-window criteria 和 migration evidence。 |
-| TBD | TBD | Phase 499: prove renderer virtualization execution boundary | P2 | renderer projection tests/docs、scale baseline docs、可能的 spike-only benchmark harness | 与 retained migration 独立。除非 focused implementation issue 在 CI-repeatable performance evidence 下证明 true renderer virtualization，否则继续把声明限制为 viewport-budgeted projection。 |
+| #121 | `avalonia-node-map-9x7` | Phase 499: prove renderer virtualization execution boundary | P2 | renderer projection tests/docs、scale baseline docs、仅规划 spike-only benchmark harness，除非后续 implementation issue 被批准 | Current owned slice。与 retained migration 独立。除非 focused implementation issue 在 CI-repeatable performance evidence 下证明 true renderer virtualization，否则继续把声明限制为 viewport-budgeted projection。 |
 | TBD | TBD | Phase 500: choose next shell visual breadth state | P3 | 仅 shell manifest/docs/tests | 选择一个有界 state，例如 selected non-Cookbook host group 或 search/filter state；flyouts、popups、context menus、broad language/theme certification 和 strict pixel baselines 继续不纳入范围。 |
 
 ## 推荐并行 Worktree 计划
@@ -210,7 +215,7 @@ Phase 498 现在通过 GitHub #119 / `avalonia-node-map-3um` 承接 retained mig
 - `docs/phase-496-cookbook-architecture-contract`：已负责 Cookbook example architecture contract row；docs/tests-only，且与 shell visual 工作独立。
 - `docs/phase-497-shell-closed-drawer-gate`：已负责 #117 / `avalonia-node-map-5nl`；写集限制在 shell manifest、screenshot tests 和 screenshot docs。
 - `docs/phase-498-retained-removal-gate`：负责 #119 / `avalonia-node-map-3um`；写集限制在 retained migration removal execution criteria，并必须与 v1/API-baseline policy 顺序推进。
-- `perf/phase-499-renderer-virtualization-boundary`：应负责 renderer virtualization execution proof。除非 performance evidence 支撑 implementation，否则按 spike/contract branch 处理。
+- `perf/phase-499-renderer-virtualization-boundary`：负责 #121 / `avalonia-node-map-9x7`；应负责 renderer virtualization execution boundary proof。除非 performance evidence 支撑单独的 implementation issue，否则保持 docs/tests-only。
 
 ## UI 验证策略
 
@@ -234,4 +239,5 @@ Phase 498 现在通过 GitHub #119 / `avalonia-node-map-3um` 承接 retained mig
 - Phase 495 现在通过 GitHub #113 / `avalonia-node-map-wzt` 承接 post-Phase-494 roadmap refresh；它只记录 next issue split，不做 implementation。
 - Phase 497 现在通过 GitHub #117 / `avalonia-node-map-5nl` 承接 closed-drawer shell visual gate expansion；它只记录一条 closed state，不做 broad visual certification。
 - Phase 498 现在通过 GitHub #119 / `avalonia-node-map-3um` 承接 retained migration removal execution-gate definition；它只记录 removal 前置证据标准，不执行 removal。
-- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497 和 Phase 498 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
+- Phase 499 现在通过 GitHub #121 / `avalonia-node-map-9x7` 承接 renderer virtualization execution-boundary proof；它只记录 proof criteria，不做 renderer implementation。
+- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498 和 Phase 499 都不修改产品代码；除非 focused test 证明存在具体 missing contract。

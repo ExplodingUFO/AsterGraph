@@ -246,7 +246,6 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.Contains("GitHub #119", contents, StringComparison.Ordinal);
             Assert.Contains("avalonia-node-map-3um", contents, StringComparison.Ordinal);
             Assert.Contains("retained migration removal execution gate", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("Current owned slice", contents, StringComparison.Ordinal);
             Assert.Contains("exact symbols", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("blocker tests", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("support-window", contents, StringComparison.OrdinalIgnoreCase);
@@ -260,8 +259,8 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.DoesNotContain("| TBD | TBD | Phase 498", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains("Phase 498 now owns the retained migration removal execution gate", englishParity, StringComparison.Ordinal);
-        Assert.Contains("Phase 498 现在通过 GitHub #119 / `avalonia-node-map-3um` 承接 retained migration removal execution gate", chineseParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 498 closed the retained migration removal execution gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 498 已通过 GitHub #119 / `avalonia-node-map-3um` 关闭 retained migration removal execution gate", chineseParity, StringComparison.Ordinal);
     }
 
     private static string ReadRepoFile(string relativePath)

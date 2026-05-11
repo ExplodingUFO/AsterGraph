@@ -38,6 +38,10 @@ Phase 497 is GitHub #117 / `avalonia-node-map-5nl`, a closed-drawer shell visual
 
 Phase 498 is GitHub #119 / `avalonia-node-map-3um`, the retained migration removal execution gate selected after the closed-drawer shell visual gate closed. This slice is docs/tests only: it turns the Phase 492 inventory into an execution gate with exact symbols, blocker tests, support-window criteria, migration evidence, and the later `eng/public-api-baseline.txt` approval path required before any removal PR. It authorizes no retained API removal, no public API baseline change, no runtime behavior change, and no UI change.
 
+## Phase 499 Update
+
+Phase 499 is GitHub #121 / `avalonia-node-map-9x7`, the renderer virtualization execution-boundary proof selected after the retained migration removal execution gate closed. This slice is docs/tests only: it pins the current evidence to viewport-budgeted scene projection/rendering, records the execution proof required before any ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size support claim expansion, and keeps `xlarge` telemetry-only. It does not authorize a renderer rewrite, benchmark harness implementation, public API change, runtime behavior change, UI change, or support-claim expansion.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -196,12 +200,13 @@ Phase 494 closed localized full-window shell visual gate coverage. It added one 
 
 Phase 495 refreshed the active queue after GitHub and Beads returned to zero open issues. Phase 496 then closed the Cookbook example architecture contract. Phase 497 closed the closed-drawer shell visual gate breadth slice through GitHub #117 / `avalonia-node-map-5nl`; it added one bounded closed shell state, not broad shell certification.
 
-Phase 498 now owns the retained migration removal execution gate through GitHub #119 / `avalonia-node-map-3um`. It is current/owned work and only defines the gate for a later API-change issue: exact symbols, blocker tests, support-window criteria, migration evidence, and `eng/public-api-baseline.txt` approval are required before any removal PR. The current slice authorizes no retained API removal, no public API baseline change, no runtime behavior change, and no UI change.
+Phase 498 closed the retained migration removal execution gate through GitHub #119 / `avalonia-node-map-3um`. It only defined the gate for a later API-change issue: exact symbols, blocker tests, support-window criteria, migration evidence, and `eng/public-api-baseline.txt` approval are required before any removal PR. The slice authorized no retained API removal, no public API baseline change, no runtime behavior change, and no UI change.
+
+Phase 499 now owns the renderer virtualization execution boundary through GitHub #121 / `avalonia-node-map-9x7`. It is current/owned work and remains docs/tests only: the current claim is viewport-budgeted scene projection/rendering. Any future implementation issue that widens the claim must introduce non-informational renderer thresholds, a repeatable proof command, focused renderer tests, artifact metadata, and evidence that the claimed operation avoids full collection scans and full scene rebuilds.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #119 | `avalonia-node-map-3um` | Phase 498: define retained migration removal execution gate | P3 | public API inventory docs/tests, retained migration recipe/docs, `eng/public-api-baseline.txt` analysis only unless a later API-change issue is approved | Current owned slice. Sequential with v1 policy. This is a gate definition, not deletion: identify exact symbols, blocker tests, support-window criteria, and migration evidence needed before any retained API removal PR. |
-| TBD | TBD | Phase 499: prove renderer virtualization execution boundary | P2 | renderer projection tests/docs, scale baseline docs, possible spike-only benchmark harness | Independent from retained migration. Keep claims bounded to viewport-budgeted projection unless a focused implementation issue proves true renderer virtualization under CI-repeatable performance evidence. |
+| #121 | `avalonia-node-map-9x7` | Phase 499: prove renderer virtualization execution boundary | P2 | renderer projection tests/docs, scale baseline docs, spike-only benchmark harness planning only unless a later implementation issue is approved | Current owned slice. Independent from retained migration. Keep claims bounded to viewport-budgeted projection unless a focused implementation issue proves true renderer virtualization under CI-repeatable performance evidence. |
 | TBD | TBD | Phase 500: choose next shell visual breadth state | P3 | shell manifest/docs/tests only | Pick one bounded state such as a selected non-Cookbook host group or search/filter state; keep flyouts, popups, context menus, broad language/theme certification, and strict pixel baselines out of scope. |
 
 ## Recommended Parallel Worktree Plan
@@ -210,7 +215,7 @@ Phase 498 now owns the retained migration removal execution gate through GitHub 
 - `docs/phase-496-cookbook-architecture-contract`: owned the Cookbook example architecture contract row; docs/tests-only and independent from shell visual work.
 - `docs/phase-497-shell-closed-drawer-gate`: owned #117 / `avalonia-node-map-5nl`; isolated writes to shell manifest, screenshot tests, and screenshot docs.
 - `docs/phase-498-retained-removal-gate`: owns #119 / `avalonia-node-map-3um`; isolate writes to retained migration removal execution criteria and keep sequential with v1/API-baseline policy work.
-- `perf/phase-499-renderer-virtualization-boundary`: should own any renderer virtualization execution proof. Treat as a spike/contract branch until performance evidence justifies implementation.
+- `perf/phase-499-renderer-virtualization-boundary`: owns #121 / `avalonia-node-map-9x7`; should own the renderer virtualization execution boundary proof. Treat as docs/tests-only unless performance evidence justifies a separate implementation issue.
 
 ## UI Verification Policy
 
@@ -234,4 +239,5 @@ Current coverage includes scene-level route captures plus four manifest-driven f
 - Phase 495 now owns the post-Phase-494 roadmap refresh with GitHub #113 / `avalonia-node-map-wzt`; it records the next issue split, not implementation.
 - Phase 497 now owns the closed-drawer shell visual gate expansion with GitHub #117 / `avalonia-node-map-5nl`; it records one closed state, not broad visual certification.
 - Phase 498 now owns retained migration removal execution-gate definition with GitHub #119 / `avalonia-node-map-3um`; it records pre-removal evidence criteria, not removal.
-- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, and Phase 498 unless a focused test proves a specific missing contract.
+- Phase 499 now owns renderer virtualization execution-boundary proof with GitHub #121 / `avalonia-node-map-9x7`; it records proof criteria, not renderer implementation.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, and Phase 499 unless a focused test proves a specific missing contract.
