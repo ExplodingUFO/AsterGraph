@@ -68,7 +68,7 @@ public sealed class AsterGraphBuiltInComponentCatalogTests
     }
 
     [Fact]
-    public void ToolbarTracks_ClaimStandalonePublicSurfaceTypesWhileNodeResizerStaysInternal()
+    public void ToolbarAndResizerTracks_ClaimStandalonePublicSurfaceTypes()
     {
         AssertPublicSurfaceType(
             AsterGraphBuiltInComponentCatalog.NodeToolbar,
@@ -76,9 +76,9 @@ public sealed class AsterGraphBuiltInComponentCatalogTests
         AssertPublicSurfaceType(
             AsterGraphBuiltInComponentCatalog.EdgeToolbar,
             "AsterGraph.Avalonia.Controls.EdgeToolbar");
-        AssertStatusWithoutSurfaceType(
+        AssertPublicSurfaceType(
             AsterGraphBuiltInComponentCatalog.NodeResizer,
-            AsterGraphBuiltInComponentStatus.InternalWorkbench);
+            "AsterGraph.Avalonia.Controls.NodeResizer");
     }
 
     [Fact]
@@ -95,16 +95,6 @@ public sealed class AsterGraphBuiltInComponentCatalogTests
             Assert.Contains("edge-toolbar", contents, StringComparison.Ordinal);
             Assert.Contains("node-resizer", contents, StringComparison.Ordinal);
         }
-    }
-
-    private static void AssertStatusWithoutSurfaceType(
-        string id,
-        AsterGraphBuiltInComponentStatus expectedStatus)
-    {
-        Assert.True(AsterGraphBuiltInComponentCatalog.TryGet(id, out var descriptor));
-        Assert.NotNull(descriptor);
-        Assert.Equal(expectedStatus, descriptor.Status);
-        Assert.Null(descriptor.SurfaceTypeName);
     }
 
     private static void AssertPublicSurfaceType(string id, string expectedTypeName)

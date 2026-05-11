@@ -140,13 +140,13 @@ public static class AsterGraphBuiltInComponentCatalog
         new(
             NodeResizer,
             "NodeResizer",
-            AsterGraphBuiltInComponentStatus.InternalWorkbench,
+            AsterGraphBuiltInComponentStatus.Public,
+            typeof(Controls.NodeResizer).FullName!,
             null,
-            null,
-            "NodeCanvas resize feedback and persisted node surface commands",
+            "NodeResizer",
             "v078-custom-node-edge-route",
             "docs/en/custom-node-host-recipe.md",
-            "Resize behavior is currently part of NodeCanvas workbench interaction rather than a standalone public control."),
+            "Standalone node resizer control backed by IGraphEditorSession.Commands.TrySetNodeSize(...)."),
     ];
 
     /// <summary>
