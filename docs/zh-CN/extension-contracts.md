@@ -10,6 +10,7 @@
 - `AsterGraphEditorFactory.CreateSession(...)`
 - `IGraphEditorSession`
 - `GetCompatiblePortTargets(...)` 这类 DTO / snapshot 查询
+- 通过 `IGraphEditorCommands.TrySetNodeRotation(...)` 和 `GraphEditorNodeSurfaceSnapshot.RotationDegrees` 暴露的节点 surface 旋转
 - runtime-boundary 上的 diagnostics / automation / plugin inspection
 
 ### Supported hosted helper
@@ -60,13 +61,13 @@ v1 primary surface 中没有。已退役 compatibility-only symbol 及其 replac
   - Compatibility-only：当前不作为主支持层级发布
   - Internal-only：未通过 package docs 暴露的实现 helper
 - `AsterGraph.Core`
-  - Stable canonical：图文档、序列化模型契约、兼容规则输入，以及 editor/session 组合使用的共享数据类型
+  - Stable canonical：图文档、序列化模型契约、持久化节点 surface state、兼容规则输入，以及 editor/session 组合使用的共享数据类型
   - Supported hosted helper：无
   - Retained migration：无
   - Compatibility-only：v1 primary surface 中没有；显式 legacy import 属于 retained migration
   - Internal-only：Core internals 与持久化实现细节
 - `AsterGraph.Editor`
-  - Stable canonical：`AsterGraphEditorFactory.CreateSession(...)`、`IGraphEditorSession`、command/query DTO、diagnostics、automation、plugin discovery / inspection、export services
+  - Stable canonical：`AsterGraphEditorFactory.CreateSession(...)`、`IGraphEditorSession`、包含节点旋转的 command/query DTO、diagnostics、automation、plugin discovery / inspection、export services
   - Supported hosted helper：`AsterGraphEditorFactory.Create(...)` 是 hosted 组合 helper，但仍返回 retained facade
   - Retained migration：`GraphEditorViewModel`、`GraphEditorViewModel.Session`、迁移宿主使用的 retained menu / context-menu hook
   - Compatibility-only：v1 primary surface 中没有；已退役 symbol 由 public inventory 跟踪

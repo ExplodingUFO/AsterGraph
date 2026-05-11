@@ -22,6 +22,7 @@ Choose retained only when you are migrating an existing host in batches. If you 
 For new adopters, default to route 2 (`AsterGraphAvaloniaViewFactory`) so WPF remains adapter-2 portability validation only, not a separate onboarding path or parity promise.
 
 If the host owns its UI, route 1 is the canonical native/custom-UI path; you compose your own surface around the same session/runtime owner instead of introducing a second model.
+Custom UI hosts can persist node rotation through `IGraphEditorCommands.TrySetNodeRotation(...)` and read the current angle from `GraphEditorNodeSurfaceSnapshot.RotationDegrees`.
 
 Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphInspectorViewFactory`, and `AsterGraphMiniMapViewFactory` belong to route 2. They are composition details under the hosted-UI family, not a fourth primary route.
 

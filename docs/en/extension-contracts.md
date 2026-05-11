@@ -11,6 +11,7 @@ The public SDK contract is canonical-first: shipped stability is defined by `Cre
 - `AsterGraphEditorFactory.CreateSession(...)`
 - `IGraphEditorSession`
 - DTO/snapshot queries such as `GetCompatiblePortTargets(...)`
+- node surface rotation through `IGraphEditorCommands.TrySetNodeRotation(...)` and `GraphEditorNodeSurfaceSnapshot.RotationDegrees`
 - runtime-boundary diagnostics, automation, and plugin inspection
 
 ### Supported hosted helper
@@ -59,13 +60,13 @@ The maintainer-facing package inventory is published in [Public API Inventory](.
   - Compatibility-only: none currently published as a primary support tier
   - Internal-only: implementation helpers not exposed through package docs
 - `AsterGraph.Core`
-  - Stable canonical: graph document, serialization-oriented model contracts, compatibility rule inputs, and shared data types used by editor/session composition
+  - Stable canonical: graph document, serialization-oriented model contracts, persisted node surface state, compatibility rule inputs, and shared data types used by editor/session composition
   - Supported hosted helper: none
   - Retained migration: none
   - Compatibility-only: none in the primary v1 surface; explicit legacy import is retained migration
   - Internal-only: core internals and persistence implementation details
 - `AsterGraph.Editor`
-  - Stable canonical: `AsterGraphEditorFactory.CreateSession(...)`, `IGraphEditorSession`, command/query DTOs, diagnostics, automation, plugin discovery/inspection, and export services
+  - Stable canonical: `AsterGraphEditorFactory.CreateSession(...)`, `IGraphEditorSession`, command/query DTOs including node rotation, diagnostics, automation, plugin discovery/inspection, and export services
   - Supported hosted helper: `AsterGraphEditorFactory.Create(...)` as hosted composition that still exposes the retained facade
   - Retained migration: `GraphEditorViewModel`, `GraphEditorViewModel.Session`, and retained menu/context-menu hooks used by migrating hosts
   - Compatibility-only: none in the primary v1 surface; retired symbols are tracked by the public inventory

@@ -21,8 +21,18 @@ public sealed record GraphEditorNodeSurfaceSnapshot(
         GraphSize Size,
         GraphEditorNodeSurfaceTierSnapshot ActiveTier,
         GraphNodeExpansionState ExpansionState,
+        string? GroupId)
+        : this(NodeId, Size, ActiveTier, ExpansionState, GroupId, 0d)
+    {
+    }
+
+    public GraphEditorNodeSurfaceSnapshot(
+        string NodeId,
+        GraphSize Size,
+        GraphEditorNodeSurfaceTierSnapshot ActiveTier,
+        GraphNodeExpansionState ExpansionState,
         string? GroupId,
-        double RotationDegrees = 0d)
+        double RotationDegrees)
         : this(NodeId, Size, ExpansionState, GroupId)
     {
         this.ActiveTier = ActiveTier ?? throw new ArgumentNullException(nameof(ActiveTier));

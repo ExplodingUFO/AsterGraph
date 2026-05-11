@@ -1,20 +1,34 @@
 namespace AsterGraph.Core.Models;
 
+using System.Text.Json.Serialization;
+
 /// <summary>
 /// Immutable persisted node-surface state that is independent from any UI toolkit.
 /// </summary>
 /// <param name="ExpansionState">Current persisted card expansion state.</param>
 /// <param name="GroupId">Optional editor-only group attachment identifier.</param>
 /// <param name="RotationDegrees">Clockwise node-card rotation in degrees, normalized to the 0-360 range by mutation paths.</param>
+[method: JsonConstructor]
 public sealed record GraphNodeSurfaceState(
     GraphNodeExpansionState ExpansionState = GraphNodeExpansionState.Collapsed,
     string? GroupId = null,
     double RotationDegrees = 0d)
 {
+    public GraphNodeSurfaceState(GraphNodeExpansionState ExpansionState, string? GroupId)
+        : this(ExpansionState, GroupId, 0d)
+    {
+    }
+
     /// <summary>
     /// Default collapsed node surface state with no group attachment.
     /// </summary>
     public static GraphNodeSurfaceState Default { get; } = new();
+
+    public void Deconstruct(out GraphNodeExpansionState ExpansionState, out string? GroupId)
+    {
+        ExpansionState = this.ExpansionState;
+        GroupId = this.GroupId;
+    }
 
     /// <summary>
     /// Returns this state with a finite normalized rotation angle.
