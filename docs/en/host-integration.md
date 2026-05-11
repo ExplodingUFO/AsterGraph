@@ -72,6 +72,8 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 
 The builder delegates to the existing editor/session and Avalonia view factories. Keep `CreateSession(...)` as the canonical runtime-only route and keep retained surfaces for migration only.
 
+`DECLARATIVE_API_ERGONOMICS_AUDIT`: host integration currently offers copyable code-first and hosted composition routes through `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`, `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`, and `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()`. These routes share the same editor/session owner and are not a second runtime model. They provide no React hook parity and no <ReactFlow>-equivalent declarative DSL; any future DSL, source generator, XAML extension, or hook-like public surface needs a separate API-change tracker.
+
 ## Host-Owned Runtime Feedback
 
 Hosts that already run or simulate graph work can pass `AsterGraphEditorOptions.RuntimeOverlayProvider` and read the current view through `IGraphEditorQueries.GetRuntimeOverlaySnapshot()`. AsterGraph only exposes `GraphEditorRuntimeOverlaySnapshot` for node/connection status, payload previews, and recent logs; it does not execute graphs or own a workflow engine.

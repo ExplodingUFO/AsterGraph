@@ -217,6 +217,8 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 
 Use builder pass-throughs such as `UseBehaviorOptions(...)`, `UseContextMenuAugmentor(...)`, `UseNodePresentationProvider(...)`, `UseToolProvider(...)`, `UseRuntimeOverlayProvider(...)`, and `UseLayoutProvider(...)` when the common hosted route is still enough. `UseNodePresentationProvider(...)` forwards `AsterGraphEditorOptions.NodePresentationProvider` for editor-runtime node presentation state; Avalonia visual replacement stays on `AsterGraphPresentationOptions`.
 
+`DECLARATIVE_API_ERGONOMICS_AUDIT`: the current copyable API surface is intentionally bounded to `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`, `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`, and `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()`. Definition builders and the `templates/astergraph-avalonia` starter reduce code-first boilerplate, but they remain thin wrappers over the same model/session records. There is no React hook parity and no <ReactFlow>-equivalent declarative DSL in the current public beta.
+
 ## 6. Plugin Trust Boundary
 
 Plugin loading is currently in-process. Hosts can discover candidates, apply an allow/block trust policy, and inspect load results. AsterGraph does not provide sandboxing or untrusted-code isolation.

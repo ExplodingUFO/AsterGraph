@@ -214,9 +214,11 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 });
 ```
 
-`AsterGraphHostBuilder` 是叠在同一套 editor/session 和 Avalonia view factories 上的 thin hosted helper，不是第二套 runtime model。
+`AsterGraphHostBuilder` 是叠在同一套 editor/session 和 Avalonia view factories 上的 thin hosted helper，不是第二套 runtime model；not a second runtime model。
 
 常见 hosted 路线仍然够用时，可以使用 builder 的窄透传：`UseBehaviorOptions(...)`、`UseContextMenuAugmentor(...)`、`UseNodePresentationProvider(...)`、`UseToolProvider(...)`、`UseRuntimeOverlayProvider(...)` 和 `UseLayoutProvider(...)`。`UseNodePresentationProvider(...)` 透传的是 `AsterGraphEditorOptions.NodePresentationProvider`，用于 editor-runtime node presentation state；Avalonia visual replacement 仍然走 `AsterGraphPresentationOptions`。
+
+`DECLARATIVE_API_ERGONOMICS_AUDIT`：当前可复制 API surface 有意限定在 `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`、`AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`，以及 `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()`。Definition builders 和 `templates/astergraph-avalonia` starter 能减少 code-first 样板，但它们仍只是同一套 model/session records 上的 thin wrapper。当前 public beta 没有 no React hook parity，也没有 no <ReactFlow>-equivalent declarative DSL；these routes are not equivalent to React Flow hooks/components。
 
 ## 6. 插件信任边界
 

@@ -71,6 +71,8 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 
 builder 会委托给现有 editor/session 和 Avalonia view factories。`CreateSession(...)` 仍是 canonical runtime-only 路线，retained surfaces 仍只用于迁移。
 
+`DECLARATIVE_API_ERGONOMICS_AUDIT`：host integration 当前通过 `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`、`AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`，以及 `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` 提供可复制的 code-first 和 hosted composition 路线。这些路线共享同一个 editor/session owner，不是第二套 runtime model；not a second runtime model。它们没有 no React hook parity，也没有 no <ReactFlow>-equivalent declarative DSL；these routes are not equivalent to React Flow hooks/components。未来任何 DSL、source generator、XAML extension 或 hook-like public surface 都需要单独的 API-change tracker。
+
 ## 宿主自管 Runtime Feedback
 
 如果宿主已经拥有图运行或模拟运行逻辑，可以传入 `AsterGraphEditorOptions.RuntimeOverlayProvider`，并通过 `IGraphEditorQueries.GetRuntimeOverlaySnapshot()` 读取当前投影。AsterGraph 只暴露用于节点 / 连接状态、payload preview 和 recent logs 的 `GraphEditorRuntimeOverlaySnapshot`；它不执行图，也不拥有 workflow engine。
