@@ -103,6 +103,7 @@ C:AsterGraph.Editor.Configuration.WorkspaceCommandPermissions()
 C:AsterGraph.Editor.Diagnostics.GraphEditorDiagnostic(System.String,System.String,System.String,AsterGraph.Editor.Diagnostics.GraphEditorDiagnosticSeverity,System.Exception)
 C:AsterGraph.Editor.Diagnostics.GraphEditorInspectionSnapshot(AsterGraph.Core.Models.GraphDocument,AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot,AsterGraph.Editor.Runtime.GraphEditorViewportSnapshot,AsterGraph.Editor.Runtime.GraphEditorCapabilitySnapshot,AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot,AsterGraph.Editor.Diagnostics.GraphEditorStatusSnapshot,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Models.NodePositionSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorFeatureDescriptorSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Diagnostics.GraphEditorDiagnostic>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Plugins.GraphEditorPluginLoadSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot>,AsterGraph.Editor.Runtime.GraphEditorValidationSnapshot)
 C:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions(Microsoft.Extensions.Logging.ILoggerFactory,System.Diagnostics.ActivitySource)
+C:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot(System.Boolean,System.String,System.String,System.String,System.String,System.Nullable<AsterGraph.Core.Models.GraphConnectionTargetKind>,System.Nullable<System.Boolean>,System.String,AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason)
 C:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot(System.Boolean,System.String,System.String,System.String,System.String,System.Nullable<AsterGraph.Core.Models.GraphConnectionTargetKind>,System.Nullable<System.Boolean>,System.String)
 C:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot(System.Boolean,System.String,System.String)
 C:AsterGraph.Editor.Diagnostics.GraphEditorStatusSnapshot(System.String)
@@ -405,6 +406,12 @@ F:AsterGraph.Core.Models.PortDirection.Output:AsterGraph.Core.Models.PortDirecti
 F:AsterGraph.Editor.Diagnostics.GraphEditorDiagnosticSeverity.Error:AsterGraph.Editor.Diagnostics.GraphEditorDiagnosticSeverity
 F:AsterGraph.Editor.Diagnostics.GraphEditorDiagnosticSeverity.Info:AsterGraph.Editor.Diagnostics.GraphEditorDiagnosticSeverity
 F:AsterGraph.Editor.Diagnostics.GraphEditorDiagnosticSeverity.Warning:AsterGraph.Editor.Diagnostics.GraphEditorDiagnosticSeverity
+F:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason.EndpointTypeMissing:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason
+F:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason.IncompatibleEndpointTypes:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason
+F:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason.None:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason
+F:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason.SourceConnectionLimitReached:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason
+F:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason.TargetConnectionLimitExceeded:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason
+F:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason.WouldCreateCycle:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason
 F:AsterGraph.Editor.Events.GraphEditorDocumentChangeKind.ConnectionsChanged:AsterGraph.Editor.Events.GraphEditorDocumentChangeKind
 F:AsterGraph.Editor.Events.GraphEditorDocumentChangeKind.FragmentPasted:AsterGraph.Editor.Events.GraphEditorDocumentChangeKind
 F:AsterGraph.Editor.Events.GraphEditorDocumentChangeKind.LayoutChanged:AsterGraph.Editor.Events.GraphEditorDocumentChangeKind
@@ -1081,6 +1088,7 @@ M:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions.Equals(System.
 M:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions.GetHashCode():System.Int32
 M:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions.ToString():System.String
 M:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.<Clone>$():AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot
+M:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.Create(System.Boolean,System.String,System.String,System.String,System.String,System.Nullable<AsterGraph.Core.Models.GraphConnectionTargetKind>,System.Nullable<System.Boolean>,System.String,AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason):AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot
 M:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.Create(System.Boolean,System.String,System.String,System.String,System.String,System.Nullable<AsterGraph.Core.Models.GraphConnectionTargetKind>,System.Nullable<System.Boolean>,System.String):AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot
 M:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.Create(System.Boolean,System.String,System.String):AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot
 M:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.Equals(AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot):System.Boolean
@@ -2819,6 +2827,7 @@ P:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions.ActivitySource
 P:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions.LoggerFactory:Microsoft.Extensions.Logging.ILoggerFactory:get
 P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.HasPendingConnection:System.Boolean:get
 P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.IsTargetCompatible:System.Nullable<System.Boolean>:get
+P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.RejectionReason:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason:get
 P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.SourceNodeId:System.String:get
 P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.SourcePortId:System.String:get
 P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.TargetKind:System.Nullable<AsterGraph.Core.Models.GraphConnectionTargetKind>:get
@@ -4130,6 +4139,7 @@ T:enum AsterGraph.Core.Models.GraphEdgePathKind
 T:enum AsterGraph.Core.Models.GraphNodeExpansionState
 T:enum AsterGraph.Core.Models.PortDirection
 T:enum AsterGraph.Editor.Diagnostics.GraphEditorDiagnosticSeverity
+T:enum AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionRejectionReason
 T:enum AsterGraph.Editor.Events.GraphEditorDocumentChangeKind
 T:enum AsterGraph.Editor.Menus.ContextMenuTargetKind
 T:enum AsterGraph.Editor.Plugins.GraphEditorPluginCandidateSourceKind

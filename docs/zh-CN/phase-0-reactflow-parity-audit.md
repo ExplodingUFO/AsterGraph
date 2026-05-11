@@ -48,13 +48,13 @@ Phase 481 在现有 scene PNG gate 之外新增了确定性的 full-window Cookb
 | Edge labels and markers | Present | Labels 与 source/target marker fields 已在 edge presentation/geometry snapshots 中建模。 | Keep guarded。 |
 | Drag, pan, zoom | Present | Canvas pointer/wheel coordinators 与 viewport commands 已存在。 | Keep guarded。 |
 | Marquee/box selection and multi-select | Present | `GetSelectionRectangleSnapshot`、overlay coordinator marquee selection、`SelectAll`、`SelectNone`、`InvertSelection` 有 tests 和 Cookbook routes。 | Keep guarded。 |
-| Connection preview and validation | Present / policy gap | Pending connection、compatible targets、validation snapshots、repair commands 和 `validation-prevent-cycle` fixture 已存在。Hard cycle-prevention policy 仍需公开契约。 | GitHub #84 / `avalonia-node-map-p482`。 |
+| Connection preview and validation | Present / guarded | Pending connection、compatible targets、validation snapshots、repair commands 和 `validation-prevent-cycle` fixture 已存在。Cycle prevention 由 canonical connection completion path 强制执行，并通过 pending snapshot 暴露 `GraphEditorPendingConnectionRejectionReason.WouldCreateCycle`。 | 继续守住 `RuntimeSession_CompleteConnection_RejectsDirectCycleWithStableReason`、`RuntimeSession_CompleteConnection_RejectsIndirectCycleThroughNormalCommandPath` 和 `RuntimeSession_TryExecuteCommand_RejectsCycleThroughConnectionsConnectRoute`。 |
 | Context menu | Present | Menu descriptors 与 hosted context menu plumbing 已存在。 | Keep guarded。 |
 | Undo/redo | Present | Session commands 与 history tests 覆盖正常 command semantics。 | Keep guarded。 |
 | Copy/paste | Present | Clipboard commands、fragment serialization 和 compatibility payload tests 已存在。 | Keep guarded。 |
 | Save/restore | Present | Workspace save/load commands、serializer contracts 和 compatibility import boundary 已存在。 | Keep guarded。 |
 | Helper lines / snap guides | Present / proof-bounded | Snap/grid commands 和 projection evidence 已存在；文档声明应继续绑定 supported command route。 | Keep guarded。 |
-| Prevent cycles | Partial | Validation examples 和 route fixtures 已存在，但 hard policy 与 invalid-reason contract 需要专门测试。 | GitHub #84 / `avalonia-node-map-p482`。 |
+| Prevent cycles | Present / guarded | Direct 和 indirect cycle 都会通过 `StartConnection` / `CompleteConnection` 以及 descriptor-driven `connections.connect` 被拒绝；拒绝时保留 pending connection、不修改 document，并以 `WouldCreateCycle` 作为稳定原因。Compatible-target queries 仍是 type-compatibility discovery；completion 才是最终 policy authority。 | 继续由 Phase 482 session tests 和 diagnostics contract tests 守住。 |
 | MiniMap | Present | `GraphMiniMap`、`AsterGraphMiniMapViewFactory`、lightweight projection 和 Cookbook route 已存在。 | Keep guarded。 |
 | Controls | Present | Standalone `AsterGraphControls`、hosted action factory、built-in catalog entry 和 tests 已存在。 | Keep guarded。 |
 | Background | Present | `GridBackground`、style options、grid-density tests 和 Cookbook route 已存在。 | Keep guarded。 |
@@ -91,10 +91,10 @@ Phase 481 在现有 scene PNG gate 之外新增了确定性的 full-window Cookb
 | --- | --- | --- | --- | --- | --- |
 | #81 | `avalonia-node-map-p479` | Phase 479: define public node drag-handle API | P1 | `AsterGraph.Abstractions` 或 `AsterGraph.Avalonia`、canvas interaction routing、tests、docs | Phase 478 后可启动。避免与 rotation 同时改 node transform/hit-test。 |
 | #80 | `avalonia-node-map-p480` | Phase 480: add rotatable node model and rendering contract | P2 | `AsterGraph.Core`、`AsterGraph.Editor`、`AsterGraph.Avalonia`、serialization/API/tests/docs | 与 drag-handle 分开，因为两者都可能触碰 node hit testing 与 adorners。 |
-| #84 | `avalonia-node-map-p482` | Phase 482: harden cycle-prevention connection policy | P1 | `AsterGraph.Editor` validation policy、tests、Demo/Cookbook docs | 最小的 product-code parity slice；可独立于 UI 工作。 |
+| #84 | `avalonia-node-map-p482` | Phase 482: harden cycle-prevention connection policy | P1 | `AsterGraph.Editor` validation policy、tests、Demo/Cookbook docs | 已实现为 guarded policy contract；PR evidence 合并后关闭。 |
 | #82 | `avalonia-node-map-p483` | Phase 483: prove or bound large-graph rendering virtualization | P1 | 若实现则涉及 `AsterGraph.Avalonia` renderer/projection；否则涉及 scale docs/tests | 先作为 evidence/decision branch 启动，不要直接重写 renderer。 |
 
-推荐的下一条分支：如果下一条要保持 editor-only，优先做 `avalonia-node-map-p482` / GitHub #84，因为它能强化 cycle-prevention policy，又不和 drag-handle 或 rotation 的 hit-test 路径重叠。如果下一 milestone 会触碰可见 UI，则先查看新的 full-window shell gate artifacts，再启动 `avalonia-node-map-p479` / GitHub #81。
+Phase 482 之后的推荐下一条分支：如果下一条可以触碰 Avalonia interaction routing，做 `avalonia-node-map-p479` / GitHub #81 的 public node drag-handle API；如果下一条要保持 evidence/docs-first，则做 `avalonia-node-map-p483` / GitHub #82 的 virtualization claim 边界。
 
 ## 推荐并行 Worktree 计划
 

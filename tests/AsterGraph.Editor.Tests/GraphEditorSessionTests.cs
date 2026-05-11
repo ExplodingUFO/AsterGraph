@@ -784,6 +784,82 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void RuntimeSession_CompleteConnection_RejectsDirectCycleWithStableReason()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.direct-cycle");
+        var session = AsterGraphEditorFactory.CreateSession(CreateCycleOptions(definitionId, directCycle: true));
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+
+        var pending = session.Queries.GetPendingConnectionSnapshot();
+
+        Assert.True(pending.HasPendingConnection);
+        Assert.False(pending.IsTargetCompatible);
+        Assert.Equal(GraphEditorPendingConnectionRejectionReason.WouldCreateCycle, pending.RejectionReason);
+        Assert.Equal("Connection rejected because it would create a graph cycle.", pending.ValidationMessage);
+        Assert.Single(session.Queries.CreateDocumentSnapshot().Connections);
+    }
+
+    [Fact]
+    public void RuntimeSession_CompleteConnection_RejectsIndirectCycleThroughNormalCommandPath()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.indirect-cycle");
+        var session = AsterGraphEditorFactory.CreateSession(CreateCycleOptions(definitionId, directCycle: false));
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+
+        var pending = session.Queries.GetPendingConnectionSnapshot();
+
+        Assert.True(pending.HasPendingConnection);
+        Assert.False(pending.IsTargetCompatible);
+        Assert.Equal(GraphEditorPendingConnectionRejectionReason.WouldCreateCycle, pending.RejectionReason);
+        Assert.Equal("Connection rejected because it would create a graph cycle.", pending.ValidationMessage);
+        Assert.Equal(2, session.Queries.CreateDocumentSnapshot().Connections.Count);
+    }
+
+    [Fact]
+    public void RuntimeSession_CompleteConnection_AllowsAcyclicConnectionAndClearsRejectionReason()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.acyclic-connection");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+
+        var pending = session.Queries.GetPendingConnectionSnapshot();
+
+        Assert.False(pending.HasPendingConnection);
+        Assert.Equal(GraphEditorPendingConnectionRejectionReason.None, pending.RejectionReason);
+        var connection = Assert.Single(session.Queries.CreateDocumentSnapshot().Connections);
+        Assert.Equal(SourceNodeId, connection.SourceNodeId);
+        Assert.Equal(TargetNodeId, connection.TargetNodeId);
+    }
+
+    [Fact]
+    public void RuntimeSession_TryExecuteCommand_RejectsCycleThroughConnectionsConnectRoute()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.command-cycle");
+        var session = AsterGraphEditorFactory.CreateSession(CreateCycleOptions(definitionId, directCycle: true));
+
+        var dispatched = session.Commands.TryExecuteCommand(CreateCommand(
+            "connections.connect",
+            ("sourceNodeId", SourceNodeId),
+            ("sourcePortId", SourcePortId),
+            ("targetNodeId", TargetNodeId),
+            ("targetPortId", TargetPortId)));
+
+        var pending = session.Queries.GetPendingConnectionSnapshot();
+
+        Assert.True(dispatched);
+        Assert.True(pending.HasPendingConnection);
+        Assert.False(pending.IsTargetCompatible);
+        Assert.Equal(GraphEditorPendingConnectionRejectionReason.WouldCreateCycle, pending.RejectionReason);
+        Assert.Single(session.Queries.CreateDocumentSnapshot().Connections);
+    }
+
+    [Fact]
     public void RuntimeSession_FeatureDescriptors_ExposeExplicitDiscoveryWithoutFacadeInspection()
     {
         using var activitySource = new System.Diagnostics.ActivitySource("tests.session.features");
@@ -1551,6 +1627,15 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(eventArgsType, handlerType.GetGenericArguments()[0]);
     }
 
+    private static GraphEditorCommandInvocationSnapshot CreateCommand(
+        string commandId,
+        params (string Name, string Value)[] arguments)
+        => new(
+            commandId,
+            arguments
+                .Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value))
+                .ToList());
+
     private static string RenderMenuSignature(IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> items)
         => string.Join("||", items.Select(RenderMenuItemSignature));
 
@@ -1657,6 +1742,92 @@ public sealed class GraphEditorSessionTests
                 ],
                 []),
             NodeCatalog = CreateParameterEndpointCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        };
+    }
+
+    private static AsterGraphEditorOptions CreateCycleOptions(NodeDefinitionId definitionId, bool directCycle)
+    {
+        var intermediateNodeId = "tests.session.intermediate-001";
+        var nodes = new List<GraphNode>
+        {
+            new(
+                SourceNodeId,
+                "Source Node",
+                "Tests",
+                "Runtime",
+                "Session source node.",
+                new GraphPoint(120, 160),
+                new GraphSize(240, 160),
+                [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                [new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                "#6AD5C4",
+                definitionId),
+            new(
+                TargetNodeId,
+                "Target Node",
+                "Tests",
+                "Runtime",
+                "Session target node.",
+                new GraphPoint(520, 180),
+                new GraphSize(240, 160),
+                [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                [new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                "#F3B36B",
+                definitionId),
+        };
+        var connections = new List<GraphConnection>();
+        if (directCycle)
+        {
+            connections.Add(new GraphConnection(
+                "connection-target-to-source",
+                TargetNodeId,
+                SourcePortId,
+                SourceNodeId,
+                TargetPortId,
+                "Target to source",
+                "#6AD5C4"));
+        }
+        else
+        {
+            nodes.Add(new GraphNode(
+                intermediateNodeId,
+                "Intermediate Node",
+                "Tests",
+                "Runtime",
+                "Intermediate cycle node.",
+                new GraphPoint(320, 180),
+                new GraphSize(240, 160),
+                [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                [new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                "#9B8CFF",
+                definitionId));
+            connections.Add(new GraphConnection(
+                "connection-target-to-intermediate",
+                TargetNodeId,
+                SourcePortId,
+                intermediateNodeId,
+                TargetPortId,
+                "Target to intermediate",
+                "#6AD5C4"));
+            connections.Add(new GraphConnection(
+                "connection-intermediate-to-source",
+                intermediateNodeId,
+                SourcePortId,
+                SourceNodeId,
+                TargetPortId,
+                "Intermediate to source",
+                "#6AD5C4"));
+        }
+
+        return new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument(
+                "Cycle Session Graph",
+                "Runtime cycle prevention coverage.",
+                nodes,
+                connections),
+            NodeCatalog = CreateCatalog(definitionId),
             CompatibilityService = new DefaultPortCompatibilityService(),
         };
     }

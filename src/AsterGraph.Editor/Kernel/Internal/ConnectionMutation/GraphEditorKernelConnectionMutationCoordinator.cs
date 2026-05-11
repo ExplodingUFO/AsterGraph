@@ -299,7 +299,13 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
         if (sourcePort.TypeId is null || resolvedTarget.TypeId is null)
         {
             var reason = "Connection endpoints must expose stable type identifiers.";
-            SetPendingTargetFeedback(sourceNode, sourcePort, resolvedTarget, isCompatible: false, reason);
+            SetPendingTargetFeedback(
+                sourceNode,
+                sourcePort,
+                resolvedTarget,
+                isCompatible: false,
+                reason,
+                GraphEditorPendingConnectionRejectionReason.EndpointTypeMissing);
             _host.SetStatus(reason);
             return;
         }
@@ -308,7 +314,27 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
         if (!compatibility.IsCompatible)
         {
             var reason = $"Incompatible connection: {sourcePort.TypeId.Value} -> {resolvedTarget.TypeId.Value}.";
-            SetPendingTargetFeedback(sourceNode, sourcePort, resolvedTarget, isCompatible: false, reason);
+            SetPendingTargetFeedback(
+                sourceNode,
+                sourcePort,
+                resolvedTarget,
+                isCompatible: false,
+                reason,
+                GraphEditorPendingConnectionRejectionReason.IncompatibleEndpointTypes);
+            _host.SetStatus(reason);
+            return;
+        }
+
+        if (WouldCreateCycle(sourceNode.Id, resolvedTarget.Node.Id))
+        {
+            const string reason = "Connection rejected because it would create a graph cycle.";
+            SetPendingTargetFeedback(
+                sourceNode,
+                sourcePort,
+                resolvedTarget,
+                isCompatible: false,
+                reason,
+                GraphEditorPendingConnectionRejectionReason.WouldCreateCycle);
             _host.SetStatus(reason);
             return;
         }
@@ -343,7 +369,13 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
         if (outgoingCount >= sourcePort.MaxConnections)
         {
             var reason = $"Source port '{sourcePort.Label}' has reached its maximum connection limit ({sourcePort.MaxConnections}).";
-            SetPendingTargetFeedback(sourceNode, sourcePort, resolvedTarget, isCompatible: false, reason);
+            SetPendingTargetFeedback(
+                sourceNode,
+                sourcePort,
+                resolvedTarget,
+                isCompatible: false,
+                reason,
+                GraphEditorPendingConnectionRejectionReason.SourceConnectionLimitReached);
             _host.SetStatus(reason);
             return;
         }
@@ -357,7 +389,13 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
         if (targetPort is not null && finalIncomingCount > targetPort.MaxConnections)
         {
             var reason = $"Target port '{targetPort.Label}' would exceed its maximum connection limit ({targetPort.MaxConnections}).";
-            SetPendingTargetFeedback(sourceNode, sourcePort, resolvedTarget, isCompatible: false, reason);
+            SetPendingTargetFeedback(
+                sourceNode,
+                sourcePort,
+                resolvedTarget,
+                isCompatible: false,
+                reason,
+                GraphEditorPendingConnectionRejectionReason.TargetConnectionLimitExceeded);
             _host.SetStatus(reason);
             return;
         }
@@ -400,7 +438,8 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
         GraphPort sourcePort,
         ResolvedConnectionTarget resolvedTarget,
         bool isCompatible,
-        string reason)
+        string reason,
+        GraphEditorPendingConnectionRejectionReason rejectionReason)
         => _host.SetPendingConnection(GraphEditorPendingConnectionSnapshot.Create(
             true,
             sourceNode.Id,
@@ -409,7 +448,52 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
             resolvedTarget.Target.TargetId,
             resolvedTarget.Target.Kind,
             isCompatible,
-            reason));
+            reason,
+            rejectionReason));
+
+    private bool WouldCreateCycle(string sourceNodeId, string targetNodeId)
+    {
+        if (string.Equals(sourceNodeId, targetNodeId, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        var adjacency = _host.Document.Connections
+            .GroupBy(connection => connection.SourceNodeId, StringComparer.Ordinal)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Select(connection => connection.TargetNodeId).ToList(),
+                StringComparer.Ordinal);
+        var visited = new HashSet<string>(StringComparer.Ordinal);
+        var stack = new Stack<string>();
+        stack.Push(targetNodeId);
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+            if (!visited.Add(current))
+            {
+                continue;
+            }
+
+            if (string.Equals(current, sourceNodeId, StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            if (!adjacency.TryGetValue(current, out var nextNodes))
+            {
+                continue;
+            }
+
+            foreach (var nextNode in nextNodes)
+            {
+                stack.Push(nextNode);
+            }
+        }
+
+        return false;
+    }
 
     private void RemoveConnections(Func<GraphConnection, bool> predicate, string status)
     {
