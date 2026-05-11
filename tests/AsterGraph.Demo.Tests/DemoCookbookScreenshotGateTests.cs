@@ -149,6 +149,48 @@ public sealed class DemoCookbookScreenshotGateTests
     }
 
     [Fact]
+    public void CookbookScreenshotGate_IncludesStandaloneBuiltInBatchRoutes()
+    {
+        var routes = LoadRoutes(GetRepositoryRoot());
+
+        AssertStandaloneBuiltInRoute(
+            routes,
+            "cookbook-builtin-standalone-controls",
+            "builtin-standalone-controls-route",
+            "keyboard-navigation-lab",
+            "Keyboard Navigation Fixture",
+            "key-output");
+        AssertStandaloneBuiltInRoute(
+            routes,
+            "cookbook-builtin-standalone-panel",
+            "builtin-standalone-panel-route",
+            "host-event-inspector",
+            "Host Event Inspector Fixture",
+            "event-output");
+        AssertStandaloneBuiltInRoute(
+            routes,
+            "cookbook-builtin-node-toolbar",
+            "builtin-node-toolbar-route",
+            "selection-marquee-workbench",
+            "Selection Rectangle Fixture",
+            "select-output");
+        AssertStandaloneBuiltInRoute(
+            routes,
+            "cookbook-builtin-edge-toolbar",
+            "builtin-edge-toolbar-route",
+            "clipboard-fragment-roundtrip",
+            "Clipboard Fragment Roundtrip Fixture",
+            "clip-output");
+        AssertStandaloneBuiltInRoute(
+            routes,
+            "cookbook-builtin-node-resizer",
+            "builtin-node-resizer-route",
+            "validation-prevent-cycle",
+            "Validation Prevent Cycle Fixture",
+            "validate-output");
+    }
+
+    [Fact]
     public void CookbookScreenshotGate_IncludesInteractionFixtureBatchRoutes()
     {
         var routes = LoadRoutes(GetRepositoryRoot());
@@ -211,7 +253,28 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains(OutputRootRelativePath, contents, StringComparison.Ordinal);
             Assert.Contains("CI", contents, StringComparison.Ordinal);
             Assert.Contains("before/after", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("builtin-standalone-controls-route", contents, StringComparison.Ordinal);
+            Assert.Contains("builtin-standalone-panel-route", contents, StringComparison.Ordinal);
+            Assert.Contains("builtin-node-toolbar-route", contents, StringComparison.Ordinal);
+            Assert.Contains("builtin-edge-toolbar-route", contents, StringComparison.Ordinal);
+            Assert.Contains("builtin-node-resizer-route", contents, StringComparison.Ordinal);
         }
+    }
+
+    private static void AssertStandaloneBuiltInRoute(
+        IReadOnlyList<CookbookScreenshotGateRoute> routes,
+        string id,
+        string recipeId,
+        string scenario,
+        string documentTitle,
+        string requiredNodeId)
+    {
+        Assert.Contains(routes, route =>
+            route.Id == id
+            && route.RecipeId == recipeId
+            && route.Scenario == scenario
+            && route.ExpectedDocumentTitle == documentTitle
+            && route.RequiredNodeIds.Contains(requiredNodeId, StringComparer.Ordinal));
     }
 
     private static void AssertRouteReferencesCatalog(CookbookScreenshotGateRoute route)
