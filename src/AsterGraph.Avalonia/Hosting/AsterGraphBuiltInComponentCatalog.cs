@@ -33,6 +33,11 @@ public static class AsterGraphBuiltInComponentCatalog
     public const string ControlsPanel = "controls-panel";
 
     /// <summary>
+    /// Stable identifier for the standalone overlay panel entry.
+    /// </summary>
+    public const string Panel = "panel";
+
+    /// <summary>
     /// Stable identifier for command and tool action projection.
     /// </summary>
     public const string CommandToolProjection = "command-tool-projection";
@@ -107,6 +112,16 @@ public static class AsterGraphBuiltInComponentCatalog
             "builtin-hosted-controls-route",
             "docs/en/demo-cookbook.md",
             "Default hosted workbench chrome, command controls, panels, and shell composition."),
+        new(
+            Panel,
+            "Panel",
+            AsterGraphBuiltInComponentStatus.Public,
+            typeof(AsterGraphPanel).FullName!,
+            null,
+            "AsterGraphPanel",
+            "builtin-hosted-controls-route",
+            "docs/en/demo-cookbook.md",
+            "Standalone positional overlay panel for hosts composing their own built-in chrome."),
         new(
             CommandToolProjection,
             "Command/Tool Projection",
