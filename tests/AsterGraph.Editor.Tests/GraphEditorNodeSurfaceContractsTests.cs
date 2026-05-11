@@ -46,6 +46,7 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.ActiveTier)));
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.ExpansionState)));
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.GroupId)));
+        Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.RotationDegrees)));
         Assert.NotNull(typeof(GraphEditorSceneSnapshot).GetProperty(nameof(GraphEditorSceneSnapshot.Document)));
         Assert.NotNull(typeof(GraphEditorSceneSnapshot).GetProperty(nameof(GraphEditorSceneSnapshot.Selection)));
         Assert.NotNull(typeof(GraphEditorSceneSnapshot).GetProperty(nameof(GraphEditorSceneSnapshot.Viewport)));
@@ -54,6 +55,7 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.NotNull(typeof(GraphEditorSceneSnapshot).GetProperty(nameof(GraphEditorSceneSnapshot.PendingConnection)));
         Assert.NotNull(typeof(NodeViewModel).GetProperty("ExpansionState"));
         Assert.NotNull(typeof(NodeViewModel).GetProperty("IsExpanded"));
+        Assert.NotNull(typeof(NodeViewModel).GetProperty(nameof(NodeViewModel.RotationDegrees)));
 
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetNodeWidth), typeof(string), typeof(double), typeof(bool));
         Assert.Equal(
@@ -69,6 +71,10 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.Equal(
             typeof(bool),
             commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeExpansionState), [typeof(string), typeof(GraphNodeExpansionState)])!.ReturnType);
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetNodeRotation), typeof(string), typeof(double), typeof(bool));
+        Assert.Equal(
+            typeof(bool),
+            commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeRotation), [typeof(string), typeof(double), typeof(bool)])!.ReturnType);
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetNodeGroups));
         Assert.Equal(
@@ -345,6 +351,36 @@ public sealed class GraphEditorNodeSurfaceContractsTests
 
         Assert.NotNull(restoredNode.Surface);
         Assert.Equal(GraphNodeExpansionState.Expanded, restoredNode.Surface!.ExpansionState);
+    }
+
+    [Fact]
+    public void SessionCommands_TrySetNodeRotation_PersistsUndoableSurfaceMutation()
+    {
+        var session = CreateSession();
+        var commandIds = new List<string>();
+        session.Events.CommandExecuted += (_, args) => commandIds.Add(args.CommandId);
+
+        var changed = session.Commands.TrySetNodeRotation(NodeId, 405d, updateStatus: false);
+
+        Assert.True(changed);
+        Assert.Contains("nodes.rotate", commandIds);
+
+        var surface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == NodeId);
+        Assert.Equal(45d, surface.RotationDegrees);
+
+        var node = Assert.Single(session.Queries.CreateDocumentSnapshot().Nodes, candidate => candidate.Id == NodeId);
+        Assert.NotNull(node.Surface);
+        Assert.Equal(45d, node.Surface!.RotationDegrees);
+
+        session.Commands.Undo();
+        Assert.Equal(0d, Assert.Single(session.Queries.CreateDocumentSnapshot().Nodes, candidate => candidate.Id == NodeId).Surface?.RotationDegrees ?? 0d);
+
+        session.Commands.Redo();
+        Assert.Equal(45d, Assert.Single(session.Queries.CreateDocumentSnapshot().Nodes, candidate => candidate.Id == NodeId).Surface?.RotationDegrees);
+
+        var json = GraphDocumentSerializer.Serialize(session.Queries.CreateDocumentSnapshot());
+        var restored = GraphDocumentSerializer.Deserialize(json);
+        Assert.Equal(45d, Assert.Single(restored.Nodes, candidate => candidate.Id == NodeId).Surface?.RotationDegrees);
     }
 
     [Fact]

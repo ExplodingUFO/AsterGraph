@@ -295,6 +295,16 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to update one node's persisted clockwise rotation angle.
+    /// </summary>
+    /// <param name="nodeId">Stable node identifier.</param>
+    /// <param name="rotationDegrees">Requested clockwise angle in degrees; finite values are normalized to 0-360.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the rotation changes.</returns>
+    bool TrySetNodeRotation(string nodeId, double rotationDegrees, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to create one editor-only node group from the current selection.
     /// </summary>
     /// <param name="title">Requested group title.</param>

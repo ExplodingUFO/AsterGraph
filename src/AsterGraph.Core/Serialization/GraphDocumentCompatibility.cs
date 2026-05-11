@@ -8,7 +8,7 @@ namespace AsterGraph.Core.Serialization;
 /// </summary>
 internal static class GraphDocumentCompatibility
 {
-    public const int CurrentSchemaVersion = 5;
+    public const int CurrentSchemaVersion = 6;
 
     public static GraphDocumentSerializer.GraphDocumentFilePayload CreatePayload(GraphDocument document)
     {
@@ -110,7 +110,7 @@ internal static class GraphDocumentCompatibility
             .ToDictionary(group => group.Key, group => group.Last().Value, StringComparer.Ordinal);
 
         var normalizedNodes = scope.Nodes
-            .Select(node => node with { Surface = node.Surface ?? GraphNodeSurfaceState.Default })
+            .Select(node => node with { Surface = NormalizeSurface(node.Surface) })
             .Select(node =>
             {
                 var currentGroupId = node.Surface?.GroupId;
@@ -124,13 +124,13 @@ internal static class GraphDocumentCompatibility
                 {
                     return node with
                     {
-                        Surface = (node.Surface ?? GraphNodeSurfaceState.Default) with { GroupId = fallbackGroupId },
+                        Surface = NormalizeSurface(node.Surface) with { GroupId = fallbackGroupId },
                     };
                 }
 
                 return node with
                 {
-                    Surface = (node.Surface ?? GraphNodeSurfaceState.Default) with { GroupId = null },
+                    Surface = NormalizeSurface(node.Surface) with { GroupId = null },
                 };
             })
             .ToList();
@@ -174,6 +174,9 @@ internal static class GraphDocumentCompatibility
             ExtraPadding = padding,
         };
     }
+
+    private static GraphNodeSurfaceState NormalizeSurface(GraphNodeSurfaceState? surface)
+        => (surface ?? GraphNodeSurfaceState.Default).NormalizeRotation();
 
     private sealed record LegacyGraphDocumentFilePayload(
         int SchemaVersion,

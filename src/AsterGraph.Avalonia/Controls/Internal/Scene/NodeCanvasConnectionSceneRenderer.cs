@@ -169,9 +169,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             var localToNode = anchorDot.TranslatePoint(center, visual.Root);
             if (localToNode is not null)
             {
-                return new GraphPoint(
-                    node.X + localToNode.Value.X,
-                    node.Y + localToNode.Value.Y);
+                return TransformNodeLocalToWorld(context, node, new GraphPoint(localToNode.Value.X, localToNode.Value.Y));
             }
 
             if (context.NodeLayer is not null)
@@ -228,9 +226,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             var localToNode = anchorControl.TranslatePoint(center, visual.Root);
             if (localToNode is not null)
             {
-                return new GraphPoint(
-                    node.X + localToNode.Value.X,
-                    node.Y + localToNode.Value.Y);
+                return TransformNodeLocalToWorld(context, node, new GraphPoint(localToNode.Value.X, localToNode.Value.Y));
             }
 
             if (context.NodeLayer is not null)
@@ -244,17 +240,35 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         }
 
         var renderedWidth = context.ResolveNodePreviewSize(node)?.Width ?? node.Width;
-        return new GraphPoint(
-            node.X + Math.Max(24d, renderedWidth - 18d),
-            node.Y + 56d);
+        return TransformNodeLocalToWorld(
+            context,
+            node,
+            new GraphPoint(Math.Max(24d, renderedWidth - 18d), 56d));
     }
 
     private static GraphPoint ResolvePreviewPortAnchor(NodeViewModel node, PortViewModel port, GraphSize previewSize)
-        => PortAnchorCalculator.GetAnchor(
-            new NodeBounds(node.X, node.Y, previewSize.Width, previewSize.Height),
+    {
+        var unrotatedAnchor = PortAnchorCalculator.GetAnchor(
+            new NodeBounds(0d, 0d, previewSize.Width, previewSize.Height),
             port.Direction,
             port.Index,
             port.Total);
+        return GraphNodeRotationGeometry.TransformLocalToWorld(
+            new GraphPoint(node.X, node.Y),
+            previewSize,
+            node.RotationDegrees,
+            unrotatedAnchor);
+    }
+
+    private static GraphPoint TransformNodeLocalToWorld(
+        NodeCanvasConnectionSceneContext context,
+        NodeViewModel node,
+        GraphPoint localPoint)
+        => GraphNodeRotationGeometry.TransformLocalToWorld(
+            new GraphPoint(node.X, node.Y),
+            context.ResolveNodePreviewSize(node) ?? new GraphSize(node.Width, node.Height),
+            node.RotationDegrees,
+            localPoint);
 
     private static GraphPoint? ResolveCollapsedGroupBoundaryAnchor(
         NodeCanvasConnectionSceneContext context,

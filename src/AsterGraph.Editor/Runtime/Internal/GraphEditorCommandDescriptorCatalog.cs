@@ -20,6 +20,7 @@ internal static class GraphEditorCommandDescriptorCatalog
             ["nodes.move"] = new("Move Nodes", "nodes", "move", null),
             ["nodes.resize"] = new("Resize Node", "nodes", "resize", null),
             ["nodes.resize-width"] = new("Resize Node Width", "nodes", "resize-width", null),
+            ["nodes.rotate"] = new("Rotate Node", "nodes", "rotate", null),
             ["nodes.surface.expand"] = new("Toggle Node Expansion", "nodes", "expand", null),
             ["nodes.parameters.set"] = new("Edit Parameters", "nodes", "parameter", null),
             ["groups.create"] = new("Create Group", "groups", "group-create", null),

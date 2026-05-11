@@ -94,6 +94,18 @@ public sealed class GraphEditorCommandRegistryTests
             "node-inspect",
             "node");
         AssertPlacement(
+            registry["nodes.rotate"],
+            GraphEditorCommandSurfaceKind.ContextMenu,
+            "context-menu.node",
+            "node-rotate",
+            "node");
+        AssertPlacement(
+            registry["nodes.rotate"],
+            GraphEditorCommandSurfaceKind.Tool,
+            "tool.node",
+            "node-rotate",
+            "node");
+        AssertPlacement(
             registry["connections.disconnect"],
             GraphEditorCommandSurfaceKind.ContextMenu,
             "context-menu.connection",

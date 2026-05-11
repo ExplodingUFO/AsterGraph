@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
@@ -102,7 +103,12 @@ internal sealed class NodeCanvasResizeFeedbackCoordinator
                     continue;
                 }
 
-                var local = new Point(world.Value.X - node.X, world.Value.Y - node.Y);
+                var localPoint = GraphNodeRotationGeometry.TransformWorldToLocal(
+                    new GraphPoint(node.X, node.Y),
+                    ResolveRenderedNodeSize(nodeSurface, node),
+                    node.RotationDegrees,
+                    world.Value);
+                var local = new Point(localPoint.X, localPoint.Y);
                 if (local.X >= 0d
                     && local.Y >= 0d
                     && local.X <= nodeSurface.Bounds.Width
@@ -186,4 +192,9 @@ internal sealed class NodeCanvasResizeFeedbackCoordinator
     private Cursor ResolveCursor(GraphResizeFeedbackContext context)
         => _host.ResizeFeedbackPolicy?.ResolveCursor(context)
             ?? GraphResizeFeedbackDefaults.ResolveCursor(context);
+
+    private static GraphSize ResolveRenderedNodeSize(Control nodeSurface, NodeViewModel node)
+        => new(
+            nodeSurface.Bounds.Width > 0d ? nodeSurface.Bounds.Width : node.Width,
+            nodeSurface.Bounds.Height > 0d ? nodeSurface.Bounds.Height : node.Height);
 }

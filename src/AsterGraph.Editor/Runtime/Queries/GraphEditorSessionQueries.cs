@@ -6,6 +6,7 @@ using AsterGraph.Editor.Plugins;
 using AsterGraph.Core.Models;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Parameters;
 using AsterGraph.Editor.Runtime.Internal;
 using System;
@@ -864,10 +865,13 @@ public sealed partial class GraphEditorSession
             return (null, null);
         }
 
-        var left = nodes.Min(node => node.Position.X);
-        var top = nodes.Min(node => node.Position.Y);
-        var right = nodes.Max(node => node.Position.X + node.Size.Width);
-        var bottom = nodes.Max(node => node.Position.Y + node.Size.Height);
+        var bounds = nodes
+            .Select(CreateNodeBounds)
+            .ToList();
+        var left = bounds.Min(bound => bound.X);
+        var top = bounds.Min(bound => bound.Y);
+        var right = bounds.Max(bound => bound.X + bound.Width);
+        var bottom = bounds.Max(bound => bound.Y + bound.Height);
         return (new GraphPoint(left, top), new GraphSize(right - left, bottom - top));
     }
 
@@ -885,7 +889,7 @@ public sealed partial class GraphEditorSession
         var right = Math.Max(position.X, position.X + size.Width);
         var bottom = Math.Max(position.Y, position.Y + size.Height);
         var nodeIds = document.Nodes
-            .Where(node => Intersects(left, top, right, bottom, node.Position, node.Size))
+            .Where(node => Intersects(left, top, right, bottom, CreateNodeBounds(node)))
             .Select(node => node.Id)
             .OrderBy(id => id, StringComparer.Ordinal)
             .ToList();
@@ -898,15 +902,21 @@ public sealed partial class GraphEditorSession
         return (nodeIds, connectionIds);
     }
 
-    private static bool Intersects(double left, double top, double right, double bottom, GraphPoint position, GraphSize size)
+    private static bool Intersects(double left, double top, double right, double bottom, NodeBounds bounds)
     {
-        var nodeRight = position.X + size.Width;
-        var nodeBottom = position.Y + size.Height;
-        return position.X <= right
+        var nodeRight = bounds.X + bounds.Width;
+        var nodeBottom = bounds.Y + bounds.Height;
+        return bounds.X <= right
                && nodeRight >= left
-               && position.Y <= bottom
+               && bounds.Y <= bottom
                && nodeBottom >= top;
     }
+
+    private static NodeBounds CreateNodeBounds(GraphNode node)
+        => GraphNodeRotationGeometry.GetAxisAlignedBounds(
+            node.Position,
+            node.Size,
+            node.Surface?.RotationDegrees ?? 0d);
 
     private static GraphPoint SnapToGrid(GraphPoint position, double gridSize)
         => new(

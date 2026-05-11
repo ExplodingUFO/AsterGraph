@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Media;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
@@ -60,7 +61,36 @@ public sealed class NodeCanvasSceneHostViewportProjectionTests
             sceneHost.LastVisibleSceneInvalidationMarker);
     }
 
-    private static GraphEditorViewModel CreateEditor()
+    [AvaloniaFact]
+    public void RebuildScene_AppliesPersistedNodeRotationAroundCardCenter()
+    {
+        var editor = CreateEditor(
+            new GraphDocument(
+                "Rotated Scene",
+                "Regression coverage for scene-host node rotation transforms.",
+                [
+                    CreateNode("node-rotated", 120d, 80d) with
+                    {
+                        Surface = new GraphNodeSurfaceState(RotationDegrees: 45d),
+                    },
+                ],
+                []));
+        editor.UpdateViewportSize(640d, 420d);
+        var host = new TestSceneHost(editor);
+        var sceneHost = new NodeCanvasSceneHost(host);
+
+        sceneHost.RebuildScene();
+
+        var node = Assert.Single(host.NodeVisuals.Keys);
+        var visual = host.NodeVisuals[node].Root;
+        var rotate = Assert.IsType<RotateTransform>(visual.RenderTransform);
+
+        Assert.Equal(45d, rotate.Angle);
+        Assert.Equal(node.Width / 2d, rotate.CenterX);
+        Assert.Equal(node.Height / 2d, rotate.CenterY);
+    }
+
+    private static GraphEditorViewModel CreateEditor(GraphDocument? document = null)
     {
         var catalog = new NodeCatalog();
         catalog.RegisterDefinition(new NodeDefinition(
@@ -74,7 +104,7 @@ public sealed class NodeCanvasSceneHostViewportProjectionTests
             ]));
 
         return new GraphEditorViewModel(
-            new GraphDocument(
+            document ?? new GraphDocument(
                 "Scene Host Viewport Projection",
                 "Regression coverage for scene-host visible-scene invalidation markers.",
                 [

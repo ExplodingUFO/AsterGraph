@@ -22,7 +22,7 @@ public sealed class SerializationCompatibilityTests
     [Fact]
     public void GraphDocumentCompatibility_ExposesCurrentSchemaVersion()
     {
-        Assert.Equal(5, GraphDocumentCompatibility.CurrentSchemaVersion);
+        Assert.Equal(6, GraphDocumentCompatibility.CurrentSchemaVersion);
     }
 
     [Fact]
@@ -32,9 +32,82 @@ public sealed class SerializationCompatibilityTests
 
         var json = GraphDocumentSerializer.Serialize(document);
 
-        Assert.Contains("\"SchemaVersion\": 5", json);
+        Assert.Contains("\"SchemaVersion\": 6", json);
         Assert.Contains("\"RootGraphId\": \"graph-root\"", json);
         Assert.Contains("\"GraphScopes\"", json);
+    }
+
+    [Fact]
+    public void GraphDocumentSerializer_WritesAndReadsNodeRotationSurfaceState()
+    {
+        var document = new GraphDocument(
+            "Rotatable Graph",
+            "Exercise persisted rotation surface state.",
+            [
+                CreateNode("node-rotated") with
+                {
+                    Surface = new GraphNodeSurfaceState(
+                        GraphNodeExpansionState.Expanded,
+                        GroupId: null,
+                        RotationDegrees: 45d),
+                },
+            ],
+            []);
+
+        var json = GraphDocumentSerializer.Serialize(document);
+        var restored = GraphDocumentSerializer.Deserialize(json);
+        var node = Assert.Single(restored.Nodes);
+
+        Assert.Contains("\"RotationDegrees\": 45", json);
+        Assert.Equal(45d, node.Surface?.RotationDegrees);
+    }
+
+    [Fact]
+    public void GraphDocumentSerializer_ReadsSchemaVersion5Payload_WithDefaultRotation()
+    {
+        const string json = """
+        {
+          "SchemaVersion": 5,
+          "Title": "Legacy v5",
+          "Description": "Payload before node rotation.",
+          "Nodes": [
+            {
+              "Id": "node-001",
+              "Title": "Legacy Node",
+              "Category": "Tests",
+              "Subtitle": "Legacy",
+              "Description": "Schema v5 payload without rotation.",
+              "Position": {
+                "X": 12,
+                "Y": 24
+              },
+              "Size": {
+                "Width": 240,
+                "Height": 160
+              },
+              "Inputs": [],
+              "Outputs": [],
+              "AccentHex": "#6AD5C4",
+              "DefinitionId": {
+                "Value": "tests.node"
+              },
+              "ParameterValues": [],
+              "Surface": {
+                "ExpansionState": "Expanded",
+                "GroupId": null
+              }
+            }
+          ],
+          "Connections": []
+        }
+        """;
+
+        var restored = GraphDocumentSerializer.ImportLegacy(json);
+        var node = Assert.Single(restored.Nodes);
+
+        Assert.NotNull(node.Surface);
+        Assert.Equal(GraphNodeExpansionState.Expanded, node.Surface!.ExpansionState);
+        Assert.Equal(0d, node.Surface.RotationDegrees);
     }
 
     [Fact]

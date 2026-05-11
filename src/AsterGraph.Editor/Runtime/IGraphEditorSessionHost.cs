@@ -62,6 +62,7 @@ internal interface IGraphEditorSessionHost
     bool TrySetNodeWidth(string nodeId, double width, bool updateStatus);
     bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus);
     bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState);
+    bool TrySetNodeRotation(string nodeId, double rotationDegrees, bool updateStatus);
     string TryCreateNodeGroupFromSelection(string title);
     bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed);
     bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus);

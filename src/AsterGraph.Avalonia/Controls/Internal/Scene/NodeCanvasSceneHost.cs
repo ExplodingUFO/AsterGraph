@@ -127,7 +127,7 @@ internal sealed class NodeCanvasSceneHost
         if (applyVisibleSceneBudget)
         {
             visibleNodeIds.IntersectWith(_host.ViewModel.Nodes
-                .Where(node => IntersectsVisibleSceneBudget(visibleSceneProjection!, node.X, node.Y, node.Width, node.Height))
+                .Where(node => IntersectsVisibleSceneBudget(visibleSceneProjection!, node))
                 .Select(node => node.Id));
         }
 
@@ -209,6 +209,7 @@ internal sealed class NodeCanvasSceneHost
         {
             Canvas.SetLeft(visual.Root, node.X);
             Canvas.SetTop(visual.Root, node.Y);
+            ApplyNodeRotationTransform(node, visual.Root);
         }
     }
 
@@ -222,6 +223,7 @@ internal sealed class NodeCanvasSceneHost
         visual.Presenter.Update(visual.Visual, CreateNodeVisualContext(node));
         Canvas.SetLeft(visual.Root, node.X);
         Canvas.SetTop(visual.Root, node.Y);
+        ApplyNodeRotationTransform(node, visual.Root);
     }
 
     public GraphPoint GetPortAnchor(NodeViewModel node, PortViewModel port)
@@ -507,6 +509,22 @@ internal sealed class NodeCanvasSceneHost
             ? preview.Size
             : null;
 
+    private void ApplyNodeRotationTransform(NodeViewModel node, Control root)
+    {
+        var normalizedRotation = GraphNodeSurfaceState.NormalizeRotationDegrees(node.RotationDegrees);
+        if (Math.Abs(normalizedRotation) < 0.0001d)
+        {
+            root.RenderTransform = null;
+            return;
+        }
+
+        var renderedSize = ResolveNodePreviewSize(node) ?? new GraphSize(node.Width, node.Height);
+        root.RenderTransform = new RotateTransform(
+            normalizedRotation,
+            renderedSize.Width / 2d,
+            renderedSize.Height / 2d);
+    }
+
     private GraphEditorNodeGroupSnapshot ResolveRenderedGroupSnapshot(GraphEditorNodeGroupSnapshot group)
     {
         if (_host.InteractionSession.GroupResizePreview is NodeCanvasGroupResizePreview resizePreview
@@ -631,6 +649,15 @@ internal sealed class NodeCanvasSceneHost
                && right >= projection.WorldTopLeft.X
                && y <= projection.WorldBottomRight.Y
                && bottom >= projection.WorldTopLeft.Y;
+    }
+
+    private static bool IntersectsVisibleSceneBudget(ViewportVisibleSceneProjection projection, NodeViewModel node)
+    {
+        var bounds = GraphNodeRotationGeometry.GetAxisAlignedBounds(
+            new GraphPoint(node.X, node.Y),
+            new GraphSize(node.Width, node.Height),
+            node.RotationDegrees);
+        return IntersectsVisibleSceneBudget(projection, bounds.X, bounds.Y, bounds.Width, bounds.Height);
     }
 
     private ConnectionStyleOptions GetConnectionStyle(ConnectionViewModel connection)

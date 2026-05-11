@@ -325,10 +325,11 @@ internal sealed class NodeCanvasOverlayCoordinator
 
     private static NodeBounds GetSelectionBounds(IReadOnlyList<NodeViewModel> nodes)
     {
-        var left = nodes.Min(node => node.X);
-        var top = nodes.Min(node => node.Y);
-        var right = nodes.Max(node => node.X + node.Width);
-        var bottom = nodes.Max(node => node.Y + node.Height);
+        var bounds = nodes.Select(GetRotatedBounds).ToList();
+        var left = bounds.Min(bound => bound.X);
+        var top = bounds.Min(bound => bound.Y);
+        var right = bounds.Max(bound => bound.X + bound.Width);
+        var bottom = bounds.Max(bound => bound.Y + bound.Height);
         return new NodeBounds(left, top, right - left, bottom - top);
     }
 
@@ -337,7 +338,7 @@ internal sealed class NodeCanvasOverlayCoordinator
         var movingNodeIds = dragSession.Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
         return _host.Nodes
             .Where(node => !movingNodeIds.Contains(node.Id))
-            .Select(node => new NodeBounds(node.X, node.Y, node.Width, node.Height));
+            .Select(GetRotatedBounds);
     }
 
     private IEnumerable<NodeBounds> ResolveGroupCandidateBounds(GraphEditorNodeGroupSnapshot group)
@@ -350,7 +351,7 @@ internal sealed class NodeCanvasOverlayCoordinator
                 continue;
             }
 
-            yield return new NodeBounds(node.X, node.Y, node.Width, node.Height);
+            yield return GetRotatedBounds(node);
         }
 
         foreach (var candidateGroup in _host.GroupSnapshots)
@@ -420,4 +421,10 @@ internal sealed class NodeCanvasOverlayCoordinator
 
         return new NodeBounds(x, y, width, height);
     }
+
+    private static NodeBounds GetRotatedBounds(NodeViewModel node)
+        => GraphNodeRotationGeometry.GetAxisAlignedBounds(
+            new GraphPoint(node.X, node.Y),
+            new GraphSize(node.Width, node.Height),
+            node.RotationDegrees);
 }

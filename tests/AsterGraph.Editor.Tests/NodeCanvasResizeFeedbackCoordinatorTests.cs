@@ -8,6 +8,7 @@ using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
@@ -48,6 +49,42 @@ public sealed class NodeCanvasResizeFeedbackCoordinatorTests
         Assert.All(nodeLayer.Children.Take(nodeLayer.Children.Count - 1).OfType<Control>(), surface => Assert.Null(surface.Cursor));
     }
 
+    [AvaloniaFact]
+    public void Update_WithRotatedNodeLayer_MapsWorldPointIntoNodeLocalResizeHandle()
+    {
+        var editor = CreateEditor();
+        editor.Zoom = 1d;
+        editor.PanX = 0d;
+        editor.PanY = 0d;
+        var nodeLayer = new Canvas();
+        var rotatedNode = CreateNode("tests.resize.rotated-001", rotationDegrees: 90d);
+        var surface = new Border
+        {
+            Width = 240d,
+            Height = 160d,
+        };
+        surface.Arrange(new Rect(0d, 0d, 240d, 160d));
+        nodeLayer.Children.Add(surface);
+
+        var host = new TestResizeFeedbackHost(
+            editor,
+            nodeLayer,
+            new Dictionary<Control, NodeViewModel>
+            {
+                [surface] = rotatedNode,
+            });
+        var coordinator = new NodeCanvasResizeFeedbackCoordinator(host);
+        var rotatedRightEdgeWorldPoint = GraphNodeRotationGeometry.TransformLocalToWorld(
+            new GraphPoint(rotatedNode.X, rotatedNode.Y),
+            new GraphSize(rotatedNode.Width, rotatedNode.Height),
+            rotatedNode.RotationDegrees,
+            new GraphPoint(236d, 80d));
+
+        coordinator.Update(new Point(rotatedRightEdgeWorldPoint.X, rotatedRightEdgeWorldPoint.Y));
+
+        AssertCursor(StandardCursorType.SizeWestEast, surface.Cursor);
+    }
+
     private static GraphEditorViewModel CreateEditor()
         => new(
             new GraphDocument(
@@ -58,7 +95,7 @@ public sealed class NodeCanvasResizeFeedbackCoordinatorTests
             new NodeCatalog(),
             new DefaultPortCompatibilityService());
 
-    private static NodeViewModel CreateNode(string id)
+    private static NodeViewModel CreateNode(string id, double rotationDegrees = 0d)
         => new(new GraphNode(
             id,
             "Dense Node",
@@ -70,7 +107,8 @@ public sealed class NodeCanvasResizeFeedbackCoordinatorTests
             [],
             [],
             "#6AD5C4",
-            new NodeDefinitionId("tests.resize.dense")));
+            new NodeDefinitionId("tests.resize.dense"),
+            Surface: new GraphNodeSurfaceState(RotationDegrees: rotationDegrees)));
 
     private static void AssertCursor(StandardCursorType expected, Cursor? actual)
     {

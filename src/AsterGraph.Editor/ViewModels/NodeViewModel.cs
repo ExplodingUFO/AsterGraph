@@ -129,6 +129,11 @@ public sealed partial class NodeViewModel : ObservableObject
     public string? GroupId => Surface.GroupId;
 
     /// <summary>
+    /// Clockwise node-card rotation in degrees.
+    /// </summary>
+    public double RotationDegrees => Surface.RotationDegrees;
+
+    /// <summary>
     /// Retained compatibility property for presenters that still read the legacy node-card expansion state.
     /// </summary>
     [Obsolete("Compatibility-only retained property. Prefer ActiveSurfaceTier or Surface.ExpansionState for hosted UI decisions.")]
@@ -239,7 +244,18 @@ public sealed partial class NodeViewModel : ObservableObject
     /// <param name="port">目标端口投影。</param>
     /// <returns>对应的世界坐标锚点。</returns>
     public GraphPoint GetPortAnchor(PortViewModel port)
-        => PortAnchorCalculator.GetAnchor(Bounds, port.Direction, port.Index, port.Total);
+    {
+        var localAnchor = PortAnchorCalculator.GetAnchor(
+            new NodeBounds(0d, 0d, Width, Height),
+            port.Direction,
+            port.Index,
+            port.Total);
+        return GraphNodeRotationGeometry.TransformLocalToWorld(
+            new GraphPoint(X, Y),
+            new GraphSize(Width, Height),
+            RotationDegrees,
+            localAnchor);
+    }
 
     /// <summary>
     /// 转回不可变节点模型快照。
@@ -371,6 +387,7 @@ public sealed partial class NodeViewModel : ObservableObject
     partial void OnSurfaceChanged(GraphNodeSurfaceState value)
     {
         OnPropertyChanged(nameof(GroupId));
+        OnPropertyChanged(nameof(RotationDegrees));
         OnPropertyChanged("ExpansionState");
         OnPropertyChanged("IsExpanded");
     }
