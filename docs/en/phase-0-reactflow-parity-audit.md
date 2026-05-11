@@ -10,6 +10,10 @@ The scope of this refresh is docs and tracker state only. It does not change pro
 
 Phase 481 adds a deterministic full-window Cookbook shell capture alongside the existing scene PNG gate. The new gate covers the default Cookbook shell route, writes artifacts under `artifacts/test-results/cookbook-shell-visual-gate`, and validates dimensions, nonblank pixels, shell-part coverage, and metadata. Strict pixel-baseline comparison remains intentionally deferred until Skia/native drift is measured across CI hosts.
 
+## Phase 479 Update
+
+Phase 479 adds `NodeDragHandle` in `AsterGraph.Avalonia.Presentation` as the public hosted-Avalonia route for React Flow-style node drag handles. Hosts mark a control in a stock-shell custom node body presenter; the stock node shell then starts node dragging only from the marked handle or its descendants, without depending on Demo-only private hooks.
+
 ## Repository Baseline
 
 - Current package version is `0.11.0-beta` in `Directory.Build.props`; publishable libraries are `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and `AsterGraph.Avalonia`.
@@ -28,7 +32,7 @@ Phase 481 adds a deterministic full-window Cookbook shell capture alongside the 
 | Persisted data model and serialization | `src/AsterGraph.Core` | `GraphDocument`, groups, scopes, edge presentation, schema migration helpers, and legacy import boundary. | Compatibility cleanup from #48 is complete; new model fields such as rotation must name schema behavior up front. |
 | Session, commands, queries, state services | `src/AsterGraph.Editor` | Selection, undo/redo, clipboard, workspace save/load, connection authoring, validation, layout, events, mutations, and presentation snapshots. | Strong canonical route. New parity work should go through commands/queries rather than bypassing session ownership. |
 | Layout integration | `src/AsterGraph.Editor/Runtime` and services | `GraphLayoutRequest`, `GraphLayoutPlan`, `IGraphLayoutProvider`, preview/apply/cancel evidence, and snap/grid commands. | Provider seam exists; background/cancel/provider examples need continued proof when layout claims expand. |
-| Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`, scene host projection, edge renderer, interaction coordinators, automation peers, MiniMap, Background, Controls, Panel, NodeToolbar, EdgeToolbar, and NodeResizer. | Built-ins are now reusable public components. Remaining UI parity gaps are drag-handle API, rotation, and full-window visual regression coverage. |
+| Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`, scene host projection, edge renderer, interaction coordinators, automation peers, MiniMap, Background, Controls, Panel, NodeToolbar, EdgeToolbar, NodeResizer, and `NodeDragHandle`. | Built-ins are now reusable public components. Remaining UI parity gaps are rotation and broader full-window visual regression coverage. |
 | Hosted workbench shell | `GraphEditorView` and hosted factories | Header, library, canvas, inspector, validation panel, authoring tools, minimap, command projection, and status chrome. | Useful supported route, but new public features should avoid making Demo shell chrome a hidden dependency. |
 | Demo/Cookbook | `src/AsterGraph.Demo` | 25 recipes, route clarity docs, built-in/interaction/lifecycle batches, scene PNG screenshot gate metadata, and default full-window shell visual metadata. | Cookbook breadth, scene coverage, and the first shell-level capture are covered. Pixel-baseline comparison and broader shell-state coverage remain bounded future work. |
 | CI and release gates | `.github/workflows`, `eng/ci.ps1`, test projects | Build/test/maintenance/contract/release/hygiene lanes, public API baseline, package validation, docs route checks, scene PNG gate tests, and default full-window shell gate tests. | Strong text/API/scene/shell gates. Keep strict pixel baselines deferred until deterministic drift is measured. |
@@ -38,7 +42,7 @@ Phase 481 adds a deterministic full-window Cookbook shell capture alongside the 
 | Capability | Current status | Evidence / remaining gap | Next action |
 | --- | --- | --- | --- |
 | Custom nodes with arbitrary Avalonia content | Partial / supported through AsterGraph idioms | Node definitions, `IGraphNodeVisualPresenter`, authoring-surface docs, templates, and hosted controls exist. The public story is still less direct than React Flow's custom node component model. | Keep improving docs and samples with concrete host-owned visual presenter examples. |
-| Node drag handles | Gap | Node dragging, marquee, selection, and command routing exist, but no stable public `DragHandle` or selector-style contract was found. | GitHub #81 / `avalonia-node-map-p479`. |
+| Node drag handles | Present / guarded | `NodeDragHandle` exposes a public Avalonia attached property for custom node visual/body presenters. Focused headless tests cover drag from marked handles and suppression from unmarked body surfaces when a handle exists. | Keep guarded with `StandaloneCanvas_NodeDragHandle_*` tests and public API baseline checks. |
 | Node resizer | Present | `NodeResizer`, `TrySetNodeSize`, built-in component catalog, Cookbook route, and focused tests exist. | Keep guarded by built-in tests and screenshot route. |
 | Rotatable nodes | Missing | Source search found viewport transforms and selection transforms, but no persisted node rotation model, command, renderer contract, or tests. | GitHub #80 / `avalonia-node-map-p480`. |
 | Custom edges | Present / guarded | `GraphEdgePresentation`, connection geometry snapshots, route vertices, reconnect/edit commands, labels, path kinds, markers, animation flag, and floating endpoints exist. | Keep API and renderer tests current when edge claims change. |
@@ -84,23 +88,22 @@ The original first wave is no longer the next work queue. These tracker items ar
 | #59, #61, #63, #65 | `avalonia-node-map-a08.*` | Scene screenshot foundation plus built-in, interaction, and lifecycle Cookbook batches. |
 | #67, #69, #71, #73, #75, #77 | `avalonia-node-map-y1e.*` | Built-in catalog, NodeToolbar, EdgeToolbar, NodeResizer, Panel, Controls, and screenshot coverage for standalone built-ins. |
 | #83 | `avalonia-node-map-p481` | First full-window Cookbook shell visual gate with artifact metadata and CI lane coverage. |
+| #84 | `avalonia-node-map-p482` | Guarded cycle-prevention connection policy. |
+| #81 | `avalonia-node-map-p479` | Public hosted-Avalonia node drag-handle API through `NodeDragHandle`. |
 
 ## Next Issue Wave
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #81 | `avalonia-node-map-p479` | Phase 479: define public node drag-handle API | P1 | `AsterGraph.Abstractions` or `AsterGraph.Avalonia`, canvas interaction routing, tests, docs | Can start after Phase 478. Avoid overlapping with rotation changes in node transform/hit-test code. |
 | #80 | `avalonia-node-map-p480` | Phase 480: add rotatable node model and rendering contract | P2 | `AsterGraph.Core`, `AsterGraph.Editor`, `AsterGraph.Avalonia`, serialization/API/tests/docs | Keep separate from drag-handle work because both may touch node hit testing and adorners. |
-| #84 | `avalonia-node-map-p482` | Phase 482: harden cycle-prevention connection policy | P1 | `AsterGraph.Editor` validation policy, tests, Demo/Cookbook docs | Implemented as a guarded policy contract; close after PR evidence is merged. |
 | #82 | `avalonia-node-map-p483` | Phase 483: prove or bound large-graph rendering virtualization | P1 | `AsterGraph.Avalonia` renderer/projection if implementing; otherwise scale docs/tests | Start as an evidence/decision branch before any renderer rewrite. |
 
-Recommended next branch after Phase 482: `avalonia-node-map-p479` / GitHub #81 for the public node drag-handle API if the next branch can touch Avalonia interaction routing, or `avalonia-node-map-p483` / GitHub #82 if the next branch should stay evidence/docs-first around virtualization claims.
+Recommended next branch after Phase 479: `avalonia-node-map-p480` / GitHub #80 for rotatable nodes if the next branch can touch node transforms and hit testing, or `avalonia-node-map-p483` / GitHub #82 if the next branch should stay evidence/docs-first around virtualization claims.
 
 ## Recommended Parallel Worktree Plan
 
 - `docs/phase478-parity-refresh`: owns this audit refresh, Chinese mirror, tracker split, and Phase 478 closure only.
 - `feature/cycle-prevention-policy`: owns #84 / `avalonia-node-map-p482`. Avoid Avalonia shell work except docs/examples.
-- `feature/node-drag-handle-api`: owns #81 / `avalonia-node-map-p479`. Coordinate with rotation if both touch hit testing or adorners.
 - `feature/rotatable-nodes`: owns #80 / `avalonia-node-map-p480`. Do not mix with drag-handle API unless a shared transform abstraction is explicitly approved.
 - `perf/rendering-virtualization-boundary`: owns #82 / `avalonia-node-map-p483`. Start by proving or bounding the claim before touching renderer internals.
 

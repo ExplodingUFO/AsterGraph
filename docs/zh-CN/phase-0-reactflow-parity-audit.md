@@ -10,6 +10,10 @@
 
 Phase 481 在现有 scene PNG gate 之外新增了确定性的 full-window Cookbook shell capture。新 gate 覆盖 default Cookbook shell route，把 artifact 写到 `artifacts/test-results/cookbook-shell-visual-gate`，并验证 dimensions、nonblank pixels、shell-part coverage 和 metadata。严格 pixel-baseline comparison 仍然等 Skia/native drift 在 CI hosts 上测量清楚后再做。
 
+## Phase 479 更新
+
+Phase 479 在 `AsterGraph.Avalonia.Presentation` 中新增 `NodeDragHandle`，作为 hosted Avalonia 路线下 React Flow-style 节点 drag handle 的公开入口。宿主在 stock-shell custom node body presenter 中标记一个 control；stock node shell 只允许从该 handle 或其 descendant 启动节点拖动，不依赖 Demo-only private hook。
+
 ## 仓库基线
 
 - 当前包版本仍是 `Directory.Build.props` 中的 `0.11.0-beta`；可发布库为 `AsterGraph.Abstractions`、`AsterGraph.Core`、`AsterGraph.Editor` 和 `AsterGraph.Avalonia`。
@@ -28,7 +32,7 @@ Phase 481 在现有 scene PNG gate 之外新增了确定性的 full-window Cookb
 | 持久化模型和序列化 | `src/AsterGraph.Core` | `GraphDocument`、groups、scopes、edge presentation、schema migration helpers 和 legacy import boundary。 | #48 的兼容面清理已完成；新增模型字段例如 rotation 必须先说明 schema 行为。 |
 | Session、commands、queries、state services | `src/AsterGraph.Editor` | Selection、undo/redo、clipboard、workspace save/load、connection authoring、validation、layout、events、mutations 和 presentation snapshots。 | canonical route 已经较强；后续 parity 工作应走 commands/queries，不绕开 session ownership。 |
 | Layout integration | `src/AsterGraph.Editor/Runtime` 和 services | `GraphLayoutRequest`、`GraphLayoutPlan`、`IGraphLayoutProvider`、preview/apply/cancel evidence 和 snap/grid commands。 | Provider seam 已存在；扩展 layout 声明时仍需明确 background/cancel/provider proof。 |
-| Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`、scene host projection、edge renderer、interaction coordinators、automation peers、MiniMap、Background、Controls、Panel、NodeToolbar、EdgeToolbar 和 NodeResizer。 | Built-ins 已成为可复用 public components。剩余 UI parity 缺口集中在 drag-handle API、rotation 和 full-window visual regression。 |
+| Avalonia rendering and interaction | `src/AsterGraph.Avalonia` | `NodeCanvas`、scene host projection、edge renderer、interaction coordinators、automation peers、MiniMap、Background、Controls、Panel、NodeToolbar、EdgeToolbar、NodeResizer 和 `NodeDragHandle`。 | Built-ins 已成为可复用 public components。剩余 UI parity 缺口集中在 rotation 和更广的 full-window visual regression。 |
 | Hosted workbench shell | `GraphEditorView` 和 hosted factories | Header、library、canvas、inspector、validation panel、authoring tools、minimap、command projection 和 status chrome。 | 是有用的 supported route，但新增公开功能不应把 Demo shell chrome 变成隐藏依赖。 |
 | Demo/Cookbook | `src/AsterGraph.Demo` | 25 个 recipes、route clarity docs、built-in/interaction/lifecycle batches、scene PNG screenshot gate metadata 和 default full-window shell visual metadata。 | Cookbook breadth、scene coverage 和第一条 shell-level capture 已覆盖。Pixel-baseline comparison 与更广的 shell-state coverage 仍作为后续有界工作。 |
 | CI and release gates | `.github/workflows`、`eng/ci.ps1`、test projects | Build/test/maintenance/contract/release/hygiene lanes、public API baseline、package validation、docs route checks、scene PNG gate tests 和 default full-window shell gate tests。 | Text/API/scene/shell gates 较强。严格 pixel baseline 继续等 deterministic drift 测量后再做。 |
@@ -38,7 +42,7 @@ Phase 481 在现有 scene PNG gate 之外新增了确定性的 full-window Cookb
 | 能力 | 当前状态 | 证据 / 剩余缺口 | 下一步 |
 | --- | --- | --- | --- |
 | Custom nodes with arbitrary Avalonia content | Partial / AsterGraph idiom 下支持 | Node definitions、`IGraphNodeVisualPresenter`、authoring-surface docs、templates 和 hosted controls 已存在。公开故事仍不如 React Flow custom node component 直接。 | 用具体 host-owned visual presenter 示例继续补文档。 |
-| Node drag handles | Gap | Node dragging、marquee、selection 和 command routing 已存在，但未发现稳定 public `DragHandle` 或 selector-style contract。 | GitHub #81 / `avalonia-node-map-p479`。 |
+| Node drag handles | Present / guarded | `NodeDragHandle` 为 custom node visual/body presenter 暴露 public Avalonia attached property。Focused headless tests 覆盖从标记 handle 拖动，以及存在 handle 时未标记 body surface 不启动拖动。 | 继续用 `StandaloneCanvas_NodeDragHandle_*` tests 和 public API baseline checks 守住。 |
 | Node resizer | Present | `NodeResizer`、`TrySetNodeSize`、built-in component catalog、Cookbook route 和 focused tests 已存在。 | 继续用 built-in tests 与 screenshot route 守住。 |
 | Rotatable nodes | Missing | 只发现 viewport transforms 和 selection transforms；未发现持久化 node rotation model、command、renderer contract 或 tests。 | GitHub #80 / `avalonia-node-map-p480`。 |
 | Custom edges | Present / guarded | `GraphEdgePresentation`、connection geometry snapshots、route vertices、reconnect/edit commands、labels、path kinds、markers、animation flag 和 floating endpoints 已存在。 | Edge claims 变化时同步维护 API 与 renderer tests。 |
@@ -84,23 +88,22 @@ Phase 481 在现有 scene PNG gate 之外新增了确定性的 full-window Cookb
 | #59、#61、#63、#65 | `avalonia-node-map-a08.*` | Scene screenshot foundation，以及 built-in、interaction、lifecycle Cookbook batches。 |
 | #67、#69、#71、#73、#75、#77 | `avalonia-node-map-y1e.*` | Built-in catalog、NodeToolbar、EdgeToolbar、NodeResizer、Panel、Controls，以及 standalone built-ins 的 screenshot coverage。 |
 | #83 | `avalonia-node-map-p481` | 第一条 full-window Cookbook shell visual gate，带 artifact metadata 和 CI lane coverage。 |
+| #84 | `avalonia-node-map-p482` | Guarded cycle-prevention connection policy。 |
+| #81 | `avalonia-node-map-p479` | 通过 `NodeDragHandle` 提供 public hosted-Avalonia node drag-handle API。 |
 
 ## 下一轮 Issue Wave
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #81 | `avalonia-node-map-p479` | Phase 479: define public node drag-handle API | P1 | `AsterGraph.Abstractions` 或 `AsterGraph.Avalonia`、canvas interaction routing、tests、docs | Phase 478 后可启动。避免与 rotation 同时改 node transform/hit-test。 |
 | #80 | `avalonia-node-map-p480` | Phase 480: add rotatable node model and rendering contract | P2 | `AsterGraph.Core`、`AsterGraph.Editor`、`AsterGraph.Avalonia`、serialization/API/tests/docs | 与 drag-handle 分开，因为两者都可能触碰 node hit testing 与 adorners。 |
-| #84 | `avalonia-node-map-p482` | Phase 482: harden cycle-prevention connection policy | P1 | `AsterGraph.Editor` validation policy、tests、Demo/Cookbook docs | 已实现为 guarded policy contract；PR evidence 合并后关闭。 |
 | #82 | `avalonia-node-map-p483` | Phase 483: prove or bound large-graph rendering virtualization | P1 | 若实现则涉及 `AsterGraph.Avalonia` renderer/projection；否则涉及 scale docs/tests | 先作为 evidence/decision branch 启动，不要直接重写 renderer。 |
 
-Phase 482 之后的推荐下一条分支：如果下一条可以触碰 Avalonia interaction routing，做 `avalonia-node-map-p479` / GitHub #81 的 public node drag-handle API；如果下一条要保持 evidence/docs-first，则做 `avalonia-node-map-p483` / GitHub #82 的 virtualization claim 边界。
+Phase 479 之后的推荐下一条分支：如果下一条可以触碰 node transform 与 hit testing，做 `avalonia-node-map-p480` / GitHub #80 的 rotatable nodes；如果下一条要保持 evidence/docs-first，则做 `avalonia-node-map-p483` / GitHub #82 的 virtualization claim 边界。
 
 ## 推荐并行 Worktree 计划
 
 - `docs/phase478-parity-refresh`：只负责本审计刷新、中文镜像、tracker split 和 Phase 478 关闭。
 - `feature/cycle-prevention-policy`：负责 #84 / `avalonia-node-map-p482`，除文档/示例外避免 Avalonia shell 工作。
-- `feature/node-drag-handle-api`：负责 #81 / `avalonia-node-map-p479`，如同时推进 rotation，需协调 hit testing / adorners。
 - `feature/rotatable-nodes`：负责 #80 / `avalonia-node-map-p480`，除非明确批准共享 transform abstraction，否则不要混入 drag-handle API。
 - `perf/rendering-virtualization-boundary`：负责 #82 / `avalonia-node-map-p483`，先证明或收紧声明边界，再碰 renderer internals。
 

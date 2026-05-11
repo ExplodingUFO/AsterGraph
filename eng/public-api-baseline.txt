@@ -387,6 +387,7 @@ F:AsterGraph.Avalonia.Presentation.GraphResizeFeedbackHandle.RightEdge:AsterGrap
 F:AsterGraph.Avalonia.Presentation.GraphResizeFeedbackHandle.TopEdge:AsterGraph.Avalonia.Presentation.GraphResizeFeedbackHandle
 F:AsterGraph.Avalonia.Presentation.GraphResizeFeedbackSurfaceKind.Group:AsterGraph.Avalonia.Presentation.GraphResizeFeedbackSurfaceKind
 F:AsterGraph.Avalonia.Presentation.GraphResizeFeedbackSurfaceKind.Node:AsterGraph.Avalonia.Presentation.GraphResizeFeedbackSurfaceKind
+F:AsterGraph.Avalonia.Presentation.NodeDragHandle.IsDragHandleProperty:Avalonia.AttachedProperty<System.Boolean>
 F:AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage.Inspector:AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage
 F:AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage.NodeSurface:AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage
 F:AsterGraph.Core.Models.GraphConnectionTargetKind.Parameter:AsterGraph.Core.Models.GraphConnectionTargetKind
@@ -850,6 +851,8 @@ M:AsterGraph.Avalonia.Presentation.IGraphNodeVisualPresenter.Create(AsterGraph.A
 M:AsterGraph.Avalonia.Presentation.IGraphNodeVisualPresenter.Update(AsterGraph.Avalonia.Presentation.GraphNodeVisual,AsterGraph.Avalonia.Presentation.GraphNodeVisualContext):System.Void
 M:AsterGraph.Avalonia.Presentation.IGraphResizeFeedbackPolicy.ResolveCursor(AsterGraph.Avalonia.Presentation.GraphResizeFeedbackContext):Avalonia.Input.Cursor
 M:AsterGraph.Avalonia.Presentation.INodeParameterEditorRegistry.CreateEditor(AsterGraph.Avalonia.Presentation.NodeParameterEditorRequest):Avalonia.Controls.Control
+M:AsterGraph.Avalonia.Presentation.NodeDragHandle.GetIsDragHandle(Avalonia.Controls.Control):System.Boolean
+M:AsterGraph.Avalonia.Presentation.NodeDragHandle.SetIsDragHandle(Avalonia.Controls.Control,System.Boolean):System.Void
 M:AsterGraph.Avalonia.Presentation.NodeParameterEditorRequest.<Clone>$():AsterGraph.Avalonia.Presentation.NodeParameterEditorRequest
 M:AsterGraph.Avalonia.Presentation.NodeParameterEditorRequest.Deconstruct(out AsterGraph.Editor.ViewModels.NodeParameterViewModel&,out System.String&,out AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage&):System.Void
 M:AsterGraph.Avalonia.Presentation.NodeParameterEditorRequest.Equals(AsterGraph.Avalonia.Presentation.NodeParameterEditorRequest):System.Boolean
@@ -3938,6 +3941,7 @@ T:class AsterGraph.Avalonia.Presentation.GraphNodeVisual
 T:class AsterGraph.Avalonia.Presentation.GraphNodeVisualContext
 T:class AsterGraph.Avalonia.Presentation.GraphPresentationSemantics
 T:class AsterGraph.Avalonia.Presentation.GraphResizeFeedbackContext
+T:class AsterGraph.Avalonia.Presentation.NodeDragHandle
 T:class AsterGraph.Avalonia.Presentation.NodeParameterEditorRequest
 T:class AsterGraph.Avalonia.Styling.AvaloniaStylePalette
 T:class AsterGraph.Avalonia.Styling.GraphEditorStyleAdapter
