@@ -74,6 +74,10 @@ Phase 506 是 GitHub #135 / `avalonia-node-map-h7c`，承接 accessibility manua
 
 Phase 507 是 GitHub #137 / `avalonia-node-map-3tw`，承接 Phase 506 关闭后的 post-Phase-506 visual queue refresh。本 slice 是 docs/tests only：修复 Phases 503-506 已关闭后仍停留在 active queue 的 stale 状态，并把 Phase 506 visual planning candidates 转成具体 next tracker candidates：GitHub #139-#143 / `avalonia-node-map-2nu`、`avalonia-node-map-0ff`、`avalonia-node-map-8lu`、`avalonia-node-map-9rq` 和 `avalonia-node-map-1j4`。它不授权 no runtime UI behavior changes、no shell-state manifest rows、no strict pixel baselines、no public API changes、no retained API removal 或 no broad visual/language/theme certification。
 
+## Phase 508 更新
+
+Phase 508 是 GitHub #139 / `avalonia-node-map-2nu`，承接 post-Phase-506 queue refresh 选出的 shell flyout visual capture。本 slice 只修改 shell visual gate harness/manifest/docs/tests：新增 `shell-cookbook-default-view-menu-flyout`，打开 `PART_ViewMenu`，记录 `CaptureScope=full-window-shell-flyout-state`，并在 generated artifact metadata 中验证有界的 View menu headers。不授权 runtime UI behavior change、public API change、strict pixel baselines、popup 或 context-menu coverage、broad language/theme certification 或 retained API removal。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -250,13 +254,15 @@ Phase 505 已通过 GitHub #133 / `avalonia-node-map-b4z` 关闭 accessibility m
 
 Phase 506 已通过 GitHub #135 / `avalonia-node-map-h7c` 关闭 broader shell visual coverage planning。它保持 docs/tests only：记录现有 five manifest-driven full-window shell captures 如何衔接到后续 flyout、popup、context-menu、language/theme 和 drift-measurement work；本 slice 不新增 manifest rows，也不扩大 visual certification claims。
 
-Phase 507 现在通过 GitHub #137 / `avalonia-node-map-3tw` 承接 post-Phase-506 visual queue refresh。它是 docs/tests only：修复 stale current-owned table，并把 Phase 506 planning candidates 转成下一轮具体 visual-coverage queue；不做 no runtime UI behavior changes、no shell-state manifest rows、no strict pixel baselines、no public API changes、no retained API removal 或 no broad visual/language/theme certification。
+Phase 507 已通过 GitHub #137 / `avalonia-node-map-3tw` 关闭 post-Phase-506 visual queue refresh。它是 docs/tests only：修复 stale current-owned table，并把 Phase 506 planning candidates 转成下一轮具体 visual-coverage queue；不做 no runtime UI behavior changes、no shell-state manifest rows、no strict pixel baselines、no public API changes、no retained API removal 或 no broad visual/language/theme certification。
+
+Phase 508 现在通过 GitHub #139 / `avalonia-node-map-2nu` 承接 shell flyout visual capture。它只新增一条有界 View menu flyout state：`shell-cookbook-default-view-menu-flyout`，并记录 `PART_ViewMenu`、`full-window-shell-flyout-state` metadata 和 required header evidence；runtime behavior changes、public API changes、strict pixel baselines、popup coverage、context-menu coverage、broad language/theme certification 和 retained API removal 仍不在范围内。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #137 | `avalonia-node-map-3tw` | Phase 507: post-Phase-506 visual queue refresh | P3 | parity roadmap docs 和 focused docs tests | Current owned slice。只修复 stale tracker wording；不做 runtime UI behavior changes、shell-state manifest rows、strict pixel baselines、public API changes、retained API removal 或 broad visual/language/theme certification。 |
-| #139 | `avalonia-node-map-2nu` | Phase 508: shell flyout visual capture | P3 | shell visual gate harness、manifest/docs/tests、generated artifact metadata | Phase 507 之后的候选项。只隔离一条 flyout capture path，并证明 full-window artifact metadata，不声明 broad shell certification。 |
-| #140 | `avalonia-node-map-0ff` | Phase 509: popup visual capture | P3 | shell visual gate harness、manifest/docs/tests、generated artifact metadata | flyout capture 之后的候选项。popup coverage 与 context-menu coverage 分开推进，除非另有 tracker，不做 runtime redesign。 |
+| #137 | `avalonia-node-map-3tw` | Phase 507: post-Phase-506 visual queue refresh | P3 | parity roadmap docs 和 focused docs tests | Closed slice。只修复 stale tracker wording；不做 runtime UI behavior changes、shell-state manifest rows、strict pixel baselines、public API changes、retained API removal 或 broad visual/language/theme certification。 |
+| #139 | `avalonia-node-map-2nu` | Phase 508: shell flyout visual capture | P3 | shell visual gate harness、manifest/docs/tests、generated artifact metadata | Current owned slice。只隔离一条 View menu flyout capture path，并证明 full-window artifact metadata，不声明 broad shell certification。 |
+| #140 | `avalonia-node-map-0ff` | Phase 509: popup visual capture | P3 | shell visual gate harness、manifest/docs/tests、generated artifact metadata | Phase 508 之后的候选项。popup coverage 与 context-menu coverage 分开推进，除非另有 tracker，不做 runtime redesign。 |
 | #141 | `avalonia-node-map-8lu` | Phase 510: context-menu visual capture | P3 | context-menu visual harness/docs/tests、generated artifact metadata | popup capture 之后的候选项。复用现有 context-menu presenter route，不做 public API changes 或 retained hook removal。 |
 | #142 | `avalonia-node-map-9rq` | Phase 511: additional language/theme shell variants | P3 | 有界 language/theme rows 的 shell state manifest/docs/tests | overlay capture 形状明确后的候选项。只增加明确 variants，不声明 broad visual/language/theme certification。 |
 | #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement | P3 | drift measurement docs/tests/artifact metadata | 必须先于任何 strict pixel baseline。比较记录的 `PngSha256` 和 host metadata 作为 evidence，而不是引入 pass/fail hash policy。 |
@@ -292,7 +298,7 @@ Phase 507 现在通过 GitHub #137 / `avalonia-node-map-3tw` 承接 post-Phase-5
 - 每个新的 public UI component 或 interaction 都应有 Cookbook route；
 - 如果 UI 变更只是 structural-only 且不改变像素，需要显式说明。
 
-当前覆盖包含 scene-level route captures 和 five manifest-driven full-window shell captures。`DemoCookbookScreenshotGateTests`、`CookbookScreenshotGateRoutes.json` 和 `CookbookShellVisualGateStates.json` 能证明规范 graph scenes、route metadata、English default Cookbook open artifact、English default Cookbook closed-drawer artifact、Chinese default Cookbook shell artifact、English runtime diagnostics shell artifact 和 selected English runtime diagnostics closed-shell artifact；它们仍不提供严格 pixel-baseline comparisons 或广泛 flyout/popup/context-menu/theme/language coverage。
+当前覆盖包含 scene-level route captures 和 six manifest-driven full-window shell captures：five base shell states 加一条有界 View menu flyout state。`DemoCookbookScreenshotGateTests`、`CookbookScreenshotGateRoutes.json` 和 `CookbookShellVisualGateStates.json` 能证明规范 graph scenes、route metadata、English default Cookbook open artifact、English default Cookbook closed-drawer artifact、Chinese default Cookbook shell artifact、English runtime diagnostics shell artifact、selected English runtime diagnostics closed-shell artifact，以及 `shell-cookbook-default-view-menu-flyout`；它们仍不提供严格 pixel-baseline comparisons、View menu 之外的广泛 flyout coverage、popup coverage、context-menu coverage 或 broad theme/language coverage。
 
 ## Tracker 备注
 
@@ -312,6 +318,7 @@ Phase 507 现在通过 GitHub #137 / `avalonia-node-map-3tw` 承接 post-Phase-5
 - Phase 504 已通过 GitHub #131 / `avalonia-node-map-8lf` 关闭 layout provider evidence expansion；它记录当前同步且由宿主拥有的 layout provider seam。
 - Phase 505 已通过 GitHub #133 / `avalonia-node-map-b4z` 关闭 accessibility manual assistive-technology validation planning；它只记录 manual AT checks，不声明 certification。
 - Phase 506 已通过 GitHub #135 / `avalonia-node-map-h7c` 关闭 broader shell visual coverage planning；它只记录未来 visual candidates，不新增 manifest rows。
-- Phase 507 现在通过 GitHub #137 / `avalonia-node-map-3tw` 承接 post-Phase-506 visual queue refresh；它把 Phases 508-512 分配到真实 tracker IDs。
-- Phase 508 / #139 / `avalonia-node-map-2nu`、Phase 509 / #140 / `avalonia-node-map-0ff`、Phase 510 / #141 / `avalonia-node-map-8lu`、Phase 511 / #142 / `avalonia-node-map-9rq` 和 Phase 512 / #143 / `avalonia-node-map-1j4` 是下一轮具体 visual-coverage candidates。
-- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506 和 Phase 507 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
+- Phase 507 已通过 GitHub #137 / `avalonia-node-map-3tw` 关闭 post-Phase-506 visual queue refresh；它把 Phases 508-512 分配到真实 tracker IDs。
+- Phase 508 现在通过 GitHub #139 / `avalonia-node-map-2nu` 承接 shell flyout visual capture；它只新增 `shell-cookbook-default-view-menu-flyout` 和 `full-window-shell-flyout-state` metadata。
+- Phase 509 / #140 / `avalonia-node-map-0ff`、Phase 510 / #141 / `avalonia-node-map-8lu`、Phase 511 / #142 / `avalonia-node-map-9rq` 和 Phase 512 / #143 / `avalonia-node-map-1j4` 仍是下一轮具体 visual-coverage candidates。
+- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507 和 Phase 508 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
