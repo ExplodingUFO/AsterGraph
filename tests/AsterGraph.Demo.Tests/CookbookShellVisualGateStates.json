@@ -32,6 +32,20 @@
     "outputFileName": "shell-cookbook-default-open-zh-cn.png"
   },
   {
+    "id": "shell-cookbook-default-closed",
+    "routeId": "cookbook-default-starter-host-ai-pipeline",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "expectedPaneOpen": false,
+    "requiredShellParts": [
+      "PART_HostMenu",
+      "PART_HostShellSplitView",
+      "PART_MainGraphEditorHost"
+    ],
+    "outputFileName": "shell-cookbook-default-closed.png"
+  },
+  {
     "id": "shell-runtime-diagnostics-open",
     "routeId": "cookbook-default-starter-host-ai-pipeline",
     "hostGroup": "runtime",

@@ -288,6 +288,7 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains("before/after", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("shell-runtime-diagnostics-open", contents, StringComparison.Ordinal);
             Assert.Contains("shell-cookbook-default-open-zh-cn", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-closed", contents, StringComparison.Ordinal);
             Assert.Contains("language/theme", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("builtin-standalone-controls-route", contents, StringComparison.Ordinal);
             Assert.Contains("builtin-standalone-panel-route", contents, StringComparison.Ordinal);
@@ -401,6 +402,10 @@ public sealed class DemoCookbookScreenshotGateTests
         viewModel.PreferredWindowWidth = route.ViewportWidth;
         viewModel.PreferredWindowHeight = route.ViewportHeight;
         viewModel.OpenHostMenuGroup(shellState.HostGroup);
+        if (!shellState.ExpectedPaneOpen)
+        {
+            viewModel.CloseHostPane();
+        }
 
         var window = new MainWindow
         {
