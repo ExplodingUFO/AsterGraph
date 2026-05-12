@@ -141,6 +141,49 @@ public sealed class AccessibilityManualValidationDocsTests
         }
     }
 
+    [Fact]
+    public void AccessibilityManualValidationDocs_RecordPhase518DynamicAnnouncementRuntimeProof()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+        var englishRecipe = ReadRepoFile("docs/en/hosted-accessibility-recipe.md");
+        var chineseRecipe = ReadRepoFile("docs/zh-CN/hosted-accessibility-recipe.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 518", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #158", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-g0u", contents, StringComparison.Ordinal);
+            Assert.Contains("ACCESSIBILITY_DYNAMIC_ANNOUNCEMENT_CONTRACT", contents, StringComparison.Ordinal);
+            Assert.Contains("AutomationProperties.LiveSetting", contents, StringComparison.Ordinal);
+            Assert.Contains("Polite", contents, StringComparison.Ordinal);
+            Assert.Contains("validation/export/status", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("live screen-reader speech output was not observed", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no broad screen-reader certification claim", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { englishRecipe, chineseRecipe })
+        {
+            Assert.Contains("ACCESSIBILITY_DYNAMIC_ANNOUNCEMENT_CONTRACT", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 518", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #158", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-g0u", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_ValidationStatusText", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_StatusValidationText", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_ExportStatusText", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_CurrentStatusText", contents, StringComparison.Ordinal);
+            Assert.Contains("Validation status", contents, StringComparison.Ordinal);
+            Assert.Contains("Status bar validation", contents, StringComparison.Ordinal);
+            Assert.Contains("Export status", contents, StringComparison.Ordinal);
+            Assert.Contains("Current editor status", contents, StringComparison.Ordinal);
+            Assert.Contains("AutomationProperties.LiveSetting", contents, StringComparison.Ordinal);
+            Assert.Contains("Polite", contents, StringComparison.Ordinal);
+            Assert.Contains("DynamicStatusAnnouncementRegions_ExposeStableLiveRegionContract", contents, StringComparison.Ordinal);
+            Assert.Contains("live screen-reader speech output was not observed", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no broad screen-reader certification claim", contents, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 
