@@ -98,6 +98,10 @@ Phase 512 is GitHub #143 / `avalonia-node-map-1j4`, the pixel-baseline drift mea
 
 Phase 513 is GitHub #149 / `avalonia-node-map-d8q`, the post-Phase-512 roadmap refresh after the Phase 506 visual queue closed through Phases 508-512. This slice is docs/tests only: it records Phase 512 as closed, replaces the current-owned visual queue with concrete post-Phase-512 follow-ups, and keeps `.planning/` drift explicit because those files are local/ignored rather than part of the PR worktree. It authorizes no runtime behavior changes, no public API changes, no UI redesign, no strict pixel baseline enforcement, no retained API removal, and no broad parity or accessibility certification claims.
 
+## Phase 514 Update
+
+Phase 514 is GitHub #150 / `avalonia-node-map-ien`, the executable renderer virtualization proof harness selected after the Phase 513 roadmap refresh. It adds `RendererVirtualizationProofHarnessTests` and a machine-readable `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT` marker with `graphSize`, `viewport`, `zoom`, `overscan`, `visibleVisualCounts`, `invalidationCounts`, and `measuredTimings`. The artifact records `avoidsFullCollectionScan=false` and `avoidsFullSceneRebuild=false`, so the defended public claim remains viewport-budgeted scene projection/rendering with no support-claim expansion. It does not authorize an ItemsRepeater/Skia-style renderer rewrite, public API change, UI redesign, or new graph-size support tier.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -264,7 +268,7 @@ Phase 500 closed the selected runtime shell visual gate state through GitHub #12
 
 Phase 501 closed the post-Phase-500 parity follow-up queue refresh through GitHub #125 / `avalonia-node-map-38n`. It converted the current partial gaps into a concrete queue while keeping broad React Flow parity claims, runtime behavior changes, public API changes, UI redesign, strict pixel baselines, retained API removal, and renderer virtualization implementation out of scope.
 
-Phase 502 now owns the renderer virtualization execution proof through GitHub #127 / `avalonia-node-map-mai`. It is current/owned work and remains docs/tests only: define the proof command and artifact metadata contract required before any true renderer virtualization claim while keeping implementation, runtime behavior change, public API change, UI redesign, retained API removal, and support-claim expansion out of scope.
+Phase 502 closed the renderer virtualization execution proof contract through GitHub #127 / `avalonia-node-map-mai`. It remained docs/tests only: define the proof command and artifact metadata contract required before any true renderer virtualization claim while keeping implementation, runtime behavior change, public API change, UI redesign, retained API removal, and support-claim expansion out of scope.
 
 Phase 503 now owns the declarative API ergonomics audit through GitHub #129 / `avalonia-node-map-mzu`. It remains docs/tests only: record the current code-first, factory, hosted-builder, template, and Demo routes without claiming React hook parity, a `<ReactFlow>`-equivalent declarative DSL, runtime behavior change, public API change, UI redesign, retained API removal, or public API baseline change.
 
@@ -287,6 +291,8 @@ Phase 511 now owns the additional language/theme shell variants through GitHub #
 Phase 512 closed pixel-baseline drift measurement through GitHub #143 / `avalonia-node-map-1j4`. It added record-only `DriftMeasurement` metadata beside each generated scene and shell artifact's `PngSha256`, including host runtime, OS, and process architecture fields; strict pixel baselines, pass/fail hash policy, visual redesign, runtime behavior changes, public API changes, and retained API removal remain out of scope.
 
 Phase 513 refreshes the post-Phase-512 queue through GitHub #149 / `avalonia-node-map-d8q`. It records that the Phase 506 visual queue is closed through Phases 508-512, moves the current owned slice to this roadmap refresh, and selects the next concrete follow-ups from remaining tracked evidence rather than reopening closed visual rows.
+
+Phase 514 executes the first renderer virtualization proof harness through GitHub #150 / `avalonia-node-map-ien`. It adds `RendererVirtualizationProofHarnessTests` and `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT` metadata for `graphSize`, `viewport`, `zoom`, `overscan`, `visibleVisualCounts`, `invalidationCounts`, and `measuredTimings`; because it records `avoidsFullCollectionScan=false` and `avoidsFullSceneRebuild=false`, the claim remains viewport-budgeted scene projection/rendering with no support-claim expansion.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
@@ -357,7 +363,7 @@ Current coverage includes scene-level route captures plus ten manifest-driven fu
 - Phase 511 now owns the additional language/theme shell variants with GitHub #142 / `avalonia-node-map-9rq`; it adds only `shell-cookbook-default-closed-zh-cn` and `shell-runtime-diagnostics-open-zh-cn` as `zh-CN` + `canonical-dark` metadata rows.
 - Phase 512 closed pixel-baseline drift measurement with GitHub #143 / `avalonia-node-map-1j4`; it records `DriftMeasurement` metadata as `record-only` and `drift-evidence` beside `PngSha256`, with `HostRuntimeDescription`, `OsDescription`, and `ProcessArchitecture`.
 - Phase 513 now owns the post-Phase-512 roadmap refresh with GitHub #149 / `avalonia-node-map-d8q`; it records the closed visual queue and selects the next real follow-ups.
-- Phase 514 is GitHub #150 / `avalonia-node-map-ien`; it is blocked behind Phase 513 and should execute the renderer virtualization proof harness before any true virtualization claim widens.
-- Phase 515 is GitHub #151 / `avalonia-node-map-t44`; it is blocked behind Phase 513 and should decide strict pixel-baseline policy from Phase 512 drift metadata.
-- Phase 516 is GitHub #152 / `avalonia-node-map-821`; it is blocked behind Phase 513 and should record manual assistive-technology validation evidence without unsupported certification claims.
+- Phase 514 is GitHub #150 / `avalonia-node-map-ien`; it executes the renderer virtualization proof harness with `RendererVirtualizationProofHarnessTests` and `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT`, while keeping `avoidsFullCollectionScan=false`, `avoidsFullSceneRebuild=false`, and no support-claim expansion.
+- Phase 515 is GitHub #151 / `avalonia-node-map-t44`; it should decide strict pixel-baseline policy from Phase 512 drift metadata after the Phase 514 renderer proof artifact is accepted.
+- Phase 516 is GitHub #152 / `avalonia-node-map-821`; it should record manual assistive-technology validation evidence without unsupported certification claims after the Phase 514 renderer proof artifact is accepted.
 - Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, Phase 499, Phase 500, Phase 501, Phase 502, Phase 503, Phase 504, Phase 505, Phase 506, Phase 507, Phase 508, Phase 509, Phase 510, Phase 511, Phase 512, and Phase 513 unless a focused test proves a specific missing contract.
