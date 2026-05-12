@@ -117,6 +117,20 @@
     "outputFileName": "shell-cookbook-default-closed.png"
   },
   {
+    "id": "shell-cookbook-default-closed-zh-cn",
+    "routeId": "cookbook-default-starter-host-ai-pipeline",
+    "hostGroup": "cookbook",
+    "language": "zh-CN",
+    "theme": "canonical-dark",
+    "expectedPaneOpen": false,
+    "requiredShellParts": [
+      "PART_HostMenu",
+      "PART_HostShellSplitView",
+      "PART_MainGraphEditorHost"
+    ],
+    "outputFileName": "shell-cookbook-default-closed-zh-cn.png"
+  },
+  {
     "id": "shell-runtime-diagnostics-open",
     "routeId": "cookbook-default-starter-host-ai-pipeline",
     "hostGroup": "runtime",
@@ -132,6 +146,23 @@
       "PART_MainGraphEditorHost"
     ],
     "outputFileName": "shell-runtime-diagnostics-open.png"
+  },
+  {
+    "id": "shell-runtime-diagnostics-open-zh-cn",
+    "routeId": "cookbook-default-starter-host-ai-pipeline",
+    "hostGroup": "runtime",
+    "language": "zh-CN",
+    "theme": "canonical-dark",
+    "expectedPaneOpen": true,
+    "requiredShellParts": [
+      "PART_HostMenu",
+      "PART_HostShellSplitView",
+      "PART_RuntimeSummarySection",
+      "PART_RuntimeInspectionSection",
+      "PART_RuntimeDiagnosticsSection",
+      "PART_MainGraphEditorHost"
+    ],
+    "outputFileName": "shell-runtime-diagnostics-open-zh-cn.png"
   },
   {
     "id": "shell-runtime-diagnostics-closed",

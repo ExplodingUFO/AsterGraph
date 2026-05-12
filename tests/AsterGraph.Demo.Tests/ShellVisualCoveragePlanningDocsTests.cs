@@ -61,7 +61,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(8, document.RootElement.GetArrayLength());
+        Assert.Equal(10, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -74,7 +74,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(8, document.RootElement.GetArrayLength());
+        Assert.Equal(10, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -102,7 +102,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(8, document.RootElement.GetArrayLength());
+        Assert.Equal(10, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -124,6 +124,42 @@ public sealed class ShellVisualCoveragePlanningDocsTests
             Assert.Contains("Add Node", contents, StringComparison.Ordinal);
             Assert.Contains("Fit View", contents, StringComparison.Ordinal);
             Assert.Contains("Reset View", contents, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void ShellVisualCoveragePlanningDocs_RecordPhase511BoundedLanguageThemeRows()
+    {
+        var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
+        using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
+        Assert.Equal(10, document.RootElement.GetArrayLength());
+        Assert.Contains(
+            document.RootElement.EnumerateArray(),
+            state =>
+                string.Equals(state.GetProperty("id").GetString(), "shell-cookbook-default-closed-zh-cn", StringComparison.Ordinal)
+                && string.Equals(state.GetProperty("language").GetString(), "zh-CN", StringComparison.Ordinal)
+                && string.Equals(state.GetProperty("theme").GetString(), "canonical-dark", StringComparison.Ordinal)
+                && !state.GetProperty("expectedPaneOpen").GetBoolean());
+        Assert.Contains(
+            document.RootElement.EnumerateArray(),
+            state =>
+                string.Equals(state.GetProperty("id").GetString(), "shell-runtime-diagnostics-open-zh-cn", StringComparison.Ordinal)
+                && string.Equals(state.GetProperty("language").GetString(), "zh-CN", StringComparison.Ordinal)
+                && string.Equals(state.GetProperty("theme").GetString(), "canonical-dark", StringComparison.Ordinal)
+                && state.GetProperty("expectedPaneOpen").GetBoolean());
+
+        var englishCookbook = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chineseCookbook = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+        foreach (var contents in new[] { englishCookbook, chineseCookbook })
+        {
+            Assert.Contains("Phase 511", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #142", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-9rq", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-closed-zh-cn", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-runtime-diagnostics-open-zh-cn", contents, StringComparison.Ordinal);
+            Assert.Contains("zh-CN", contents, StringComparison.Ordinal);
+            Assert.Contains("canonical-dark", contents, StringComparison.Ordinal);
+            Assert.Contains("no broad visual/language/theme certification", contents, StringComparison.OrdinalIgnoreCase);
         }
     }
 
