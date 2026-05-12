@@ -630,6 +630,56 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase527BackgroundVariantPublicSurfaceGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 527", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #177", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-dim", contents, StringComparison.Ordinal);
+            Assert.Contains("Background variant public surface gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("GridBackground line-grid renderer", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("CanvasStyleOptions grid tokens", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("bounded line-density behavior", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("snap-to-grid/session command evidence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("built-in catalog/Cookbook route", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("screenshot-gate coverage", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("partial / guarded", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("GridBackground.CalculateVisibleLineMetrics", contents, StringComparison.Ordinal);
+            Assert.Contains("CanvasStyleOptions.GridBackgroundHex", contents, StringComparison.Ordinal);
+            Assert.Contains("PrimaryGridSpacing", contents, StringComparison.Ordinal);
+            Assert.Contains("SecondaryGridSpacing", contents, StringComparison.Ordinal);
+            Assert.Contains("TrySnapSelectedNodesToGrid", contents, StringComparison.Ordinal);
+            Assert.Contains("CalculateVisibleLineMetrics_WithExtremeZoomSpacing_KeepsLineDensityBounded", contents, StringComparison.Ordinal);
+            Assert.Contains("AuthoringToolsChrome_ProjectsStockSelectionLayoutActions", contents, StringComparison.Ordinal);
+            Assert.Contains("builtin-background-grid-route", contents, StringComparison.Ordinal);
+            Assert.Contains("background-grid-density", contents, StringComparison.Ordinal);
+            Assert.Contains("GRID_BACKGROUND_DENSITY_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("cookbook-builtin-background-grid", contents, StringComparison.Ordinal);
+            Assert.Contains("dots/lines/cross variants", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("gap/size public API policy", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("background graph indexing", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("second renderer/new layout runtime", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no strict visual-baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow Background parity claim", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertBackgroundVariantPublicSurfaceGate(ExtractBackgroundVariantPublicSurfaceGate(englishParity));
+        AssertBackgroundVariantPublicSurfaceGate(ExtractBackgroundVariantPublicSurfaceGate(chineseParity));
+
+        Assert.Contains("Phase 527 records the Background variant public surface gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 527 记录 Background variant public surface gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -789,6 +839,30 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("not full React Flow Controls parity", table, StringComparison.OrdinalIgnoreCase);
     }
 
+    private static void AssertBackgroundVariantPublicSurfaceGate(string table)
+    {
+        Assert.Contains("| Background gate |", table, StringComparison.Ordinal);
+        Assert.Contains("| GridBackground line-grid renderer | Supported / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| CanvasStyleOptions grid tokens | Supported / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Bounded line-density behavior | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Snap-to-grid/session command evidence | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Built-in catalog/Cookbook route | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Screenshot-gate coverage | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Dots/lines/cross variants and gap/size API | Gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("GridBackground.CalculateVisibleLineMetrics", table, StringComparison.Ordinal);
+        Assert.Contains("CanvasStyleOptions.GridBackgroundHex", table, StringComparison.Ordinal);
+        Assert.Contains("PrimaryGridSpacing", table, StringComparison.Ordinal);
+        Assert.Contains("SecondaryGridSpacing", table, StringComparison.Ordinal);
+        Assert.Contains("TrySnapSelectedNodesToGrid", table, StringComparison.Ordinal);
+        Assert.Contains("CalculateVisibleLineMetrics_WithExtremeZoomSpacing_KeepsLineDensityBounded", table, StringComparison.Ordinal);
+        Assert.Contains("AuthoringToolsChrome_ProjectsStockSelectionLayoutActions", table, StringComparison.Ordinal);
+        Assert.Contains("builtin-background-grid-route", table, StringComparison.Ordinal);
+        Assert.Contains("background-grid-density", table, StringComparison.Ordinal);
+        Assert.Contains("GRID_BACKGROUND_DENSITY_OK", table, StringComparison.Ordinal);
+        Assert.Contains("cookbook-builtin-background-grid", table, StringComparison.Ordinal);
+        Assert.Contains("not full React Flow Background parity", table, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static string ExtractMiniMapInteractionCustomizationGate(string contents)
     {
         var headingStart = contents.IndexOf("\n## MiniMap Interaction And Customization Gate", StringComparison.Ordinal);
@@ -812,6 +886,19 @@ public sealed class ReactFlowParityRoadmapDocsTests
 
         var nextHeading = contents.IndexOf("\n## ", tableStart, StringComparison.Ordinal);
         Assert.True(nextHeading > tableStart, "Expected heading after Controls interactivity and custom-button gate table.");
+        return contents[tableStart..nextHeading];
+    }
+
+    private static string ExtractBackgroundVariantPublicSurfaceGate(string contents)
+    {
+        var headingStart = contents.IndexOf("\n## Background Variant Public Surface Gate", StringComparison.Ordinal);
+        Assert.True(headingStart >= 0, "Expected Background variant public surface gate heading.");
+
+        var tableStart = contents.IndexOf("| Background gate |", headingStart, StringComparison.Ordinal);
+        Assert.True(tableStart >= 0, "Expected Background variant public surface gate table header.");
+
+        var nextHeading = contents.IndexOf("\n## ", tableStart, StringComparison.Ordinal);
+        Assert.True(nextHeading > tableStart, "Expected heading after Background variant public surface gate table.");
         return contents[tableStart..nextHeading];
     }
 
