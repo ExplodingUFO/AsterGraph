@@ -583,6 +583,53 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase526ControlsInteractivityCustomButtonGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 526", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #175", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-clw", contents, StringComparison.Ordinal);
+            Assert.Contains("Controls interactivity/custom-button parity gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("canonical viewport commands", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("hosted action descriptor projection", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("disabled-command recovery", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("stable button/focus boundary", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("built-in catalog/Cookbook route", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("custom button/action injection gaps", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("partial / guarded", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("viewport.zoom-in", contents, StringComparison.Ordinal);
+            Assert.Contains("viewport.zoom-out", contents, StringComparison.Ordinal);
+            Assert.Contains("viewport.fit", contents, StringComparison.Ordinal);
+            Assert.Contains("viewport.reset", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphHostedActionFactory.CreateCommandActions", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphControls_RendersViewportActionsAndExecutesCanonicalCommands", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphControls_DisabledCommandDescriptorsExposeTooltipRecoveryText", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_AsterGraphControlsZoomInButton", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_AsterGraphControlsZoomOutButton", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_AsterGraphControlsFitViewButton", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_AsterGraphControlsResetViewButton", contents, StringComparison.Ordinal);
+            Assert.Contains("BUILTIN_STANDALONE_CONTROLS_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no strict visual-baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow Controls parity claim", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertControlsInteractivityCustomButtonGate(ExtractControlsInteractivityCustomButtonGate(englishParity));
+        AssertControlsInteractivityCustomButtonGate(ExtractControlsInteractivityCustomButtonGate(chineseParity));
+
+        Assert.Contains("Phase 526 records the Controls interactivity/custom-button parity gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 526 记录 Controls interactivity/custom-button parity gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -718,6 +765,30 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("not full React Flow MiniMap parity", table, StringComparison.OrdinalIgnoreCase);
     }
 
+    private static void AssertControlsInteractivityCustomButtonGate(string table)
+    {
+        Assert.Contains("| Controls gate |", table, StringComparison.Ordinal);
+        Assert.Contains("| Canonical viewport commands | Supported / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Hosted action descriptor projection | Supported / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Disabled-command recovery | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Stable button/focus boundary | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Built-in catalog/Cookbook route | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Custom button/action injection gaps | Gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("viewport.zoom-in", table, StringComparison.Ordinal);
+        Assert.Contains("viewport.zoom-out", table, StringComparison.Ordinal);
+        Assert.Contains("viewport.fit", table, StringComparison.Ordinal);
+        Assert.Contains("viewport.reset", table, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphHostedActionFactory.CreateCommandActions", table, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphControls_RendersViewportActionsAndExecutesCanonicalCommands", table, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphControls_DisabledCommandDescriptorsExposeTooltipRecoveryText", table, StringComparison.Ordinal);
+        Assert.Contains("PART_AsterGraphControlsZoomInButton", table, StringComparison.Ordinal);
+        Assert.Contains("PART_AsterGraphControlsZoomOutButton", table, StringComparison.Ordinal);
+        Assert.Contains("PART_AsterGraphControlsFitViewButton", table, StringComparison.Ordinal);
+        Assert.Contains("PART_AsterGraphControlsResetViewButton", table, StringComparison.Ordinal);
+        Assert.Contains("BUILTIN_STANDALONE_CONTROLS_OK", table, StringComparison.Ordinal);
+        Assert.Contains("not full React Flow Controls parity", table, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static string ExtractMiniMapInteractionCustomizationGate(string contents)
     {
         var headingStart = contents.IndexOf("\n## MiniMap Interaction And Customization Gate", StringComparison.Ordinal);
@@ -728,6 +799,19 @@ public sealed class ReactFlowParityRoadmapDocsTests
 
         var nextHeading = contents.IndexOf("\n## ", tableStart, StringComparison.Ordinal);
         Assert.True(nextHeading > tableStart, "Expected heading after MiniMap interaction and customization gate table.");
+        return contents[tableStart..nextHeading];
+    }
+
+    private static string ExtractControlsInteractivityCustomButtonGate(string contents)
+    {
+        var headingStart = contents.IndexOf("\n## Controls Interactivity And Custom-Button Gate", StringComparison.Ordinal);
+        Assert.True(headingStart >= 0, "Expected Controls interactivity and custom-button gate heading.");
+
+        var tableStart = contents.IndexOf("| Controls gate |", headingStart, StringComparison.Ordinal);
+        Assert.True(tableStart >= 0, "Expected Controls interactivity and custom-button gate table header.");
+
+        var nextHeading = contents.IndexOf("\n## ", tableStart, StringComparison.Ordinal);
+        Assert.True(nextHeading > tableStart, "Expected heading after Controls interactivity and custom-button gate table.");
         return contents[tableStart..nextHeading];
     }
 
