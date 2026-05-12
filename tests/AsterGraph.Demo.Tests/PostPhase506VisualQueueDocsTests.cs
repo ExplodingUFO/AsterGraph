@@ -59,12 +59,16 @@ public sealed class PostPhase506VisualQueueDocsTests
 
     private static void AssertCurrentQueue(string table)
     {
-        Assert.Contains("| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh", table, StringComparison.Ordinal);
-        Assert.Contains("| #150 | `avalonia-node-map-ien` | Phase 514: execute renderer virtualization proof harness", table, StringComparison.Ordinal);
-        Assert.Contains("| #151 | `avalonia-node-map-t44` | Phase 515: decide strict pixel baseline policy from drift evidence", table, StringComparison.Ordinal);
-        Assert.Contains("| #152 | `avalonia-node-map-821` | Phase 516: record manual assistive-technology validation evidence", table, StringComparison.Ordinal);
+        Assert.Contains("| #161 | `avalonia-node-map-rs5` | Phase 519: refresh parity roadmap after dynamic announcement proof", table, StringComparison.Ordinal);
+        Assert.Contains("| #162 | `avalonia-node-map-vdc` | Phase 520: define declarative host composition API gate", table, StringComparison.Ordinal);
+        Assert.Contains("| #163 | `avalonia-node-map-ayx` | Phase 521: define strict pixel-baseline comparator readiness gate", table, StringComparison.Ordinal);
+        Assert.Contains("| #164 | `avalonia-node-map-ecx` | Phase 522: audit retained migration removal readiness", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #137 | `avalonia-node-map-3tw` | Phase 507: post-Phase-506 visual queue refresh", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #150 | `avalonia-node-map-ien` | Phase 514: execute renderer virtualization proof harness", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #151 | `avalonia-node-map-t44` | Phase 515: decide strict pixel baseline policy from drift evidence", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #152 | `avalonia-node-map-821` | Phase 516: record manual assistive-technology validation evidence", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #129 | `avalonia-node-map-mzu`", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #131 | `avalonia-node-map-8lf`", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #133 | `avalonia-node-map-b4z`", table, StringComparison.Ordinal);

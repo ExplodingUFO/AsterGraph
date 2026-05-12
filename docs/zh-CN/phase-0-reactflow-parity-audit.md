@@ -118,6 +118,10 @@ Phase 517 是 GitHub #156 / `avalonia-node-map-1pd`，承接 Phase 516 的 live 
 
 Phase 518 是 GitHub #158 / `avalonia-node-map-g0u`，在 Phase 517 之后补 dynamic validation/export/status announcement runtime proof。它通过 `ACCESSIBILITY_DYNAMIC_ANNOUNCEMENT_CONTRACT` 给现有 validation/export/status surfaces 补稳定 automation name、help text 和 `AutomationProperties.LiveSetting=Polite`，覆盖 `PART_ValidationStatusText`、`PART_StatusValidationText`、`PART_ExportStatusText` 和 `PART_CurrentStatusText`。Focused tests 证明 validation/export/status 文本更新和 live-region metadata contract，但 live screen-reader speech output was not observed。这个 slice 不授权 UI redesign、public API change、retained API removal 或 broad screen-reader certification claim。
 
+## Phase 519 更新
+
+Phase 519 是 GitHub #161 / `avalonia-node-map-rs5`，在 dynamic validation/export/status announcement proof 关闭后刷新 post-Phase-518 roadmap refresh。本 slice 仍是 docs/tests only：记录 Phase 518 和 `ACCESSIBILITY_DYNAMIC_ANNOUNCEMENT_CONTRACT` 已关闭，替换仍列出已关闭 Phases 513-516 的 stale current queue，并选择 GitHub #162-#164 / `avalonia-node-map-vdc`、`avalonia-node-map-ayx`、`avalonia-node-map-ecx` 作为真实 tracker-backed follow-ups，同时明确 `.planning/` drift，因为这些文件是 local/ignored workflow state，不是本 PR 的 source of truth。不授权 no runtime behavior changes、no public API changes、no UI redesign、no strict pixel-baseline enforcement、no retained API removal 或 no broad parity or screen-reader certification claim。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -314,12 +318,14 @@ Phase 516 通过 GitHub #152 / `avalonia-node-map-821` 记录 manual assistive-t
 
 Phase 517 通过 GitHub #156 / `avalonia-node-map-1pd` 记录 live assistive-technology platform-equivalent evidence。它把 `ACCESSIBILITY_LIVE_AT_UIA_EVIDENCE` 加入 hosted accessibility recipe，记录针对 `validation-prevent-cycle` 的 Windows UI Automation check，说明 live screen-reader speech output was not observed，并用 GitHub #158 / `avalonia-node-map-g0u` 跟踪剩余 dynamic validation/export/status announcement proof，不做 broad certification claim。
 
+Phase 519 刷新 post-Phase-518 queue，对应 GitHub #161 / `avalonia-node-map-rs5`。它记录 Phase 518 已关闭，继续明确 live screen-reader speech-output 边界，并把下一步工作转成 declarative API ergonomics、strict pixel-baseline comparator readiness 和 retained migration removal readiness 的 tracker-backed follow-ups，而不是重新打开已关闭的 Phase 513-516 queue。
+
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh | P2 | parity roadmap docs 和 focused docs tests | Current slice。它是当前唯一 active docs refresh，必须先关闭，后续 implementation/evidence work 才能开始。 |
-| #150 | `avalonia-node-map-ien` | Phase 514: execute renderer virtualization proof harness | P2 | renderer proof harness/tests、scale docs、artifact metadata | Blocked until after Phase 513 closes。queue 被接受后，可与 pixel-baseline 和 manual AT evidence 工作并行。 |
-| #151 | `avalonia-node-map-t44` | Phase 515: decide strict pixel baseline policy from drift evidence | P3 | visual gate metadata/docs/tests、drift artifact analysis | Blocked until after Phase 513 closes。它只处理 visual artifact policy，不碰 renderer internals，可与 Phase 514 并行。 |
-| #152 | `avalonia-node-map-821` | Phase 516: record manual assistive-technology validation evidence | P3 | manual accessibility evidence/docs/tests | Blocked until after Phase 513 closes。如果 human/manual AT evidence 可用，可与 Phase 514 和 Phase 515 并行。 |
+| #161 | `avalonia-node-map-rs5` | Phase 519: refresh parity roadmap after dynamic announcement proof | P2 | parity roadmap docs 和 focused docs tests | Current slice。它记录 Phase 518 关闭证据，且必须先关闭，后续 docs/API-policy follow-up slices 才能开始。 |
+| #162 | `avalonia-node-map-vdc` | Phase 520: define declarative host composition API gate | P3 | declarative API docs/tests、quick-start 与 host-composition boundary text | Blocked until Phase 519 closes。它只处理 API ergonomics planning，可与 visual policy 和 retained migration readiness 并行。 |
+| #163 | `avalonia-node-map-ayx` | Phase 521: define strict pixel-baseline comparator readiness gate | P3 | visual policy docs/tests 和 drift-evidence readiness criteria | Blocked until Phase 519 closes。它不新增 shell-state rows，也不启用 strict hashes，可与 declarative API 和 retained migration readiness 并行。 |
+| #164 | `avalonia-node-map-ecx` | Phase 522: audit retained migration removal readiness | P3 | retained migration docs/tests 和 API-policy readiness classification | Blocked until Phase 519 closes。除非后续 API-changing issue 明确负责 public API deletion，否则保持 docs/tests-only。 |
 
 ## 推荐并行 Worktree 计划
 
@@ -345,6 +351,10 @@ Phase 517 通过 GitHub #156 / `avalonia-node-map-1pd` 记录 live assistive-tec
 - `perf/phase-514-renderer-virtualization-proof`：负责 #150 / `avalonia-node-map-ien`；后续 worktree，用于第一条 executable renderer proof harness 和 artifact metadata。
 - `visual/phase-515-pixel-baseline-policy`：负责 #151 / `avalonia-node-map-t44`；后续 worktree，用 Phase 512 drift metadata 决定 strict pixel-baseline policy。
 - `a11y/phase-516-manual-at-evidence`：负责 #152 / `avalonia-node-map-821`；后续 worktree，用于 manual assistive-technology validation evidence。
+- `docs/phase-519-roadmap-refresh`：负责 #161 / `avalonia-node-map-rs5`；当前 worktree，用于 post-Phase-518 roadmap refresh 和 tracker-backed follow-up selection。
+- `docs/phase-520-declarative-api-gate`：负责 #162 / `avalonia-node-map-vdc`；后续 worktree，用于 declarative host-composition API gate docs/tests，不修改 public API。
+- `visual/phase-521-pixel-comparator-readiness`：负责 #163 / `avalonia-node-map-ayx`；后续 worktree，用于 strict pixel-baseline comparator readiness docs/tests，不启用 strict enforcement。
+- `docs/phase-522-retained-readiness`：负责 #164 / `avalonia-node-map-ecx`；后续 worktree，用于 retained migration removal readiness docs/tests，不删除 API。
 
 ## UI 验证策略
 
