@@ -670,6 +670,9 @@ public partial class NodeCanvas : UserControl
     private void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize)
         => _overlayCoordinator.UpdateMarqueeSelection(currentScreenPosition, finalize);
 
+    private void UpdateLassoSelection(IReadOnlyList<Point> screenPoints, bool finalize)
+        => _overlayCoordinator.UpdateLassoSelection(screenPoints, finalize);
+
     private void HideSelectionAdorner()
         => _overlayCoordinator.HideSelectionAdorner();
 

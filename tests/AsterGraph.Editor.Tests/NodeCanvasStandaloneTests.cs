@@ -968,6 +968,37 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void LassoSelection_RoutesThroughCanvasBridge_AndSelectsContainedNodes()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+        var targetNode = editor.Nodes.Single(node => node.Id == TargetNodeId);
+        var topLeft = WorldToScreenPoint(canvas, sourceNode.X - 24, sourceNode.Y - 24);
+        var topRight = WorldToScreenPoint(canvas, sourceNode.X + sourceNode.Width + 24, sourceNode.Y - 24);
+        var bottomRight = WorldToScreenPoint(canvas, sourceNode.X + sourceNode.Width + 24, sourceNode.Y + sourceNode.Height + 24);
+        var bottomLeft = WorldToScreenPoint(canvas, sourceNode.X - 24, sourceNode.Y + sourceNode.Height + 24);
+
+        try
+        {
+            InvokeCanvasVoidMethod(
+                "UpdateLassoSelection",
+                canvas,
+                new List<Point> { topLeft, topRight, bottomRight, bottomLeft },
+                true);
+
+            var selected = Assert.Single(editor.SelectedNodes);
+            Assert.Equal(SourceNodeId, selected.Id);
+            Assert.Equal(SourceNodeId, editor.SelectedNode?.Id);
+            Assert.DoesNotContain(editor.SelectedNodes, node => string.Equals(node.Id, targetNode.Id, StringComparison.Ordinal));
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void PointerCaptureLost_ClearsActivePointerInteraction()
     {
         var editor = CreateEditor();
@@ -3302,6 +3333,13 @@ public sealed class NodeCanvasStandaloneTests
         var method = typeof(NodeCanvas).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new Xunit.Sdk.XunitException($"Could not find NodeCanvas method '{methodName}'.");
         return Assert.IsType<T>(method.Invoke(canvas, args));
+    }
+
+    private static void InvokeCanvasVoidMethod(string methodName, NodeCanvas canvas, params object[] args)
+    {
+        var method = typeof(NodeCanvas).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new Xunit.Sdk.XunitException($"Could not find NodeCanvas method '{methodName}'.");
+        method.Invoke(canvas, args);
     }
 
     private static Window CreateWindow(Control content)

@@ -158,6 +158,73 @@ public sealed class NodeCanvasOverlayCoordinatorTests
     }
 
     [AvaloniaFact]
+    public void UpdateLassoSelection_WithFinalizeTrue_UsesBackendSelectionLassoQuery()
+    {
+        var host = new TestOverlayHost
+        {
+            WorldProjector = point => new GraphPoint(point.X + 100, point.Y + 200),
+        };
+        var coordinator = new NodeCanvasOverlayCoordinator(host);
+        var first = CreateNode("node-040", 10, 20, 180, 160);
+        var second = CreateNode("node-041", 240, 120, 180, 160);
+        var excluded = CreateNode("node-042", 520, 320, 180, 160);
+        host.Nodes = [first, second, excluded];
+        host.LassoNodeIds = [first.Id, second.Id];
+        host.InteractionSession.BeginCanvasSelection(new Point(10, 15), KeyModifiers.None, []);
+
+        coordinator.UpdateLassoSelection(
+            [
+                new Point(10, 15),
+                new Point(70, 15),
+                new Point(70, 55),
+                new Point(10, 55),
+            ],
+            finalize: true);
+
+        Assert.Equal(1, host.GetSelectionLassoSnapshotCalls);
+        Assert.Equal(
+            [
+                new GraphPoint(110, 215),
+                new GraphPoint(170, 215),
+                new GraphPoint(170, 255),
+                new GraphPoint(110, 255),
+            ],
+            host.LastLassoPoints);
+        Assert.Collection(
+            host.LastSelection!,
+            node => Assert.Same(first, node),
+            node => Assert.Same(second, node));
+        Assert.Same(second, host.LastPrimaryNode);
+        Assert.Equal("Selected 2 nodes.", host.LastStatus);
+    }
+
+    [AvaloniaFact]
+    public void UpdateLassoSelection_WithControlModifier_TogglesAgainstBaselineAndSetsFinalizeStatus()
+    {
+        var host = new TestOverlayHost();
+        var coordinator = new NodeCanvasOverlayCoordinator(host);
+        var first = CreateNode("node-050", 10, 20, 180, 160);
+        var second = CreateNode("node-051", 240, 120, 180, 160);
+        host.Nodes = [first, second];
+        host.LassoNodeIds = [first.Id, second.Id];
+        host.InteractionSession.BeginCanvasSelection(new Point(10, 15), KeyModifiers.Control, [first]);
+
+        coordinator.UpdateLassoSelection(
+            [
+                new Point(10, 15),
+                new Point(70, 15),
+                new Point(70, 55),
+                new Point(10, 55),
+            ],
+            finalize: true);
+
+        var selection = Assert.Single(host.LastSelection!);
+        Assert.Same(second, selection);
+        Assert.Same(second, host.LastPrimaryNode);
+        Assert.Equal($"Selected {second.Title}.", host.LastStatus);
+    }
+
+    [AvaloniaFact]
     public void UpdateMarqueeSelection_WithShiftModifier_UnionsBaselineAndHitNodes()
     {
         var host = new TestOverlayHost();
@@ -245,6 +312,19 @@ public sealed class NodeCanvasOverlayCoordinatorTests
         {
             GetSelectionRectangleSnapshotCalls++;
             return new(Nodes.Select(n => n.Id).ToList(), []);
+        }
+
+        public IReadOnlyList<string> LassoNodeIds { get; set; } = [];
+
+        public int GetSelectionLassoSnapshotCalls { get; private set; }
+
+        public IReadOnlyList<GraphPoint> LastLassoPoints { get; private set; } = [];
+
+        public GraphEditorSelectionLassoSnapshot GetSelectionLassoSnapshot(IReadOnlyList<GraphPoint> points)
+        {
+            GetSelectionLassoSnapshotCalls++;
+            LastLassoPoints = points.ToList();
+            return new(LassoNodeIds.ToList(), []);
         }
 
         public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode, string? status = null)
