@@ -126,6 +126,10 @@ Phase 519 是 GitHub #161 / `avalonia-node-map-rs5`，在 dynamic validation/exp
 
 Phase 520 是 GitHub #162 / `avalonia-node-map-vdc`，在 Phase 519 roadmap refresh 关闭后定义 declarative host composition API gate。本 slice 只修改 docs/tests，并新增 `DECLARATIVE_HOST_COMPOSITION_GATE`：具体 future candidate 是叠在 `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` 以及现有 `AsterGraphEditorFactory.CreateSession(...)`、`AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)` seam 之上的 future composition profile。这个 future composition profile 可以把命名宿主组合 recipe 和默认项打包起来，但它是 not current public API。当前支持声明仍只限 code-first factories、thin hosted builder 和 `templates/astergraph-avalonia`。本 slice 不授权 no public API change、no source generator、no XAML extension、no React hook parity、no <ReactFlow>-equivalent declarative DSL、no runtime behavior change、no UI redesign 或 no retained API removal。
 
+## Phase 521 更新
+
+Phase 521 是 GitHub #163 / `avalonia-node-map-ayx`，承接 post-Phase-518 queue 中的 strict pixel-baseline comparator readiness gate。本 slice 只修改 docs/tests，并新增 `STRICT_PIXEL_BASELINE_COMPARATOR_READINESS_GATE`：后续 strict pixel-baseline 工作必须先选择 host-keyed comparator 或 tolerant comparator，列出 supported CI hosts，说明同一 route/state set 所需的 repeatability sample count，定义 tolerance fields 及其单位，把 comparator version 和选中的 host key 或 tolerance profile 写入 artifact metadata schema，并记录 drift triage 的 failure review path。当前 artifacts 仍保持 record-only：`Policy=record-only`、`PngHashPurpose=drift-evidence`、`StrictPixelBaselineEnforced=false`。本 slice 不授权 no strict pixel baseline enforcement、no shell visual manifest additions、no visual redesign、no runtime behavior change、no public API change 或 no retained API removal。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -326,6 +330,8 @@ Phase 519 刷新 post-Phase-518 queue，对应 GitHub #161 / `avalonia-node-map-
 
 Phase 520 通过 GitHub #162 / `avalonia-node-map-vdc` 定义 declarative host composition gate。它记录 `DECLARATIVE_HOST_COMPOSITION_GATE`，并选择一个叠在现有 `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` 与 factory/session seam 上的 future composition profile 作为下一条有界候选；同时明确这个 future composition profile 仍是 not current public API，本 slice 不声明 source-generator、XAML-extension、hook 或 `<ReactFlow>`-equivalent DSL。
 
+Phase 521 通过 GitHub #163 / `avalonia-node-map-ayx` 定义 strict pixel-baseline comparator readiness gate。它记录 `STRICT_PIXEL_BASELINE_COMPARATOR_READINESS_GATE`，让当前 visual artifacts 继续保持 `Policy=record-only`、`PngHashPurpose=drift-evidence` 和 `StrictPixelBaselineEnforced=false`，并要求任何 pass/fail policy 前都先审查 host-keyed comparator 或 tolerant comparator，明确 supported CI hosts、repeatability sample count、tolerance fields、artifact metadata schema 更新、comparator version 和 failure review path。
+
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
 | #161 | `avalonia-node-map-rs5` | Phase 519: refresh parity roadmap after dynamic announcement proof | P2 | parity roadmap docs 和 focused docs tests | Closed prerequisite。它记录 Phase 518 关闭证据，并已解除后续 docs/API-policy slices 的阻塞。 |
@@ -402,4 +408,5 @@ Phase 520 通过 GitHub #162 / `avalonia-node-map-vdc` 定义 declarative host c
 - Phase 514 是 GitHub #150 / `avalonia-node-map-ien`；它执行 renderer virtualization proof harness，新增 `RendererVirtualizationProofHarnessTests` 和 `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT`，同时保持 `avoidsFullCollectionScan=false`、`avoidsFullSceneRebuild=false` 和 no support-claim expansion。
 - Phase 515 是 GitHub #151 / `avalonia-node-map-t44`；它已基于 Phase 512 drift metadata 决定 strict pixel-baseline policy：strict single-hash enforcement 继续 deferred，直到具备 repeatable no-drift evidence，或先审查并落地一个带明确阈值的 host-keyed or tolerant comparator。
 - Phase 516 是 GitHub #152 / `avalonia-node-map-821`；它记录 `ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE`，不声明 unsupported certification claims，并把 headless automation proof 与 live assistive-technology observations 分开；live screen-reader announcement validation 由 GitHub #156 / `avalonia-node-map-1pd` 继续追踪。
+- Phase 521 是 GitHub #163 / `avalonia-node-map-ayx`；它记录 `STRICT_PIXEL_BASELINE_COMPARATOR_READINESS_GATE`，不启用 strict pixel baseline enforcement，不新增 shell visual manifest additions，不做 visual redesign、runtime behavior change、public API change 或 retained API removal。
 - Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512 和 Phase 513 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
