@@ -518,6 +518,37 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase524BuiltInComponentParityMatrixInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 524", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #171", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-0k0", contents, StringComparison.Ordinal);
+            Assert.Contains("built-in component parity matrix", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("MiniMap", contents, StringComparison.Ordinal);
+            Assert.Contains("Controls", contents, StringComparison.Ordinal);
+            Assert.Contains("Background/Grid", contents, StringComparison.Ordinal);
+            Assert.Contains("Panel", contents, StringComparison.Ordinal);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no strict visual-baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertBuiltInComponentMatrix(ExtractBuiltInComponentMatrix(englishParity));
+        AssertBuiltInComponentMatrix(ExtractBuiltInComponentMatrix(chineseParity));
+
+        Assert.Contains("Phase 524 records the built-in component parity matrix", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 524 记录 built-in component parity matrix", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -613,6 +644,46 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.DoesNotContain("| #163 | `avalonia-node-map-ayx` | Phase 521: define strict pixel-baseline comparator readiness gate", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #164 | `avalonia-node-map-ecx` | Phase 522: audit retained migration removal readiness", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement | P3 | drift measurement docs/tests/artifact metadata | Current owned slice", table, StringComparison.Ordinal);
+    }
+
+    private static void AssertBuiltInComponentMatrix(string table)
+    {
+        Assert.Contains("| Built-in |", table, StringComparison.Ordinal);
+        Assert.Contains("| MiniMap | Partial / guarded | `GraphMiniMap` + `AsterGraphMiniMapViewFactory.Create(...)` |", table, StringComparison.Ordinal);
+        Assert.Contains("| Controls | Partial / guarded | `AsterGraphControls` |", table, StringComparison.Ordinal);
+        Assert.Contains("| Background/Grid | Partial / guarded | `GridBackground` + style grid options |", table, StringComparison.Ordinal);
+        Assert.Contains("| Panel | Partial / guarded | `AsterGraphPanel` + `AsterGraphPanelPosition` |", table, StringComparison.Ordinal);
+        Assert.Contains("GraphMiniMapStandaloneTests", table, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphBuiltInControlsTests", table, StringComparison.Ordinal);
+        Assert.Contains("GridBackgroundTests", table, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphBuiltInPanelTests", table, StringComparison.Ordinal);
+        Assert.Contains("minimap-workbench", table, StringComparison.Ordinal);
+        Assert.Contains("hosted-controls-panel", table, StringComparison.Ordinal);
+        Assert.Contains("background-grid-density", table, StringComparison.Ordinal);
+        Assert.Contains("standalone-panel", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 525", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 526", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 527", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 528", table, StringComparison.Ordinal);
+        Assert.Contains("not full React Flow built-in parity", table, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string ExtractBuiltInComponentMatrix(string contents)
+    {
+        var headingStart = contents.IndexOf("\n## Built-in Component Parity Matrix", StringComparison.Ordinal);
+        if (headingStart < 0)
+        {
+            headingStart = contents.IndexOf("\n## Built-in Component 对齐矩阵", StringComparison.Ordinal);
+        }
+
+        Assert.True(headingStart >= 0, "Expected built-in component parity matrix heading.");
+
+        var tableStart = contents.IndexOf("| Built-in |", headingStart, StringComparison.Ordinal);
+        Assert.True(tableStart >= 0, "Expected built-in component parity matrix table header.");
+
+        var nextHeading = contents.IndexOf("\n## ", tableStart, StringComparison.Ordinal);
+        Assert.True(nextHeading > tableStart, "Expected heading after built-in component parity matrix table.");
+        return contents[tableStart..nextHeading];
     }
 
     private static string ExtractIssueWaveTable(string contents)
