@@ -417,10 +417,48 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("| TBD | TBD | Phase 512", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("Phase 512: pixel-baseline drift measurement | P3 | drift measurement docs/tests/artifact metadata | Current owned slice", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains("Phase 512 now owns pixel-baseline drift measurement", englishParity, StringComparison.Ordinal);
-        Assert.Contains("Phase 512 现在通过 GitHub #143 / `avalonia-node-map-1j4` 承接 pixel-baseline drift measurement", chineseParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 512 closed pixel-baseline drift measurement", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 512 已通过 GitHub #143 / `avalonia-node-map-1j4` 关闭 pixel-baseline drift measurement", chineseParity, StringComparison.Ordinal);
+        Assert.DoesNotContain("Phase 512 now owns pixel-baseline drift measurement", englishParity, StringComparison.Ordinal);
+        Assert.DoesNotContain("Phase 512 现在通过 GitHub #143 / `avalonia-node-map-1j4` 承接 pixel-baseline drift measurement", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase513PostPhase512QueueRefreshInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 513", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #149", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-d8q", contents, StringComparison.Ordinal);
+            Assert.Contains("post-Phase-512 roadmap refresh", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Phase 506 visual queue", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Phases 508-512", contents, StringComparison.Ordinal);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no strict pixel baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement | P3 | drift measurement docs/tests/artifact metadata | Current owned slice", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Phase 513 refreshes the post-Phase-512 queue", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 513 刷新 post-Phase-512 queue", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParityRoadmapDocs_SelectConcretePostPhase512FollowUps()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        AssertPostPhase512Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase512Queue(ExtractIssueWaveTable(chineseParity));
     }
 
     [Fact]
@@ -479,6 +517,43 @@ public sealed class ReactFlowParityRoadmapDocsTests
 
         Assert.Contains("Phase 502 now owns the renderer virtualization execution proof", englishParity, StringComparison.Ordinal);
         Assert.Contains("Phase 502 现在通过 GitHub #127 / `avalonia-node-map-mai` 承接 renderer virtualization execution proof", chineseParity, StringComparison.Ordinal);
+    }
+
+    private static void AssertPostPhase512Queue(string table)
+    {
+        Assert.Contains("| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh", table, StringComparison.Ordinal);
+        Assert.Contains("| #150 | `avalonia-node-map-ien` | Phase 514: execute renderer virtualization proof harness", table, StringComparison.Ordinal);
+        Assert.Contains("| #151 | `avalonia-node-map-t44` | Phase 515: decide strict pixel baseline policy from drift evidence", table, StringComparison.Ordinal);
+        Assert.Contains("| #152 | `avalonia-node-map-821` | Phase 516: record manual assistive-technology validation evidence", table, StringComparison.Ordinal);
+        Assert.Contains("P2", table, StringComparison.Ordinal);
+        Assert.Contains("P3", table, StringComparison.Ordinal);
+        Assert.Contains("renderer proof harness/tests", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("visual gate metadata/docs/tests", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("manual accessibility evidence/docs/tests", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("after Phase 513 closes", table, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("| #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement | P3 | drift measurement docs/tests/artifact metadata | Current owned slice", table, StringComparison.Ordinal);
+    }
+
+    private static string ExtractIssueWaveTable(string contents)
+    {
+        var headingStart = contents.IndexOf("\n## Next Issue Wave", StringComparison.Ordinal);
+        if (headingStart < 0)
+        {
+            headingStart = contents.IndexOf("\n## 下一轮 Issue Wave", StringComparison.Ordinal);
+        }
+
+        Assert.True(headingStart >= 0, "Expected Next Issue Wave heading.");
+
+        var tableStart = contents.IndexOf("| GitHub |", headingStart, StringComparison.Ordinal);
+        Assert.True(tableStart >= 0, "Expected Next Issue Wave table header.");
+        var nextHeading = contents.IndexOf("\n## Recommended Parallel Worktree Plan", tableStart, StringComparison.Ordinal);
+        if (nextHeading < 0)
+        {
+            nextHeading = contents.IndexOf("\n## 推荐并行 Worktree 计划", tableStart, StringComparison.Ordinal);
+        }
+
+        Assert.True(nextHeading > tableStart, "Expected worktree plan heading after Next Issue Wave table.");
+        return contents[tableStart..nextHeading];
     }
 
     private static string ReadRepoFile(string relativePath)
