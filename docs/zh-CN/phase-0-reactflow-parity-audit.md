@@ -142,6 +142,10 @@ Phase 523 是 GitHub #169 / `avalonia-node-map-bp0`，在 retained migration rem
 
 Phase 524 是 GitHub #171 / `avalonia-node-map-0k0`，承接 post-Phase-522 issue-wave refresh 后的 built-in component parity matrix。本 slice 只修改 docs/tests：把 MiniMap、Controls、Background/Grid 和 Panel 的当前 built-in 状态收敛到一张矩阵，把 source/test/demo evidence 与剩余 React Flow parity gap 分开，并保留 Phase 525-528 作为 behavior 或 API 扩展的 tracker-backed gates。不授权 no runtime behavior changes、no public API changes、no UI redesign、no screenshot manifest expansion、no strict visual-baseline enforcement 或 no retained API removal。
 
+## Phase 525 更新
+
+Phase 525 是 GitHub #173 / `avalonia-node-map-ba7`，承接 built-in component matrix 后的 MiniMap interaction and customization parity gate。本 slice 只修改 docs/tests：把当前 MiniMap 支持记录为 partial / guarded；viewport recentering、viewport/session sync、custom presenter/render behavior、factory/options customization 和 accessibility/focus boundary 都有 source-backed evidence，但这仍不是 full React Flow MiniMap parity claim。不授权 no runtime behavior changes、no public API changes、no UI redesign、no screenshot manifest expansion、no strict visual-baseline enforcement、no retained API removal，也不做 no full React Flow MiniMap parity claim 之外的扩大声明。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -252,6 +256,18 @@ Phase 524 记录 built-in component parity matrix，对应 GitHub #171 / `avalon
 | Background/Grid | Partial / guarded | `GridBackground` + style grid options | `GridBackgroundTests`、`background-grid-density`、style grid tokens、snap-to-grid command evidence 和现有 screenshot route coverage。 | Evidence is not full React Flow built-in parity；dots/lines/cross variants、gap/size API policy 和 public background variant claims 仍是有界后续工作。 | Phase 527: Background variant public surface gate. |
 | Panel | Partial / guarded | `AsterGraphPanel` + `AsterGraphPanelPosition` | `AsterGraphBuiltInPanelTests`、`standalone-panel`、built-in catalog entry、host-owned content composition 和 positional overlay tests。 | Evidence is not full React Flow built-in parity；viewport-attached overlay semantics、positioning policy 和 hosted-shell independence 需要后续边界。 | Phase 528: Panel versus viewport-attached overlay boundary. |
 
+## MiniMap Interaction And Customization Gate
+
+Phase 525 记录 MiniMap interaction and customization parity gate，对应 GitHub #173 / `avalonia-node-map-ba7`。这个 gate 继续把 MiniMap 支持限定为 partial / guarded：已有 seams 可用且有测试，但不会把它升级为 full React Flow MiniMap parity claim，也不会在本 slice 中承诺额外 runtime/API/UI behavior。
+
+| MiniMap gate | Current status | Existing evidence | Remaining gap / boundary |
+| --- | --- | --- | --- |
+| Viewport recentering | Supported / guarded | `GraphMiniMap.CenterViewportFromMiniMap(...)`、stock pointer handling 和 `StandaloneMiniMap_RecenterViewport_ForDifferentMiniMapPoints`。 | 当前 proof 只覆盖通过 canonical editor command path 进行 recentering；更丰富的 React Flow-style viewport policy 或 alternate gestures 需要后续 behavior issue。Phase 525 的总体边界仍是 not full React Flow MiniMap parity。 |
+| Viewport/session sync | Supported / guarded | `GraphMiniMap` 读取 `IGraphEditorSession` snapshots，订阅 document/selection/viewport events，并由 `HostedMiniMap_BalancedModeInvalidatesOnViewportChange`、`HostedMiniMap_ThroughputModeDefersViewportInvalidationButReadsFreshViewportOnProjection` 和 `LightweightMiniMap_ReusesNodeProjectionButRefreshesViewportSnapshot` 守住。 | Balanced 和 Throughput cadence markers 只证明当前 session sync boundary，不声明 general renderer virtualization 或 second-renderer。 |
+| Custom presenter/render behavior | Supported seam / guarded | `IGraphMiniMapPresenter.Create(IGraphEditorSession?)`、`AsterGraphPresentationOptions.MiniMapPresenter` 和 `StandaloneMiniMap_CustomPresenter_RecenterViewportThroughEditorApi`。 | 宿主可以替换 presented control，但这是 host-owned presenter customization，不是 React component/plugin render pipeline。 |
+| Factory/options customization | Supported seam / guarded | `AsterGraphMiniMapViewFactory.Create(...)`、`AsterGraphMiniMapViewOptions.Session`、`AsterGraphMiniMapViewOptions.StyleOptions`、`AsterGraphMiniMapViewOptions.Presentation` 和 `minimap-workbench`。 | 当前 options 覆盖 session/style/presenter composition；gap/size/mask/position APIs 如有需要必须另开 future tracker。 |
+| Accessibility/focus boundary | Guarded | `GraphMiniMap.Focusable = false`、stock surface `Focusable = false`、`StandaloneMiniMapFactory_BindsSessionAndRemainsNonFocusable` 和 `StandaloneMiniMap_StockSurfaceStaysOutOfKeyboardFocusPath`。 | Stock MiniMap 保持 pointer-only 并退出 keyboard focus path；这不是 screen-reader certification，也不声明 custom presenter content 一定不可聚焦。 |
+
 ## 已完成的 Phase 0 Issue Wave
 
 原始 first wave 不再是下一轮工作队列。下面这些 tracker 项只作为历史上下文：
@@ -361,11 +377,13 @@ Phase 523 刷新 post-Phase-522 parity issue wave，对应 GitHub #169 / `avalon
 
 Phase 524 记录 built-in component parity matrix，对应 GitHub #171 / `avalonia-node-map-0k0`。它把 MiniMap、Controls、Background/Grid 和 Panel 的支持范围限定在当前 public surfaces 和 evidence，并把 interaction、customization、variant 与 overlay-boundary 工作留给 Phase 525-528。
 
+Phase 525 记录 MiniMap interaction and customization parity gate，对应 GitHub #173 / `avalonia-node-map-ba7`。它把 viewport recentering、viewport/session sync、custom presenter/render behavior、factory/options customization 和 accessibility/focus boundary 绑定到现有 source/test/Cookbook evidence，不授权产品或 API 修改。
+
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
 | #169 | `avalonia-node-map-bp0` | Phase 523: refresh React Flow parity issue wave after retained readiness audit | P2 | parity roadmap docs 和 focused docs tests | Current issue。它定义 queue 和 tracker 边界，因此会阻塞下一批 implementation wave。 |
 | #171 | `avalonia-node-map-0k0` | Phase 524: built-in component parity matrix for MiniMap, Controls, Background, Panel | P2 | feature catalog、public API inventory、Avalonia README 和 docs tests | Current docs/test slice。它定义 built-in row 边界，因此会阻塞 Phase 525-528。 |
-| TBD | TBD | Phase 525: MiniMap interaction and customization parity gate | P2 | `GraphMiniMap`、MiniMap factory/options、minimap tests 和 docs | Phase 524 之后可开始。不要与其他触碰 `GraphMiniMap` 的工作并行。 |
+| #173 | `avalonia-node-map-ba7` | Phase 525: MiniMap interaction and customization parity gate | P2 | `GraphMiniMap`、MiniMap factory/options、minimap tests 和 docs | Current docs/test gate。不要与其他触碰 `GraphMiniMap` 的工作并行。 |
 | TBD | TBD | Phase 526: Controls interactivity/custom-button parity gate | P2 | `AsterGraphControls`、hosted action button tests 和 docs | 只要写集保持分离，可与 MiniMap work 并行。 |
 | TBD | TBD | Phase 527: Background variant public surface gate | P3 | background/grid control docs/tests 和当前 background support evidence | 只要避免共享 shell docs 编辑，可与 Controls 和 MiniMap 并行。 |
 | TBD | TBD | Phase 528: Panel versus viewport-attached overlay boundary | P3 | `AsterGraphPanel`、host integration docs 和 panel tests | Phase 524 之后可开始；如果同时编辑 broad built-in component docs，需要串行。 |
@@ -401,7 +419,7 @@ Phase 524 记录 built-in component parity matrix，对应 GitHub #171 / `avalon
 - `docs/phase-522-retained-readiness`：负责 #164 / `avalonia-node-map-ecx`；ready parallel worktree，用于 retained migration removal readiness docs/tests，不删除 API。
 - `docs/phase-523-parity-wave-refresh`：负责 #169 / `avalonia-node-map-bp0`；当前 worktree，用于 post-Phase-522 parity issue-wave refresh 和下一批 implementation split。
 - `docs/phase-524-built-in-component-matrix`：负责 #171 / `avalonia-node-map-0k0`；当前 docs/test worktree，用于 MiniMap、Controls、Background 和 Panel 的 built-in component parity matrix。
-- `ui/phase-525-minimap-interaction-customization`：未来 MiniMap worktree；写集限制在 `GraphMiniMap`、MiniMap options/factories、focused tests 和直接相关文档。
+- `docs/phase-525-minimap-interaction-gate`：负责 #173 / `avalonia-node-map-ba7`；当前 docs/test worktree，用于 MiniMap interaction and customization parity gate。
 - `ui/phase-526-controls-custom-button`：未来 Controls worktree；如果只触碰 `AsterGraphControls`、hosted action buttons、tests 和直接相关文档，可以与 MiniMap 并行。
 - `ui/phase-527-background-variants`：未来 Background worktree；避免共享 shell docs，并且不要修改 MiniMap/Controls。
 - `ui/phase-528-panel-overlay-boundary`：未来 Panel worktree；如果与 Phase 524 同时编辑同一 built-in component inventory，需要串行。
@@ -451,4 +469,5 @@ Phase 524 记录 built-in component parity matrix，对应 GitHub #171 / `avalon
 - Phase 522 是 GitHub #164 / `avalonia-node-map-ecx`；它记录 `RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT`，不删除 retained API，不修改 public API baseline，不改变 runtime behavior，也不改 UI。
 - Phase 523 是 GitHub #169 / `avalonia-node-map-bp0`；它刷新 post-Phase-522 issue wave，并记录 built-in component、MiniMap、Controls、Background、Panel 和 whiteboard feasibility follow-ups，不做 runtime behavior changes、public API changes、UI redesign、visual-baseline enforcement 或 retained API removal。
 - Phase 524 是 GitHub #171 / `avalonia-node-map-0k0`；它记录 MiniMap、Controls、Background/Grid 和 Panel 的 built-in component parity matrix，不做 runtime behavior changes、public API changes、UI redesign、screenshot manifest expansion、strict visual-baseline enforcement 或 retained API removal。
-- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512、Phase 513、Phase 520、Phase 521、Phase 522、Phase 523 和 Phase 524 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
+- Phase 525 是 GitHub #173 / `avalonia-node-map-ba7`；它记录 MiniMap interaction and customization parity gate，不做 runtime behavior changes、public API changes、UI redesign、screenshot manifest expansion、strict visual-baseline enforcement、retained API removal 或 full React Flow MiniMap parity claim。
+- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512、Phase 513、Phase 520、Phase 521、Phase 522、Phase 523、Phase 524 和 Phase 525 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
