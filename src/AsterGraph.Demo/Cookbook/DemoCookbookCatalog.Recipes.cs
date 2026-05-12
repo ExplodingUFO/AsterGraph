@@ -1278,6 +1278,91 @@ public static partial class DemoCookbookCatalog
             """
             ),
         new DemoCookbookRecipe(
+            "interaction-lasso-screenshot-proof-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Interaction lasso screenshot proof route",
+            "Capture a bounded Cookbook and shell visual proof for the existing lasso transient feedback path.",
+            [
+                new DemoCookbookAnchor(
+                    "Public lasso selection mode",
+                    "src/AsterGraph.Avalonia/Controls/NodeCanvasSelectionMode.cs",
+                    "Lasso"),
+                new DemoCookbookAnchor(
+                    "Lasso feedback update",
+                    "src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs",
+                    "UpdateLassoFeedback"),
+                new DemoCookbookAnchor(
+                    "Lasso feedback cleanup",
+                    "src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs",
+                    "ClearLassoFeedback"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Selection marquee graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "selection-marquee-workbench"),
+                new DemoCookbookAnchor(
+                    "Transient lasso path proof",
+                    "tests/AsterGraph.Editor.Tests/NodeCanvasStandaloneTests.cs",
+                    "LassoSelectionMode_RendersTransientFeedbackPathOnlyDuringDrag"),
+                new DemoCookbookAnchor(
+                    "Lasso shell visual gate state",
+                    "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json",
+                    "shell-cookbook-lasso-screenshot-proof"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Lasso screenshot proof cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "LASSO_SCREENSHOT_PROOF_BOUNDARY_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The route reuses selection-marquee-workbench so lasso screenshot proof stays tied to a populated selection scene.",
+                    "selection-marquee-workbench"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "The shell visual gate opens PART_NodeCanvas and captures the transient lasso path while the drag is active.",
+                    "shell-cookbook-lasso-screenshot-proof"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "The proof remains anchored to the existing transient feedback test instead of introducing a whiteboard tool.",
+                    "LassoSelectionMode_RendersTransientFeedbackPathOnlyDuringDrag"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "NodeCanvasSelectionMode.Lasso routes pointer drag selection through the existing canvas surface.",
+                    "NodeCanvasSelectionMode.Lasso"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "The full-window shell capture keeps the lasso path visible with the Cookbook drawer and graph scene.",
+                    "shell-cookbook-lasso-screenshot-proof"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "The generated metadata records PART_NodeCanvas and full-window-shell-lasso-state for evidence review.",
+                    "shell-cookbook-lasso-screenshot-proof"),
+            ],
+            [
+                "LASSO_SCREENSHOT_PROOF_BOUNDARY_OK",
+                "NodeCanvasSelectionMode.Lasso",
+                "LassoSelectionMode_RendersTransientFeedbackPathOnlyDuringDrag",
+            ],
+            new DemoCookbookRouteClarity(
+                "Interaction lasso screenshot proof route: launch `selection-marquee-workbench`, set `NodeCanvasSelectionMode.Lasso`, and capture the active transient lasso overlay.",
+                "Supported seams live in `AsterGraph.Avalonia` NodeCanvas lasso feedback and the existing `AsterGraph.Editor` selection contracts.",
+                "Demo cookbook provides a screenshot proof fixture and manifest state only; Demo does not add toolbar UX, eraser behavior, drawing primitives, persistence, or a renderer rewrite."),
+            "Lasso screenshot proof coverage is limited to existing lasso selection activation, transient overlay feedback, Cookbook scene capture, and shell visual metadata; the explicit exclusions remain no toolbar UX, no eraser behavior, no drawing primitives, no persistence, no strict pixel baselines, no retained API removal, and no full whiteboard parity.",
+            CodeSample: """
+            // Activate the existing lasso selection mode before capturing proof.
+            var canvas = window.FindControl<NodeCanvas>("PART_NodeCanvas");
+            canvas.SelectionMode = NodeCanvasSelectionMode.Lasso;
+
+            // Capture while the pointer drag is active so the transient lasso path is visible.
+            """
+            ),
+        new DemoCookbookRecipe(
             "interaction-keyboard-navigation-route",
             DemoCookbookRecipeCategory.Authoring,
             "Interaction keyboard navigation route",

@@ -967,6 +967,39 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase536LassoScreenshotProofBoundaryInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 536", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #195", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-uvd", contents, StringComparison.Ordinal);
+            Assert.Contains("lasso screenshot route and Cookbook proof boundary", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("cookbook-interaction-lasso-screenshot-proof", contents, StringComparison.Ordinal);
+            Assert.Contains("interaction-lasso-screenshot-proof-route", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-lasso-screenshot-proof", contents, StringComparison.Ordinal);
+            Assert.Contains("full-window-shell-lasso-state", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeCanvasSelectionMode.Lasso", contents, StringComparison.Ordinal);
+            Assert.Contains("LassoSelectionMode_RendersTransientFeedbackPathOnlyDuringDrag", contents, StringComparison.Ordinal);
+            Assert.Contains("LASSO_SCREENSHOT_PROOF_BOUNDARY_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("toolbar UX", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("eraser", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("drawing primitives", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("persistence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("renderer rewrite", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("strict pixel baseline", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("full whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertPostPhase534Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase534Queue(ExtractIssueWaveTable(chineseParity));
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -1056,7 +1089,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
     private static void AssertPostPhase534Queue(string table)
     {
         Assert.Contains("| #193 | `avalonia-node-map-8l6` | Phase 535: refresh post-lasso visual feedback parity queue", table, StringComparison.Ordinal);
-        Assert.Contains("Phase 536: lasso screenshot route and Cookbook proof boundary", table, StringComparison.Ordinal);
+        Assert.Contains("| #195 | `avalonia-node-map-uvd` | Phase 536: lasso screenshot route and Cookbook proof boundary", table, StringComparison.Ordinal);
         Assert.Contains("Phase 537: lasso toolbar UX and public activation ergonomics boundary", table, StringComparison.Ordinal);
         Assert.Contains("Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
         Assert.Contains("Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
@@ -1074,6 +1107,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
             table.Contains("Can run after Phase 535 in parallel", StringComparison.OrdinalIgnoreCase)
             || table.Contains("Phase 535 后可与", StringComparison.OrdinalIgnoreCase));
         Assert.DoesNotContain("| #191 | `avalonia-node-map-lzy` | Phase 534: lasso visual gesture feedback route", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 536: lasso screenshot route and Cookbook proof boundary", table, StringComparison.Ordinal);
         Assert.DoesNotContain("Current Avalonia visual feedback slice", table, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("当前 Avalonia overlay feedback slice", table, StringComparison.OrdinalIgnoreCase);
     }

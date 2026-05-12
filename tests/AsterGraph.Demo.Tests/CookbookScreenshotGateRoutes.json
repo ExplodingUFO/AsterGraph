@@ -210,6 +210,27 @@
     "outputFileName": "cookbook-interaction-selection-marquee.png"
   },
   {
+    "id": "cookbook-interaction-lasso-screenshot-proof",
+    "recipeId": "interaction-lasso-screenshot-proof-route",
+    "scenario": "selection-marquee-workbench",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "viewportWidth": 1680,
+    "viewportHeight": 940,
+    "backgroundHex": "#09141C",
+    "scale": 1.0,
+    "minimumBytes": 4096,
+    "expectedDocumentTitle": "Selection Rectangle Fixture",
+    "minimumNodeCount": 8,
+    "minimumConnectionCount": 10,
+    "requiredNodeIds": [
+      "select-clock",
+      "select-output"
+    ],
+    "outputFileName": "cookbook-interaction-lasso-screenshot-proof.png"
+  },
+  {
     "id": "cookbook-interaction-keyboard-navigation",
     "recipeId": "interaction-keyboard-navigation-route",
     "scenario": "keyboard-navigation-lab",

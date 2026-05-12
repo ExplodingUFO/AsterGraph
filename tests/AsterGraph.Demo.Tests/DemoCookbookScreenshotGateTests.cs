@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text.Json;
+using Avalonia;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Menus;
@@ -12,6 +13,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AsterGraph.Demo.Cookbook;
@@ -263,6 +265,33 @@ public sealed class DemoCookbookScreenshotGateTests
     }
 
     [Fact]
+    public void CookbookScreenshotGate_IncludesPhase536LassoScreenshotProofRoute()
+    {
+        var routes = LoadRoutes(GetRepositoryRoot());
+        var shellStates = LoadShellStates(GetRepositoryRoot());
+
+        var route = Assert.Single(routes, candidate =>
+            string.Equals(candidate.Id, "cookbook-interaction-lasso-screenshot-proof", StringComparison.Ordinal));
+        Assert.Equal("interaction-lasso-screenshot-proof-route", route.RecipeId);
+        Assert.Equal("selection-marquee-workbench", route.Scenario);
+        Assert.Equal("Selection Rectangle Fixture", route.ExpectedDocumentTitle);
+        Assert.Contains("select-output", route.RequiredNodeIds, StringComparer.Ordinal);
+        Assert.Equal("cookbook-interaction-lasso-screenshot-proof.png", route.OutputFileName);
+
+        var shellState = Assert.Single(shellStates, state =>
+            string.Equals(state.Id, "shell-cookbook-lasso-screenshot-proof", StringComparison.Ordinal));
+        Assert.Equal(route.Id, shellState.RouteId);
+        Assert.Equal("cookbook", shellState.HostGroup);
+        Assert.Equal("en", shellState.Language);
+        Assert.Equal("canonical-dark", shellState.Theme);
+        Assert.True(shellState.ExpectedPaneOpen);
+        Assert.Equal("PART_NodeCanvas", shellState.LassoTargetPartName);
+        Assert.Contains("PART_NodeCanvas", shellState.RequiredShellParts, StringComparer.Ordinal);
+        Assert.Contains("PART_CookbookWorkspaceRecipeContentPanel", shellState.RequiredShellParts, StringComparer.Ordinal);
+        Assert.Equal("shell-cookbook-lasso-screenshot-proof.png", shellState.OutputFileName);
+    }
+
+    [Fact]
     public void CookbookScreenshotGate_IncludesLifecycleFixtureBatchRoutes()
     {
         var routes = LoadRoutes(GetRepositoryRoot());
@@ -307,7 +336,7 @@ public sealed class DemoCookbookScreenshotGateTests
             ],
             shellState.RequiredShellParts);
         Assert.Equal("shell-runtime-diagnostics-closed.png", shellState.OutputFileName);
-        Assert.Equal(10, shellStates.Count);
+        Assert.Equal(11, shellStates.Count);
     }
 
     [Fact]
@@ -534,6 +563,11 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.NotEmpty(shellState.RequiredContextMenuHeaders);
             Assert.All(shellState.RequiredContextMenuHeaders, header => Assert.False(string.IsNullOrWhiteSpace(header)));
         }
+
+        if (!string.IsNullOrWhiteSpace(shellState.LassoTargetPartName))
+        {
+            Assert.StartsWith("PART_", shellState.LassoTargetPartName, StringComparison.Ordinal);
+        }
     }
 
     private static IReadOnlyList<CookbookScreenshotGateRoute> LoadRoutes(string repoRoot)
@@ -619,6 +653,7 @@ public sealed class DemoCookbookScreenshotGateTests
             var openedFlyout = OpenRequestedFlyout(window, shellState);
             var openedPopup = OpenRequestedPopup(window, shellState);
             var openedContextMenu = OpenRequestedContextMenu(window, shellState);
+            var capturedLassoTargetName = OpenRequestedLassoProof(window, shellState);
 
             using var frame = window.CaptureRenderedFrame();
             Assert.NotNull(frame);
@@ -645,7 +680,7 @@ public sealed class DemoCookbookScreenshotGateTests
                 imageSize.Width,
                 imageSize.Height,
                 "headless-avalonia-window",
-                ResolveShellCaptureScope(openedFlyout, openedPopup, openedContextMenu),
+                ResolveShellCaptureScope(openedFlyout, openedPopup, openedContextMenu, capturedLassoTargetName),
                 ToRepoRelativePath(repoRoot, imagePath),
                 ShellStateManifestRelativePath,
                 viewModel.SelectedHostMenuGroupTitle,
@@ -661,6 +696,9 @@ public sealed class DemoCookbookScreenshotGateTests
                 openedContextMenu?.TargetPartName,
                 openedContextMenu?.IsOpen ?? false,
                 openedContextMenu?.CoveredHeaders ?? [],
+                capturedLassoTargetName,
+                capturedLassoTargetName is null ? null : "NodeCanvasSelectionMode.Lasso",
+                capturedLassoTargetName is null ? null : "LassoSelectionMode_RendersTransientFeedbackPathOnlyDuringDrag",
                 pixelInspection.NonTransparentPixelCount,
                 pixelInspection.DistinctColorCount,
                 CreateRecordOnlyDriftMeasurementMetadata(),
@@ -676,7 +714,10 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains(route.RecipeId, metadataJson, StringComparison.Ordinal);
             Assert.Contains(shellState.Language, metadataJson, StringComparison.Ordinal);
             Assert.Contains(shellState.Theme, metadataJson, StringComparison.Ordinal);
-            Assert.Contains(ResolveShellCaptureScope(openedFlyout, openedPopup, openedContextMenu), metadataJson, StringComparison.Ordinal);
+            Assert.Contains(
+                ResolveShellCaptureScope(openedFlyout, openedPopup, openedContextMenu, capturedLassoTargetName),
+                metadataJson,
+                StringComparison.Ordinal);
             Assert.Contains(ToRepoRelativePath(repoRoot, imagePath), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ShellStateManifestRelativePath, metadataJson, StringComparison.Ordinal);
             Assert.Contains("\"DriftMeasurement\"", metadataJson, StringComparison.Ordinal);
@@ -714,6 +755,14 @@ public sealed class DemoCookbookScreenshotGateTests
                 Assert.Contains("\"IsContextMenuOpen\": true", metadataJson, StringComparison.Ordinal);
                 Assert.All(shellState.RequiredContextMenuHeaders, header => Assert.Contains(header, metadataJson, StringComparison.Ordinal));
             }
+
+            if (!string.IsNullOrWhiteSpace(shellState.LassoTargetPartName))
+            {
+                Assert.Contains("full-window-shell-lasso-state", metadataJson, StringComparison.Ordinal);
+                Assert.Contains(shellState.LassoTargetPartName, metadataJson, StringComparison.Ordinal);
+                Assert.Contains("NodeCanvasSelectionMode.Lasso", metadataJson, StringComparison.Ordinal);
+                Assert.Contains("LassoSelectionMode_RendersTransientFeedbackPathOnlyDuringDrag", metadataJson, StringComparison.Ordinal);
+            }
         }
         finally
         {
@@ -724,7 +773,8 @@ public sealed class DemoCookbookScreenshotGateTests
     private static string ResolveShellCaptureScope(
         MenuItem? openedFlyout,
         Control? openedPopup,
-        OpenContextMenuResult? openedContextMenu)
+        OpenContextMenuResult? openedContextMenu,
+        string? capturedLassoTargetName)
     {
         if (openedPopup is not null)
         {
@@ -734,6 +784,11 @@ public sealed class DemoCookbookScreenshotGateTests
         if (openedContextMenu is not null)
         {
             return "full-window-shell-context-menu-state";
+        }
+
+        if (capturedLassoTargetName is not null)
+        {
+            return "full-window-shell-lasso-state";
         }
 
         return openedFlyout is null
@@ -832,6 +887,59 @@ public sealed class DemoCookbookScreenshotGateTests
             presenter.IsOpen,
             presenter.CoveredHeaders);
     }
+
+    private static string? OpenRequestedLassoProof(MainWindow window, CookbookShellVisualGateState shellState)
+    {
+        if (string.IsNullOrWhiteSpace(shellState.LassoTargetPartName))
+        {
+            return null;
+        }
+
+        var target = Assert.IsType<NodeCanvas>(FindShellControl(window, shellState.LassoTargetPartName));
+        target.SelectionMode = NodeCanvasSelectionMode.Lasso;
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+        var topLeft = new Point(420, 260);
+        var topRight = new Point(720, 260);
+        var bottomRight = new Point(720, 520);
+
+        target.RaiseEvent(CreatePointerPressedArgs(target, pointer, topLeft));
+        target.RaiseEvent(CreatePointerMovedArgs(target, pointer, topRight));
+        target.RaiseEvent(CreatePointerMovedArgs(target, pointer, bottomRight));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Loaded);
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.Equal(NodeCanvasSelectionMode.Lasso, target.SelectionMode);
+        Assert.Single(target.FindControl<Canvas>("OverlayLayer")!.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+        return shellState.LassoTargetPartName;
+    }
+
+    private static PointerPressedEventArgs CreatePointerPressedArgs(
+        NodeCanvas canvas,
+        global::Avalonia.Input.Pointer pointer,
+        Point position)
+        => new(
+            canvas,
+            pointer,
+            canvas,
+            position,
+            0UL,
+            new PointerPointProperties(RawInputModifiers.LeftMouseButton, PointerUpdateKind.LeftButtonPressed),
+            KeyModifiers.None,
+            1);
+
+    private static PointerEventArgs CreatePointerMovedArgs(
+        NodeCanvas canvas,
+        global::Avalonia.Input.Pointer pointer,
+        Point position)
+        => new(
+            InputElement.PointerMovedEvent,
+            canvas,
+            pointer,
+            canvas,
+            position,
+            0UL,
+            new PointerPointProperties(RawInputModifiers.LeftMouseButton, PointerUpdateKind.Other),
+            KeyModifiers.None);
 
     private static Control? FindShellControl(MainWindow window, string partName)
         => window.FindControl<Control>(partName)
@@ -947,6 +1055,7 @@ public sealed class DemoCookbookScreenshotGateTests
         string[] RequiredPopupText,
         string? ContextMenuTargetPartName,
         string[] RequiredContextMenuHeaders,
+        string? LassoTargetPartName,
         string[] RequiredShellParts,
         string OutputFileName);
 
@@ -1001,6 +1110,9 @@ public sealed class DemoCookbookScreenshotGateTests
         string? ContextMenuTargetPartName,
         bool IsContextMenuOpen,
         string[] CoveredContextMenuHeaders,
+        string? LassoTargetPartName,
+        string? LassoSelectionMode,
+        string? LassoFeedbackProof,
         int NonTransparentPixelCount,
         int DistinctColorCount,
         VisualDriftMeasurementMetadata DriftMeasurement,
