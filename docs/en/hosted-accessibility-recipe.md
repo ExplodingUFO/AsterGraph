@@ -60,6 +60,19 @@ The evidence package keeps no live-region/runtime behavior change, no UI change,
 
 This Phase 517 evidence keeps no live-region/runtime behavior change, no UI change, no public API change, no retained API removal, and no broad screen-reader certification claim. GitHub #158 / `avalonia-node-map-g0u` owns the follow-up runtime proof for dynamic validation/export/status announcements.
 
+## Dynamic Announcement Runtime Contract
+
+`ACCESSIBILITY_DYNAMIC_ANNOUNCEMENT_CONTRACT` is the Phase 518 / GitHub #158 / `avalonia-node-map-g0u` runtime contract. It adds stable automation names, reviewed help text, and `AutomationProperties.LiveSetting` set to `Polite` on the existing hosted Demo validation/export/status text surfaces.
+
+| Surface | Automation name | Live-region contract | Boundary |
+| --- | --- | --- | --- |
+| `PART_ValidationStatusText` | `Validation status` | `AutomationProperties.LiveSetting=Polite`; text updates when the graph validation snapshot changes | headless/runtime metadata proof only |
+| `PART_StatusValidationText` | `Status bar validation` | `AutomationProperties.LiveSetting=Polite`; text updates when the graph validation snapshot changes | headless/runtime metadata proof only |
+| `PART_ExportStatusText` | `Export status` | `AutomationProperties.LiveSetting=Polite`; text updates when scene export progress or completion changes | headless/runtime metadata proof only |
+| `PART_CurrentStatusText` | `Current editor status` | `AutomationProperties.LiveSetting=Polite`; text updates when editor commands publish status messages | headless/runtime metadata proof only |
+
+The focused guard is `DynamicStatusAnnouncementRegions_ExposeStableLiveRegionContract`, which verifies the named surfaces and dynamic text updates without requiring Narrator, NVDA, or VoiceOver in CI. This closes the previous validation/export/status live-region metadata gap, but live screen-reader speech output was not observed and this is not a broad screen-reader certification claim.
+
 ## Proof Contract
 
 Validate the hosted route with:

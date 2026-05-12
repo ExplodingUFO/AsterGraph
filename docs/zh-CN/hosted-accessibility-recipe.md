@@ -60,6 +60,19 @@
 
 这份 Phase 517 evidence 继续保持 no live-region/runtime behavior change、no UI change、no public API change、no retained API removal，并且 no broad screen-reader certification claim。GitHub #158 / `avalonia-node-map-g0u` 负责后续 dynamic validation/export/status announcements 的 runtime proof。
 
+## Dynamic Announcement Runtime Contract
+
+`ACCESSIBILITY_DYNAMIC_ANNOUNCEMENT_CONTRACT` 是 Phase 518 / GitHub #158 / `avalonia-node-map-g0u` 的 runtime contract。它在现有 hosted Demo 的 validation/export/status 文本面上补齐稳定 automation name、reviewed help text，并把 `AutomationProperties.LiveSetting` 设置为 `Polite`。
+
+| Surface | Automation name | Live-region contract | Boundary |
+| --- | --- | --- | --- |
+| `PART_ValidationStatusText` | `Validation status` | `AutomationProperties.LiveSetting=Polite`；graph validation snapshot 变化时更新文本 | 只证明 headless/runtime metadata |
+| `PART_StatusValidationText` | `Status bar validation` | `AutomationProperties.LiveSetting=Polite`；graph validation snapshot 变化时更新文本 | 只证明 headless/runtime metadata |
+| `PART_ExportStatusText` | `Export status` | `AutomationProperties.LiveSetting=Polite`；scene export progress 或 completion 变化时更新文本 | 只证明 headless/runtime metadata |
+| `PART_CurrentStatusText` | `Current editor status` | `AutomationProperties.LiveSetting=Polite`；editor commands 发布 status message 时更新文本 | 只证明 headless/runtime metadata |
+
+Focused guard 是 `DynamicStatusAnnouncementRegions_ExposeStableLiveRegionContract`，它验证这些具名 surface 和动态文本更新，不要求 CI 中运行 Narrator、NVDA 或 VoiceOver。这关闭了前一阶段留下的 validation/export/status live-region metadata gap，但 live screen-reader speech output was not observed，也不构成 no broad screen-reader certification claim 之外的扩大声明。
+
 ## Proof Contract
 
 用下面这条命令验证 hosted route：

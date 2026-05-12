@@ -135,6 +135,7 @@ public partial class GraphEditorView : UserControl
     private StackPanel? _shortcutHelpList;
     private TextBlock? _validationStatusText;
     private TextBlock? _statusValidationText;
+    private TextBlock? _currentStatusText;
     private TextBlock? _problemsRepairDiscoveryStatusText;
     private StackPanel? _validationFeedbackList;
     private TextBlock? _fragmentCaptionText;
@@ -409,6 +410,7 @@ public partial class GraphEditorView : UserControl
         _shortcutHelpList = this.FindControl<StackPanel>("PART_ShortcutHelpList");
         _validationStatusText = this.FindControl<TextBlock>("PART_ValidationStatusText");
         _statusValidationText = this.FindControl<TextBlock>("PART_StatusValidationText");
+        _currentStatusText = this.FindControl<TextBlock>("PART_CurrentStatusText");
         _problemsRepairDiscoveryStatusText =
             this.FindControl<TextBlock>("PART_ProblemsRepairDiscoveryStatusText");
         _validationFeedbackList = this.FindControl<StackPanel>("PART_ValidationFeedbackList");
@@ -455,6 +457,23 @@ public partial class GraphEditorView : UserControl
         {
             AutomationProperties.SetName(_commandPaletteSearchBox, "Command palette search");
         }
+
+        ApplyAnnouncementRegionAutomation(
+            _validationStatusText,
+            "Validation status",
+            "Updates when the graph validation snapshot changes.");
+        ApplyAnnouncementRegionAutomation(
+            _statusValidationText,
+            "Status bar validation",
+            "Updates when the graph validation snapshot changes.");
+        ApplyAnnouncementRegionAutomation(
+            _exportStatusText,
+            "Export status",
+            "Updates when scene export progress or completion changes.");
+        ApplyAnnouncementRegionAutomation(
+            _currentStatusText,
+            "Current editor status",
+            "Updates when editor commands publish status messages.");
 
         InitializeExportPanelControls();
 
@@ -687,6 +706,18 @@ public partial class GraphEditorView : UserControl
         {
             CloseCommandPalette();
         }
+    }
+
+    private static void ApplyAnnouncementRegionAutomation(Control? control, string name, string helpText)
+    {
+        if (control is null)
+        {
+            return;
+        }
+
+        AutomationProperties.SetName(control, name);
+        AutomationProperties.SetHelpText(control, helpText);
+        AutomationProperties.SetLiveSetting(control, AutomationLiveSetting.Polite);
     }
 
     private void RefreshCommandSurfaceState()

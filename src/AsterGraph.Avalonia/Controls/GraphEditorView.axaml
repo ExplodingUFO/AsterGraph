@@ -396,7 +396,8 @@
                      FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                      TextWrapping="Wrap"
                      Foreground="{DynamicResource AsterGraph.BodyBrush}" />
-          <TextBlock Grid.Column="3"
+          <TextBlock x:Name="PART_CurrentStatusText"
+                     Grid.Column="3"
                      Text="{Binding StatusMessage}"
                      FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                      TextWrapping="Wrap"

@@ -256,6 +256,57 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void DynamicStatusAnnouncementRegions_ExposeStableLiveRegionContract()
+    {
+        var editor = CreateValidationFeedbackEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var validationStatus = FindRequiredControl<TextBlock>(view, "PART_ValidationStatusText");
+        var statusValidation = FindRequiredControl<TextBlock>(view, "PART_StatusValidationText");
+        var exportStatus = FindRequiredControl<TextBlock>(view, "PART_ExportStatusText");
+        var currentStatus = FindRequiredControl<TextBlock>(view, "PART_CurrentStatusText");
+
+        AssertAnnouncementRegion(
+            validationStatus,
+            "Validation status",
+            "Updates when the graph validation snapshot changes.");
+        AssertAnnouncementRegion(
+            statusValidation,
+            "Status bar validation",
+            "Updates when the graph validation snapshot changes.");
+        AssertAnnouncementRegion(
+            exportStatus,
+            "Export status",
+            "Updates when scene export progress or completion changes.");
+        AssertAnnouncementRegion(
+            currentStatus,
+            "Current editor status",
+            "Updates when editor commands publish status messages.");
+
+        Assert.Contains("1 error", validationStatus.Text, StringComparison.Ordinal);
+        Assert.Contains("1 error", statusValidation.Text, StringComparison.Ordinal);
+        Assert.Contains("Choose a format and scope.", exportStatus.Text, StringComparison.Ordinal);
+
+        editor.Session.Commands.DeleteConnection("connection-001");
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+        Assert.Contains("0 errors", validationStatus.Text, StringComparison.Ordinal);
+        Assert.Contains("0 errors", statusValidation.Text, StringComparison.Ordinal);
+
+        editor.StatusMessage = "Focused announcement contract.";
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+        Assert.Equal("Focused announcement contract.", currentStatus.Text);
+
+        var exportRunButton = FindRequiredControl<Button>(view, "PART_ExportRunButton");
+        exportRunButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+        Assert.Contains("SVG export", exportStatus.Text, StringComparison.Ordinal);
+    }
+
+    [AvaloniaFact]
     public void ProblemsPanel_DoubleClickFocusesNodeAndReusesInspectorSelection()
     {
         var editor = CreateValidationParameterFeedbackEditor();
@@ -1484,6 +1535,13 @@ public sealed class GraphEditorViewTests
     {
         Assert.True(control.Focusable);
         Assert.Equal(automationName, AutomationProperties.GetName(control));
+    }
+
+    private static void AssertAnnouncementRegion(Control control, string automationName, string helpText)
+    {
+        Assert.Equal(automationName, AutomationProperties.GetName(control));
+        Assert.Equal(helpText, AutomationProperties.GetHelpText(control));
+        Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting(control));
     }
 
     private static void AssertFocusRoundTrip(
