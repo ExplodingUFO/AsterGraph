@@ -98,6 +98,10 @@ Phase 512 是 GitHub #143 / `avalonia-node-map-1j4`，承接有界 shell-state r
 
 Phase 513 是 GitHub #149 / `avalonia-node-map-d8q`，在 Phase 506 visual queue 已通过 Phases 508-512 全部关闭后刷新 post-Phase-512 roadmap refresh。本 slice 仍是 docs/tests only：把 Phase 512 记录为 closed，替换 current-owned visual queue 为具体 post-Phase-512 follow-ups，并明确 `.planning/` drift，因为这些文件是 local/ignored，不属于 PR worktree 的 tracked artifact。不授权 no runtime behavior changes、no public API changes、no UI redesign、no strict pixel baseline enforcement、no retained API removal 或 broad parity/accessibility certification claims。
 
+## Phase 514 更新
+
+Phase 514 是 GitHub #150 / `avalonia-node-map-ien`，在 Phase 513 roadmap refresh 后执行 executable renderer virtualization proof harness。它新增 `RendererVirtualizationProofHarnessTests`，并输出机器可读的 `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT` marker，包含 `graphSize`、`viewport`、`zoom`、`overscan`、`visibleVisualCounts`、`invalidationCounts` 和 `measuredTimings`。该 artifact 记录 `avoidsFullCollectionScan=false` 和 `avoidsFullSceneRebuild=false`，所以公开声明仍保持 viewport-budgeted scene projection/rendering，并保持 no support-claim expansion。不授权 ItemsRepeater/Skia-style renderer rewrite、public API change、UI redesign 或新的 graph-size support tier。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -264,7 +268,7 @@ Phase 500 已通过 GitHub #123 / `avalonia-node-map-66t` 关闭 selected runtim
 
 Phase 501 已通过 GitHub #125 / `avalonia-node-map-38n` 关闭 post-Phase-500 parity follow-up queue refresh。它把当前 partial gaps 转成具体队列，同时把 broad React Flow parity claims、runtime behavior changes、public API changes、UI redesign、strict pixel baselines、retained API removal 和 renderer virtualization implementation 排除在外。
 
-Phase 502 现在通过 GitHub #127 / `avalonia-node-map-mai` 承接 renderer virtualization execution proof。它是 Current owned slice，并保持 docs/tests only：定义任何 true renderer virtualization 声明前必须具备的 proof command 和 artifact metadata contract，同时把 implementation、runtime behavior change、public API change、UI redesign、retained API removal 和 support-claim expansion 排除在外。
+Phase 502 已通过 GitHub #127 / `avalonia-node-map-mai` 关闭 renderer virtualization execution proof contract。它保持 docs/tests only：定义任何 true renderer virtualization 声明前必须具备的 proof command 和 artifact metadata contract，同时把 implementation、runtime behavior change、public API change、UI redesign、retained API removal 和 support-claim expansion 排除在外。
 
 Phase 503 现在通过 GitHub #129 / `avalonia-node-map-mzu` 承接 declarative API ergonomics audit。它保持 docs/tests only：记录当前 code-first、factory、hosted-builder、template 和 Demo 路线，不声明 React hook parity、`<ReactFlow>`-equivalent declarative DSL、runtime behavior change、public API change、UI redesign、retained API removal 或 public API baseline change。
 
@@ -287,6 +291,8 @@ Phase 511 现在通过 GitHub #142 / `avalonia-node-map-9rq` 承接 additional l
 Phase 512 已通过 GitHub #143 / `avalonia-node-map-1j4` 关闭 pixel-baseline drift measurement。它只在每个 generated scene 和 shell artifact 的 `PngSha256` 旁边新增 record-only `DriftMeasurement` metadata，包含 host runtime、OS 和 process architecture 字段；strict pixel baselines、pass/fail hash policy、visual redesign、runtime behavior changes、public API changes 和 retained API removal 仍不在范围内。
 
 Phase 513 刷新 post-Phase-512 queue，对应 GitHub #149 / `avalonia-node-map-d8q`。它记录 Phase 506 visual queue 已经通过 Phases 508-512 全部关闭，把 current owned slice 移到本 roadmap refresh，并基于剩余 tracked evidence 选择下一批具体 follow-ups，而不是重新打开已经关闭的 visual rows。
+
+Phase 514 通过 GitHub #150 / `avalonia-node-map-ien` 执行第一条 renderer virtualization proof harness。它新增 `RendererVirtualizationProofHarnessTests`，并输出 `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT` metadata，覆盖 `graphSize`、`viewport`、`zoom`、`overscan`、`visibleVisualCounts`、`invalidationCounts` 和 `measuredTimings`；由于它记录 `avoidsFullCollectionScan=false` 和 `avoidsFullSceneRebuild=false`，公开声明仍保持 viewport-budgeted scene projection/rendering，并保持 no support-claim expansion。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
@@ -357,7 +363,7 @@ Phase 513 刷新 post-Phase-512 queue，对应 GitHub #149 / `avalonia-node-map-
 - Phase 511 现在通过 GitHub #142 / `avalonia-node-map-9rq` 承接 additional language/theme shell variants；它只新增 `shell-cookbook-default-closed-zh-cn` 和 `shell-runtime-diagnostics-open-zh-cn` 两条 `zh-CN` + `canonical-dark` metadata rows。
 - Phase 512 已通过 GitHub #143 / `avalonia-node-map-1j4` 关闭 pixel-baseline drift measurement；它把 `DriftMeasurement` metadata 作为 `record-only` 和 `drift-evidence` 记录在 `PngSha256` 旁边，并包含 `HostRuntimeDescription`、`OsDescription` 和 `ProcessArchitecture`。
 - Phase 513 现在通过 GitHub #149 / `avalonia-node-map-d8q` 承接 post-Phase-512 roadmap refresh；它记录已关闭的 visual queue，并选择下一批真实 follow-ups。
-- Phase 514 是 GitHub #150 / `avalonia-node-map-ien`；它 blocked behind Phase 513，必须先执行 renderer virtualization proof harness，之后才允许扩大 true virtualization claim。
-- Phase 515 是 GitHub #151 / `avalonia-node-map-t44`；它 blocked behind Phase 513，用 Phase 512 drift metadata 决定 strict pixel-baseline policy。
-- Phase 516 是 GitHub #152 / `avalonia-node-map-821`；它 blocked behind Phase 513，记录 manual assistive-technology validation evidence，不声明 unsupported certification claims。
+- Phase 514 是 GitHub #150 / `avalonia-node-map-ien`；它执行 renderer virtualization proof harness，新增 `RendererVirtualizationProofHarnessTests` 和 `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT`，同时保持 `avoidsFullCollectionScan=false`、`avoidsFullSceneRebuild=false` 和 no support-claim expansion。
+- Phase 515 是 GitHub #151 / `avalonia-node-map-t44`；它应在 Phase 514 renderer proof artifact 被接受后，用 Phase 512 drift metadata 决定 strict pixel-baseline policy。
+- Phase 516 是 GitHub #152 / `avalonia-node-map-821`；它应在 Phase 514 renderer proof artifact 被接受后记录 manual assistive-technology validation evidence，不声明 unsupported certification claims。
 - Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512 和 Phase 513 都不修改产品代码；除非 focused test 证明存在具体 missing contract。

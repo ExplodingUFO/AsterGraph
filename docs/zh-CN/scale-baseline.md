@@ -136,6 +136,8 @@ Phase 502 proof contract 为未来 proof artifact 预留这些机器可读 marke
 
 任何后续要声明 true renderer virtualization 的 implementation PR，都必须写入包含 `graphSize`、`viewport`、`zoom`、`overscan`、`visibleVisualCounts`、`invalidationCounts` 和 `measuredTimings` 的 artifact metadata；同时配套 focused renderer tests；定义 non-informational renderer thresholds；并证明被声明的操作同时避开 full collection scan 和 full scene rebuild。在这些证据存在前，公开表述仍只限于 viewport-budgeted scene projection/rendering，`xlarge` 继续是 telemetry-only，Phase 502 只记录 no support-claim expansion。
 
+Phase 514 是 GitHub #150 / `avalonia-node-map-ien`，用于第一条 executable renderer virtualization proof harness。它新增 `RendererVirtualizationProofHarnessTests`，并输出机器可读的 `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT` marker，包含 `graphSize`、`viewport`、`zoom`、`overscan`、`visibleVisualCounts`、`invalidationCounts` 和 `measuredTimings`。该 artifact 明确记录 `avoidsFullCollectionScan=false` 和 `avoidsFullSceneRebuild=false`，所以公开声明仍保持 viewport-budgeted scene projection/rendering，且 no support-claim expansion。
+
 ## 运行方式
 
 ```powershell

@@ -136,6 +136,8 @@ The Phase 502 proof contract reserves these machine-readable markers for the fut
 
 Any future implementation PR that claims true renderer virtualization must write artifact metadata with `graphSize`, `viewport`, `zoom`, `overscan`, `visibleVisualCounts`, `invalidationCounts`, and `measuredTimings`; pair those artifacts with focused renderer tests; define non-informational renderer thresholds; and prove the claimed operation avoids both a full collection scan and a full scene rebuild. Until that proof exists, the current public statement stays viewport-budgeted scene projection/rendering only, `xlarge` remains telemetry-only, and Phase 502 records no support-claim expansion.
 
+Phase 514 is GitHub #150 / `avalonia-node-map-ien`, the first executable renderer virtualization proof harness. It adds `RendererVirtualizationProofHarnessTests` and the machine-readable `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT` marker with `graphSize`, `viewport`, `zoom`, `overscan`, `visibleVisualCounts`, `invalidationCounts`, and `measuredTimings`. The artifact records `avoidsFullCollectionScan=false` and `avoidsFullSceneRebuild=false`, so the public claim remains viewport-budgeted scene projection/rendering with no support-claim expansion.
+
 ## Commands
 
 ```powershell

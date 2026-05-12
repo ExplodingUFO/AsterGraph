@@ -515,8 +515,10 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.DoesNotContain("| TBD | TBD | Phase 502: renderer virtualization execution proof", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains("Phase 502 now owns the renderer virtualization execution proof", englishParity, StringComparison.Ordinal);
-        Assert.Contains("Phase 502 现在通过 GitHub #127 / `avalonia-node-map-mai` 承接 renderer virtualization execution proof", chineseParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 502 closed the renderer virtualization execution proof contract", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 502 已通过 GitHub #127 / `avalonia-node-map-mai` 关闭 renderer virtualization execution proof contract", chineseParity, StringComparison.Ordinal);
+        Assert.DoesNotContain("Phase 502 now owns the renderer virtualization execution proof", englishParity, StringComparison.Ordinal);
+        Assert.DoesNotContain("Phase 502 现在通过 GitHub #127 / `avalonia-node-map-mai` 承接 renderer virtualization execution proof", chineseParity, StringComparison.Ordinal);
     }
 
     private static void AssertPostPhase512Queue(string table)
