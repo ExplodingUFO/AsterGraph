@@ -36,6 +36,10 @@ internal interface INodeCanvasPointerInteractionHost
 
     void UpdateLassoSelection(IReadOnlyList<Point> screenPoints, bool finalize);
 
+    void UpdateLassoFeedback(IReadOnlyList<Point> screenPoints, bool finalize);
+
+    void ClearLassoFeedback();
+
     GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY);
 
     NodeCanvasGroupResizePreview ApplyGroupResizeAssist(
@@ -171,6 +175,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                 if (_host.InteractionSession.TryBeginLassoSelection(currentScreenPosition, selectionDragThreshold))
                 {
                     _host.InteractionSession.RecordLassoSelectionPoint(currentScreenPosition);
+                    _host.UpdateLassoFeedback(_host.InteractionSession.LassoScreenPoints, finalize: false);
                     _host.ClearResizeFeedback();
                     return true;
                 }
@@ -320,6 +325,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             {
                 _host.InteractionSession.RecordLassoSelectionPoint(currentScreenPosition);
                 _host.UpdateLassoSelection(_host.InteractionSession.LassoScreenPoints, finalize: true);
+                _host.UpdateLassoFeedback(_host.InteractionSession.LassoScreenPoints, finalize: true);
             }
             else if (_host.InteractionSession.IsMarqueeSelecting)
             {
@@ -370,6 +376,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
         _host.InteractionSession.ResetAfterPointerRelease();
         _host.HideGuideAdorners();
+        _host.ClearLassoFeedback();
         _host.ClearResizeFeedback();
         _host.UpdateResizeFeedback(currentScreenPosition);
     }
@@ -383,6 +390,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
         _host.InteractionSession.ResetAfterPointerRelease();
         _host.HideGuideAdorners();
+        _host.ClearLassoFeedback();
         _host.ClearResizeFeedback();
         return true;
     }

@@ -120,6 +120,11 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         Assert.True(handled);
         Assert.Equal(0, host.UpdateMarqueeSelectionCalls);
         Assert.Equal(0, host.UpdateLassoSelectionCalls);
+        Assert.Equal(1, host.UpdateLassoFeedbackCalls);
+        Assert.Equal(
+            [new Point(10, 10), new Point(24, 26)],
+            host.LastLassoFeedbackPoints);
+        Assert.False(host.LastLassoFeedbackFinalize);
         Assert.Equal(
             [new Point(10, 10), new Point(24, 26)],
             host.InteractionSession.LassoScreenPoints);
@@ -450,6 +455,9 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         Assert.Equal(0, host.UpdateMarqueeSelectionCalls);
         Assert.Equal(1, host.UpdateLassoSelectionCalls);
         Assert.True(host.LastLassoFinalize);
+        Assert.Equal(1, host.UpdateLassoFeedbackCalls);
+        Assert.True(host.LastLassoFeedbackFinalize);
+        Assert.Equal(1, host.ClearLassoFeedbackCalls);
         Assert.Equal(
             [new Point(8, 12), new Point(20, 24), new Point(32, 28), new Point(48, 60)],
             host.LastLassoPoints);
@@ -561,6 +569,7 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         Assert.Null(host.InteractionSession.DragStartScreenPosition);
         Assert.True(host.InteractionSession.DragSession is null);
         Assert.Equal(1, host.HideGuideAdornerCalls);
+        Assert.Equal(1, host.ClearLassoFeedbackCalls);
         Assert.Equal(1, host.ClearResizeFeedbackCalls);
 
         Assert.False(coordinator.HandlePointerCaptureLost());
@@ -686,6 +695,14 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
 
         public bool LastLassoFinalize { get; private set; }
 
+        public int UpdateLassoFeedbackCalls { get; private set; }
+
+        public IReadOnlyList<Point> LastLassoFeedbackPoints { get; private set; } = [];
+
+        public bool LastLassoFeedbackFinalize { get; private set; }
+
+        public int ClearLassoFeedbackCalls { get; private set; }
+
         public int ApplyDragAssistCalls { get; private set; }
 
         public GraphPoint DragAssistResult { get; set; } = new(0, 0);
@@ -727,6 +744,18 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
             UpdateLassoSelectionCalls++;
             LastLassoPoints = screenPoints.ToList();
             LastLassoFinalize = finalize;
+        }
+
+        public void UpdateLassoFeedback(IReadOnlyList<Point> screenPoints, bool finalize)
+        {
+            UpdateLassoFeedbackCalls++;
+            LastLassoFeedbackPoints = screenPoints.ToList();
+            LastLassoFeedbackFinalize = finalize;
+        }
+
+        public void ClearLassoFeedback()
+        {
+            ClearLassoFeedbackCalls++;
         }
 
         public GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)
