@@ -680,6 +680,61 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase528PanelViewportAttachedOverlayBoundaryInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 528", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #179", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-9ow", contents, StringComparison.Ordinal);
+            Assert.Contains("Panel versus viewport-attached overlay boundary", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("standalone `AsterGraphPanel`", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphPanelPosition", contents, StringComparison.Ordinal);
+            Assert.Contains("TopLeft", contents, StringComparison.Ordinal);
+            Assert.Contains("TopCenter", contents, StringComparison.Ordinal);
+            Assert.Contains("TopRight", contents, StringComparison.Ordinal);
+            Assert.Contains("CenterLeft", contents, StringComparison.Ordinal);
+            Assert.Contains("Center", contents, StringComparison.Ordinal);
+            Assert.Contains("CenterRight", contents, StringComparison.Ordinal);
+            Assert.Contains("BottomLeft", contents, StringComparison.Ordinal);
+            Assert.Contains("BottomCenter", contents, StringComparison.Ordinal);
+            Assert.Contains("BottomRight", contents, StringComparison.Ordinal);
+            Assert.Contains("Offset", contents, StringComparison.Ordinal);
+            Assert.Contains("Padding", contents, StringComparison.Ordinal);
+            Assert.Contains("CornerRadius", contents, StringComparison.Ordinal);
+            Assert.Contains("host-owned content composition", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("focus boundary", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("AsterGraphPanel_ArrangesContentAtRequestedOverlayPosition", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphPanel_DefaultsToNonFocusableOverlayContainerAndPreservesFocusableContent", contents, StringComparison.Ordinal);
+            Assert.Contains("builtin-standalone-panel-route", contents, StringComparison.Ordinal);
+            Assert.Contains("standalone-panel", contents, StringComparison.Ordinal);
+            Assert.Contains("cookbook-builtin-standalone-panel", contents, StringComparison.Ordinal);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no strict visual-baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow Panel parity claim", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no new viewport runtime", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no panel persistence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no remote sync", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no shell dependency", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no workflow engine", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 528: Panel versus viewport-attached overlay boundary", contents, StringComparison.Ordinal);
+        }
+
+        AssertPanelViewportAttachedOverlayBoundary(ExtractPanelViewportAttachedOverlayBoundary(englishParity));
+        AssertPanelViewportAttachedOverlayBoundary(ExtractPanelViewportAttachedOverlayBoundary(chineseParity));
+
+        Assert.Contains("Phase 528 records the Panel versus viewport-attached overlay boundary", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 528 记录 Panel versus viewport-attached overlay boundary", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -863,6 +918,43 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("not full React Flow Background parity", table, StringComparison.OrdinalIgnoreCase);
     }
 
+    private static void AssertPanelViewportAttachedOverlayBoundary(string table)
+    {
+        Assert.Contains("| Panel gate |", table, StringComparison.Ordinal);
+        Assert.Contains("| Public standalone overlay primitive | Supported / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Placement enum and properties | Supported / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Host-owned content composition | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Focus boundary | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Built-in catalog/Cookbook route | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Screenshot-gate coverage | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Viewport-attached overlay parity | Gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphPanel", table, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphPanelPosition", table, StringComparison.Ordinal);
+        Assert.Contains("TopLeft", table, StringComparison.Ordinal);
+        Assert.Contains("TopCenter", table, StringComparison.Ordinal);
+        Assert.Contains("TopRight", table, StringComparison.Ordinal);
+        Assert.Contains("CenterLeft", table, StringComparison.Ordinal);
+        Assert.Contains("Center", table, StringComparison.Ordinal);
+        Assert.Contains("CenterRight", table, StringComparison.Ordinal);
+        Assert.Contains("BottomLeft", table, StringComparison.Ordinal);
+        Assert.Contains("BottomCenter", table, StringComparison.Ordinal);
+        Assert.Contains("BottomRight", table, StringComparison.Ordinal);
+        Assert.Contains("Position", table, StringComparison.Ordinal);
+        Assert.Contains("Offset", table, StringComparison.Ordinal);
+        Assert.Contains("Padding", table, StringComparison.Ordinal);
+        Assert.Contains("CornerRadius", table, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphPanel_ArrangesContentAtRequestedOverlayPosition", table, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphPanel_DefaultsToNonFocusableOverlayContainerAndPreservesFocusableContent", table, StringComparison.Ordinal);
+        Assert.Contains("builtin-standalone-panel-route", table, StringComparison.Ordinal);
+        Assert.Contains("standalone-panel", table, StringComparison.Ordinal);
+        Assert.Contains("cookbook-builtin-standalone-panel", table, StringComparison.Ordinal);
+        Assert.Contains("panel persistence", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("remote sync", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("shell dependency", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("workflow engine", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not full React Flow Panel parity", table, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static string ExtractMiniMapInteractionCustomizationGate(string contents)
     {
         var headingStart = contents.IndexOf("\n## MiniMap Interaction And Customization Gate", StringComparison.Ordinal);
@@ -899,6 +991,19 @@ public sealed class ReactFlowParityRoadmapDocsTests
 
         var nextHeading = contents.IndexOf("\n## ", tableStart, StringComparison.Ordinal);
         Assert.True(nextHeading > tableStart, "Expected heading after Background variant public surface gate table.");
+        return contents[tableStart..nextHeading];
+    }
+
+    private static string ExtractPanelViewportAttachedOverlayBoundary(string contents)
+    {
+        var headingStart = contents.IndexOf("\n## Panel Versus Viewport-Attached Overlay Boundary", StringComparison.Ordinal);
+        Assert.True(headingStart >= 0, "Expected Panel versus viewport-attached overlay boundary heading.");
+
+        var tableStart = contents.IndexOf("| Panel gate |", headingStart, StringComparison.Ordinal);
+        Assert.True(tableStart >= 0, "Expected Panel versus viewport-attached overlay boundary table header.");
+
+        var nextHeading = contents.IndexOf("\n## ", tableStart, StringComparison.Ordinal);
+        Assert.True(nextHeading > tableStart, "Expected heading after Panel versus viewport-attached overlay boundary table.");
         return contents[tableStart..nextHeading];
     }
 
