@@ -298,7 +298,7 @@ public sealed class DemoCookbookScreenshotGateTests
             ],
             shellState.RequiredShellParts);
         Assert.Equal("shell-runtime-diagnostics-closed.png", shellState.OutputFileName);
-        Assert.Equal(8, shellStates.Count);
+        Assert.Equal(10, shellStates.Count);
     }
 
     [Fact]
@@ -375,6 +375,47 @@ public sealed class DemoCookbookScreenshotGateTests
     }
 
     [Fact]
+    public void CookbookScreenshotGate_IncludesPhase511BoundedLanguageThemeShellStates()
+    {
+        var shellStates = LoadShellStates(GetRepositoryRoot());
+
+        var closedCookbook = Assert.Single(shellStates, state =>
+            string.Equals(state.Id, "shell-cookbook-default-closed-zh-cn", StringComparison.Ordinal));
+        Assert.Equal("cookbook-default-starter-host-ai-pipeline", closedCookbook.RouteId);
+        Assert.Equal("cookbook", closedCookbook.HostGroup);
+        Assert.Equal("zh-CN", closedCookbook.Language);
+        Assert.Equal("canonical-dark", closedCookbook.Theme);
+        Assert.False(closedCookbook.ExpectedPaneOpen);
+        Assert.Equal(
+            [
+                "PART_HostMenu",
+                "PART_HostShellSplitView",
+                "PART_MainGraphEditorHost",
+            ],
+            closedCookbook.RequiredShellParts);
+        Assert.Equal("shell-cookbook-default-closed-zh-cn.png", closedCookbook.OutputFileName);
+
+        var runtimeOpen = Assert.Single(shellStates, state =>
+            string.Equals(state.Id, "shell-runtime-diagnostics-open-zh-cn", StringComparison.Ordinal));
+        Assert.Equal("cookbook-default-starter-host-ai-pipeline", runtimeOpen.RouteId);
+        Assert.Equal("runtime", runtimeOpen.HostGroup);
+        Assert.Equal("zh-CN", runtimeOpen.Language);
+        Assert.Equal("canonical-dark", runtimeOpen.Theme);
+        Assert.True(runtimeOpen.ExpectedPaneOpen);
+        Assert.Equal(
+            [
+                "PART_HostMenu",
+                "PART_HostShellSplitView",
+                "PART_RuntimeSummarySection",
+                "PART_RuntimeInspectionSection",
+                "PART_RuntimeDiagnosticsSection",
+                "PART_MainGraphEditorHost",
+            ],
+            runtimeOpen.RequiredShellParts);
+        Assert.Equal("shell-runtime-diagnostics-open-zh-cn.png", runtimeOpen.OutputFileName);
+    }
+
+    [Fact]
     public void CookbookScreenshotGate_DocumentationNamesCommandArtifactsAndCiPosture()
     {
         var english = ReadRepoFile("docs/en/demo-cookbook.md");
@@ -403,6 +444,9 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains("shell-cookbook-default-canvas-context-menu", contents, StringComparison.Ordinal);
             Assert.Contains("full-window-shell-context-menu-state", contents, StringComparison.Ordinal);
             Assert.Contains("PART_NodeCanvas", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-closed-zh-cn", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-runtime-diagnostics-open-zh-cn", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 511", contents, StringComparison.Ordinal);
             Assert.Contains("language/theme", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("builtin-standalone-controls-route", contents, StringComparison.Ordinal);
             Assert.Contains("builtin-standalone-panel-route", contents, StringComparison.Ordinal);
