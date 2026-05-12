@@ -1084,6 +1084,50 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase539DrawingPrimitiveModelGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 539", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #201", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-rwr", contents, StringComparison.Ordinal);
+            Assert.Contains("rectangle/freehand drawing primitive model gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("GraphDocument", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphNode", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphConnection", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorSelectionRectangleSnapshot", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorSelectionLassoSnapshot", contents, StringComparison.Ordinal);
+            Assert.Contains("model identity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("geometry", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("style/brush state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("hit-testing/edit lifecycle", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("renderer projection", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("persistence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Cookbook/screenshot evidence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no Avalonia pointer coordinator edits", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer-layer changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no persistence/schema changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("rectangle/freehand drawing parity is supported", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("Rectangle draw parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("Freehand draw parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 539: rectangle/freehand drawing primitive model gate", contents, StringComparison.Ordinal);
+        }
+
+        AssertPostPhase539Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase539Queue(ExtractIssueWaveTable(chineseParity));
+
+        Assert.Contains("Phase 539 records the rectangle/freehand drawing primitive model gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 539 记录 rectangle/freehand drawing primitive model gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -1156,7 +1200,8 @@ public sealed class ReactFlowParityRoadmapDocsTests
             || table.Contains("阻塞下一批 implementation wave", StringComparison.OrdinalIgnoreCase));
         Assert.True(
             table.Contains("in parallel", StringComparison.OrdinalIgnoreCase)
-            || table.Contains("可与", StringComparison.OrdinalIgnoreCase));
+            || table.Contains("可与", StringComparison.OrdinalIgnoreCase)
+            || table.Contains("Current stacked drawing model gate", StringComparison.OrdinalIgnoreCase));
         Assert.DoesNotContain("Current docs/API-policy slice", table, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Ready after Phase 519", table, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh", table, StringComparison.Ordinal);
@@ -1191,7 +1236,9 @@ public sealed class ReactFlowParityRoadmapDocsTests
             || table.Contains("阻塞下一批 implementation wave", StringComparison.OrdinalIgnoreCase));
         Assert.True(
             table.Contains("Can run after Phase 535 in parallel", StringComparison.OrdinalIgnoreCase)
-            || table.Contains("Phase 535 后可与", StringComparison.OrdinalIgnoreCase));
+            || table.Contains("Phase 535 后可与", StringComparison.OrdinalIgnoreCase)
+            || table.Contains("Blocks lasso toolbar work", StringComparison.OrdinalIgnoreCase)
+            || table.Contains("进入 lasso toolbar work", StringComparison.OrdinalIgnoreCase));
         Assert.DoesNotContain("| #191 | `avalonia-node-map-lzy` | Phase 534: lasso visual gesture feedback route", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| TBD | TBD | Phase 536: lasso screenshot route and Cookbook proof boundary", table, StringComparison.Ordinal);
         Assert.DoesNotContain("Current Avalonia visual feedback slice", table, StringComparison.OrdinalIgnoreCase);
@@ -1218,7 +1265,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
     {
         Assert.Contains("| #197 | `avalonia-node-map-w9h` | Phase 537: lasso toolbar UX and public activation ergonomics boundary", table, StringComparison.Ordinal);
         Assert.Contains("| #199 | `avalonia-node-map-a3w` | Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
-        Assert.Contains("Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
+        Assert.Contains("| #201 | `avalonia-node-map-rwr` | Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
         Assert.Contains("Phase 540: whiteboard persistence and render-layer readiness gate", table, StringComparison.Ordinal);
         Assert.Contains("TBD", table, StringComparison.Ordinal);
         Assert.Contains("graph-selection deletion evidence", table, StringComparison.OrdinalIgnoreCase);
@@ -1226,7 +1273,23 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("persistence/schema planning", table, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("| TBD | TBD | Phase 537: lasso toolbar UX and public activation ergonomics boundary", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| TBD | TBD | Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
         Assert.DoesNotContain("Current toolbar ergonomics slice", table, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void AssertPostPhase539Queue(string table)
+    {
+        Assert.Contains("| #197 | `avalonia-node-map-w9h` | Phase 537: lasso toolbar UX and public activation ergonomics boundary", table, StringComparison.Ordinal);
+        Assert.Contains("| #199 | `avalonia-node-map-a3w` | Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
+        Assert.Contains("| #201 | `avalonia-node-map-rwr` | Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 540: whiteboard persistence and render-layer readiness gate", table, StringComparison.Ordinal);
+        Assert.Contains("Current stacked drawing model gate", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("graph-selection deletion evidence", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Core/Editor model contract", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("persistence/schema planning", table, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("| TBD | TBD | Phase 537: lasso toolbar UX and public activation ergonomics boundary", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
     }
 
     private static void AssertPhase538WorktreePlan(string plan)
@@ -1378,7 +1441,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("| Multi-select and command projection | Present / guarded |", table, StringComparison.Ordinal);
         Assert.Contains("| Lasso/freehand selection | Public Avalonia lasso selection mode with hosted toolbar activation and transient visual feedback / whiteboard gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Eraser tool | Feasibility gate recorded / gap retained |", table, StringComparison.Ordinal);
-        Assert.Contains("| Rectangle/freehand drawing | Gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("| Rectangle/freehand drawing | Model gate recorded / gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Whiteboard persistence/render layer | Gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("https://reactflow.dev/learn/advanced-use/whiteboard", table, StringComparison.Ordinal);
         Assert.Contains("Freehand draw", table, StringComparison.Ordinal);
