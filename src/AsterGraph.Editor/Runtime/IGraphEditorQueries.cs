@@ -33,6 +33,14 @@ public interface IGraphEditorQueries
     GraphEditorSelectionRectangleSnapshot GetSelectionRectangleSnapshot(GraphPoint position, GraphSize size)
         => throw new NotSupportedException();
 
+    /// <summary>
+    /// Gets a freeform lasso selection projection for the current active scope.
+    /// </summary>
+    /// <param name="points">Canvas-space polygon points. The path is treated as closed; at least three points are required.</param>
+    /// <returns>Nodes whose center points are inside the polygon, plus connections whose endpoints are both selected.</returns>
+    GraphEditorSelectionLassoSnapshot GetSelectionLassoSnapshot(IReadOnlyList<GraphPoint> points)
+        => throw new NotSupportedException();
+
     GraphEditorSnapGuideSnapshot GetSnapGuideSnapshot(GraphEditorSnapGuideQuery? query = null)
         => throw new NotSupportedException();
 
