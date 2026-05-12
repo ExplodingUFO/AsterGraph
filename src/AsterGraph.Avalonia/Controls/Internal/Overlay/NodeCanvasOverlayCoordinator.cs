@@ -43,6 +43,8 @@ internal interface INodeCanvasOverlayHost
 
     GraphEditorSelectionRectangleSnapshot GetSelectionRectangleSnapshot(GraphPoint firstCorner, GraphPoint secondCorner);
 
+    GraphEditorSelectionLassoSnapshot GetSelectionLassoSnapshot(IReadOnlyList<GraphPoint> points);
+
     NodeCanvasInteractionSession InteractionSession { get; }
 
     void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode, string? status = null);
@@ -149,6 +151,40 @@ internal sealed class NodeCanvasOverlayCoordinator
                     _ => $"Selected {nodes.Count} nodes.",
                 }
                 : null);
+    }
+
+    public void UpdateLassoSelection(IReadOnlyList<Point> screenPoints, bool finalize)
+    {
+        if (!finalize || screenPoints.Count == 0)
+        {
+            return;
+        }
+
+        var worldPoints = screenPoints
+            .Select(point => _host.ScreenToWorld(new GraphPoint(point.X, point.Y)))
+            .ToList();
+        var snapshot = _host.GetSelectionLassoSnapshot(worldPoints);
+        var nodeIdSet = snapshot.NodeIds.ToHashSet(StringComparer.Ordinal);
+        var hitNodes = _host.Nodes
+            .Where(node => nodeIdSet.Contains(node.Id))
+            .ToList();
+        var nodes = ApplySelectionModifiers(hitNodes);
+        var primaryNode = nodes.LastOrDefault();
+
+        if (SelectionsMatchCurrentState(nodes, primaryNode))
+        {
+            return;
+        }
+
+        _host.SetSelection(
+            nodes,
+            primaryNode,
+            nodes.Count switch
+            {
+                0 => "No nodes inside lasso selection.",
+                1 => $"Selected {nodes[0].Title}.",
+                _ => $"Selected {nodes.Count} nodes.",
+            });
     }
 
     public GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)

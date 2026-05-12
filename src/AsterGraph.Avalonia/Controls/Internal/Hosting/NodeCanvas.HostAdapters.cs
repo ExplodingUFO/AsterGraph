@@ -227,6 +227,10 @@ public partial class NodeCanvas
                 ?? new GraphEditorSelectionRectangleSnapshot([], []);
         }
 
+        public GraphEditorSelectionLassoSnapshot GetSelectionLassoSnapshot(IReadOnlyList<GraphPoint> points)
+            => _owner.ViewModel?.Session.Queries.GetSelectionLassoSnapshot(points)
+               ?? new GraphEditorSelectionLassoSnapshot([], []);
+
         public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
 
         public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode, string? status = null)
