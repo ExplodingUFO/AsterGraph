@@ -1128,6 +1128,52 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase540WhiteboardPersistenceRenderGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 540", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #203", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-91b", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard persistence and render-layer readiness gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("GraphDocumentSerializer", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphDocumentCompatibility", contents, StringComparison.Ordinal);
+            Assert.Contains("CurrentSchemaVersion", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphWorkspaceService", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorSceneSnapshot", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeCanvasConnectionSceneRenderer", contents, StringComparison.Ordinal);
+            Assert.Contains("CookbookScreenshotGateRoutes.json", contents, StringComparison.Ordinal);
+            Assert.Contains("CookbookShellVisualGateStates.json", contents, StringComparison.Ordinal);
+            Assert.Contains("persistence/schema contract", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("renderer projection contract", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("hit-testing/edit lifecycle", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("screenshot/Cookbook evidence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("migration policy", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("whiteboard annotation persistence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("whiteboard annotation rendering", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no persistence/schema changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer-layer changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("whiteboard persistence parity is supported", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("render-layer parity is supported", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("whiteboard annotation persistence is implemented", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 540: whiteboard persistence and render-layer readiness gate", contents, StringComparison.Ordinal);
+        }
+
+        AssertPostPhase540Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase540Queue(ExtractIssueWaveTable(chineseParity));
+
+        Assert.Contains("Phase 540 records the whiteboard persistence and render-layer readiness gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 540 记录 whiteboard persistence and render-layer readiness gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -1223,7 +1269,9 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
         Assert.Contains("Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
         Assert.Contains("Phase 540: whiteboard persistence and render-layer readiness gate", table, StringComparison.Ordinal);
-        Assert.Contains("TBD", table, StringComparison.Ordinal);
+        Assert.True(
+            table.Contains("TBD", StringComparison.Ordinal)
+            || table.Contains("| #203 | `avalonia-node-map-91b` | Phase 540: whiteboard persistence and render-layer readiness gate", StringComparison.Ordinal));
         Assert.Contains("Cookbook screenshot manifest", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("hosted authoring tools", table, StringComparison.OrdinalIgnoreCase);
         Assert.True(
@@ -1251,7 +1299,9 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
         Assert.Contains("Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
         Assert.Contains("Phase 540: whiteboard persistence and render-layer readiness gate", table, StringComparison.Ordinal);
-        Assert.Contains("TBD", table, StringComparison.Ordinal);
+        Assert.True(
+            table.Contains("TBD", StringComparison.Ordinal)
+            || table.Contains("| #203 | `avalonia-node-map-91b` | Phase 540: whiteboard persistence and render-layer readiness gate", StringComparison.Ordinal));
         Assert.Contains("hosted authoring tools", table, StringComparison.OrdinalIgnoreCase);
         Assert.True(
             table.Contains("editor selection/delete commands", StringComparison.OrdinalIgnoreCase)
@@ -1267,7 +1317,9 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("| #199 | `avalonia-node-map-a3w` | Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
         Assert.Contains("| #201 | `avalonia-node-map-rwr` | Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
         Assert.Contains("Phase 540: whiteboard persistence and render-layer readiness gate", table, StringComparison.Ordinal);
-        Assert.Contains("TBD", table, StringComparison.Ordinal);
+        Assert.True(
+            table.Contains("TBD", StringComparison.Ordinal)
+            || table.Contains("| #203 | `avalonia-node-map-91b` | Phase 540: whiteboard persistence and render-layer readiness gate", StringComparison.Ordinal));
         Assert.Contains("graph-selection deletion evidence", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Core/Editor model contract", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("persistence/schema planning", table, StringComparison.OrdinalIgnoreCase);
@@ -1290,6 +1342,15 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.DoesNotContain("| TBD | TBD | Phase 537: lasso toolbar UX and public activation ergonomics boundary", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| TBD | TBD | Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| TBD | TBD | Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
+    }
+
+    private static void AssertPostPhase540Queue(string table)
+    {
+        AssertPostPhase539Queue(table);
+        Assert.Contains("| #203 | `avalonia-node-map-91b` | Phase 540: whiteboard persistence and render-layer readiness gate", table, StringComparison.Ordinal);
+        Assert.Contains("Stacked after Phase 539", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("readiness criteria", table, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("| TBD | TBD | Phase 540: whiteboard persistence and render-layer readiness gate", table, StringComparison.Ordinal);
     }
 
     private static void AssertPhase538WorktreePlan(string plan)
@@ -1442,7 +1503,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("| Lasso/freehand selection | Public Avalonia lasso selection mode with hosted toolbar activation and transient visual feedback / whiteboard gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Eraser tool | Feasibility gate recorded / gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Rectangle/freehand drawing | Model gate recorded / gap retained |", table, StringComparison.Ordinal);
-        Assert.Contains("| Whiteboard persistence/render layer | Gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("| Whiteboard persistence/render layer | Readiness gate recorded / gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("https://reactflow.dev/learn/advanced-use/whiteboard", table, StringComparison.Ordinal);
         Assert.Contains("Freehand draw", table, StringComparison.Ordinal);
         Assert.Contains("Lasso selection", table, StringComparison.Ordinal);
