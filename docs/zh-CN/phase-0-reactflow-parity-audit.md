@@ -150,6 +150,10 @@ Phase 525 是 GitHub #173 / `avalonia-node-map-ba7`，承接 built-in component 
 
 Phase 526 是 GitHub #175 / `avalonia-node-map-clw`，承接 built-in component matrix 后的 Controls interactivity/custom-button parity gate。本 slice 只修改 docs/tests：把当前 Controls 支持记录为 partial / guarded；canonical viewport commands、hosted action descriptor projection、disabled-command recovery、stable button/focus boundary 和 built-in catalog/Cookbook route 都有 source-backed evidence，同时继续明确保留 custom button/action injection gaps 作为后续工作。不授权 no runtime behavior changes、no public API changes、no UI redesign、no screenshot manifest expansion、no strict visual-baseline enforcement、no retained API removal，也不做 no full React Flow Controls parity claim 之外的扩大声明。
 
+## Phase 527 更新
+
+Phase 527 是 GitHub #177 / `avalonia-node-map-dim`，承接 built-in component matrix 后的 Background variant public surface gate。本 slice 只修改 docs/tests：把当前 Background/Grid 支持记录为 partial / guarded；`GridBackground` line-grid renderer、`CanvasStyleOptions` grid tokens、bounded line-density behavior、snap-to-grid/session command evidence、built-in catalog/Cookbook route 和 screenshot-gate coverage 都有 source-backed evidence。同时继续把 dots/lines/cross variants、gap/size public API policy、background graph indexing、second renderer/new layout runtime 和 full React Flow Background parity 保留为显式 gaps。不授权 no runtime behavior changes、no public API changes、no UI redesign、no screenshot manifest expansion、no strict visual-baseline enforcement、no retained API removal，也不做 no full React Flow Background parity claim 之外的扩大声明。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -285,6 +289,20 @@ Phase 526 记录 Controls interactivity/custom-button parity gate，对应 GitHu
 | Built-in catalog/Cookbook route | Guarded | Built-in catalog 暴露 `AsterGraphControls`，Cookbook route 使用 `builtin-standalone-controls-route`，并且 recipe 带有 `BUILTIN_STANDALONE_CONTROLS_OK`。 | Catalog 和 Cookbook evidence 只证明 standalone route 存在；不新增 shell dependency、workflow engine 或 new viewport runtime。 |
 | Custom button/action injection gaps | Gap retained | Built-in matrix 和 Phase 526 issue 继续把 custom button composition、action injection、richer interactivity 和 full React Flow Controls parity 排除在 supported claim 之外。 | 这些 gap 需要后续 behavior/API issue，docs 才能声明 custom-button parity。Phase 526 的总体边界仍是 not full React Flow Controls parity。 |
 
+## Background Variant Public Surface Gate
+
+Phase 527 记录 Background variant public surface gate，对应 GitHub #177 / `avalonia-node-map-dim`。这个 gate 继续把 Background/Grid 支持限定为 partial / guarded：当前 stock line-grid renderer、style tokens、density bounds、snap command evidence、catalog/Cookbook route 和 screenshot-gate row 都可用且有测试，但不会把它升级为 full React Flow Background parity claim，也不会在本 slice 中承诺额外 runtime/API/UI behavior。
+
+| Background gate | Current status | Existing evidence | Remaining gap / boundary |
+| --- | --- | --- | --- |
+| GridBackground line-grid renderer | Supported / guarded | `GridBackground.CalculateVisibleLineMetrics(...)` 根据 viewport pan/zoom 和 canvas style state 渲染当前 primary/secondary line grid。 | 这只是 stock line-grid renderer；dots/lines/cross variants 和 variant selection 仍是 future API work。 |
+| CanvasStyleOptions grid tokens | Supported / guarded | `CanvasStyleOptions.GridBackgroundHex`、`PrimaryGridHex`、`SecondaryGridHex`、`PrimaryGridSpacing` 和 `SecondaryGridSpacing` 提供当前 theme-backed grid tokens。 | Tokens 只定制当前 colors 和 spacing；不是 React Flow-style `variant`、`gap` 或 `size` public API policy。 |
+| Bounded line-density behavior | Guarded | `CalculateVisibleLineMetrics_WithExtremeZoomSpacing_KeepsLineDensityBounded` 证明 extreme zoom 不会产生不可读或无界 line counts。 | Density bounds 是 renderer safety guard，不是 general virtualization 或 alternate renderer claim。 |
+| Snap-to-grid/session command evidence | Guarded | `TrySnapSelectedNodesToGrid` 和 `AuthoringToolsChrome_ProjectsStockSelectionLayoutActions` 让 grid-related alignment 继续走现有 session command seams。 | Snap/layout command evidence 不新增 layout runtime、background graph indexing 或 background-specific state model。 |
+| Built-in catalog/Cookbook route | Guarded | Built-in catalog 把 `Background/Grid` 暴露为 `GridBackground`，Cookbook route `builtin-background-grid-route` 启动 `background-grid-density` fixture，并带有 `GRID_BACKGROUND_DENSITY_OK`。 | Catalog 和 Cookbook evidence 只证明 discoverability 与 runnable fixture；不新增 second renderer/new layout runtime behavior。 |
+| Screenshot-gate coverage | Guarded | Screenshot manifest row `cookbook-builtin-background-grid` 捕获 `builtin-background-grid-route` / `background-grid-density`，并期望 `Background Grid Density` document。 | Screenshot-gate coverage 只证明现有 fixture 被捕获；本 slice 不做 screenshot manifest expansion 或 strict visual-baseline enforcement。 |
+| Dots/lines/cross variants and gap/size API | Gap retained | Built-in matrix 和 Phase 527 issue 继续把 dots/lines/cross variants、gap/size public API policy、background graph indexing、second renderer/new layout runtime 和 full React Flow Background parity 排除在 supported claim 之外。 | 这些 gap 需要后续 behavior/API issue，docs 才能声明 variant parity。Phase 527 的总体边界仍是 not full React Flow Background parity。 |
+
 ## 已完成的 Phase 0 Issue Wave
 
 原始 first wave 不再是下一轮工作队列。下面这些 tracker 项只作为历史上下文：
@@ -398,13 +416,15 @@ Phase 525 记录 MiniMap interaction and customization parity gate，对应 GitH
 
 Phase 526 记录 Controls interactivity/custom-button parity gate，对应 GitHub #175 / `avalonia-node-map-clw`。它把 canonical viewport commands、hosted action descriptor projection、disabled-command recovery、stable button/focus boundary 和 built-in catalog/Cookbook route 绑定到现有 source/test/Cookbook evidence，同时保留 custom button/action injection gaps，不授权产品或 API 修改。
 
+Phase 527 记录 Background variant public surface gate，对应 GitHub #177 / `avalonia-node-map-dim`。它把 `GridBackground` line-grid rendering、`CanvasStyleOptions` grid tokens、bounded line-density behavior、snap-to-grid/session command evidence、built-in catalog/Cookbook route 和 screenshot-gate coverage 绑定到现有 evidence，同时把 dots/lines/cross variants、gap/size public API policy、background graph indexing、second renderer/new layout runtime 和 full React Flow Background parity 保留为 gaps。
+
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
 | #169 | `avalonia-node-map-bp0` | Phase 523: refresh React Flow parity issue wave after retained readiness audit | P2 | parity roadmap docs 和 focused docs tests | Current issue。它定义 queue 和 tracker 边界，因此会阻塞下一批 implementation wave。 |
 | #171 | `avalonia-node-map-0k0` | Phase 524: built-in component parity matrix for MiniMap, Controls, Background, Panel | P2 | feature catalog、public API inventory、Avalonia README 和 docs tests | Current docs/test slice。它定义 built-in row 边界，因此会阻塞 Phase 525-528。 |
 | #173 | `avalonia-node-map-ba7` | Phase 525: MiniMap interaction and customization parity gate | P2 | `GraphMiniMap`、MiniMap factory/options、minimap tests 和 docs | Current docs/test gate。不要与其他触碰 `GraphMiniMap` 的工作并行。 |
 | #175 | `avalonia-node-map-clw` | Phase 526: Controls interactivity/custom-button parity gate | P2 | `AsterGraphControls`、hosted action button tests 和 docs | Current docs/test gate。不要与其他触碰 `AsterGraphControls` action projection 的工作并行。 |
-| TBD | TBD | Phase 527: Background variant public surface gate | P3 | background/grid control docs/tests 和当前 background support evidence | 只要避免共享 shell docs 编辑，可与 Controls 和 MiniMap 并行。 |
+| #177 | `avalonia-node-map-dim` | Phase 527: Background variant public surface gate | P3 | background/grid control docs/tests 和当前 background support evidence | Current docs/test gate。只要避免共享 shell docs 且不修改 MiniMap/Controls，可与不重叠的 Panel 或 whiteboard work 并行。 |
 | TBD | TBD | Phase 528: Panel versus viewport-attached overlay boundary | P3 | `AsterGraphPanel`、host integration docs 和 panel tests | Phase 524 之后可开始；如果同时编辑 broad built-in component docs，需要串行。 |
 | TBD | TBD | Phase 529: whiteboard/lasso/eraser feasibility audit | P4 | advanced editing docs/tests 或 spike document | 更大的可选 parity track；不阻塞 built-in component parity。 |
 
@@ -440,7 +460,7 @@ Phase 526 记录 Controls interactivity/custom-button parity gate，对应 GitHu
 - `docs/phase-524-built-in-component-matrix`：负责 #171 / `avalonia-node-map-0k0`；当前 docs/test worktree，用于 MiniMap、Controls、Background 和 Panel 的 built-in component parity matrix。
 - `docs/phase-525-minimap-interaction-gate`：负责 #173 / `avalonia-node-map-ba7`；当前 docs/test worktree，用于 MiniMap interaction and customization parity gate。
 - `docs/phase-526-controls-interactivity-gate`：负责 #175 / `avalonia-node-map-clw`；当前 docs/test worktree，用于 Controls interactivity/custom-button parity gate。
-- `ui/phase-527-background-variants`：未来 Background worktree；避免共享 shell docs，并且不要修改 MiniMap/Controls。
+- `docs/phase-527-background-variant-gate`：负责 #177 / `avalonia-node-map-dim`；当前 docs/test worktree，用于 Background variant public surface gate。
 - `ui/phase-528-panel-overlay-boundary`：未来 Panel worktree；如果与 Phase 524 同时编辑同一 built-in component inventory，需要串行。
 - `docs/phase-529-whiteboard-feasibility`：未来 feasibility audit，评估 lasso、eraser、rectangle 和 freehand whiteboard-style parity，不直接承诺实现。
 
@@ -490,4 +510,5 @@ Phase 526 记录 Controls interactivity/custom-button parity gate，对应 GitHu
 - Phase 524 是 GitHub #171 / `avalonia-node-map-0k0`；它记录 MiniMap、Controls、Background/Grid 和 Panel 的 built-in component parity matrix，不做 runtime behavior changes、public API changes、UI redesign、screenshot manifest expansion、strict visual-baseline enforcement 或 retained API removal。
 - Phase 525 是 GitHub #173 / `avalonia-node-map-ba7`；它记录 MiniMap interaction and customization parity gate，不做 runtime behavior changes、public API changes、UI redesign、screenshot manifest expansion、strict visual-baseline enforcement、retained API removal 或 full React Flow MiniMap parity claim。
 - Phase 526 是 GitHub #175 / `avalonia-node-map-clw`；它记录 Controls interactivity/custom-button parity gate，不做 runtime behavior changes、public API changes、UI redesign、screenshot manifest expansion、strict visual-baseline enforcement、retained API removal 或 full React Flow Controls parity claim。
-- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512、Phase 513、Phase 520、Phase 521、Phase 522、Phase 523、Phase 524、Phase 525 和 Phase 526 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
+- Phase 527 是 GitHub #177 / `avalonia-node-map-dim`；它记录 Background variant public surface gate，不做 runtime behavior changes、public API changes、UI redesign、screenshot manifest expansion、strict visual-baseline enforcement、retained API removal 或 full React Flow Background parity claim。
+- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512、Phase 513、Phase 520、Phase 521、Phase 522、Phase 523、Phase 524、Phase 525、Phase 526 和 Phase 527 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
