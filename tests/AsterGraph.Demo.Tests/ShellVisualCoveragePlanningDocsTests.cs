@@ -163,6 +163,32 @@ public sealed class ShellVisualCoveragePlanningDocsTests
         }
     }
 
+    [Fact]
+    public void ShellVisualCoveragePlanningDocs_RecordPhase512DriftMeasurementContract()
+    {
+        var englishCookbook = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chineseCookbook = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+        foreach (var contents in new[] { englishCookbook, chineseCookbook })
+        {
+            Assert.Contains("Phase 512", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #143", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-1j4", contents, StringComparison.Ordinal);
+            Assert.Contains("pixel-baseline drift measurement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("record-only", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("drift-evidence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("DriftMeasurement", contents, StringComparison.Ordinal);
+            Assert.Contains("HostRuntimeDescription", contents, StringComparison.Ordinal);
+            Assert.Contains("OsDescription", contents, StringComparison.Ordinal);
+            Assert.Contains("ProcessArchitecture", contents, StringComparison.Ordinal);
+            Assert.Contains("PngSha256", contents, StringComparison.Ordinal);
+            Assert.Contains("no strict pixel baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no visual redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 
