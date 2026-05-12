@@ -49,6 +49,17 @@ This checklist is planning evidence only: no live-region/runtime behavior change
 
 The evidence package keeps no live-region/runtime behavior change, no UI change, no public API change, no retained API removal, and no broad screen-reader certification claim. Any later Narrator, NVDA, VoiceOver, or platform-equivalent notes should stay on this same hosted route and record the exact announcements and focus transitions rather than replacing the headless proof.
 
+## Live Assistive-Technology Platform-Equivalent Evidence
+
+`ACCESSIBILITY_LIVE_AT_UIA_EVIDENCE` is the Phase 517 / GitHub #156 / `avalonia-node-map-1pd` evidence record. It records a Windows UI Automation platform-equivalent check against the hosted Demo route without claiming live screen-reader speech output.
+
+| Evidence lane | Hosted route states exercised | Observed result | Boundary |
+| --- | --- | --- | --- |
+| Windows UI Automation platform-equivalent check on 2026-05-12 with `src/AsterGraph.Demo/bin/Release/net9.0/AsterGraph.Demo.exe --scenario validation-prevent-cycle` | `GraphEditorView`, `NodeCanvas`, projected host command buttons, and visible node/port names in the `validation-prevent-cycle` scenario | `GraphEditorView`, `NodeCanvas`, projected host command buttons, and some node/port names were exposed through UIA | platform-equivalent evidence only; live screen-reader speech output was not observed |
+| Gap observed in the same UIA run | `PART_CommandPaletteSearchBox`, `PART_ParameterSearchBox`, validation/export/status surfaces, and usable live-region metadata | those targets were not exposed in the observed initial validation scenario state | dynamic validation/export/status announcements remain unproven and are tracked by GitHub #158 / `avalonia-node-map-g0u` |
+
+This Phase 517 evidence keeps no live-region/runtime behavior change, no UI change, no public API change, no retained API removal, and no broad screen-reader certification claim. GitHub #158 / `avalonia-node-map-g0u` owns the follow-up runtime proof for dynamic validation/export/status announcements.
+
 ## Proof Contract
 
 Validate the hosted route with:

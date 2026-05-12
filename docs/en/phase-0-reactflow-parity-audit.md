@@ -110,6 +110,10 @@ Phase 515 is GitHub #151 / `avalonia-node-map-t44`, the strict pixel-baseline po
 
 Phase 516 is GitHub #152 / `avalonia-node-map-821`, the manual assistive-technology validation evidence slice after the post-Phase-512 queue. It adds `ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE` as a bounded platform-equivalent evidence record: fresh Demo proof plus focused headless accessibility tests cover the hosted route states, while the docs explicitly separate headless automation proof from live assistive-technology observations. Phase 516 records `GraphEditorView`, `NodeCanvas`, `GraphInspectorView`, `PART_CommandPaletteSearchBox`, `PART_ParameterSearchBox`, projected command buttons, validation focus buttons, and export/status text as the route-state set, and it records that live screen-reader observations were not performed. The live dynamic validation/export/status announcement gap is filed as GitHub #156 / `avalonia-node-map-1pd`. This slice authorizes no live-region/runtime behavior change, no UI change, no public API change, no retained API removal, and no broad screen-reader certification claim.
 
+## Phase 517 Update
+
+Phase 517 is GitHub #156 / `avalonia-node-map-1pd`, the live assistive-technology validation evidence slice after Phase 516. It adds `ACCESSIBILITY_LIVE_AT_UIA_EVIDENCE` as a Windows UI Automation platform-equivalent record against the hosted Demo `validation-prevent-cycle` scenario. The run observed `GraphEditorView`, `NodeCanvas`, projected host command buttons, and some node/port names through UIA, but `PART_CommandPaletteSearchBox`, `PART_ParameterSearchBox`, and validation/export/status surfaces were not exposed in the observed initial state, and live screen-reader speech output was not observed. The remaining dynamic validation/export/status announcement proof is filed as GitHub #158 / `avalonia-node-map-g0u`. This slice authorizes no live-region/runtime behavior change, no UI change, no public API change, no retained API removal, and no broad screen-reader certification claim.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -252,7 +256,7 @@ Phase 491 records the current accessibility posture as a source-backed contract 
 | Hosted validation/problems shell | Problem rows and focus buttons expose automation names and help text tied to validation targets. | `GraphEditorViewTests` |
 | Hosted export, fragment, command-palette, and authoring shells | Existing interactive controls expose names and stay keyboard-focusable; command-palette focus recovery remains guarded separately. | `GraphEditorViewTests`, `GraphEditorNavigationFocusWorkflowTests` |
 
-Remaining bounded gap: headless tests can guard names, peers, focusability, and focus return, but they do not prove live screen-reader announcements for dynamic validation/export/status changes. Phase 516 records the platform-equivalent evidence package; live screen-reader announcement validation is now GitHub #156 / `avalonia-node-map-1pd`.
+Remaining bounded gap: headless tests can guard names, peers, focusability, and focus return, but they do not prove live screen-reader announcements for dynamic validation/export/status changes. Phase 516 records the platform-equivalent evidence package, and Phase 517 records Windows UI Automation platform-equivalent evidence with live screen-reader speech output was not observed; dynamic validation/export/status announcement proof is now GitHub #158 / `avalonia-node-map-g0u`.
 
 ## Next Issue Wave
 
@@ -303,6 +307,8 @@ Phase 513 refreshes the post-Phase-512 queue through GitHub #149 / `avalonia-nod
 Phase 514 executes the first renderer virtualization proof harness through GitHub #150 / `avalonia-node-map-ien`. It adds `RendererVirtualizationProofHarnessTests` and `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT` metadata for `graphSize`, `viewport`, `zoom`, `overscan`, `visibleVisualCounts`, `invalidationCounts`, and `measuredTimings`; because it records `avoidsFullCollectionScan=false` and `avoidsFullSceneRebuild=false`, the claim remains viewport-budgeted scene projection/rendering with no support-claim expansion.
 
 Phase 516 records manual assistive-technology validation evidence through GitHub #152 / `avalonia-node-map-821`. It adds the `ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE` to the hosted accessibility recipe, keeps platform-equivalent headless automation proof separate from live assistive-technology observations, and files GitHub #156 / `avalonia-node-map-1pd` for live screen-reader announcement validation before any broader claim.
+
+Phase 517 records live assistive-technology platform-equivalent evidence through GitHub #156 / `avalonia-node-map-1pd`. It adds `ACCESSIBILITY_LIVE_AT_UIA_EVIDENCE` to the hosted accessibility recipe, records the Windows UI Automation check against `validation-prevent-cycle`, states that live screen-reader speech output was not observed, and files GitHub #158 / `avalonia-node-map-g0u` for the remaining dynamic validation/export/status announcement proof without making a broad certification claim.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |

@@ -49,6 +49,17 @@
 
 这份 evidence package 继续保持 no live-region/runtime behavior change、no UI change、no public API change、no retained API removal，并且 no broad screen-reader certification claim。后续如果补 Narrator、NVDA、VoiceOver 或 platform-equivalent notes，也必须留在同一条 hosted route 上，记录实际 announcements 和 focus transitions，而不是替换 headless proof。
 
+## Live Assistive-Technology Platform-Equivalent Evidence
+
+`ACCESSIBILITY_LIVE_AT_UIA_EVIDENCE` 是 Phase 517 / GitHub #156 / `avalonia-node-map-1pd` 的证据记录。它记录一次针对 hosted Demo route 的 Windows UI Automation platform-equivalent check，但不声明 live screen-reader speech output。
+
+| Evidence lane | Hosted route states exercised | Observed result | Boundary |
+| --- | --- | --- | --- |
+| 2026-05-12 Windows UI Automation platform-equivalent check：`src/AsterGraph.Demo/bin/Release/net9.0/AsterGraph.Demo.exe --scenario validation-prevent-cycle` | `validation-prevent-cycle` scenario 中的 `GraphEditorView`、`NodeCanvas`、projected host command buttons 以及可见 node/port names | UIA 暴露了 `GraphEditorView`、`NodeCanvas`、projected host command buttons 和部分 node/port names | 只算 platform-equivalent evidence；live screen-reader speech output was not observed |
+| 同一次 UIA run 观察到的 gap | `PART_CommandPaletteSearchBox`、`PART_ParameterSearchBox`、validation/export/status surfaces 和 usable live-region metadata | 这些 targets 在 observed initial validation scenario state 中 not exposed | dynamic validation/export/status announcements 仍未证明，后续由 GitHub #158 / `avalonia-node-map-g0u` 追踪 |
+
+这份 Phase 517 evidence 继续保持 no live-region/runtime behavior change、no UI change、no public API change、no retained API removal，并且 no broad screen-reader certification claim。GitHub #158 / `avalonia-node-map-g0u` 负责后续 dynamic validation/export/status announcements 的 runtime proof。
+
 ## Proof Contract
 
 用下面这条命令验证 hosted route：

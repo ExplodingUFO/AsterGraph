@@ -110,6 +110,10 @@ Phase 515 是 GitHub #151 / `avalonia-node-map-t44`，在 Phase 512 添加 drift
 
 Phase 516 是 GitHub #152 / `avalonia-node-map-821`，在 post-Phase-512 queue 之后记录 manual assistive-technology validation evidence。它新增 `ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE`，作为有边界的 platform-equivalent evidence record：fresh Demo proof 和 focused headless accessibility tests 覆盖 hosted route states，同时文档明确把 headless automation proof 与 live assistive-technology observations 分开。Phase 516 记录的 route-state set 包括 `GraphEditorView`、`NodeCanvas`、`GraphInspectorView`、`PART_CommandPaletteSearchBox`、`PART_ParameterSearchBox`、投影出来的 command buttons、validation focus buttons 和 export/status text，并记录 live screen-reader observations were not performed。live dynamic validation/export/status announcement gap 已作为 GitHub #156 / `avalonia-node-map-1pd` 追踪。本 slice 不授权 no live-region/runtime behavior change、no UI change、no public API change、no retained API removal 或 no broad screen-reader certification claim。
 
+## Phase 517 更新
+
+Phase 517 是 GitHub #156 / `avalonia-node-map-1pd`，承接 Phase 516 的 live assistive-technology validation evidence。它新增 `ACCESSIBILITY_LIVE_AT_UIA_EVIDENCE`，记录针对 hosted Demo `validation-prevent-cycle` scenario 的 Windows UI Automation platform-equivalent check。本次 run 通过 UIA 观察到 `GraphEditorView`、`NodeCanvas`、projected host command buttons 和部分 node/port names，但 `PART_CommandPaletteSearchBox`、`PART_ParameterSearchBox` 以及 validation/export/status surfaces 在 observed initial state 中 not exposed，并且 live screen-reader speech output was not observed。剩余 dynamic validation/export/status announcement proof 已作为 GitHub #158 / `avalonia-node-map-g0u` 追踪。本 slice 不授权 no live-region/runtime behavior change、no UI change、no public API change、no retained API removal 或 no broad screen-reader certification claim。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -252,7 +256,7 @@ Phase 491 把当前 accessibility posture 记录成 source-backed contract，而
 | Hosted validation/problems shell | Problem rows 与 focus buttons 暴露 automation names 和绑定 validation targets 的 help text。 | `GraphEditorViewTests` |
 | Hosted export、fragment、command-palette、authoring shells | 现有 interactive controls 暴露 names 并保持 keyboard-focusable；command-palette focus recovery 由单独测试守住。 | `GraphEditorViewTests`、`GraphEditorNavigationFocusWorkflowTests` |
 
-剩余有界缺口：headless tests 可以守住 names、peers、focusability 和 focus return，但不能证明 dynamic validation/export/status changes 的实时 screen-reader announcements。Phase 516 已记录 platform-equivalent evidence package；live screen-reader announcement validation 现在由 GitHub #156 / `avalonia-node-map-1pd` 追踪。
+剩余有界缺口：headless tests 可以守住 names、peers、focusability 和 focus return，但不能证明 dynamic validation/export/status changes 的实时 screen-reader announcements。Phase 516 已记录 platform-equivalent evidence package，Phase 517 已记录 Windows UI Automation platform-equivalent evidence，并说明 live screen-reader speech output was not observed；dynamic validation/export/status announcement proof 现在由 GitHub #158 / `avalonia-node-map-g0u` 追踪。
 
 ## 下一轮 Issue Wave
 
@@ -303,6 +307,8 @@ Phase 513 刷新 post-Phase-512 queue，对应 GitHub #149 / `avalonia-node-map-
 Phase 514 通过 GitHub #150 / `avalonia-node-map-ien` 执行第一条 renderer virtualization proof harness。它新增 `RendererVirtualizationProofHarnessTests`，并输出 `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT` metadata，覆盖 `graphSize`、`viewport`、`zoom`、`overscan`、`visibleVisualCounts`、`invalidationCounts` 和 `measuredTimings`；由于它记录 `avoidsFullCollectionScan=false` 和 `avoidsFullSceneRebuild=false`，公开声明仍保持 viewport-budgeted scene projection/rendering，并保持 no support-claim expansion。
 
 Phase 516 通过 GitHub #152 / `avalonia-node-map-821` 记录 manual assistive-technology validation evidence。它把 `ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE` 加入 hosted accessibility recipe，把 platform-equivalent headless automation proof 与 live assistive-technology observations 分开，并用 GitHub #156 / `avalonia-node-map-1pd` 跟踪 live screen-reader announcement validation，完成前不扩大声明。
+
+Phase 517 通过 GitHub #156 / `avalonia-node-map-1pd` 记录 live assistive-technology platform-equivalent evidence。它把 `ACCESSIBILITY_LIVE_AT_UIA_EVIDENCE` 加入 hosted accessibility recipe，记录针对 `validation-prevent-cycle` 的 Windows UI Automation check，说明 live screen-reader speech output was not observed，并用 GitHub #158 / `avalonia-node-map-g0u` 跟踪剩余 dynamic validation/export/status announcement proof，不做 broad certification claim。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
