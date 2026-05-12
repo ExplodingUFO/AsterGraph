@@ -290,6 +290,13 @@ public sealed class GraphEditorSessionTests
             typeof(IReadOnlyList<string>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetSelectedNodeConnectionIds))!.ReturnType);
 
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetSelectionLassoSnapshot), typeof(IReadOnlyList<GraphPoint>));
+        Assert.Equal(
+            typeof(GraphEditorSelectionLassoSnapshot),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetSelectionLassoSnapshot), [typeof(IReadOnlyList<GraphPoint>)])!.ReturnType);
+        Assert.NotNull(typeof(GraphEditorSelectionLassoSnapshot).GetProperty(nameof(GraphEditorSelectionLassoSnapshot.NodeIds)));
+        Assert.NotNull(typeof(GraphEditorSelectionLassoSnapshot).GetProperty(nameof(GraphEditorSelectionLassoSnapshot.ConnectionIds)));
+
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetViewportSnapshot));
         Assert.Equal(typeof(GraphEditorViewportSnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetViewportSnapshot))!.ReturnType);
 

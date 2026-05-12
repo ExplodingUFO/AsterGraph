@@ -207,6 +207,7 @@ C:AsterGraph.Editor.Runtime.GraphEditorRuntimeOverlaySnapshot(System.Boolean,Sys
 C:AsterGraph.Editor.Runtime.GraphEditorSceneSnapshot(AsterGraph.Core.Models.GraphDocument,AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot,AsterGraph.Editor.Runtime.GraphEditorViewportSnapshot,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeSurfaceSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorConnectionGeometrySnapshot>,AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot)
 C:AsterGraph.Editor.Runtime.GraphEditorScopeBreadcrumbSnapshot(System.String,System.String)
 C:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot(System.String,System.String,System.Boolean,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorScopeBreadcrumbSnapshot>)
+C:AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot(System.Collections.Generic.IReadOnlyList<System.String>,System.Collections.Generic.IReadOnlyList<System.String>)
 C:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot(System.Collections.Generic.IReadOnlyList<System.String>,System.Collections.Generic.IReadOnlyList<System.String>)
 C:AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot(System.Collections.Generic.IReadOnlyList<System.String>,System.String)
 C:AsterGraph.Editor.Runtime.GraphEditorSelectionTransformItemSnapshot(System.String,AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize,AsterGraph.Core.Models.GraphPoint)
@@ -1625,6 +1626,12 @@ M:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.Equals(AsterGraph
 M:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.Equals(System.Object):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.GetHashCode():System.Int32
 M:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.ToString():System.String
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot.Deconstruct(out System.Collections.Generic.IReadOnlyList<System.String>&,out System.Collections.Generic.IReadOnlyList<System.String>&):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot.Equals(System.Object):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot.GetHashCode():System.Int32
+M:AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot.ToString():System.String
 M:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.Deconstruct(out System.Collections.Generic.IReadOnlyList<System.String>&,out System.Collections.Generic.IReadOnlyList<System.String>&):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot):System.Boolean
@@ -1703,6 +1710,7 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSceneSnapshot():AsterGraph.Edi
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetScopeNavigationSnapshot():AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSelectedNodeConnectionIds():System.Collections.Generic.IReadOnlyList<System.String>
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSelectedNodeParameterSnapshots():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot>
+M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSelectionLassoSnapshot(System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPoint>):AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSelectionRectangleSnapshot(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize):AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSelectionSnapshot():AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetSelectionTransformSnapshot(AsterGraph.Editor.Runtime.GraphEditorSelectionTransformQuery):AsterGraph.Editor.Runtime.GraphEditorSelectionTransformSnapshot
@@ -2015,6 +2023,7 @@ M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSceneSnapshot():AsterGraph.Ed
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetScopeNavigationSnapshot():AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSelectedNodeConnectionIds():System.Collections.Generic.IReadOnlyList<System.String>
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSelectedNodeParameterSnapshots():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot>
+M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSelectionLassoSnapshot(System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphPoint>):AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSelectionRectangleSnapshot(AsterGraph.Core.Models.GraphPoint,AsterGraph.Core.Models.GraphSize):AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSelectionSnapshot():AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetSelectionTransformSnapshot(AsterGraph.Editor.Runtime.GraphEditorSelectionTransformQuery):AsterGraph.Editor.Runtime.GraphEditorSelectionTransformSnapshot
@@ -3445,6 +3454,8 @@ P:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.Breadcrumbs:Syste
 P:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.CanNavigateToParent:System.Boolean:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.CurrentScopeId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot.ParentScopeId:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot.ConnectionIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot.NodeIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.ConnectionIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot.NodeIds:System.Collections.Generic.IReadOnlyList<System.String>:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot.PrimarySelectedConnectionId:System.String:get,set
@@ -4091,6 +4102,7 @@ T:class AsterGraph.Editor.Runtime.GraphEditorRuntimeOverlaySnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorSceneSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorScopeBreadcrumbSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorScopeNavigationSnapshot
+T:class AsterGraph.Editor.Runtime.GraphEditorSelectionLassoSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorSelectionRectangleSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorSelectionTransformItemSnapshot

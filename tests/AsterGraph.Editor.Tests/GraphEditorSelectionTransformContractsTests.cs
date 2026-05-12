@@ -54,6 +54,64 @@ public sealed class GraphEditorSelectionTransformContractsTests
     }
 
     [Fact]
+    public void Queries_GetSelectionLassoSnapshot_ReturnsCenterContainedNodesAndConnections()
+    {
+        var session = CreateSession();
+
+        var snapshot = session.Queries.GetSelectionLassoSnapshot(
+        [
+            new GraphPoint(190, 100),
+            new GraphPoint(570, 100),
+            new GraphPoint(570, 220),
+            new GraphPoint(190, 220),
+        ]);
+
+        Assert.Equal(["source-001", "target-001"], snapshot.NodeIds);
+        Assert.Equal(["connection-001"], snapshot.ConnectionIds);
+    }
+
+    [Fact]
+    public void Queries_GetSelectionLassoSnapshot_UsesNodeCenterInsteadOfBoundsIntersection()
+    {
+        var session = CreateSession();
+
+        var snapshot = session.Queries.GetSelectionLassoSnapshot(
+        [
+            new GraphPoint(100, 100),
+            new GraphPoint(180, 100),
+            new GraphPoint(180, 260),
+            new GraphPoint(100, 260),
+        ]);
+
+        Assert.Empty(snapshot.NodeIds);
+        Assert.Empty(snapshot.ConnectionIds);
+    }
+
+    [Fact]
+    public void Queries_GetSelectionLassoSnapshot_WithOpenOrDegeneratePath_ReturnsDeterministicResults()
+    {
+        var session = CreateSession();
+
+        var sourceOnly = session.Queries.GetSelectionLassoSnapshot(
+        [
+            new GraphPoint(180, 120),
+            new GraphPoint(280, 120),
+            new GraphPoint(280, 220),
+            new GraphPoint(180, 220),
+        ]);
+        var degenerate = session.Queries.GetSelectionLassoSnapshot(
+        [
+            new GraphPoint(180, 120),
+            new GraphPoint(280, 120),
+        ]);
+
+        Assert.Equal(["source-001"], sourceOnly.NodeIds);
+        Assert.Empty(sourceOnly.ConnectionIds);
+        Assert.Empty(degenerate.NodeIds);
+        Assert.Empty(degenerate.ConnectionIds);
+    }
+
+    [Fact]
     public void Queries_ProjectSelectionTransformBoundsPreviewAndRectangleHits()
     {
         var session = CreateSession();

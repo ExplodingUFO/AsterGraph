@@ -788,6 +788,38 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase530LassoSelectionQueryContractInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 530", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #183", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-8um", contents, StringComparison.Ordinal);
+            Assert.Contains("lasso/freehand selection query contract", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("GetSelectionLassoSnapshot", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorSelectionLassoSnapshot", contents, StringComparison.Ordinal);
+            Assert.Contains("center-point", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("endpoint", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("pointer-mode state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("gesture capture", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("eraser", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("drawing primitives", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("persistence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("renderer", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("strict visual-baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertWhiteboardLassoEraserFeasibilityAudit(ExtractWhiteboardLassoEraserFeasibilityAudit(englishParity));
+        AssertWhiteboardLassoEraserFeasibilityAudit(ExtractWhiteboardLassoEraserFeasibilityAudit(chineseParity));
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -1014,7 +1046,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("| React Flow whiteboard reference | Gap-scoping reference |", table, StringComparison.Ordinal);
         Assert.Contains("| Rectangle marquee selection | Present / guarded |", table, StringComparison.Ordinal);
         Assert.Contains("| Multi-select and command projection | Present / guarded |", table, StringComparison.Ordinal);
-        Assert.Contains("| Lasso/freehand selection | Gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("| Lasso/freehand selection | Backend query supported / UI gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Eraser tool | Gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Rectangle/freehand drawing | Gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Whiteboard persistence/render layer | Gap retained |", table, StringComparison.Ordinal);
@@ -1024,8 +1056,13 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("Eraser", table, StringComparison.Ordinal);
         Assert.Contains("Rectangle draw", table, StringComparison.Ordinal);
         Assert.Contains("GetSelectionRectangleSnapshot", table, StringComparison.Ordinal);
+        Assert.Contains("GetSelectionLassoSnapshot", table, StringComparison.Ordinal);
+        Assert.Contains("GraphEditorSelectionLassoSnapshot", table, StringComparison.Ordinal);
         Assert.Contains("UpdateMarqueeSelection", table, StringComparison.Ordinal);
         Assert.Contains("Queries_GetSelectionRectangleSnapshot_ReturnsNodesAndConnectionsInRectangle", table, StringComparison.Ordinal);
+        Assert.Contains("Queries_GetSelectionLassoSnapshot_ReturnsCenterContainedNodesAndConnections", table, StringComparison.Ordinal);
+        Assert.Contains("Queries_GetSelectionLassoSnapshot_UsesNodeCenterInsteadOfBoundsIntersection", table, StringComparison.Ordinal);
+        Assert.Contains("Queries_GetSelectionLassoSnapshot_WithOpenOrDegeneratePath_ReturnsDeterministicResults", table, StringComparison.Ordinal);
         Assert.Contains("UpdateMarqueeSelection_WithFinalizeTrue_UsesBackendSelectionRectangleQuery", table, StringComparison.Ordinal);
         Assert.Contains("interaction-selection-marquee-route", table, StringComparison.Ordinal);
         Assert.Contains("selection-marquee-workbench", table, StringComparison.Ordinal);

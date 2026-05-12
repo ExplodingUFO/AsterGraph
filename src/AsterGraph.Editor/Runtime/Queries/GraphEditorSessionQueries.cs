@@ -98,6 +98,15 @@ public sealed partial class GraphEditorSession
         return new GraphEditorSelectionRectangleSnapshot(nodeIds, connectionIds);
     }
 
+    public GraphEditorSelectionLassoSnapshot GetSelectionLassoSnapshot(IReadOnlyList<GraphPoint> points)
+    {
+        ArgumentNullException.ThrowIfNull(points);
+
+        var document = _host.CreateActiveScopeDocumentSnapshot();
+        var (nodeIds, connectionIds) = ProjectSelectionLasso(document, points);
+        return new GraphEditorSelectionLassoSnapshot(nodeIds, connectionIds);
+    }
+
     public GraphEditorSnapGuideSnapshot GetSnapGuideSnapshot(GraphEditorSnapGuideQuery? query = null)
     {
         query ??= new GraphEditorSnapGuideQuery();
@@ -900,6 +909,63 @@ public sealed partial class GraphEditorSession
             .OrderBy(id => id, StringComparer.Ordinal)
             .ToList();
         return (nodeIds, connectionIds);
+    }
+
+    private static (IReadOnlyList<string> NodeIds, IReadOnlyList<string> ConnectionIds) ProjectSelectionLasso(
+        GraphDocument document,
+        IReadOnlyList<GraphPoint> points)
+    {
+        if (points.Count < 3)
+        {
+            return ([], []);
+        }
+
+        var nodeIds = document.Nodes
+            .Where(node => ContainsPoint(points, GetNodeCenter(node)))
+            .Select(node => node.Id)
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToList();
+        var connectionIds = ProjectEndpointContainedConnections(document, nodeIds);
+        return (nodeIds, connectionIds);
+    }
+
+    private static IReadOnlyList<string> ProjectEndpointContainedConnections(
+        GraphDocument document,
+        IReadOnlyList<string> nodeIds)
+    {
+        var nodeIdSet = nodeIds.ToHashSet(StringComparer.Ordinal);
+        return document.Connections
+            .Where(connection => nodeIdSet.Contains(connection.SourceNodeId) && nodeIdSet.Contains(connection.TargetNodeId))
+            .Select(connection => connection.Id)
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToList();
+    }
+
+    private static GraphPoint GetNodeCenter(GraphNode node)
+    {
+        var bounds = CreateNodeBounds(node);
+        return new GraphPoint(bounds.X + bounds.Width / 2d, bounds.Y + bounds.Height / 2d);
+    }
+
+    private static bool ContainsPoint(IReadOnlyList<GraphPoint> polygon, GraphPoint point)
+    {
+        var contains = false;
+        var previousIndex = polygon.Count - 1;
+
+        for (var currentIndex = 0; currentIndex < polygon.Count; currentIndex++)
+        {
+            var current = polygon[currentIndex];
+            var previous = polygon[previousIndex];
+            if (((current.Y > point.Y) != (previous.Y > point.Y))
+                && point.X < (previous.X - current.X) * (point.Y - current.Y) / (previous.Y - current.Y) + current.X)
+            {
+                contains = !contains;
+            }
+
+            previousIndex = currentIndex;
+        }
+
+        return contains;
     }
 
     private static bool Intersects(double left, double top, double right, double bottom, NodeBounds bounds)
