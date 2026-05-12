@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text.Json;
 using AsterGraph.Abstractions.Styling;
@@ -115,6 +116,7 @@ public sealed class DemoCookbookScreenshotGateTests
                 scene.Document.Title,
                 scene.Document.Nodes.Count,
                 scene.Document.Connections.Count,
+                CreateRecordOnlyDriftMeasurementMetadata(),
                 Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant());
 
             File.WriteAllText(
@@ -133,6 +135,13 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains(route.ViewportHeight.ToString(System.Globalization.CultureInfo.InvariantCulture), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ToRepoRelativePath(repoRoot, writtenPath), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ManifestRelativePath, metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"DriftMeasurement\"", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"Policy\": \"record-only\"", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"PngHashPurpose\": \"drift-evidence\"", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"StrictPixelBaselineEnforced\": false", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"HostRuntimeDescription\"", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"OsDescription\"", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"ProcessArchitecture\"", metadataJson, StringComparison.Ordinal);
         }
     }
 
@@ -654,6 +663,7 @@ public sealed class DemoCookbookScreenshotGateTests
                 openedContextMenu?.CoveredHeaders ?? [],
                 pixelInspection.NonTransparentPixelCount,
                 pixelInspection.DistinctColorCount,
+                CreateRecordOnlyDriftMeasurementMetadata(),
                 Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant());
 
             File.WriteAllText(
@@ -669,6 +679,13 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains(ResolveShellCaptureScope(openedFlyout, openedPopup, openedContextMenu), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ToRepoRelativePath(repoRoot, imagePath), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ShellStateManifestRelativePath, metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"DriftMeasurement\"", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"Policy\": \"record-only\"", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"PngHashPurpose\": \"drift-evidence\"", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"StrictPixelBaselineEnforced\": false", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"HostRuntimeDescription\"", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"OsDescription\"", metadataJson, StringComparison.Ordinal);
+            Assert.Contains("\"ProcessArchitecture\"", metadataJson, StringComparison.Ordinal);
             foreach (var partName in shellState.RequiredShellParts)
             {
                 Assert.Contains(partName, metadataJson, StringComparison.Ordinal);
@@ -723,6 +740,15 @@ public sealed class DemoCookbookScreenshotGateTests
             ? "full-window-shell-state"
             : "full-window-shell-flyout-state";
     }
+
+    private static VisualDriftMeasurementMetadata CreateRecordOnlyDriftMeasurementMetadata()
+        => new(
+            "record-only",
+            "drift-evidence",
+            StrictPixelBaselineEnforced: false,
+            RuntimeInformation.FrameworkDescription,
+            RuntimeInformation.OSDescription,
+            RuntimeInformation.ProcessArchitecture.ToString());
 
     private static MenuItem? OpenRequestedFlyout(MainWindow window, CookbookShellVisualGateState shellState)
     {
@@ -943,6 +969,7 @@ public sealed class DemoCookbookScreenshotGateTests
         string DocumentTitle,
         int NodeCount,
         int ConnectionCount,
+        VisualDriftMeasurementMetadata DriftMeasurement,
         string PngSha256);
 
     private sealed record CookbookShellVisualGateMetadata(
@@ -976,7 +1003,16 @@ public sealed class DemoCookbookScreenshotGateTests
         string[] CoveredContextMenuHeaders,
         int NonTransparentPixelCount,
         int DistinctColorCount,
+        VisualDriftMeasurementMetadata DriftMeasurement,
         string PngSha256);
+
+    private sealed record VisualDriftMeasurementMetadata(
+        string Policy,
+        string PngHashPurpose,
+        bool StrictPixelBaselineEnforced,
+        string HostRuntimeDescription,
+        string OsDescription,
+        string ProcessArchitecture);
 
     private sealed record PngSize(int Width, int Height);
 

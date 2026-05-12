@@ -393,6 +393,37 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase512PixelBaselineDriftMeasurementInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 512", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #143", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-1j4", contents, StringComparison.Ordinal);
+            Assert.Contains("pixel-baseline drift measurement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("record-only", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("drift-evidence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("HostRuntimeDescription", contents, StringComparison.Ordinal);
+            Assert.Contains("OsDescription", contents, StringComparison.Ordinal);
+            Assert.Contains("ProcessArchitecture", contents, StringComparison.Ordinal);
+            Assert.Contains("PngSha256", contents, StringComparison.Ordinal);
+            Assert.Contains("strict pixel baselines", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no strict pixel baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no visual redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 512", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Phase 512 now owns pixel-baseline drift measurement", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 512 现在通过 GitHub #143 / `avalonia-node-map-1j4` 承接 pixel-baseline drift measurement", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
