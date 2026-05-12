@@ -65,6 +65,7 @@ public sealed class NodeCanvasStandaloneTests
             Assert.Same(editor, canvas.ViewModel);
             Assert.True(canvas.EnableDefaultContextMenu);
             Assert.True(canvas.CommandShortcutPolicy.Enabled);
+            Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
             Assert.True(canvas.Focusable);
             Assert.Contains("Canvas Source", allText);
             Assert.Null(canvas.NodeVisualPresenter);
@@ -991,6 +992,40 @@ public sealed class NodeCanvasStandaloneTests
             Assert.Equal(SourceNodeId, selected.Id);
             Assert.Equal(SourceNodeId, editor.SelectedNode?.Id);
             Assert.DoesNotContain(editor.SelectedNodes, node => string.Equals(node.Id, targetNode.Id, StringComparison.Ordinal));
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void LassoSelectionMode_RoutesThroughCanvasPointerHandlers_AndSelectsContainedNodes()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        canvas.SelectionMode = NodeCanvasSelectionMode.Lasso;
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+        var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+        var targetNode = editor.Nodes.Single(node => node.Id == TargetNodeId);
+        var topLeft = WorldToScreenPoint(canvas, sourceNode.X - 24, sourceNode.Y - 24);
+        var topRight = WorldToScreenPoint(canvas, sourceNode.X + sourceNode.Width + 24, sourceNode.Y - 24);
+        var bottomRight = WorldToScreenPoint(canvas, sourceNode.X + sourceNode.Width + 24, sourceNode.Y + sourceNode.Height + 24);
+        var bottomLeft = WorldToScreenPoint(canvas, sourceNode.X - 24, sourceNode.Y + sourceNode.Height + 24);
+
+        try
+        {
+            InvokeCanvasPointerPressed(canvas, CreatePointerPressedArgs(canvas, pointer, topLeft, KeyModifiers.None));
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, topRight, KeyModifiers.None));
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, bottomRight, KeyModifiers.None));
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, bottomLeft, KeyModifiers.None));
+            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, topLeft, KeyModifiers.None));
+
+            var selected = Assert.Single(editor.SelectedNodes);
+            Assert.Equal(SourceNodeId, selected.Id);
+            Assert.Equal(SourceNodeId, editor.SelectedNode?.Id);
+            Assert.DoesNotContain(editor.SelectedNodes, node => string.Equals(node.Id, targetNode.Id, StringComparison.Ordinal));
+            Assert.Null(pointer.Captured);
         }
         finally
         {

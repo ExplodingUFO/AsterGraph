@@ -59,6 +59,14 @@ public partial class NodeCanvas : UserControl
         AvaloniaProperty.Register<NodeCanvas, bool>(nameof(EnableAltLeftDragPanning), true);
 
     /// <summary>
+    /// Controls the pointer selection mode used for empty-canvas selection drags.
+    /// </summary>
+    public static readonly StyledProperty<NodeCanvasSelectionMode> SelectionModeProperty =
+        AvaloniaProperty.Register<NodeCanvas, NodeCanvasSelectionMode>(
+            nameof(SelectionMode),
+            NodeCanvasSelectionMode.Marquee);
+
+    /// <summary>
     /// 控制节点可视树替换的展示器。
     /// </summary>
     public static readonly StyledProperty<IGraphNodeVisualPresenter?> NodeVisualPresenterProperty =
@@ -197,6 +205,15 @@ public partial class NodeCanvas : UserControl
     {
         get => GetValue(EnableAltLeftDragPanningProperty);
         set => SetValue(EnableAltLeftDragPanningProperty, value);
+    }
+
+    /// <summary>
+    /// Pointer selection mode used when the host starts a selection drag on empty canvas space.
+    /// </summary>
+    public NodeCanvasSelectionMode SelectionMode
+    {
+        get => GetValue(SelectionModeProperty);
+        set => SetValue(SelectionModeProperty, value);
     }
 
     internal bool AttachPlatformSeams { get; set; } = true;

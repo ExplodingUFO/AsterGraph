@@ -660,6 +660,8 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
 
         public bool EnableAltLeftDragPanning { get; init; } = true;
 
+        public NodeCanvasSelectionGestureKind SelectionGestureKind { get; init; } = NodeCanvasSelectionGestureKind.Marquee;
+
         public NodeCanvasInteractionSession InteractionSession { get; } = new();
 
         public int HideSelectionAdornerCalls { get; private set; }

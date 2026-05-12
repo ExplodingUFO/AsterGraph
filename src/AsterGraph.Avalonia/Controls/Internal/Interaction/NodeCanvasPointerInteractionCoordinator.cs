@@ -16,6 +16,8 @@ internal interface INodeCanvasPointerInteractionHost
 
     bool EnableAltLeftDragPanning { get; }
 
+    NodeCanvasSelectionGestureKind SelectionGestureKind { get; }
+
     NodeCanvasInteractionSession InteractionSession { get; }
 
     void FocusCanvas();
@@ -107,7 +109,8 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         _host.InteractionSession.BeginCanvasSelection(
             currentScreenPosition,
             modifiers,
-            _host.ViewModel.SelectedNodes.ToList());
+            _host.ViewModel.SelectedNodes.ToList(),
+            _host.SelectionGestureKind);
         _host.HideSelectionAdorner();
         _host.HideGuideAdorners();
         return new NodeCanvasPointerPressedResult(Handled: true, CapturePointer: true);

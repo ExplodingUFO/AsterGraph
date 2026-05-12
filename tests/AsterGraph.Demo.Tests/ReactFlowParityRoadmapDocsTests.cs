@@ -883,6 +883,31 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase533PublicLassoPointerModeActivationInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 533", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #189", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-cxe", contents, StringComparison.Ordinal);
+            Assert.Contains("public lasso pointer-mode activation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("NodeCanvasSelectionMode.Lasso", contents, StringComparison.Ordinal);
+            Assert.Contains("LassoSelectionMode_RoutesThroughCanvasPointerHandlers_AndSelectsContainedNodes", contents, StringComparison.Ordinal);
+            Assert.Contains("marquee remains the default", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("toolbar UX", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("visual gesture capture", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("lasso screenshot route", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertWhiteboardLassoEraserFeasibilityAudit(ExtractWhiteboardLassoEraserFeasibilityAudit(englishParity));
+        AssertWhiteboardLassoEraserFeasibilityAudit(ExtractWhiteboardLassoEraserFeasibilityAudit(chineseParity));
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -1109,7 +1134,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("| React Flow whiteboard reference | Gap-scoping reference |", table, StringComparison.Ordinal);
         Assert.Contains("| Rectangle marquee selection | Present / guarded |", table, StringComparison.Ordinal);
         Assert.Contains("| Multi-select and command projection | Present / guarded |", table, StringComparison.Ordinal);
-        Assert.Contains("| Lasso/freehand selection | Internal Avalonia gesture capture supported / UI gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("| Lasso/freehand selection | Public Avalonia lasso selection mode supported / whiteboard gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Eraser tool | Gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Rectangle/freehand drawing | Gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Whiteboard persistence/render layer | Gap retained |", table, StringComparison.Ordinal);
@@ -1133,6 +1158,8 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("TryBeginLassoSelection_WithLassoGestureKind_RecordsStartAndMoveAfterThreshold", table, StringComparison.Ordinal);
         Assert.Contains("HandleMoved_WhenCanvasSelectionUsesLassoGesture_RecordsLassoPointAndSkipsMarqueeUpdate", table, StringComparison.Ordinal);
         Assert.Contains("HandleReleased_AfterLassoSelection_FinalizesLassoSelectionAndResetsSession", table, StringComparison.Ordinal);
+        Assert.Contains("NodeCanvasSelectionMode.Lasso", table, StringComparison.Ordinal);
+        Assert.Contains("LassoSelectionMode_RoutesThroughCanvasPointerHandlers_AndSelectsContainedNodes", table, StringComparison.Ordinal);
         Assert.Contains("interaction-selection-marquee-route", table, StringComparison.Ordinal);
         Assert.Contains("selection-marquee-workbench", table, StringComparison.Ordinal);
         Assert.Contains("v079-selection-rectangle-route", table, StringComparison.Ordinal);
@@ -1141,7 +1168,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("selection.invert", table, StringComparison.Ordinal);
         Assert.Contains("selection.delete", table, StringComparison.Ordinal);
         Assert.Contains("selection.transform.move", table, StringComparison.Ordinal);
-        Assert.Contains("pointer-mode state machine", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public pointer-mode activation route", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("toolbar UX", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("visual gesture capture", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("drawing persistence", table, StringComparison.OrdinalIgnoreCase);
