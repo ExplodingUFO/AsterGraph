@@ -158,6 +158,10 @@ Phase 527 是 GitHub #177 / `avalonia-node-map-dim`，承接 built-in component 
 
 Phase 528 是 GitHub #179 / `avalonia-node-map-9ow`，承接 built-in component matrix 后的 Panel versus viewport-attached overlay boundary。本 slice 只修改 docs/tests：把当前 Panel 支持记录为 partial / guarded；standalone `AsterGraphPanel`、`AsterGraphPanelPosition`、positional layout properties、host-owned content composition、focus boundary、built-in catalog/Cookbook route 和 screenshot-gate coverage 都有 source-backed evidence。同时继续把 viewport-attached overlay semantics、positioning policy parity、panel persistence、remote sync、shell dependency、workflow engine behavior 和 full React Flow Panel parity 保留为显式 gaps。不授权 no runtime behavior changes、no public API changes、no UI redesign、no screenshot manifest expansion、no strict visual-baseline enforcement、no retained API removal、no new viewport runtime、no panel persistence、no remote sync、no shell dependency、no workflow engine，也不做 no full React Flow Panel parity claim 之外的扩大声明。
 
+## Phase 529 更新
+
+Phase 529 是 GitHub #181 / `avalonia-node-map-jrm`，承接 Panel boundary gate 后的 whiteboard/lasso/eraser feasibility audit。本 slice 只修改 docs/tests：记录 AsterGraph 已有 guarded rectangle marquee selection、multi-select command projection 和 Cookbook route evidence，但这些不等于 React Flow whiteboard 的 Freehand draw、Lasso selection、Eraser 或 Rectangle draw。它继续把 lasso/freehand selection、eraser tool behavior、rectangle/freehand drawing、whiteboard primitives、pointer-mode state machine、drawing persistence、renderer layer、hit-testing、screenshots、React Flow-like examples 和 full React Flow whiteboard parity 保留为显式 gaps。不授权 no runtime UI behavior changes、no public API changes、no renderer changes、no screenshot manifest expansion、no strict visual-baseline enforcement、no retained API removal，也不做 no whiteboard implementation 之外的扩大声明。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -236,7 +240,8 @@ Phase 483 通过选择 bounded-docs 路径关闭 GitHub #82，而不是重写 re
 | Editable/reconnectable edges | Present | Reconnect、route-vertex commands 和 edge toolbar evidence 已存在。 | Keep guarded。 |
 | Edge labels and markers | Present | Labels 与 source/target marker fields 已在 edge presentation/geometry snapshots 中建模。 | Keep guarded。 |
 | Drag, pan, zoom | Present | Canvas pointer/wheel coordinators 与 viewport commands 已存在。 | Keep guarded。 |
-| Marquee/box selection and multi-select | Present | `GetSelectionRectangleSnapshot`、overlay coordinator marquee selection、`SelectAll`、`SelectNone`、`InvertSelection` 有 tests 和 Cookbook routes。 | Keep guarded。 |
+| Marquee/box selection and multi-select | Present | `GetSelectionRectangleSnapshot`、overlay coordinator marquee selection、`SelectAll`、`SelectNone`、`InvertSelection` 有 tests 和 Cookbook routes。这是 rectangular marquee selection，不是 freehand lasso 或 whiteboard drawing parity。 | Keep guarded。 |
+| Whiteboard / lasso / eraser / rectangle draw | Gap retained / feasibility scoped | React Flow whiteboard docs 把 Freehand draw、Lasso selection、Eraser 和 Rectangle draw 列为 distinct advanced examples。AsterGraph 当前有 rectangle marquee selection 和 command projection evidence，但没有 whiteboard primitives 或 drawing tools。 | Phase 529 只记录 feasibility boundary，不实现 whiteboard behavior。 |
 | Connection preview and validation | Present / guarded | Pending connection、compatible targets、validation snapshots、repair commands 和 `validation-prevent-cycle` fixture 已存在。Cycle prevention 由 canonical connection completion path 强制执行，并通过 pending snapshot 暴露 `GraphEditorPendingConnectionRejectionReason.WouldCreateCycle`。 | 继续守住 `RuntimeSession_CompleteConnection_RejectsDirectCycleWithStableReason`、`RuntimeSession_CompleteConnection_RejectsIndirectCycleThroughNormalCommandPath` 和 `RuntimeSession_TryExecuteCommand_RejectsCycleThroughConnectionsConnectRoute`。 |
 | Context menu | Present | Menu descriptors 与 hosted context menu plumbing 已存在。 | Keep guarded。 |
 | Undo/redo | Present | Session commands 与 history tests 覆盖正常 command semantics。 | Keep guarded。 |
@@ -320,6 +325,20 @@ Phase 528 记录 Panel versus viewport-attached overlay boundary，对应 GitHub
 | Built-in catalog/Cookbook route | Guarded | Built-in catalog 暴露 `AsterGraphPanel`，Cookbook route 使用 `builtin-standalone-panel-route`，fixture 仍是 `standalone-panel`。 | Catalog 和 Cookbook evidence 只证明 discoverability 与可运行 fixture；它们不新增 shell dependency 或 new viewport runtime。 |
 | Screenshot-gate coverage | Guarded | Screenshot manifest row `cookbook-builtin-standalone-panel` 捕获 `builtin-standalone-panel-route` / `standalone-panel`。 | Screenshot-gate coverage 只证明现有 fixture 被捕获；本 slice 不做 screenshot manifest expansion 或 strict visual-baseline enforcement。 |
 | Viewport-attached overlay parity | Gap retained | Built-in matrix 和 Phase 528 issue 继续把 viewport-attached overlay semantics、React Flow Panel positioning policy parity、panel persistence、remote sync、shell dependency、workflow engine behavior 和 full React Flow Panel parity 排除在 supported claim 外。 | 这些 gaps 需要后续 behavior/API issue 才能声明 overlay parity。Phase 528 总体边界仍是 not full React Flow Panel parity。 |
+
+## Whiteboard/Lasso/Eraser 可行性审计
+
+Phase 529 记录 whiteboard/lasso/eraser feasibility audit，对应 GitHub #181 / `avalonia-node-map-jrm`。React Flow 在 https://reactflow.dev/learn/advanced-use/whiteboard 把 whiteboard features 作为单独 advanced track 说明，包括 Freehand draw、Lasso selection、Eraser 和 Rectangle draw。AsterGraph 当前 evidence 更窄：rectangular marquee selection 和 selection command projection 有 guard，但它不等同于 full React Flow whiteboard parity，也不承诺本 slice 之外的 runtime/API/UI/renderer 行为。
+
+| Whiteboard gate | Current status | Existing evidence | Remaining gap / boundary |
+| --- | --- | --- | --- |
+| React Flow whiteboard reference | Gap-scoping reference | React Flow 的 whiteboard guide at https://reactflow.dev/learn/advanced-use/whiteboard 把 Freehand draw、Lasso selection、Eraser 和 Rectangle draw examples 与 core node/edge editor 分开。 | 该 reference 只用于界定比较范围；Phase 529 不导入 React Flow behavior，也不声明 complete whiteboard application。 |
+| Rectangle marquee selection | Present / guarded | `GetSelectionRectangleSnapshot`、`UpdateMarqueeSelection`、`Queries_GetSelectionRectangleSnapshot_ReturnsNodesAndConnectionsInRectangle`、`UpdateMarqueeSelection_WithFinalizeTrue_UsesBackendSelectionRectangleQuery`、`interaction-selection-marquee-route`、`selection-marquee-workbench` 和 `v079-selection-rectangle-route` 证明 rectangular selection evidence。 | 这是 axis-aligned rectangle/marquee selection，不是 lasso/freehand selection 或 drawing tool。 |
+| Multi-select and command projection | Present / guarded | `selection.select-all`、`selection.select-none`、`selection.invert`、`selection.delete` 和 `selection.transform.move` 暴露当前 selection 与 manipulation commands。 | Command projection 操作 graph selections；它不新增 eraser hit trails、drawn shape lifecycle 或 whiteboard-specific edit modes。 |
+| Lasso/freehand selection | Gap retained | 当前没有 source-backed lasso/freehand selection mode、partial/freeform inclusion policy 或 lasso screenshot route。 | 需要后续 behavior/API issue 才能定义 pointer-mode state machine、freeform geometry capture、hit-testing 和 selection semantics。Phase 529 总体边界仍是 not full React Flow whiteboard parity。 |
+| Eraser tool | Gap retained | `selection.delete` 可以删除当前 graph selection，但没有 eraser cursor、collision trail 或 eraser-specific hit-testing path。 | 声明 eraser tool parity 之前需要后续 behavior/API issue；本 slice 不新增 runtime UI behavior changes。 |
+| Rectangle/freehand drawing | Gap retained | 现有 rectangle evidence 只属于 selection。当前没有 rectangle/freehand drawing tools、whiteboard primitives、shape nodes、brush/color state 或 drawing persistence contracts。 | 声明 rectangle draw 或 freehand draw parity 前，需要后续 API/model/renderer 工作。 |
+| Whiteboard persistence/render layer | Gap retained | 当前 Cookbook 和 screenshot rows 覆盖 graph scenes 与 built-in components，不覆盖 whiteboard annotations 或 drawing state。 | 后续若推进，需要 persistence、renderer layer、hit-testing、React Flow-like examples 和 screenshot manifest expansion；Phase 529 均不新增。 |
 
 ## 已完成的 Phase 0 Issue Wave
 
@@ -438,6 +457,8 @@ Phase 527 记录 Background variant public surface gate，对应 GitHub #177 / `
 
 Phase 528 记录 Panel versus viewport-attached overlay boundary，对应 GitHub #179 / `avalonia-node-map-9ow`。它把 standalone `AsterGraphPanel`、`AsterGraphPanelPosition`、positional layout properties、host-owned content composition、focus boundary、built-in catalog/Cookbook route 和 screenshot-gate coverage 绑定到现有 evidence，同时把 viewport-attached overlay semantics、positioning policy parity、panel persistence、remote sync、shell dependency、workflow engine behavior 和 full React Flow Panel parity 保留为 gaps。
 
+Phase 529 记录 whiteboard/lasso/eraser feasibility audit，对应 GitHub #181 / `avalonia-node-map-jrm`。它把 rectangular marquee selection、multi-select commands 和 Cookbook routes 绑定到现有 evidence，同时把 lasso/freehand selection、eraser tool behavior、rectangle/freehand drawing、whiteboard primitives、pointer-mode state machine、drawing persistence、renderer layer、hit-testing、screenshots、React Flow-like examples 和 full React Flow whiteboard parity 保留为 gaps。
+
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
 | #169 | `avalonia-node-map-bp0` | Phase 523: refresh React Flow parity issue wave after retained readiness audit | P2 | parity roadmap docs 和 focused docs tests | Current issue。它定义 queue 和 tracker 边界，因此会阻塞下一批 implementation wave。 |
@@ -446,7 +467,7 @@ Phase 528 记录 Panel versus viewport-attached overlay boundary，对应 GitHub
 | #175 | `avalonia-node-map-clw` | Phase 526: Controls interactivity/custom-button parity gate | P2 | `AsterGraphControls`、hosted action button tests 和 docs | Current docs/test gate。不要与其他触碰 `AsterGraphControls` action projection 的工作并行。 |
 | #177 | `avalonia-node-map-dim` | Phase 527: Background variant public surface gate | P3 | background/grid control docs/tests 和当前 background support evidence | Current docs/test gate。只要避免共享 shell docs 且不修改 MiniMap/Controls，可与不重叠的 Panel 或 whiteboard work 并行。 |
 | #179 | `avalonia-node-map-9ow` | Phase 528: Panel versus viewport-attached overlay boundary | P3 | `AsterGraphPanel`、host integration docs 和 panel tests | Current docs/test gate。只要避免共享 parity roadmap rows，可与 whiteboard feasibility work 并行。 |
-| TBD | TBD | Phase 529: whiteboard/lasso/eraser feasibility audit | P4 | advanced editing docs/tests 或 spike document | 更大的可选 parity track；不阻塞 built-in component parity。 |
+| #181 | `avalonia-node-map-jrm` | Phase 529: whiteboard/lasso/eraser feasibility audit | P4 | advanced editing docs/tests 和 source-backed feasibility boundary | Current docs/test feasibility audit。更大的可选 parity track；不阻塞 built-in component parity，也不实现 whiteboard。 |
 
 ## 推荐并行 Worktree 计划
 
@@ -482,7 +503,7 @@ Phase 528 记录 Panel versus viewport-attached overlay boundary，对应 GitHub
 - `docs/phase-526-controls-interactivity-gate`：负责 #175 / `avalonia-node-map-clw`；当前 docs/test worktree，用于 Controls interactivity/custom-button parity gate。
 - `docs/phase-527-background-variant-gate`：负责 #177 / `avalonia-node-map-dim`；当前 docs/test worktree，用于 Background variant public surface gate。
 - `docs/phase-528-panel-overlay-boundary`：负责 #179 / `avalonia-node-map-9ow`；当前 docs/test worktree，用于 Panel versus viewport-attached overlay boundary。
-- `docs/phase-529-whiteboard-feasibility`：未来 feasibility audit，评估 lasso、eraser、rectangle 和 freehand whiteboard-style parity，不直接承诺实现。
+- `docs/phase-529-whiteboard-feasibility`：负责 #181 / `avalonia-node-map-jrm`；当前 feasibility audit，评估 lasso、eraser、rectangle 和 freehand whiteboard-style parity，不直接承诺实现。
 
 ## UI 验证策略
 
@@ -532,4 +553,5 @@ Phase 528 记录 Panel versus viewport-attached overlay boundary，对应 GitHub
 - Phase 526 是 GitHub #175 / `avalonia-node-map-clw`；它记录 Controls interactivity/custom-button parity gate，不做 runtime behavior changes、public API changes、UI redesign、screenshot manifest expansion、strict visual-baseline enforcement、retained API removal 或 full React Flow Controls parity claim。
 - Phase 527 是 GitHub #177 / `avalonia-node-map-dim`；它记录 Background variant public surface gate，不做 runtime behavior changes、public API changes、UI redesign、screenshot manifest expansion、strict visual-baseline enforcement、retained API removal 或 full React Flow Background parity claim。
 - Phase 528 是 GitHub #179 / `avalonia-node-map-9ow`；它记录 Panel versus viewport-attached overlay boundary，不做 runtime behavior changes、public API changes、UI redesign、screenshot manifest expansion、strict visual-baseline enforcement、retained API removal、new viewport runtime、panel persistence、remote sync、shell dependency、workflow engine behavior 或 full React Flow Panel parity claim。
-- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512、Phase 513、Phase 520、Phase 521、Phase 522、Phase 523、Phase 524、Phase 525、Phase 526、Phase 527 和 Phase 528 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
+- Phase 529 是 GitHub #181 / `avalonia-node-map-jrm`；它记录 whiteboard/lasso/eraser feasibility audit，不做 runtime UI behavior changes、public API changes、renderer changes、screenshot manifest expansion、strict visual-baseline enforcement、retained API removal 或 whiteboard implementation。
+- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512、Phase 513、Phase 520、Phase 521、Phase 522、Phase 523、Phase 524、Phase 525、Phase 526、Phase 527、Phase 528 和 Phase 529 都不修改产品代码；除非 focused test 证明存在具体 missing contract。

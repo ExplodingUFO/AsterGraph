@@ -735,6 +735,59 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase529WhiteboardLassoEraserFeasibilityAuditInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 529", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #181", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-jrm", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard/lasso/eraser feasibility audit", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("React Flow whiteboard", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Freehand draw", contents, StringComparison.Ordinal);
+            Assert.Contains("Lasso selection", contents, StringComparison.Ordinal);
+            Assert.Contains("Eraser", contents, StringComparison.Ordinal);
+            Assert.Contains("Rectangle draw", contents, StringComparison.Ordinal);
+            Assert.Contains("GetSelectionRectangleSnapshot", contents, StringComparison.Ordinal);
+            Assert.Contains("UpdateMarqueeSelection", contents, StringComparison.Ordinal);
+            Assert.Contains("selection-marquee-workbench", contents, StringComparison.Ordinal);
+            Assert.Contains("interaction-selection-marquee-route", contents, StringComparison.Ordinal);
+            Assert.Contains("v079-selection-rectangle-route", contents, StringComparison.Ordinal);
+            Assert.Contains("selection.select-all", contents, StringComparison.Ordinal);
+            Assert.Contains("selection.select-none", contents, StringComparison.Ordinal);
+            Assert.Contains("selection.invert", contents, StringComparison.Ordinal);
+            Assert.Contains("selection.delete", contents, StringComparison.Ordinal);
+            Assert.Contains("selection.transform.move", contents, StringComparison.Ordinal);
+            Assert.Contains("lasso/freehand selection", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("eraser tool", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("rectangle/freehand drawing", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("whiteboard primitives", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("pointer-mode state machine", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("drawing persistence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("renderer layer", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("hit-testing", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime UI behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no strict visual-baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no whiteboard implementation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("not full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 529: whiteboard/lasso/eraser feasibility audit", contents, StringComparison.Ordinal);
+        }
+
+        AssertWhiteboardLassoEraserFeasibilityAudit(ExtractWhiteboardLassoEraserFeasibilityAudit(englishParity));
+        AssertWhiteboardLassoEraserFeasibilityAudit(ExtractWhiteboardLassoEraserFeasibilityAudit(chineseParity));
+
+        Assert.Contains("Phase 529 records the whiteboard/lasso/eraser feasibility audit", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 529 记录 whiteboard/lasso/eraser feasibility audit", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -802,7 +855,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("Phase 526: Controls interactivity/custom-button parity gate", table, StringComparison.Ordinal);
         Assert.Contains("Phase 527: Background variant public surface gate", table, StringComparison.Ordinal);
         Assert.Contains("Phase 528: Panel versus viewport-attached overlay boundary", table, StringComparison.Ordinal);
-        Assert.Contains("Phase 529: whiteboard/lasso/eraser feasibility audit", table, StringComparison.Ordinal);
+        Assert.Contains("| #181 | `avalonia-node-map-jrm` | Phase 529: whiteboard/lasso/eraser feasibility audit", table, StringComparison.Ordinal);
         Assert.Contains("P2", table, StringComparison.Ordinal);
         Assert.Contains("P3", table, StringComparison.Ordinal);
         Assert.Contains("P4", table, StringComparison.Ordinal);
@@ -955,6 +1008,41 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("not full React Flow Panel parity", table, StringComparison.OrdinalIgnoreCase);
     }
 
+    private static void AssertWhiteboardLassoEraserFeasibilityAudit(string table)
+    {
+        Assert.Contains("| Whiteboard gate |", table, StringComparison.Ordinal);
+        Assert.Contains("| React Flow whiteboard reference | Gap-scoping reference |", table, StringComparison.Ordinal);
+        Assert.Contains("| Rectangle marquee selection | Present / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Multi-select and command projection | Present / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Lasso/freehand selection | Gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("| Eraser tool | Gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("| Rectangle/freehand drawing | Gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("| Whiteboard persistence/render layer | Gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("https://reactflow.dev/learn/advanced-use/whiteboard", table, StringComparison.Ordinal);
+        Assert.Contains("Freehand draw", table, StringComparison.Ordinal);
+        Assert.Contains("Lasso selection", table, StringComparison.Ordinal);
+        Assert.Contains("Eraser", table, StringComparison.Ordinal);
+        Assert.Contains("Rectangle draw", table, StringComparison.Ordinal);
+        Assert.Contains("GetSelectionRectangleSnapshot", table, StringComparison.Ordinal);
+        Assert.Contains("UpdateMarqueeSelection", table, StringComparison.Ordinal);
+        Assert.Contains("Queries_GetSelectionRectangleSnapshot_ReturnsNodesAndConnectionsInRectangle", table, StringComparison.Ordinal);
+        Assert.Contains("UpdateMarqueeSelection_WithFinalizeTrue_UsesBackendSelectionRectangleQuery", table, StringComparison.Ordinal);
+        Assert.Contains("interaction-selection-marquee-route", table, StringComparison.Ordinal);
+        Assert.Contains("selection-marquee-workbench", table, StringComparison.Ordinal);
+        Assert.Contains("v079-selection-rectangle-route", table, StringComparison.Ordinal);
+        Assert.Contains("selection.select-all", table, StringComparison.Ordinal);
+        Assert.Contains("selection.select-none", table, StringComparison.Ordinal);
+        Assert.Contains("selection.invert", table, StringComparison.Ordinal);
+        Assert.Contains("selection.delete", table, StringComparison.Ordinal);
+        Assert.Contains("selection.transform.move", table, StringComparison.Ordinal);
+        Assert.Contains("pointer-mode state machine", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("drawing persistence", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("renderer layer", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("hit-testing", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("screenshot manifest expansion", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not full React Flow whiteboard parity", table, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static string ExtractMiniMapInteractionCustomizationGate(string contents)
     {
         var headingStart = contents.IndexOf("\n## MiniMap Interaction And Customization Gate", StringComparison.Ordinal);
@@ -1004,6 +1092,24 @@ public sealed class ReactFlowParityRoadmapDocsTests
 
         var nextHeading = contents.IndexOf("\n## ", tableStart, StringComparison.Ordinal);
         Assert.True(nextHeading > tableStart, "Expected heading after Panel versus viewport-attached overlay boundary table.");
+        return contents[tableStart..nextHeading];
+    }
+
+    private static string ExtractWhiteboardLassoEraserFeasibilityAudit(string contents)
+    {
+        var headingStart = contents.IndexOf("\n## Whiteboard Lasso Eraser Feasibility Audit", StringComparison.Ordinal);
+        if (headingStart < 0)
+        {
+            headingStart = contents.IndexOf("\n## Whiteboard/Lasso/Eraser 可行性审计", StringComparison.Ordinal);
+        }
+
+        Assert.True(headingStart >= 0, "Expected whiteboard/lasso/eraser feasibility audit heading.");
+
+        var tableStart = contents.IndexOf("| Whiteboard gate |", headingStart, StringComparison.Ordinal);
+        Assert.True(tableStart >= 0, "Expected whiteboard/lasso/eraser feasibility audit table header.");
+
+        var nextHeading = contents.IndexOf("\n## ", tableStart, StringComparison.Ordinal);
+        Assert.True(nextHeading > tableStart, "Expected heading after whiteboard/lasso/eraser feasibility audit table.");
         return contents[tableStart..nextHeading];
     }
 
