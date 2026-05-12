@@ -134,6 +134,10 @@ Phase 521 is GitHub #163 / `avalonia-node-map-ayx`, the strict pixel-baseline co
 
 Phase 522 is GitHub #164 / `avalonia-node-map-ecx`, the retained migration removal readiness audit selected from the post-Phase-518 queue. This docs/tests-only decision adds `RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT`: `GraphEditorViewModel`, `GraphEditorView`, `GraphEditorViewModel.Session`, retained extension-hook overloads, retained node expansion helpers, hosted-helper retained wording, and `GraphDocumentSerializer.ImportLegacy(...)` stay kept in the current prerelease support window. They are not ready for deletion; any removal remains blocked until a later API-changing issue owns the public API deletion, copies exact `eng/public-api-baseline.txt` metadata lines, proves replacement routes, and reviews the baseline diff. This slice authorizes no retained API removal, no public API baseline change, no runtime behavior change, and no UI change.
 
+## Phase 523 Update
+
+Phase 523 is GitHub #169 / `avalonia-node-map-bp0`, the post-Phase-522 parity issue-wave refresh after the retained migration removal readiness audit closed. This docs/tests-only decision replaces the now-closed Phase 519-522 queue with tracker candidates for built-in component parity matrix, MiniMap interaction and customization parity gate, Controls interactivity/custom-button parity gate, Background variant public surface gate, Panel versus viewport-attached overlay boundary, and whiteboard/lasso/eraser feasibility audit. It authorizes no runtime behavior changes, no public API changes, no UI redesign, no visual-baseline enforcement, and no retained API removal.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -338,12 +342,17 @@ Phase 521 defines the strict pixel-baseline comparator readiness gate through Gi
 
 Phase 522 audits retained migration removal readiness through GitHub #164 / `avalonia-node-map-ecx`. It records `RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT`, keeps retained migration surfaces in the current prerelease support window, and leaves deletion blocked until a later API-changing issue owns exact `eng/public-api-baseline.txt` changes. It authorizes no retained API removal, no public API baseline change, no runtime behavior change, and no UI change.
 
+Phase 523 refreshes the post-Phase-522 parity issue wave through GitHub #169 / `avalonia-node-map-bp0`. It records the closed Phase 519-522 policy queue, keeps the next work tracker-backed, and splits current React Flow parity pressure into built-in component matrix, MiniMap, Controls, Background, Panel, and whiteboard feasibility follow-ups without authorizing product or API changes in this slice.
+
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #161 | `avalonia-node-map-rs5` | Phase 519: refresh parity roadmap after dynamic announcement proof | P2 | parity roadmap docs and focused docs tests | Closed prerequisite. It records closed Phase 518 evidence and unblocked the follow-up docs/API-policy slices. |
-| #162 | `avalonia-node-map-vdc` | Phase 520: define declarative host composition API gate | P3 | declarative API docs/tests, quick-start and host-composition boundary text | Current docs/API-policy slice. It can run independently from visual policy and retained migration readiness because it stays in API ergonomics planning. |
-| #163 | `avalonia-node-map-ayx` | Phase 521: define strict pixel-baseline comparator readiness gate | P3 | visual policy docs/tests and drift-evidence readiness criteria | Ready after Phase 519. Can run independently from declarative API and retained migration readiness because it does not add shell-state rows or enforce strict hashes. |
-| #164 | `avalonia-node-map-ecx` | Phase 522: audit retained migration removal readiness | P3 | retained migration docs/tests and API-policy readiness classification | Ready after Phase 519. Must remain docs/tests-only unless a later API-changing issue explicitly owns public API deletion. |
+| #169 | `avalonia-node-map-bp0` | Phase 523: refresh React Flow parity issue wave after retained readiness audit | P2 | parity roadmap docs and focused docs tests | Current issue. Blocks the next implementation wave because it defines the queue and tracker boundaries. |
+| TBD | TBD | Phase 524: built-in component parity matrix for MiniMap, Controls, Background, Panel | P2 | feature catalog, public API inventory, Avalonia README, and docs tests | Ready after Phase 523. Docs/tests-only and independent from code changes. |
+| TBD | TBD | Phase 525: MiniMap interaction and customization parity gate | P2 | `GraphMiniMap`, MiniMap factory/options, minimap tests, and docs | Ready after Phase 524. Do not run in parallel with other work touching `GraphMiniMap`. |
+| TBD | TBD | Phase 526: Controls interactivity/custom-button parity gate | P2 | `AsterGraphControls`, hosted action button tests, and docs | Can run in parallel with MiniMap work if write sets stay disjoint. |
+| TBD | TBD | Phase 527: Background variant public surface gate | P3 | background/grid control docs/tests and current background support evidence | Can run in parallel with Controls and MiniMap work if it avoids shared shell docs edits. |
+| TBD | TBD | Phase 528: Panel versus viewport-attached overlay boundary | P3 | `AsterGraphPanel`, host integration docs, and panel tests | Ready after Phase 524; serialize with broad built-in component docs edits. |
+| TBD | TBD | Phase 529: whiteboard/lasso/eraser feasibility audit | P4 | advanced editing docs/tests or a spike document | Larger optional parity track; should not block built-in component parity. |
 
 ## Recommended Parallel Worktree Plan
 
@@ -373,6 +382,13 @@ Phase 522 audits retained migration removal readiness through GitHub #164 / `ava
 - `docs/phase-520-declarative-api-gate`: owns #162 / `avalonia-node-map-vdc`; current worktree for declarative host-composition API gate docs/tests without public API changes.
 - `visual/phase-521-pixel-comparator-readiness`: owns #163 / `avalonia-node-map-ayx`; ready parallel worktree for strict pixel-baseline comparator readiness docs/tests without strict enforcement.
 - `docs/phase-522-retained-readiness`: owns #164 / `avalonia-node-map-ecx`; ready parallel worktree for retained migration removal readiness docs/tests without deleting API.
+- `docs/phase-523-parity-wave-refresh`: owns #169 / `avalonia-node-map-bp0`; current worktree for this post-Phase-522 parity issue-wave refresh and next implementation split.
+- `docs/phase-524-built-in-component-matrix`: future docs/test worktree for the built-in component parity matrix across MiniMap, Controls, Background, and Panel.
+- `ui/phase-525-minimap-interaction-customization`: future MiniMap worktree; keep writes isolated to `GraphMiniMap`, MiniMap options/factories, focused tests, and directly related docs.
+- `ui/phase-526-controls-custom-button`: future Controls worktree; can run beside MiniMap if it only touches `AsterGraphControls`, hosted action buttons, tests, and directly related docs.
+- `ui/phase-527-background-variants`: future Background worktree; isolate from shared shell docs and avoid changing MiniMap/Controls.
+- `ui/phase-528-panel-overlay-boundary`: future Panel worktree; serialize with Phase 524 docs if both edit the same built-in component inventory.
+- `docs/phase-529-whiteboard-feasibility`: future feasibility audit for lasso, eraser, rectangle, and freehand whiteboard-style parity without committing to implementation.
 
 ## UI Verification Policy
 
@@ -416,4 +432,5 @@ Current coverage includes scene-level route captures plus ten manifest-driven fu
 - Phase 516 is GitHub #152 / `avalonia-node-map-821`; it records `ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE` without unsupported certification claims, separates headless automation proof from live assistive-technology observations, and files GitHub #156 / `avalonia-node-map-1pd` for live screen-reader announcement validation.
 - Phase 521 is GitHub #163 / `avalonia-node-map-ayx`; it records `STRICT_PIXEL_BASELINE_COMPARATOR_READINESS_GATE` without strict pixel baseline enforcement, shell visual manifest additions, visual redesign, runtime behavior change, public API change, or retained API removal.
 - Phase 522 is GitHub #164 / `avalonia-node-map-ecx`; it records `RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT` without retained API removal, public API baseline change, runtime behavior change, or UI change.
-- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, Phase 499, Phase 500, Phase 501, Phase 502, Phase 503, Phase 504, Phase 505, Phase 506, Phase 507, Phase 508, Phase 509, Phase 510, Phase 511, Phase 512, Phase 513, Phase 520, Phase 521, and Phase 522 unless a focused test proves a specific missing contract.
+- Phase 523 is GitHub #169 / `avalonia-node-map-bp0`; it refreshes the post-Phase-522 issue wave and records built-in component, MiniMap, Controls, Background, Panel, and whiteboard feasibility follow-ups without runtime behavior changes, public API changes, UI redesign, visual-baseline enforcement, or retained API removal.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, Phase 499, Phase 500, Phase 501, Phase 502, Phase 503, Phase 504, Phase 505, Phase 506, Phase 507, Phase 508, Phase 509, Phase 510, Phase 511, Phase 512, Phase 513, Phase 520, Phase 521, Phase 522, and Phase 523 unless a focused test proves a specific missing contract.

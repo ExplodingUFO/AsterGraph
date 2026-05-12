@@ -489,6 +489,35 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase523PostRetainedReadinessRefreshInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 523", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #169", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-bp0", contents, StringComparison.Ordinal);
+            Assert.Contains("post-Phase-522 parity issue-wave refresh", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("built-in component parity matrix", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("MiniMap interaction and customization parity gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Controls interactivity/custom-button parity gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Background variant public surface gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Panel versus viewport-attached overlay boundary", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("whiteboard/lasso/eraser feasibility audit", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no visual-baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("Phase 523 refreshes the post-Phase-522 parity issue wave", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 523 刷新 post-Phase-522 parity issue wave", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -550,24 +579,39 @@ public sealed class ReactFlowParityRoadmapDocsTests
 
     private static void AssertPostPhase518Queue(string table)
     {
-        Assert.Contains("| #161 | `avalonia-node-map-rs5` | Phase 519: refresh parity roadmap after dynamic announcement proof", table, StringComparison.Ordinal);
-        Assert.Contains("| #162 | `avalonia-node-map-vdc` | Phase 520: define declarative host composition API gate", table, StringComparison.Ordinal);
-        Assert.Contains("| #163 | `avalonia-node-map-ayx` | Phase 521: define strict pixel-baseline comparator readiness gate", table, StringComparison.Ordinal);
-        Assert.Contains("| #164 | `avalonia-node-map-ecx` | Phase 522: audit retained migration removal readiness", table, StringComparison.Ordinal);
+        Assert.Contains("| #169 | `avalonia-node-map-bp0` | Phase 523: refresh React Flow parity issue wave after retained readiness audit", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 524: built-in component parity matrix for MiniMap, Controls, Background, Panel", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 525: MiniMap interaction and customization parity gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 526: Controls interactivity/custom-button parity gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 527: Background variant public surface gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 528: Panel versus viewport-attached overlay boundary", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 529: whiteboard/lasso/eraser feasibility audit", table, StringComparison.Ordinal);
         Assert.Contains("P2", table, StringComparison.Ordinal);
         Assert.Contains("P3", table, StringComparison.Ordinal);
+        Assert.Contains("P4", table, StringComparison.Ordinal);
         Assert.Contains("parity roadmap docs", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("focused docs tests", table, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("declarative API docs/tests", table, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("visual policy docs/tests", table, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("retained migration docs/tests", table, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Current docs/API-policy slice", table, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Ready after Phase 519", table, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("blocked until Phase 519 closes", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("feature catalog", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("GraphMiniMap", table, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphControls", table, StringComparison.Ordinal);
+        Assert.Contains("background/grid", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("AsterGraphPanel", table, StringComparison.Ordinal);
+        Assert.True(
+            table.Contains("Blocks the next implementation wave", StringComparison.OrdinalIgnoreCase)
+            || table.Contains("阻塞下一批 implementation wave", StringComparison.OrdinalIgnoreCase));
+        Assert.True(
+            table.Contains("Can run in parallel", StringComparison.OrdinalIgnoreCase)
+            || table.Contains("可与", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain("Current docs/API-policy slice", table, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Ready after Phase 519", table, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #150 | `avalonia-node-map-ien` | Phase 514: execute renderer virtualization proof harness", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #151 | `avalonia-node-map-t44` | Phase 515: decide strict pixel baseline policy from drift evidence", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #152 | `avalonia-node-map-821` | Phase 516: record manual assistive-technology validation evidence", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #161 | `avalonia-node-map-rs5` | Phase 519: refresh parity roadmap after dynamic announcement proof", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #162 | `avalonia-node-map-vdc` | Phase 520: define declarative host composition API gate", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #163 | `avalonia-node-map-ayx` | Phase 521: define strict pixel-baseline comparator readiness gate", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #164 | `avalonia-node-map-ecx` | Phase 522: audit retained migration removal readiness", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement | P3 | drift measurement docs/tests/artifact metadata | Current owned slice", table, StringComparison.Ordinal);
     }
 
