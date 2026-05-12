@@ -106,6 +106,10 @@ Phase 514 是 GitHub #150 / `avalonia-node-map-ien`，在 Phase 513 roadmap refr
 
 Phase 515 是 GitHub #151 / `avalonia-node-map-t44`，在 Phase 512 添加 drift metadata 后决定 strict pixel-baseline policy。结论是 strict single-hash enforcement 继续 deferred。该决定基于 two successful Phase 512 release-validation artifact sets：每组都在 `artifacts/test-results` 下包含 25 metadata.json files，generated scene 和 full-window shell artifacts 都记录 `PngSha256`、`DriftMeasurement`、`Policy=record-only`、`PngHashPurpose=drift-evidence`、`StrictPixelBaselineEnforced=false`、`HostRuntimeDescription`、`OsDescription` 和 `ProcessArchitecture`。`shell-cookbook-default-host-command-tooltip-popup` 这条 full-window popup artifact 在两次成功 Windows release-validation run 中产生了不同的 `PngSha256`，所以脆弱的 single-hash pass/fail gate 还没有准备好。后续 pass/fail policy 必须先为同一 route/state 集合在 supported CI hosts 上提供 repeatable no-drift evidence，或者定义并审查一个带明确阈值的 host-keyed or tolerant comparator。本 slice 不授权 visual redesign、runtime behavior change、public API change、retained API removal 或 strict pixel baseline enforcement。
 
+## Phase 516 更新
+
+Phase 516 是 GitHub #152 / `avalonia-node-map-821`，在 post-Phase-512 queue 之后记录 manual assistive-technology validation evidence。它新增 `ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE`，作为有边界的 platform-equivalent evidence record：fresh Demo proof 和 focused headless accessibility tests 覆盖 hosted route states，同时文档明确把 headless automation proof 与 live assistive-technology observations 分开。Phase 516 记录的 route-state set 包括 `GraphEditorView`、`NodeCanvas`、`GraphInspectorView`、`PART_CommandPaletteSearchBox`、`PART_ParameterSearchBox`、投影出来的 command buttons、validation focus buttons 和 export/status text，并记录 live screen-reader observations were not performed。live dynamic validation/export/status announcement gap 已作为 GitHub #156 / `avalonia-node-map-1pd` 追踪。本 slice 不授权 no live-region/runtime behavior change、no UI change、no public API change、no retained API removal 或 no broad screen-reader certification claim。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -248,7 +252,7 @@ Phase 491 把当前 accessibility posture 记录成 source-backed contract，而
 | Hosted validation/problems shell | Problem rows 与 focus buttons 暴露 automation names 和绑定 validation targets 的 help text。 | `GraphEditorViewTests` |
 | Hosted export、fragment、command-palette、authoring shells | 现有 interactive controls 暴露 names 并保持 keyboard-focusable；command-palette focus recovery 由单独测试守住。 | `GraphEditorViewTests`、`GraphEditorNavigationFocusWorkflowTests` |
 
-剩余有界缺口：headless tests 可以守住 names、peers、focusability 和 focus return，但不能证明 dynamic validation/export status changes 的实时 screen-reader announcements。未来 live-region 或 assistive-technology certification 工作需要新的 GitHub/Beads tracker。
+剩余有界缺口：headless tests 可以守住 names、peers、focusability 和 focus return，但不能证明 dynamic validation/export/status changes 的实时 screen-reader announcements。Phase 516 已记录 platform-equivalent evidence package；live screen-reader announcement validation 现在由 GitHub #156 / `avalonia-node-map-1pd` 追踪。
 
 ## 下一轮 Issue Wave
 
@@ -297,6 +301,8 @@ Phase 512 已通过 GitHub #143 / `avalonia-node-map-1j4` 关闭 pixel-baseline 
 Phase 513 刷新 post-Phase-512 queue，对应 GitHub #149 / `avalonia-node-map-d8q`。它记录 Phase 506 visual queue 已经通过 Phases 508-512 全部关闭，把 current owned slice 移到本 roadmap refresh，并基于剩余 tracked evidence 选择下一批具体 follow-ups，而不是重新打开已经关闭的 visual rows。
 
 Phase 514 通过 GitHub #150 / `avalonia-node-map-ien` 执行第一条 renderer virtualization proof harness。它新增 `RendererVirtualizationProofHarnessTests`，并输出 `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT` metadata，覆盖 `graphSize`、`viewport`、`zoom`、`overscan`、`visibleVisualCounts`、`invalidationCounts` 和 `measuredTimings`；由于它记录 `avoidsFullCollectionScan=false` 和 `avoidsFullSceneRebuild=false`，公开声明仍保持 viewport-budgeted scene projection/rendering，并保持 no support-claim expansion。
+
+Phase 516 通过 GitHub #152 / `avalonia-node-map-821` 记录 manual assistive-technology validation evidence。它把 `ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE` 加入 hosted accessibility recipe，把 platform-equivalent headless automation proof 与 live assistive-technology observations 分开，并用 GitHub #156 / `avalonia-node-map-1pd` 跟踪 live screen-reader announcement validation，完成前不扩大声明。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
@@ -369,5 +375,5 @@ Phase 514 通过 GitHub #150 / `avalonia-node-map-ien` 执行第一条 renderer 
 - Phase 513 现在通过 GitHub #149 / `avalonia-node-map-d8q` 承接 post-Phase-512 roadmap refresh；它记录已关闭的 visual queue，并选择下一批真实 follow-ups。
 - Phase 514 是 GitHub #150 / `avalonia-node-map-ien`；它执行 renderer virtualization proof harness，新增 `RendererVirtualizationProofHarnessTests` 和 `RENDERER_VIRTUALIZATION_PROOF_ARTIFACT`，同时保持 `avoidsFullCollectionScan=false`、`avoidsFullSceneRebuild=false` 和 no support-claim expansion。
 - Phase 515 是 GitHub #151 / `avalonia-node-map-t44`；它已基于 Phase 512 drift metadata 决定 strict pixel-baseline policy：strict single-hash enforcement 继续 deferred，直到具备 repeatable no-drift evidence，或先审查并落地一个带明确阈值的 host-keyed or tolerant comparator。
-- Phase 516 是 GitHub #152 / `avalonia-node-map-821`；它应在 Phase 514 renderer proof artifact 被接受后记录 manual assistive-technology validation evidence，不声明 unsupported certification claims。
+- Phase 516 是 GitHub #152 / `avalonia-node-map-821`；它记录 `ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE`，不声明 unsupported certification claims，并把 headless automation proof 与 live assistive-technology observations 分开；live screen-reader announcement validation 由 GitHub #156 / `avalonia-node-map-1pd` 继续追踪。
 - Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512 和 Phase 513 都不修改产品代码；除非 focused test 证明存在具体 missing contract。

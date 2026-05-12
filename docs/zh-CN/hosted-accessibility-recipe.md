@@ -37,6 +37,18 @@
 
 这份 checklist 只是 planning evidence：no live-region/runtime behavior change、no UI change、no public API change、no retained API removal，并且 no broad screen-reader certification claim。
 
+## Manual Assistive-Technology Evidence Package
+
+`ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE` 是 Phase 516 / GitHub #152 / `avalonia-node-map-821` 的证据记录。它把 Phase 505 的计划转成有边界的 platform-equivalent package，同时把 headless automation proof 和 live assistive-technology observations 分开。
+
+| Evidence lane | Hosted route states exercised | Observed result | Boundary |
+| --- | --- | --- | --- |
+| 2026-05-12 fresh Demo proof：`dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --configuration Release --nologo -- --proof` | hosted Demo route、command surface、native interaction accessibility checks 和 proof metrics | 输出 `NATIVE_INTERACTION_A11Y_OK:True`、`COMMAND_SURFACE_OK:True`、`DEMO_OK:True` 以及 `HOST_NATIVE_METRIC:*` 行 | 只算 platform-equivalent headless automation proof；live screen-reader observations were not performed |
+| Focused headless accessibility tests | `GraphEditorView`、`NodeCanvas`、`GraphInspectorView`、`PART_CommandPaletteSearchBox`、`PART_ParameterSearchBox`、投影出来的 command buttons、投影出来的 node/edge tools、validation focus buttons 和 export/status text | accessible names、focusability、focus recovery、command-surface projection 和 validation focus routes 继续由 `GraphEditorViewTests`、`NodeCanvasStandaloneTests` 和 `AccessibilityManualValidationDocsTests` 守住 | dynamic validation/export/status announcements 仍然是 not observed by a live screen reader |
+| Live assistive-technology pass | Narrator、NVDA 和 VoiceOver | Phase 516 中 not observed | GitHub #156 / `avalonia-node-map-1pd` 负责 live screen-reader announcement validation，完成前不扩大声明 |
+
+这份 evidence package 继续保持 no live-region/runtime behavior change、no UI change、no public API change、no retained API removal，并且 no broad screen-reader certification claim。后续如果补 Narrator、NVDA、VoiceOver 或 platform-equivalent notes，也必须留在同一条 hosted route 上，记录实际 announcements 和 focus transitions，而不是替换 headless proof。
+
 ## Proof Contract
 
 用下面这条命令验证 hosted route：

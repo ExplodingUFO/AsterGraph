@@ -37,6 +37,18 @@ Pair it with `src/AsterGraph.Demo`, because that is the defended hosted proof ro
 
 This checklist is planning evidence only: no live-region/runtime behavior change, no UI change, no public API change, no retained API removal, and no broad screen-reader certification claim.
 
+## Manual Assistive-Technology Evidence Package
+
+`ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE` is the Phase 516 / GitHub #152 / `avalonia-node-map-821` evidence record. It converts the Phase 505 plan into a bounded platform-equivalent package while keeping the headless automation proof separate from live assistive-technology observations.
+
+| Evidence lane | Hosted route states exercised | Observed result | Boundary |
+| --- | --- | --- | --- |
+| Fresh Demo proof on 2026-05-12 with `dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --configuration Release --nologo -- --proof` | hosted Demo route, command surface, native interaction accessibility checks, and proof metrics | emitted `NATIVE_INTERACTION_A11Y_OK:True`, `COMMAND_SURFACE_OK:True`, `DEMO_OK:True`, and `HOST_NATIVE_METRIC:*` lines | platform-equivalent headless automation proof only; live screen-reader observations were not performed |
+| Focused headless accessibility tests | `GraphEditorView`, `NodeCanvas`, `GraphInspectorView`, `PART_CommandPaletteSearchBox`, `PART_ParameterSearchBox`, projected command buttons, projected node or edge tools, validation focus buttons, and export/status text | accessible names, focusability, focus recovery, command-surface projection, and validation focus routes remain guarded by `GraphEditorViewTests`, `NodeCanvasStandaloneTests`, and `AccessibilityManualValidationDocsTests` | dynamic validation/export/status announcements remain not observed by a live screen reader |
+| Live assistive-technology pass | Narrator, NVDA, and VoiceOver | not observed in Phase 516 | GitHub #156 / `avalonia-node-map-1pd` owns live screen-reader announcement validation before any broader claim |
+
+The evidence package keeps no live-region/runtime behavior change, no UI change, no public API change, no retained API removal, and no broad screen-reader certification claim. Any later Narrator, NVDA, VoiceOver, or platform-equivalent notes should stay on this same hosted route and record the exact announcements and focus transitions rather than replacing the headless proof.
+
 ## Proof Contract
 
 Validate the hosted route with:
