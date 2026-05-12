@@ -219,6 +219,8 @@ Use builder pass-throughs such as `UseBehaviorOptions(...)`, `UseContextMenuAugm
 
 `DECLARATIVE_API_ERGONOMICS_AUDIT`: the current copyable API surface is intentionally bounded to `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`, `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`, and `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()`. Definition builders and the `templates/astergraph-avalonia` starter reduce code-first boilerplate, but they remain thin wrappers over the same model/session records. There is no React hook parity and no <ReactFlow>-equivalent declarative DSL in the current public beta.
 
+`DECLARATIVE_HOST_COMPOSITION_GATE`: the next bounded candidate is a future composition profile that would package named hosted recipes and defaults around `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` while still using `AsterGraphEditorFactory.CreateSession(...)`, `AsterGraphEditorFactory.Create(...)`, and `AsterGraphAvaloniaViewFactory.Create(...)` underneath. That future composition profile is not current public API. It is not a source generator, XAML extension, React hook parity surface, or <ReactFlow>-equivalent declarative DSL.
+
 ## 6. Plugin Trust Boundary
 
 Plugin loading is currently in-process. Hosts can discover candidates, apply an allow/block trust policy, and inspect load results. AsterGraph does not provide sandboxing or untrusted-code isolation.
