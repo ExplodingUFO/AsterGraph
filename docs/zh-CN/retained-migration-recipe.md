@@ -112,6 +112,20 @@ Phase 498 是 GitHub #119 / `avalonia-node-map-3um`。本节只定义 retained m
 | `NodeViewModel.ExpansionState` 和 `NodeViewModel.IsExpanded` | 证明 hosted UI decisions 改用 `ActiveSurfaceTier`、`Surface.ExpansionState` 或 session/query snapshots。 |
 | `TrySetNodeExpansionState(...)` 和 `TrySetNodeGroupExtraPadding(...)` retained helpers | 证明调用方迁到 `Session.Commands.TrySetNodeExpansionState(...)`、size/group commands 和 session query snapshots。 |
 
+## Phase 522 retained migration removal readiness audit
+
+Phase 522 是 GitHub #164 / `avalonia-node-map-ecx`。本节在 Phase 492 inventory 和 Phase 498 removal execution gate 之后记录 `RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT`。本 audit 只改 docs/tests：no retained API removal、no public API baseline change、no runtime behavior change、no UI change。当前 readiness state 保持保守：retained surfaces kept in the current prerelease support window；真正删除仍 blocked until a later API-changing issue，并且该 issue 必须负责 public API change 和 `eng/public-api-baseline.txt` diff。
+
+| Surface | Current readiness classification |
+| --- | --- |
+| `GraphEditorViewModel`、`GraphEditorView` 和 `GraphEditorViewModel.Session` retained bridge usage | Kept in the current prerelease support window。Not ready for deletion；必须等后续 API-changing issue 证明受影响宿主可用 `AsterGraphEditorFactory.CreateSession(...)` 承接 runtime-owned work，或用 `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` 承接 shipped Avalonia UI。 |
+| `GraphDocumentSerializer.ImportLegacy(...)` explicit import path | Kept in the current prerelease support window，作为 bounded migration entry point。Not ready for deletion；必须等后续 API-changing issue 证明没有受支持迁移流程还需要 direct legacy import。 |
+| `IGraphContextMenuAugmentor.Augment(GraphEditorViewModel, ...)` | Kept in the current prerelease support window。Not ready for deletion；必须先有 blocker tests 证明所有 host menu augmentors 都可改用 `Augment(GraphContextMenuAugmentationContext)`。 |
+| `INodePresentationProvider.GetNodePresentation(NodeViewModel)` | Kept in the current prerelease support window。Not ready for deletion；必须先有 blocker tests 证明 host presenters 都可改用 `GetNodePresentation(NodePresentationContext)`。 |
+| `NodeViewModel.ExpansionState` 和 `NodeViewModel.IsExpanded` | Kept in the current prerelease support window。Not ready for deletion；必须证明 hosted UI decisions 已改用 `ActiveSurfaceTier`、`Surface.ExpansionState` 或 session/query snapshots。 |
+| `TrySetNodeExpansionState(...)` 和 `TrySetNodeGroupExtraPadding(...)` retained helpers | Kept in the current prerelease support window。Not ready for deletion；必须证明调用方已迁到 `Session.Commands.TrySetNodeExpansionState(...)`、size/group commands 和 session query snapshots。 |
+| `AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphAvaloniaViewOptions`，以及 `AsterGraphEditorFactory.Create(...)` docs 中的 retained-facade wording | Kept in the current prerelease support window，分类是 supported hosted helper composition，不是 compatibility-only API。Not ready for deletion 或 reclassification；必须等后续 API-changing issue 同步更新 route docs 与 public API baseline。 |
+
 ## 成功标准
 
 宿主只要满足下面这些条件，就基本已经离开 migration-critical path：

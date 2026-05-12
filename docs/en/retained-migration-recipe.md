@@ -113,6 +113,20 @@ The removal candidate list starts with these retained or compatibility-only surf
 | `NodeViewModel.ExpansionState` and `NodeViewModel.IsExpanded` | Prove hosted UI decisions use `ActiveSurfaceTier`, `Surface.ExpansionState`, or session/query snapshots. |
 | `TrySetNodeExpansionState(...)` and `TrySetNodeGroupExtraPadding(...)` retained helpers | Prove callers moved to `Session.Commands.TrySetNodeExpansionState(...)`, size/group commands, and session query snapshots. |
 
+## Phase 522 retained migration removal readiness audit
+
+Phase 522 is GitHub #164 / `avalonia-node-map-ecx`. It records `RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT` after the Phase 492 inventory and Phase 498 removal execution gate. This audit is docs/tests only: no retained API removal, no public API baseline change, no runtime behavior change, and no UI change. The current readiness state is intentionally conservative: retained surfaces are kept in the current prerelease support window, and actual deletion is blocked until a later API-changing issue owns the public API change and `eng/public-api-baseline.txt` diff.
+
+| Surface | Current readiness classification |
+| --- | --- |
+| `GraphEditorViewModel`, `GraphEditorView`, and `GraphEditorViewModel.Session` retained bridge usage | Kept in the current prerelease support window. Not ready for deletion until a later API-changing issue proves affected hosts can use `AsterGraphEditorFactory.CreateSession(...)` for runtime-owned work or `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)` for shipped Avalonia UI. |
+| `GraphDocumentSerializer.ImportLegacy(...)` explicit import path | Kept in the current prerelease support window as a bounded migration entry point. Not ready for deletion until a later API-changing issue proves no supported migration flow still needs direct legacy import. |
+| `IGraphContextMenuAugmentor.Augment(GraphEditorViewModel, ...)` | Kept in the current prerelease support window. Not ready for deletion until blocker tests prove all host menu augmentors can use `Augment(GraphContextMenuAugmentationContext)`. |
+| `INodePresentationProvider.GetNodePresentation(NodeViewModel)` | Kept in the current prerelease support window. Not ready for deletion until blocker tests prove host presenters can use `GetNodePresentation(NodePresentationContext)`. |
+| `NodeViewModel.ExpansionState` and `NodeViewModel.IsExpanded` | Kept in the current prerelease support window. Not ready for deletion until hosted UI decisions use `ActiveSurfaceTier`, `Surface.ExpansionState`, or session/query snapshots. |
+| `TrySetNodeExpansionState(...)` and `TrySetNodeGroupExtraPadding(...)` retained helpers | Kept in the current prerelease support window. Not ready for deletion until callers move to `Session.Commands.TrySetNodeExpansionState(...)`, size/group commands, and session query snapshots. |
+| `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphAvaloniaViewOptions`, and retained-facade wording in `AsterGraphEditorFactory.Create(...)` docs | Kept in the current prerelease support window as supported hosted helper composition, not compatibility-only API. Not ready for deletion or reclassification without a later API-changing issue that updates route docs and the public API baseline. |
+
 ## Success Criteria
 
 A host is effectively off the migration-critical path once:
