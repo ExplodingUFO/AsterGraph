@@ -690,6 +690,12 @@ public partial class NodeCanvas : UserControl
     private void UpdateLassoSelection(IReadOnlyList<Point> screenPoints, bool finalize)
         => _overlayCoordinator.UpdateLassoSelection(screenPoints, finalize);
 
+    private void UpdateLassoFeedback(IReadOnlyList<Point> screenPoints, bool finalize)
+        => _overlayCoordinator.UpdateLassoFeedback(screenPoints, finalize);
+
+    private void ClearLassoFeedback()
+        => _overlayCoordinator.ClearLassoFeedback();
+
     private void HideSelectionAdorner()
         => _overlayCoordinator.HideSelectionAdorner();
 

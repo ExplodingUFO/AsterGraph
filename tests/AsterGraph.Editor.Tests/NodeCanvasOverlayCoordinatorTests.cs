@@ -279,6 +279,8 @@ public sealed class NodeCanvasOverlayCoordinatorTests
 
         public Border? HorizontalGuideAdorner { get; set; } = new();
 
+        public Canvas? OverlayLayer { get; set; }
+
         public NodeCanvasInteractionSession InteractionSession { get; } = new();
 
         public IReadOnlyList<NodeViewModel> SelectedNodes { get; private set; } = [];

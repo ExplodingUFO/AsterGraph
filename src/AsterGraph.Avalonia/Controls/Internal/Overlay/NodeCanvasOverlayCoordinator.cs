@@ -1,6 +1,8 @@
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
@@ -8,6 +10,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
+using ShapePath = Avalonia.Controls.Shapes.Path;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
 
@@ -35,6 +38,8 @@ internal interface INodeCanvasOverlayHost
 
     Border? HorizontalGuideAdorner { get; }
 
+    Canvas? OverlayLayer { get; }
+
     GraphPoint WorldToScreen(double x, double y);
 
     GraphPoint ScreenToWorld(GraphPoint point);
@@ -53,6 +58,7 @@ internal interface INodeCanvasOverlayHost
 internal sealed class NodeCanvasOverlayCoordinator
 {
     private readonly INodeCanvasOverlayHost _host;
+    private ShapePath? _lassoFeedbackPath;
 
     public NodeCanvasOverlayCoordinator(INodeCanvasOverlayHost host)
     {
@@ -185,6 +191,36 @@ internal sealed class NodeCanvasOverlayCoordinator
                 1 => $"Selected {nodes[0].Title}.",
                 _ => $"Selected {nodes.Count} nodes.",
             });
+    }
+
+    public void UpdateLassoFeedback(IReadOnlyList<Point> screenPoints, bool finalize)
+    {
+        if (finalize || screenPoints.Count < 2 || _host.OverlayLayer is null)
+        {
+            ClearLassoFeedback();
+            return;
+        }
+
+        _lassoFeedbackPath ??= CreateLassoFeedbackPath();
+        if (!_host.OverlayLayer.Children.Contains(_lassoFeedbackPath))
+        {
+            _host.OverlayLayer.Children.Add(_lassoFeedbackPath);
+        }
+
+        _lassoFeedbackPath.Data = CreateLassoGeometry(screenPoints);
+        _lassoFeedbackPath.IsVisible = true;
+    }
+
+    public void ClearLassoFeedback()
+    {
+        if (_lassoFeedbackPath is null)
+        {
+            return;
+        }
+
+        _host.OverlayLayer?.Children.Remove(_lassoFeedbackPath);
+        _lassoFeedbackPath.Data = null;
+        _lassoFeedbackPath.IsVisible = false;
     }
 
     public GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)
@@ -357,6 +393,32 @@ internal sealed class NodeCanvasOverlayCoordinator
         }
 
         return true;
+    }
+
+    private ShapePath CreateLassoFeedbackPath()
+    {
+        var style = _host.StyleOptions.Canvas;
+        return new ShapePath
+        {
+            IsHitTestVisible = false,
+            Stroke = BrushFactory.Solid(style.SelectionBorderHex, 0.95),
+            StrokeThickness = Math.Max(1d, style.SelectionBorderThickness),
+            StrokeDashArray = new AvaloniaList<double> { 6, 4 },
+            Fill = null,
+        };
+    }
+
+    private static Geometry CreateLassoGeometry(IReadOnlyList<Point> screenPoints)
+    {
+        var geometry = new StreamGeometry();
+        using var context = geometry.Open();
+        context.BeginFigure(screenPoints[0], isFilled: false);
+        for (var index = 1; index < screenPoints.Count; index++)
+        {
+            context.LineTo(screenPoints[index]);
+        }
+
+        return geometry;
     }
 
     private static NodeBounds GetSelectionBounds(IReadOnlyList<NodeViewModel> nodes)

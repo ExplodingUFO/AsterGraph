@@ -206,6 +206,8 @@ public partial class NodeCanvas
 
         public Border? HorizontalGuideAdorner => _owner._horizontalGuideAdorner;
 
+        public Canvas? OverlayLayer => _owner._overlayLayer;
+
         public GraphPoint WorldToScreen(double x, double y)
             => _owner.WorldToScreen(x, y);
 
@@ -315,6 +317,12 @@ public partial class NodeCanvas
 
         public void UpdateLassoSelection(IReadOnlyList<Point> screenPoints, bool finalize)
             => _owner.UpdateLassoSelection(screenPoints, finalize);
+
+        public void UpdateLassoFeedback(IReadOnlyList<Point> screenPoints, bool finalize)
+            => _owner.UpdateLassoFeedback(screenPoints, finalize);
+
+        public void ClearLassoFeedback()
+            => _owner.ClearLassoFeedback();
 
         public GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)
             => _owner.ApplyDragAssist(dragSession, deltaX, deltaY);

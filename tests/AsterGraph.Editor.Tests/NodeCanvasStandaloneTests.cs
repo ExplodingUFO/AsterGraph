@@ -1034,6 +1034,43 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void LassoSelectionMode_RendersTransientFeedbackPathOnlyDuringDrag()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        canvas.SelectionMode = NodeCanvasSelectionMode.Lasso;
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+        var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+        var topLeft = WorldToScreenPoint(canvas, sourceNode.X - 24, sourceNode.Y - 24);
+        var topRight = WorldToScreenPoint(canvas, sourceNode.X + sourceNode.Width + 24, sourceNode.Y - 24);
+        var bottomRight = WorldToScreenPoint(canvas, sourceNode.X + sourceNode.Width + 24, sourceNode.Y + sourceNode.Height + 24);
+
+        try
+        {
+            InvokeCanvasPointerPressed(canvas, CreatePointerPressedArgs(canvas, pointer, topLeft, KeyModifiers.None));
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, topRight, KeyModifiers.None));
+
+            var lassoPath = Assert.Single(GetOverlayLayer(canvas).Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            Assert.True(lassoPath.IsVisible);
+            Assert.NotNull(lassoPath.Data);
+
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, bottomRight, KeyModifiers.None));
+
+            Assert.Same(lassoPath, Assert.Single(GetOverlayLayer(canvas).Children.OfType<global::Avalonia.Controls.Shapes.Path>()));
+            Assert.True(lassoPath.Data!.Bounds.Width > 0d);
+            Assert.True(lassoPath.Data.Bounds.Height > 0d);
+
+            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, topLeft, KeyModifiers.None));
+
+            Assert.Empty(GetOverlayLayer(canvas).Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void PointerCaptureLost_ClearsActivePointerInteraction()
     {
         var editor = CreateEditor();
@@ -1065,6 +1102,9 @@ public sealed class NodeCanvasStandaloneTests
             window.Close();
         }
     }
+
+    private static Canvas GetOverlayLayer(NodeCanvas canvas)
+        => Assert.IsType<Canvas>(canvas.FindControl<Canvas>("OverlayLayer"));
 
     [AvaloniaFact]
     public void ResizedNode_ResolvesRicherSurfaceTier()
