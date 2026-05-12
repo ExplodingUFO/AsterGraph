@@ -118,6 +118,10 @@ Phase 517 is GitHub #156 / `avalonia-node-map-1pd`, the live assistive-technolog
 
 Phase 518 is GitHub #158 / `avalonia-node-map-g0u`, the dynamic validation/export/status announcement runtime proof after Phase 517. It adds `ACCESSIBILITY_DYNAMIC_ANNOUNCEMENT_CONTRACT` by putting stable automation names, help text, and `AutomationProperties.LiveSetting=Polite` on the existing validation/export/status surfaces, including `PART_ValidationStatusText`, `PART_StatusValidationText`, `PART_ExportStatusText`, and `PART_CurrentStatusText`. Focused tests prove the validation/export/status text updates and live-region metadata contract, but live screen-reader speech output was not observed. This slice authorizes no UI redesign, no public API change, no retained API removal, and no broad screen-reader certification claim.
 
+## Phase 519 Update
+
+Phase 519 is GitHub #161 / `avalonia-node-map-rs5`, the post-Phase-518 roadmap refresh after the dynamic validation/export/status announcement proof closed. This slice is docs/tests only: it records Phase 518 and `ACCESSIBILITY_DYNAMIC_ANNOUNCEMENT_CONTRACT` as closed, replaces the stale current queue that still listed closed Phases 513-516, selects tracker-backed follow-ups through GitHub #162-#164 / `avalonia-node-map-vdc`, `avalonia-node-map-ayx`, and `avalonia-node-map-ecx`, and keeps `.planning/` drift explicit because those files are local/ignored workflow state rather than the PR source of truth. It authorizes no runtime behavior changes, no public API changes, no UI redesign, no strict pixel-baseline enforcement, no retained API removal, and no broad parity or screen-reader certification claim.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -314,12 +318,14 @@ Phase 516 records manual assistive-technology validation evidence through GitHub
 
 Phase 517 records live assistive-technology platform-equivalent evidence through GitHub #156 / `avalonia-node-map-1pd`. It adds `ACCESSIBILITY_LIVE_AT_UIA_EVIDENCE` to the hosted accessibility recipe, records the Windows UI Automation check against `validation-prevent-cycle`, states that live screen-reader speech output was not observed, and files GitHub #158 / `avalonia-node-map-g0u` for the remaining dynamic validation/export/status announcement proof without making a broad certification claim.
 
+Phase 519 refreshes the post-Phase-518 queue through GitHub #161 / `avalonia-node-map-rs5`. It records Phase 518 as closed, keeps the live screen-reader speech-output boundary explicit, and turns the next work into tracker-backed follow-ups for declarative API ergonomics, strict pixel-baseline comparator readiness, and retained migration removal readiness instead of reopening the closed Phase 513-516 queue.
+
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh | P2 | parity roadmap docs and focused docs tests | Current slice. It is the only active docs refresh and must close before the follow-up implementation/evidence work starts. |
-| #150 | `avalonia-node-map-ien` | Phase 514: execute renderer virtualization proof harness | P2 | renderer proof harness/tests, scale docs, artifact metadata | Blocked until after Phase 513 closes. Can run independently from pixel-baseline and manual AT evidence work after the queue is accepted. |
-| #151 | `avalonia-node-map-t44` | Phase 515: decide strict pixel baseline policy from drift evidence | P3 | visual gate metadata/docs/tests, drift artifact analysis | Blocked until after Phase 513 closes. Can run in parallel with Phase 514 because it stays on visual artifact policy rather than renderer internals. |
-| #152 | `avalonia-node-map-821` | Phase 516: record manual assistive-technology validation evidence | P3 | manual accessibility evidence/docs/tests | Blocked until after Phase 513 closes. Can run in parallel with Phases 514 and 515 if the human/manual AT evidence is available. |
+| #161 | `avalonia-node-map-rs5` | Phase 519: refresh parity roadmap after dynamic announcement proof | P2 | parity roadmap docs and focused docs tests | Current slice. It records closed Phase 518 evidence and must close before the next follow-up docs/API-policy slices start. |
+| #162 | `avalonia-node-map-vdc` | Phase 520: define declarative host composition API gate | P3 | declarative API docs/tests, quick-start and host-composition boundary text | Blocked until Phase 519 closes. Can run independently from visual policy and retained migration readiness because it stays in API ergonomics planning. |
+| #163 | `avalonia-node-map-ayx` | Phase 521: define strict pixel-baseline comparator readiness gate | P3 | visual policy docs/tests and drift-evidence readiness criteria | Blocked until Phase 519 closes. Can run independently from declarative API and retained migration readiness because it does not add shell-state rows or enforce strict hashes. |
+| #164 | `avalonia-node-map-ecx` | Phase 522: audit retained migration removal readiness | P3 | retained migration docs/tests and API-policy readiness classification | Blocked until Phase 519 closes. Must remain docs/tests-only unless a later API-changing issue explicitly owns public API deletion. |
 
 ## Recommended Parallel Worktree Plan
 
@@ -345,6 +351,10 @@ Phase 517 records live assistive-technology platform-equivalent evidence through
 - `perf/phase-514-renderer-virtualization-proof`: owns #150 / `avalonia-node-map-ien`; future worktree for the first executable renderer proof harness and artifact metadata.
 - `visual/phase-515-pixel-baseline-policy`: owns #151 / `avalonia-node-map-t44`; future worktree for strict pixel-baseline policy decision using Phase 512 drift metadata.
 - `a11y/phase-516-manual-at-evidence`: owns #152 / `avalonia-node-map-821`; future worktree for manual assistive-technology validation evidence.
+- `docs/phase-519-roadmap-refresh`: owns #161 / `avalonia-node-map-rs5`; current worktree for this post-Phase-518 roadmap refresh and tracker-backed follow-up selection.
+- `docs/phase-520-declarative-api-gate`: owns #162 / `avalonia-node-map-vdc`; future worktree for declarative host-composition API gate docs/tests without public API changes.
+- `visual/phase-521-pixel-comparator-readiness`: owns #163 / `avalonia-node-map-ayx`; future worktree for strict pixel-baseline comparator readiness docs/tests without strict enforcement.
+- `docs/phase-522-retained-readiness`: owns #164 / `avalonia-node-map-ecx`; future worktree for retained migration removal readiness docs/tests without deleting API.
 
 ## UI Verification Policy
 
