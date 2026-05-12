@@ -285,6 +285,11 @@ public partial class NodeCanvas
 
         public bool EnableAltLeftDragPanning => _owner.EnableAltLeftDragPanning;
 
+        public NodeCanvasSelectionGestureKind SelectionGestureKind
+            => _owner.SelectionMode is NodeCanvasSelectionMode.Lasso
+                ? NodeCanvasSelectionGestureKind.Lasso
+                : NodeCanvasSelectionGestureKind.Marquee;
+
         public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
 
         public void FocusCanvas()
