@@ -142,6 +142,10 @@ Phase 523 is GitHub #169 / `avalonia-node-map-bp0`, the post-Phase-522 parity is
 
 Phase 524 is GitHub #171 / `avalonia-node-map-0k0`, the built-in component parity matrix selected after the post-Phase-522 issue-wave refresh. This docs/tests-only decision records the current MiniMap, Controls, Background/Grid, and Panel built-in status in a compact matrix, separates source/test/demo evidence from remaining React Flow parity gaps, and keeps Phase 525-528 as the tracker-backed gates for behavior or API expansion. It authorizes no runtime behavior changes, no public API changes, no UI redesign, no screenshot manifest expansion, no strict visual-baseline enforcement, and no retained API removal.
 
+## Phase 525 Update
+
+Phase 525 is GitHub #173 / `avalonia-node-map-ba7`, the MiniMap interaction and customization parity gate selected after the built-in component matrix. This docs/tests-only decision records the current MiniMap support as partial / guarded: viewport recentering, viewport/session sync, custom presenter/render behavior, factory/options customization, and the accessibility/focus boundary all have source-backed evidence, but this is still not a full React Flow MiniMap parity claim. It authorizes no runtime behavior changes, no public API changes, no UI redesign, no screenshot manifest expansion, no strict visual-baseline enforcement, no retained API removal, and no full React Flow MiniMap parity claim.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -252,6 +256,18 @@ Phase 524 records the built-in component parity matrix through GitHub #171 / `av
 | Background/Grid | Partial / guarded | `GridBackground` + style grid options | `GridBackgroundTests`, `background-grid-density`, style grid tokens, snap-to-grid command evidence, and existing screenshot route coverage. | Evidence is not full React Flow built-in parity; dots/lines/cross variants, gap/size API policy, and public background variant claims remain bounded future work. | Phase 527: Background variant public surface gate. |
 | Panel | Partial / guarded | `AsterGraphPanel` + `AsterGraphPanelPosition` | `AsterGraphBuiltInPanelTests`, `standalone-panel`, built-in catalog entry, host-owned content composition, and positional overlay tests. | Evidence is not full React Flow built-in parity; viewport-attached overlay semantics, positioning policy, and hosted-shell independence need a later boundary. | Phase 528: Panel versus viewport-attached overlay boundary. |
 
+## MiniMap Interaction And Customization Gate
+
+Phase 525 records the MiniMap interaction and customization parity gate through GitHub #173 / `avalonia-node-map-ba7`. The gate keeps MiniMap support partial / guarded: existing seams are usable and tested, but they do not become a full React Flow MiniMap parity claim or a commitment to additional runtime/API/UI behavior in this slice.
+
+| MiniMap gate | Current status | Existing evidence | Remaining gap / boundary |
+| --- | --- | --- | --- |
+| Viewport recentering | Supported / guarded | `GraphMiniMap.CenterViewportFromMiniMap(...)`, stock pointer handling, and `StandaloneMiniMap_RecenterViewport_ForDifferentMiniMapPoints`. | Current proof covers recentering through the canonical editor command path; richer React Flow-style viewport policy or alternate gestures need a later behavior issue. Overall Phase 525 boundary remains not full React Flow MiniMap parity. |
+| Viewport/session sync | Supported / guarded | `GraphMiniMap` reads `IGraphEditorSession` snapshots, subscribes to document/selection/viewport events, and is guarded by `HostedMiniMap_BalancedModeInvalidatesOnViewportChange`, `HostedMiniMap_ThroughputModeDefersViewportInvalidationButReadsFreshViewportOnProjection`, and `LightweightMiniMap_ReusesNodeProjectionButRefreshesViewportSnapshot`. | Balanced and Throughput cadence markers are evidence for the current session sync boundary, not a general renderer virtualization or second-renderer claim. |
+| Custom presenter/render behavior | Supported seam / guarded | `IGraphMiniMapPresenter.Create(IGraphEditorSession?)`, `AsterGraphPresentationOptions.MiniMapPresenter`, and `StandaloneMiniMap_CustomPresenter_RecenterViewportThroughEditorApi`. | Hosts can replace the presented control, but this is host-owned presenter customization, not a React component/plugin render pipeline. |
+| Factory/options customization | Supported seam / guarded | `AsterGraphMiniMapViewFactory.Create(...)`, `AsterGraphMiniMapViewOptions.Session`, `AsterGraphMiniMapViewOptions.StyleOptions`, `AsterGraphMiniMapViewOptions.Presentation`, and `minimap-workbench`. | Current options cover session/style/presenter composition; gap/size/mask/position APIs remain future tracker work if needed. |
+| Accessibility/focus boundary | Guarded | `GraphMiniMap.Focusable = false`, stock surface `Focusable = false`, `StandaloneMiniMapFactory_BindsSessionAndRemainsNonFocusable`, and `StandaloneMiniMap_StockSurfaceStaysOutOfKeyboardFocusPath`. | The stock MiniMap stays pointer-only and outside the keyboard focus path; this is not screen-reader certification or a claim that custom presenter content is non-focusable. |
+
 ## Completed Phase 0 Issue Wave
 
 The original first wave is no longer the next work queue. These tracker items are closed and should be treated as historical context:
@@ -361,11 +377,13 @@ Phase 523 refreshes the post-Phase-522 parity issue wave through GitHub #169 / `
 
 Phase 524 records the built-in component parity matrix through GitHub #171 / `avalonia-node-map-0k0`. It keeps MiniMap, Controls, Background/Grid, and Panel support bounded to current public surfaces and evidence while leaving interaction, customization, variant, and overlay-boundary work to Phase 525-528.
 
+Phase 525 records the MiniMap interaction and customization parity gate through GitHub #173 / `avalonia-node-map-ba7`. It keeps viewport recentering, viewport/session sync, custom presenter/render behavior, factory/options customization, and the accessibility/focus boundary tied to existing source/test/Cookbook evidence without authorizing product or API changes.
+
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
 | #169 | `avalonia-node-map-bp0` | Phase 523: refresh React Flow parity issue wave after retained readiness audit | P2 | parity roadmap docs and focused docs tests | Current issue. Blocks the next implementation wave because it defines the queue and tracker boundaries. |
 | #171 | `avalonia-node-map-0k0` | Phase 524: built-in component parity matrix for MiniMap, Controls, Background, Panel | P2 | feature catalog, public API inventory, Avalonia README, and docs tests | Current docs/test slice. Blocks Phase 525-528 because it defines the built-in row boundaries. |
-| TBD | TBD | Phase 525: MiniMap interaction and customization parity gate | P2 | `GraphMiniMap`, MiniMap factory/options, minimap tests, and docs | Ready after Phase 524. Do not run in parallel with other work touching `GraphMiniMap`. |
+| #173 | `avalonia-node-map-ba7` | Phase 525: MiniMap interaction and customization parity gate | P2 | `GraphMiniMap`, MiniMap factory/options, minimap tests, and docs | Current docs/test gate. Do not run in parallel with other work touching `GraphMiniMap`. |
 | TBD | TBD | Phase 526: Controls interactivity/custom-button parity gate | P2 | `AsterGraphControls`, hosted action button tests, and docs | Can run in parallel with MiniMap work if write sets stay disjoint. |
 | TBD | TBD | Phase 527: Background variant public surface gate | P3 | background/grid control docs/tests and current background support evidence | Can run in parallel with Controls and MiniMap work if it avoids shared shell docs edits. |
 | TBD | TBD | Phase 528: Panel versus viewport-attached overlay boundary | P3 | `AsterGraphPanel`, host integration docs, and panel tests | Ready after Phase 524; serialize with broad built-in component docs edits. |
@@ -401,7 +419,7 @@ Phase 524 records the built-in component parity matrix through GitHub #171 / `av
 - `docs/phase-522-retained-readiness`: owns #164 / `avalonia-node-map-ecx`; ready parallel worktree for retained migration removal readiness docs/tests without deleting API.
 - `docs/phase-523-parity-wave-refresh`: owns #169 / `avalonia-node-map-bp0`; current worktree for this post-Phase-522 parity issue-wave refresh and next implementation split.
 - `docs/phase-524-built-in-component-matrix`: owns #171 / `avalonia-node-map-0k0`; current docs/test worktree for the built-in component parity matrix across MiniMap, Controls, Background, and Panel.
-- `ui/phase-525-minimap-interaction-customization`: future MiniMap worktree; keep writes isolated to `GraphMiniMap`, MiniMap options/factories, focused tests, and directly related docs.
+- `docs/phase-525-minimap-interaction-gate`: owns #173 / `avalonia-node-map-ba7`; current docs/test worktree for the MiniMap interaction and customization parity gate.
 - `ui/phase-526-controls-custom-button`: future Controls worktree; can run beside MiniMap if it only touches `AsterGraphControls`, hosted action buttons, tests, and directly related docs.
 - `ui/phase-527-background-variants`: future Background worktree; isolate from shared shell docs and avoid changing MiniMap/Controls.
 - `ui/phase-528-panel-overlay-boundary`: future Panel worktree; serialize with Phase 524 docs if both edit the same built-in component inventory.
@@ -451,4 +469,5 @@ Current coverage includes scene-level route captures plus ten manifest-driven fu
 - Phase 522 is GitHub #164 / `avalonia-node-map-ecx`; it records `RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT` without retained API removal, public API baseline change, runtime behavior change, or UI change.
 - Phase 523 is GitHub #169 / `avalonia-node-map-bp0`; it refreshes the post-Phase-522 issue wave and records built-in component, MiniMap, Controls, Background, Panel, and whiteboard feasibility follow-ups without runtime behavior changes, public API changes, UI redesign, visual-baseline enforcement, or retained API removal.
 - Phase 524 is GitHub #171 / `avalonia-node-map-0k0`; it records the built-in component parity matrix for MiniMap, Controls, Background/Grid, and Panel without runtime behavior changes, public API changes, UI redesign, screenshot manifest expansion, strict visual-baseline enforcement, or retained API removal.
-- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, Phase 499, Phase 500, Phase 501, Phase 502, Phase 503, Phase 504, Phase 505, Phase 506, Phase 507, Phase 508, Phase 509, Phase 510, Phase 511, Phase 512, Phase 513, Phase 520, Phase 521, Phase 522, Phase 523, and Phase 524 unless a focused test proves a specific missing contract.
+- Phase 525 is GitHub #173 / `avalonia-node-map-ba7`; it records the MiniMap interaction and customization parity gate without runtime behavior changes, public API changes, UI redesign, screenshot manifest expansion, strict visual-baseline enforcement, retained API removal, or a full React Flow MiniMap parity claim.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, Phase 499, Phase 500, Phase 501, Phase 502, Phase 503, Phase 504, Phase 505, Phase 506, Phase 507, Phase 508, Phase 509, Phase 510, Phase 511, Phase 512, Phase 513, Phase 520, Phase 521, Phase 522, Phase 523, Phase 524, and Phase 525 unless a focused test proves a specific missing contract.

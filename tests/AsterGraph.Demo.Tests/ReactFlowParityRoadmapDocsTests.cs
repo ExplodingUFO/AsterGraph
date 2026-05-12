@@ -549,6 +549,40 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase525MiniMapInteractionCustomizationGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 525", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #173", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-ba7", contents, StringComparison.Ordinal);
+            Assert.Contains("MiniMap interaction and customization parity gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("viewport recentering", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("viewport/session sync", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("custom presenter", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("factory/options customization", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("accessibility/focus boundary", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("partial / guarded", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no strict visual-baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow MiniMap parity claim", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertMiniMapInteractionCustomizationGate(ExtractMiniMapInteractionCustomizationGate(englishParity));
+        AssertMiniMapInteractionCustomizationGate(ExtractMiniMapInteractionCustomizationGate(chineseParity));
+
+        Assert.Contains("Phase 525 records the MiniMap interaction and customization parity gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 525 记录 MiniMap interaction and customization parity gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -666,6 +700,35 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("Phase 527", table, StringComparison.Ordinal);
         Assert.Contains("Phase 528", table, StringComparison.Ordinal);
         Assert.Contains("not full React Flow built-in parity", table, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void AssertMiniMapInteractionCustomizationGate(string table)
+    {
+        Assert.Contains("| MiniMap gate |", table, StringComparison.Ordinal);
+        Assert.Contains("| Viewport recentering | Supported / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Viewport/session sync | Supported / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Custom presenter/render behavior | Supported seam / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Factory/options customization | Supported seam / guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("| Accessibility/focus boundary | Guarded |", table, StringComparison.Ordinal);
+        Assert.Contains("StandaloneMiniMap_RecenterViewport_ForDifferentMiniMapPoints", table, StringComparison.Ordinal);
+        Assert.Contains("HostedMiniMap_BalancedModeInvalidatesOnViewportChange", table, StringComparison.Ordinal);
+        Assert.Contains("StandaloneMiniMap_CustomPresenter_RecenterViewportThroughEditorApi", table, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphMiniMapViewOptions", table, StringComparison.Ordinal);
+        Assert.Contains("StandaloneMiniMap_StockSurfaceStaysOutOfKeyboardFocusPath", table, StringComparison.Ordinal);
+        Assert.Contains("not full React Flow MiniMap parity", table, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string ExtractMiniMapInteractionCustomizationGate(string contents)
+    {
+        var headingStart = contents.IndexOf("\n## MiniMap Interaction And Customization Gate", StringComparison.Ordinal);
+        Assert.True(headingStart >= 0, "Expected MiniMap interaction and customization gate heading.");
+
+        var tableStart = contents.IndexOf("| MiniMap gate |", headingStart, StringComparison.Ordinal);
+        Assert.True(tableStart >= 0, "Expected MiniMap interaction and customization gate table header.");
+
+        var nextHeading = contents.IndexOf("\n## ", tableStart, StringComparison.Ordinal);
+        Assert.True(nextHeading > tableStart, "Expected heading after MiniMap interaction and customization gate table.");
+        return contents[tableStart..nextHeading];
     }
 
     private static string ExtractBuiltInComponentMatrix(string contents)
