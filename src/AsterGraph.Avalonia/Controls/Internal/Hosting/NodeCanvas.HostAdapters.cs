@@ -308,6 +308,9 @@ public partial class NodeCanvas
         public void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize)
             => _owner.UpdateMarqueeSelection(currentScreenPosition, finalize);
 
+        public void UpdateLassoSelection(IReadOnlyList<Point> screenPoints, bool finalize)
+            => _owner.UpdateLassoSelection(screenPoints, finalize);
+
         public GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)
             => _owner.ApplyDragAssist(dragSession, deltaX, deltaY);
 

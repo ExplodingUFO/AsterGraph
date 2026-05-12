@@ -32,6 +32,8 @@ internal interface INodeCanvasPointerInteractionHost
 
     void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize);
 
+    void UpdateLassoSelection(IReadOnlyList<Point> screenPoints, bool finalize);
+
     GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY);
 
     NodeCanvasGroupResizePreview ApplyGroupResizeAssist(
@@ -159,12 +161,23 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         if (_host.InteractionSession.SelectionStartScreenPosition is not null
             && !_host.InteractionSession.IsPanning
             && _host.InteractionSession.DragNode is null
-            && _host.InteractionSession.DragGroupId is null
-            && _host.InteractionSession.TryBeginMarqueeSelection(currentScreenPosition, selectionDragThreshold))
+            && _host.InteractionSession.DragGroupId is null)
         {
-            _host.ClearResizeFeedback();
-            _host.UpdateMarqueeSelection(currentScreenPosition, finalize: false);
-            return true;
+            if (_host.InteractionSession.SelectionGestureKind is NodeCanvasSelectionGestureKind.Lasso)
+            {
+                if (_host.InteractionSession.TryBeginLassoSelection(currentScreenPosition, selectionDragThreshold))
+                {
+                    _host.InteractionSession.RecordLassoSelectionPoint(currentScreenPosition);
+                    _host.ClearResizeFeedback();
+                    return true;
+                }
+            }
+            else if (_host.InteractionSession.TryBeginMarqueeSelection(currentScreenPosition, selectionDragThreshold))
+            {
+                _host.ClearResizeFeedback();
+                _host.UpdateMarqueeSelection(currentScreenPosition, finalize: false);
+                return true;
+            }
         }
 
         var handled = false;
@@ -300,7 +313,12 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
         if (_host.InteractionSession.SelectionStartScreenPosition is not null)
         {
-            if (_host.InteractionSession.IsMarqueeSelecting)
+            if (_host.InteractionSession.IsLassoSelecting)
+            {
+                _host.InteractionSession.RecordLassoSelectionPoint(currentScreenPosition);
+                _host.UpdateLassoSelection(_host.InteractionSession.LassoScreenPoints, finalize: true);
+            }
+            else if (_host.InteractionSession.IsMarqueeSelecting)
             {
                 _host.UpdateMarqueeSelection(currentScreenPosition, finalize: true);
             }

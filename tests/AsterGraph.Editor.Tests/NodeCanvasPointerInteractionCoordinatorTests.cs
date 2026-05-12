@@ -104,6 +104,30 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
     }
 
     [Fact]
+    public void HandleMoved_WhenCanvasSelectionUsesLassoGesture_RecordsLassoPointAndSkipsMarqueeUpdate()
+    {
+        var editor = CreateEditor();
+        var host = new TestPointerInteractionHost(editor);
+        host.InteractionSession.BeginCanvasSelection(
+            new Point(10, 10),
+            KeyModifiers.None,
+            [],
+            NodeCanvasSelectionGestureKind.Lasso);
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var handled = coordinator.HandleMoved(new Point(24, 26), selectionDragThreshold: 6);
+
+        Assert.True(handled);
+        Assert.Equal(0, host.UpdateMarqueeSelectionCalls);
+        Assert.Equal(0, host.UpdateLassoSelectionCalls);
+        Assert.Equal(
+            [new Point(10, 10), new Point(24, 26)],
+            host.InteractionSession.LassoScreenPoints);
+        Assert.True(host.InteractionSession.IsLassoSelecting);
+        Assert.False(host.InteractionSession.IsMarqueeSelecting);
+    }
+
+    [Fact]
     public void HandleMoved_WhenPanning_PansViewportAndUpdatesLastPointer()
     {
         var editor = CreateEditor();
@@ -408,6 +432,34 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
     }
 
     [Fact]
+    public void HandleReleased_AfterLassoSelection_FinalizesLassoSelectionAndResetsSession()
+    {
+        var editor = CreateEditor();
+        var host = new TestPointerInteractionHost(editor);
+        host.InteractionSession.BeginCanvasSelection(
+            new Point(8, 12),
+            KeyModifiers.None,
+            [],
+            NodeCanvasSelectionGestureKind.Lasso);
+        host.InteractionSession.TryBeginLassoSelection(new Point(20, 24), threshold: 6);
+        host.InteractionSession.RecordLassoSelectionPoint(new Point(32, 28));
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        coordinator.HandleReleased(new Point(48, 60));
+
+        Assert.Equal(0, host.UpdateMarqueeSelectionCalls);
+        Assert.Equal(1, host.UpdateLassoSelectionCalls);
+        Assert.True(host.LastLassoFinalize);
+        Assert.Equal(
+            [new Point(8, 12), new Point(20, 24), new Point(32, 28), new Point(48, 60)],
+            host.LastLassoPoints);
+        Assert.Null(host.InteractionSession.SelectionStartScreenPosition);
+        Assert.False(host.InteractionSession.IsLassoSelecting);
+        Assert.Equal(1, host.HideSelectionAdornerCalls);
+        Assert.Equal(1, host.HideGuideAdornerCalls);
+    }
+
+    [Fact]
     public void HandleReleased_AfterNodeDrag_CommitsHistoryInteractionBoundary()
     {
         var editor = CreateEditor();
@@ -626,6 +678,12 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
 
         public bool LastMarqueeFinalize { get; private set; }
 
+        public int UpdateLassoSelectionCalls { get; private set; }
+
+        public IReadOnlyList<Point> LastLassoPoints { get; private set; } = [];
+
+        public bool LastLassoFinalize { get; private set; }
+
         public int ApplyDragAssistCalls { get; private set; }
 
         public GraphPoint DragAssistResult { get; set; } = new(0, 0);
@@ -660,6 +718,13 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
             UpdateMarqueeSelectionCalls++;
             LastMarqueePoint = currentScreenPosition;
             LastMarqueeFinalize = finalize;
+        }
+
+        public void UpdateLassoSelection(IReadOnlyList<Point> screenPoints, bool finalize)
+        {
+            UpdateLassoSelectionCalls++;
+            LastLassoPoints = screenPoints.ToList();
+            LastLassoFinalize = finalize;
         }
 
         public GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)

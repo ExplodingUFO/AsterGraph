@@ -34,6 +34,12 @@ internal readonly record struct NodeCanvasGroupResizePreview(
     GraphPoint Position,
     GraphSize Size);
 
+internal enum NodeCanvasSelectionGestureKind
+{
+    Marquee,
+    Lasso,
+}
+
 internal sealed class NodeCanvasInteractionSession
 {
     public NodeViewModel? DragNode { get; private set; }
@@ -52,9 +58,15 @@ internal sealed class NodeCanvasInteractionSession
 
     public bool IsMarqueeSelecting { get; private set; }
 
+    public bool IsLassoSelecting { get; private set; }
+
+    public NodeCanvasSelectionGestureKind SelectionGestureKind { get; private set; }
+
     public KeyModifiers SelectionModifiers { get; private set; }
 
     public IReadOnlyList<NodeViewModel> SelectionBaselineNodes { get; private set; } = [];
+
+    public IReadOnlyList<Point> LassoScreenPoints => _lassoScreenPoints;
 
     public Point? DragStartScreenPosition { get; private set; }
 
@@ -78,7 +90,13 @@ internal sealed class NodeCanvasInteractionSession
 
     public NodeCanvasGroupResizePreview? GroupResizePreview { get; private set; }
 
-    public void BeginCanvasSelection(Point startScreenPosition, KeyModifiers modifiers, IReadOnlyList<NodeViewModel> baselineNodes)
+    private readonly List<Point> _lassoScreenPoints = [];
+
+    public void BeginCanvasSelection(
+        Point startScreenPosition,
+        KeyModifiers modifiers,
+        IReadOnlyList<NodeViewModel> baselineNodes,
+        NodeCanvasSelectionGestureKind gestureKind = NodeCanvasSelectionGestureKind.Marquee)
     {
         DragNode = null;
         DragGroupId = null;
@@ -97,8 +115,11 @@ internal sealed class NodeCanvasInteractionSession
         GroupResizePreview = null;
         SelectionStartScreenPosition = startScreenPosition;
         IsMarqueeSelecting = false;
+        IsLassoSelecting = false;
+        SelectionGestureKind = gestureKind;
         SelectionModifiers = modifiers;
         SelectionBaselineNodes = baselineNodes.ToList();
+        _lassoScreenPoints.Clear();
         LastPointerPosition = startScreenPosition;
         PointerScreenPosition = startScreenPosition;
     }
@@ -118,6 +139,8 @@ internal sealed class NodeCanvasInteractionSession
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
+        IsLassoSelecting = false;
+        _lassoScreenPoints.Clear();
         DragStartScreenPosition = startScreenPosition;
         LastPointerPosition = startScreenPosition;
         PointerScreenPosition = startScreenPosition;
@@ -149,6 +172,8 @@ internal sealed class NodeCanvasInteractionSession
         GroupResizePreview = null;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
+        IsLassoSelecting = false;
+        _lassoScreenPoints.Clear();
         LastPointerPosition = startScreenPosition;
         PointerScreenPosition = startScreenPosition;
     }
@@ -173,6 +198,8 @@ internal sealed class NodeCanvasInteractionSession
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
+        IsLassoSelecting = false;
+        _lassoScreenPoints.Clear();
         DragStartScreenPosition = startScreenPosition;
         LastPointerPosition = startScreenPosition;
         PointerScreenPosition = startScreenPosition;
@@ -198,6 +225,8 @@ internal sealed class NodeCanvasInteractionSession
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
+        IsLassoSelecting = false;
+        _lassoScreenPoints.Clear();
         DragStartScreenPosition = startScreenPosition;
         LastPointerPosition = startScreenPosition;
         PointerScreenPosition = startScreenPosition;
@@ -233,6 +262,8 @@ internal sealed class NodeCanvasInteractionSession
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
+        IsLassoSelecting = false;
+        _lassoScreenPoints.Clear();
         DragStartScreenPosition = startScreenPosition;
         LastPointerPosition = startScreenPosition;
         PointerScreenPosition = startScreenPosition;
@@ -333,11 +364,55 @@ internal sealed class NodeCanvasInteractionSession
         return IsMarqueeSelecting;
     }
 
+    public bool TryBeginLassoSelection(Point currentScreenPosition, double threshold)
+    {
+        if (SelectionGestureKind is not NodeCanvasSelectionGestureKind.Lasso
+            || SelectionStartScreenPosition is null
+            || IsPanning
+            || DragNode is not null
+            || DragGroupId is not null)
+        {
+            return false;
+        }
+
+        if (IsLassoSelecting)
+        {
+            return true;
+        }
+
+        var delta = currentScreenPosition - SelectionStartScreenPosition.Value;
+        if (Math.Abs(delta.X) >= threshold || Math.Abs(delta.Y) >= threshold)
+        {
+            IsLassoSelecting = true;
+            _lassoScreenPoints.Clear();
+            _lassoScreenPoints.Add(SelectionStartScreenPosition.Value);
+            _lassoScreenPoints.Add(currentScreenPosition);
+        }
+
+        return IsLassoSelecting;
+    }
+
+    public void RecordLassoSelectionPoint(Point currentScreenPosition)
+    {
+        if (!IsLassoSelecting)
+        {
+            return;
+        }
+
+        if (_lassoScreenPoints.Count == 0 || _lassoScreenPoints[^1] != currentScreenPosition)
+        {
+            _lassoScreenPoints.Add(currentScreenPosition);
+        }
+    }
+
     public void ResetAfterPointerRelease()
     {
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
+        IsLassoSelecting = false;
+        SelectionGestureKind = NodeCanvasSelectionGestureKind.Marquee;
         SelectionBaselineNodes = [];
+        _lassoScreenPoints.Clear();
         DragNode = null;
         DragGroupId = null;
         DragGroupTitle = null;

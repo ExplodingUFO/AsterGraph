@@ -71,6 +71,35 @@ public sealed class NodeCanvasInteractionSessionTests
     }
 
     [Fact]
+    public void TryBeginLassoSelection_WithLassoGestureKind_RecordsStartAndMoveAfterThreshold()
+    {
+        var session = new NodeCanvasInteractionSession();
+        session.BeginCanvasSelection(
+            new Point(10, 10),
+            KeyModifiers.None,
+            [],
+            NodeCanvasSelectionGestureKind.Lasso);
+
+        Assert.Equal(NodeCanvasSelectionGestureKind.Lasso, session.SelectionGestureKind);
+        Assert.False(session.TryBeginLassoSelection(new Point(12, 13), 6));
+        Assert.False(session.IsLassoSelecting);
+        Assert.Empty(session.LassoScreenPoints);
+
+        Assert.True(session.TryBeginLassoSelection(new Point(20, 10), 6));
+        Assert.True(session.IsLassoSelecting);
+        Assert.False(session.IsMarqueeSelecting);
+        Assert.Equal(
+            [new Point(10, 10), new Point(20, 10)],
+            session.LassoScreenPoints);
+
+        session.RecordLassoSelectionPoint(new Point(24, 18));
+
+        Assert.Equal(
+            [new Point(10, 10), new Point(20, 10), new Point(24, 18)],
+            session.LassoScreenPoints);
+    }
+
+    [Fact]
     public void BeginPanning_ClearsOtherInteractionModes()
     {
         var session = new NodeCanvasInteractionSession();
