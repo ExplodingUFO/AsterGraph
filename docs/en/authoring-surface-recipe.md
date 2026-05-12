@@ -80,7 +80,8 @@ Use one hosted handoff from definitions to proof instead of stitching together s
 3. Project node-side state from `GetNodeParameterSnapshots(nodeId)` so `NodeParameterEditorHost` and `INodeParameterEditorRegistry` reuse the same metadata and validation contract on the custom node surface.
 4. Write values back through `TrySetSelectedNodeParameterValue(...)` or `TrySetNodeParameterValue(...)`; keep validation on the shared session command path instead of adding a second editor model.
 5. Project host commands from `GetCommandDescriptors()` so toolbars, menus, shortcuts, and palette actions stay on the same shared command route.
-6. Close the handoff with `src/AsterGraph.Demo -- --proof` and expect `PORT_HANDLE_ID_OK:True`, `PORT_GROUP_AUTHORING_OK:True`, `PORT_CONNECTION_HINT_OK:True`, `PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`, `CUSTOM_EXTENSION_SURFACE_OK:True`, and `AUTHORING_SURFACE_OK:True`.
+6. For hosted pointer-mode controls, render `AsterGraphAuthoringToolActionFactory.CreatePointerSelectionModeActions(canvas)` into the same authoring toolbar row. These actions set `NodeCanvas.SelectionMode` to `NodeCanvasSelectionMode.Marquee` or `NodeCanvasSelectionMode.Lasso`; they do not add a session command, a parallel selection model, or whiteboard drawing state.
+7. Close the handoff with `src/AsterGraph.Demo -- --proof` and expect `PORT_HANDLE_ID_OK:True`, `PORT_GROUP_AUTHORING_OK:True`, `PORT_CONNECTION_HINT_OK:True`, `PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`, `CUSTOM_EXTENSION_SURFACE_OK:True`, and `AUTHORING_SURFACE_OK:True`.
 
 ## Copy path
 
@@ -89,7 +90,8 @@ Use one hosted handoff from definitions to proof instead of stitching together s
 3. Replace node visuals through `IGraphNodeVisualPresenter`.
 4. Replace editor bodies through `INodeParameterEditorRegistry`.
 5. Render any host-owned edge overlay from `GetConnectionGeometrySnapshots()`.
-6. Keep runtime decorations on `IGraphRuntimeOverlayProvider` and inspector snapshots; do not move graph execution into the editor.
+6. Add lasso activation through `CreatePointerSelectionModeActions(...)` when the host needs a toolbar affordance for `NodeCanvasSelectionMode.Lasso`.
+7. Keep runtime decorations on `IGraphRuntimeOverlayProvider` and inspector snapshots; do not move graph execution into the editor.
 
 ## Related docs
 

@@ -1148,6 +1148,42 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void AuthoringToolsChrome_ProjectsPointerModeActionsThroughNodeCanvasSelectionMode()
+    {
+        var editor = CreateSelectionEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var canvas = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas");
+        var lassoButton = FindRequiredDescendant<Button>(view, "PART_PointerModeLassoButton");
+        var marqueeButton = FindRequiredDescendant<Button>(view, "PART_PointerModeMarqueeButton");
+
+        try
+        {
+            Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+            Assert.Equal("Lasso Selection", Assert.IsType<string>(lassoButton.Content));
+            Assert.Equal("Lasso Selection", AutomationProperties.GetName(lassoButton));
+            Assert.True(lassoButton.IsEnabled);
+
+            lassoButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+            Assert.Equal(NodeCanvasSelectionMode.Lasso, canvas.SelectionMode);
+
+            marqueeButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+            Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void AuthoringToolsChrome_SelectionLayoutActionRestoresCanvasFocusAndKeyboardRouting()
     {
         var editor = CreateSelectionEditor();

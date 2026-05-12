@@ -1,9 +1,31 @@
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Avalonia.Controls;
 
 namespace AsterGraph.Avalonia.Hosting;
 
 public static class AsterGraphAuthoringToolActionFactory
 {
+    public static IReadOnlyList<AsterGraphHostedActionDescriptor> CreatePointerSelectionModeActions(NodeCanvas canvas)
+    {
+        ArgumentNullException.ThrowIfNull(canvas);
+
+        return
+        [
+            CreatePointerSelectionModeAction(
+                canvas,
+                "pointer-mode.marquee-selection",
+                "Marquee Selection",
+                "Select by dragging a rectangular marquee on empty canvas space.",
+                NodeCanvasSelectionMode.Marquee),
+            CreatePointerSelectionModeAction(
+                canvas,
+                "pointer-mode.lasso-selection",
+                "Lasso Selection",
+                "Select by drawing a freeform lasso on empty canvas space.",
+                NodeCanvasSelectionMode.Lasso),
+        ];
+    }
+
     public static IReadOnlyList<AsterGraphHostedActionDescriptor> CreateSelectionActions(IGraphEditorSession session)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -115,4 +137,26 @@ public static class AsterGraphAuthoringToolActionFactory
 
     private static bool IsDuplicateGlobalAction(string actionId)
         => actionId is "selection-wrap-composite" or "node-enter-composite-scope";
+
+    private static AsterGraphHostedActionDescriptor CreatePointerSelectionModeAction(
+        NodeCanvas canvas,
+        string id,
+        string title,
+        string recoveryHint,
+        NodeCanvasSelectionMode mode)
+        => AsterGraphHostedActionFactory.CreateHostAction(
+            new GraphEditorCommandDescriptorSnapshot(
+                id,
+                title,
+                "pointer-mode",
+                "selection",
+                null,
+                GraphEditorCommandSourceKind.Host,
+                isEnabled: true,
+                recoveryHint: recoveryHint),
+            () =>
+            {
+                canvas.SelectionMode = mode;
+                return true;
+            });
 }
