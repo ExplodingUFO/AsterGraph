@@ -68,6 +68,57 @@ public sealed class DeclarativeApiErgonomicsDocsTests
         }
     }
 
+    [Fact]
+    public void Phase520Docs_DefineDeclarativeHostCompositionGateWithoutCurrentApiExpansion()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 520", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #162", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-vdc", contents, StringComparison.Ordinal);
+            Assert.Contains("DECLARATIVE_HOST_COMPOSITION_GATE", contents, StringComparison.Ordinal);
+            Assert.Contains("future composition profile", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("AsterGraphHostBuilder.Create(...).BuildAvaloniaView()", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphEditorFactory.CreateSession(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphEditorFactory.Create(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphAvaloniaViewFactory.Create(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("not current public API", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no source generator", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no XAML extension", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no React hook parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no <ReactFlow>-equivalent declarative DSL", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        var hostDocs = new[]
+        {
+            ReadRepoFile("docs/en/quick-start.md"),
+            ReadRepoFile("docs/zh-CN/quick-start.md"),
+            ReadRepoFile("docs/en/host-integration.md"),
+            ReadRepoFile("docs/zh-CN/host-integration.md"),
+        };
+
+        foreach (var contents in hostDocs)
+        {
+            Assert.Contains("DECLARATIVE_HOST_COMPOSITION_GATE", contents, StringComparison.Ordinal);
+            Assert.Contains("future composition profile", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("not current public API", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("AsterGraphHostBuilder.Create(...).BuildAvaloniaView()", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphEditorFactory.CreateSession(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphEditorFactory.Create(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphAvaloniaViewFactory.Create(...)", contents, StringComparison.Ordinal);
+            Assert.False(
+                HasLineWithAll(contents, "composition profile", "is available"),
+                "Docs must not claim the future composition profile exists today.");
+            Assert.False(
+                HasLineWithAll(contents, "composition profile", "available today"),
+                "Docs must keep the future composition profile outside the current public API.");
+        }
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 

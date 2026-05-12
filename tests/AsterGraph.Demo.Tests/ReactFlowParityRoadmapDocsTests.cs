@@ -561,7 +561,9 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("declarative API docs/tests", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("visual policy docs/tests", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("retained migration docs/tests", table, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("blocked until Phase 519 closes", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Current docs/API-policy slice", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Ready after Phase 519", table, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("blocked until Phase 519 closes", table, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #150 | `avalonia-node-map-ien` | Phase 514: execute renderer virtualization proof harness", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #151 | `avalonia-node-map-t44` | Phase 515: decide strict pixel baseline policy from drift evidence", table, StringComparison.Ordinal);

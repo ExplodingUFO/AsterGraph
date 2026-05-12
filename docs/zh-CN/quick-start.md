@@ -220,6 +220,8 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 
 `DECLARATIVE_API_ERGONOMICS_AUDIT`：当前可复制 API surface 有意限定在 `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`、`AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`，以及 `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()`。Definition builders 和 `templates/astergraph-avalonia` starter 能减少 code-first 样板，但它们仍只是同一套 model/session records 上的 thin wrapper。当前 public beta 没有 no React hook parity，也没有 no <ReactFlow>-equivalent declarative DSL；these routes are not equivalent to React Flow hooks/components。
 
+`DECLARATIVE_HOST_COMPOSITION_GATE`：下一条有界候选是 future composition profile，它会围绕 `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` 打包命名 hosted recipe 与默认项，但底层仍使用 `AsterGraphEditorFactory.CreateSession(...)`、`AsterGraphEditorFactory.Create(...)` 和 `AsterGraphAvaloniaViewFactory.Create(...)`。这个 future composition profile 是 not current public API。它不是 source generator、XAML extension、React hook parity surface 或 <ReactFlow>-equivalent declarative DSL。
+
 ## 6. 插件信任边界
 
 插件加载当前是进程内执行。宿主可以发现候选、做 allow/block 信任策略、检查加载结果，但 AsterGraph 目前不提供沙箱或不受信任代码隔离。
