@@ -3,14 +3,21 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.Json;
+using AsterGraph.Abstractions.Styling;
+using AsterGraph.Avalonia.Controls;
+using AsterGraph.Avalonia.Menus;
+using AsterGraph.Avalonia.Presentation;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AsterGraph.Demo.Cookbook;
 using AsterGraph.Demo.ViewModels;
 using AsterGraph.Demo.Views;
+using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using SkiaSharp;
 using Xunit;
@@ -291,7 +298,7 @@ public sealed class DemoCookbookScreenshotGateTests
             ],
             shellState.RequiredShellParts);
         Assert.Equal("shell-runtime-diagnostics-closed.png", shellState.OutputFileName);
-        Assert.Equal(7, shellStates.Count);
+        Assert.Equal(8, shellStates.Count);
     }
 
     [Fact]
@@ -344,6 +351,30 @@ public sealed class DemoCookbookScreenshotGateTests
     }
 
     [Fact]
+    public void CookbookScreenshotGate_IncludesPhase510CanvasContextMenuShellState()
+    {
+        var shellStates = LoadShellStates(GetRepositoryRoot());
+        var shellState = Assert.Single(shellStates, state =>
+            string.Equals(state.Id, "shell-cookbook-default-canvas-context-menu", StringComparison.Ordinal));
+
+        Assert.Equal("cookbook-default-starter-host-ai-pipeline", shellState.RouteId);
+        Assert.Equal("cookbook", shellState.HostGroup);
+        Assert.Equal("en", shellState.Language);
+        Assert.Equal("canonical-dark", shellState.Theme);
+        Assert.True(shellState.ExpectedPaneOpen);
+        Assert.Equal("PART_NodeCanvas", shellState.ContextMenuTargetPartName);
+        Assert.Equal(
+            [
+                "Add Node",
+                "Fit View",
+                "Reset View",
+            ],
+            shellState.RequiredContextMenuHeaders);
+        Assert.Contains("PART_NodeCanvas", shellState.RequiredShellParts, StringComparer.Ordinal);
+        Assert.Equal("shell-cookbook-default-canvas-context-menu.png", shellState.OutputFileName);
+    }
+
+    [Fact]
     public void CookbookScreenshotGate_DocumentationNamesCommandArtifactsAndCiPosture()
     {
         var english = ReadRepoFile("docs/en/demo-cookbook.md");
@@ -369,6 +400,9 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains("shell-cookbook-default-host-command-tooltip-popup", contents, StringComparison.Ordinal);
             Assert.Contains("full-window-shell-popup-state", contents, StringComparison.Ordinal);
             Assert.Contains("PART_HostCommand_history.undo", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-default-canvas-context-menu", contents, StringComparison.Ordinal);
+            Assert.Contains("full-window-shell-context-menu-state", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_NodeCanvas", contents, StringComparison.Ordinal);
             Assert.Contains("language/theme", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("builtin-standalone-controls-route", contents, StringComparison.Ordinal);
             Assert.Contains("builtin-standalone-panel-route", contents, StringComparison.Ordinal);
@@ -439,6 +473,13 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.StartsWith("PART_", shellState.PopupTargetPartName, StringComparison.Ordinal);
             Assert.NotEmpty(shellState.RequiredPopupText);
             Assert.All(shellState.RequiredPopupText, text => Assert.False(string.IsNullOrWhiteSpace(text)));
+        }
+
+        if (!string.IsNullOrWhiteSpace(shellState.ContextMenuTargetPartName))
+        {
+            Assert.StartsWith("PART_", shellState.ContextMenuTargetPartName, StringComparison.Ordinal);
+            Assert.NotEmpty(shellState.RequiredContextMenuHeaders);
+            Assert.All(shellState.RequiredContextMenuHeaders, header => Assert.False(string.IsNullOrWhiteSpace(header)));
         }
     }
 
@@ -524,6 +565,7 @@ public sealed class DemoCookbookScreenshotGateTests
 
             var openedFlyout = OpenRequestedFlyout(window, shellState);
             var openedPopup = OpenRequestedPopup(window, shellState);
+            var openedContextMenu = OpenRequestedContextMenu(window, shellState);
 
             using var frame = window.CaptureRenderedFrame();
             Assert.NotNull(frame);
@@ -550,7 +592,7 @@ public sealed class DemoCookbookScreenshotGateTests
                 imageSize.Width,
                 imageSize.Height,
                 "headless-avalonia-window",
-                ResolveShellCaptureScope(openedFlyout, openedPopup),
+                ResolveShellCaptureScope(openedFlyout, openedPopup, openedContextMenu),
                 ToRepoRelativePath(repoRoot, imagePath),
                 ShellStateManifestRelativePath,
                 viewModel.SelectedHostMenuGroupTitle,
@@ -563,6 +605,9 @@ public sealed class DemoCookbookScreenshotGateTests
                 openedPopup?.Name,
                 openedPopup is not null && ToolTip.GetIsOpen(openedPopup),
                 shellState.RequiredPopupText,
+                openedContextMenu?.TargetPartName,
+                openedContextMenu?.IsOpen ?? false,
+                openedContextMenu?.CoveredHeaders ?? [],
                 pixelInspection.NonTransparentPixelCount,
                 pixelInspection.DistinctColorCount,
                 Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant());
@@ -577,7 +622,7 @@ public sealed class DemoCookbookScreenshotGateTests
             Assert.Contains(route.RecipeId, metadataJson, StringComparison.Ordinal);
             Assert.Contains(shellState.Language, metadataJson, StringComparison.Ordinal);
             Assert.Contains(shellState.Theme, metadataJson, StringComparison.Ordinal);
-            Assert.Contains(ResolveShellCaptureScope(openedFlyout, openedPopup), metadataJson, StringComparison.Ordinal);
+            Assert.Contains(ResolveShellCaptureScope(openedFlyout, openedPopup, openedContextMenu), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ToRepoRelativePath(repoRoot, imagePath), metadataJson, StringComparison.Ordinal);
             Assert.Contains(ShellStateManifestRelativePath, metadataJson, StringComparison.Ordinal);
             foreach (var partName in shellState.RequiredShellParts)
@@ -600,6 +645,14 @@ public sealed class DemoCookbookScreenshotGateTests
                 Assert.Contains("\"IsPopupOpen\": true", metadataJson, StringComparison.Ordinal);
                 Assert.All(shellState.RequiredPopupText, text => Assert.Contains(text, metadataJson, StringComparison.Ordinal));
             }
+
+            if (!string.IsNullOrWhiteSpace(shellState.ContextMenuTargetPartName))
+            {
+                Assert.Contains("full-window-shell-context-menu-state", metadataJson, StringComparison.Ordinal);
+                Assert.Contains(shellState.ContextMenuTargetPartName, metadataJson, StringComparison.Ordinal);
+                Assert.Contains("\"IsContextMenuOpen\": true", metadataJson, StringComparison.Ordinal);
+                Assert.All(shellState.RequiredContextMenuHeaders, header => Assert.Contains(header, metadataJson, StringComparison.Ordinal));
+            }
         }
         finally
         {
@@ -607,11 +660,19 @@ public sealed class DemoCookbookScreenshotGateTests
         }
     }
 
-    private static string ResolveShellCaptureScope(MenuItem? openedFlyout, Control? openedPopup)
+    private static string ResolveShellCaptureScope(
+        MenuItem? openedFlyout,
+        Control? openedPopup,
+        OpenContextMenuResult? openedContextMenu)
     {
         if (openedPopup is not null)
         {
             return "full-window-shell-popup-state";
+        }
+
+        if (openedContextMenu is not null)
+        {
+            return "full-window-shell-context-menu-state";
         }
 
         return openedFlyout is null
@@ -668,6 +729,38 @@ public sealed class DemoCookbookScreenshotGateTests
 
         Assert.True(ToolTip.GetIsOpen(target), $"{shellState.Id} expected open tooltip popup: {shellState.PopupTargetPartName}");
         return target;
+    }
+
+    private static OpenContextMenuResult? OpenRequestedContextMenu(MainWindow window, CookbookShellVisualGateState shellState)
+    {
+        if (string.IsNullOrWhiteSpace(shellState.ContextMenuTargetPartName))
+        {
+            return null;
+        }
+
+        var target = Assert.IsType<NodeCanvas>(FindShellControl(window, shellState.ContextMenuTargetPartName));
+        var presenter = new RecordingContextMenuPresenter();
+        target.ContextMenuPresenter = presenter;
+
+        var args = new ContextRequestedEventArgs
+        {
+            RoutedEvent = Control.ContextRequestedEvent,
+        };
+        target.RaiseEvent(args);
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Loaded);
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.True(args.Handled, $"{shellState.Id} expected handled context menu request: {shellState.ContextMenuTargetPartName}");
+        Assert.True(presenter.IsOpen, $"{shellState.Id} expected open context menu: {shellState.ContextMenuTargetPartName}");
+        foreach (var requiredHeader in shellState.RequiredContextMenuHeaders)
+        {
+            Assert.Contains(requiredHeader, presenter.CoveredHeaders, StringComparer.Ordinal);
+        }
+
+        return new OpenContextMenuResult(
+            shellState.ContextMenuTargetPartName,
+            presenter.IsOpen,
+            presenter.CoveredHeaders);
     }
 
     private static Control? FindShellControl(MainWindow window, string partName)
@@ -782,6 +875,8 @@ public sealed class DemoCookbookScreenshotGateTests
         string[] RequiredFlyoutHeaders,
         string? PopupTargetPartName,
         string[] RequiredPopupText,
+        string? ContextMenuTargetPartName,
+        string[] RequiredContextMenuHeaders,
         string[] RequiredShellParts,
         string OutputFileName);
 
@@ -832,6 +927,9 @@ public sealed class DemoCookbookScreenshotGateTests
         string? PopupTargetPartName,
         bool IsPopupOpen,
         string[] CoveredPopupText,
+        string? ContextMenuTargetPartName,
+        bool IsContextMenuOpen,
+        string[] CoveredContextMenuHeaders,
         int NonTransparentPixelCount,
         int DistinctColorCount,
         string PngSha256);
@@ -839,4 +937,42 @@ public sealed class DemoCookbookScreenshotGateTests
     private sealed record PngSize(int Width, int Height);
 
     private sealed record PngPixelInspection(int NonTransparentPixelCount, int DistinctColorCount);
+
+    private sealed record OpenContextMenuResult(
+        string TargetPartName,
+        bool IsOpen,
+        string[] CoveredHeaders);
+
+    private sealed class RecordingContextMenuPresenter : IGraphContextMenuPresenter
+    {
+        private readonly GraphContextMenuPresenter _inner = new();
+
+        public bool IsOpen { get; private set; }
+
+        public string[] CoveredHeaders { get; private set; } = [];
+
+        public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
+        {
+            CoveredHeaders = descriptors
+                .Where(descriptor => !descriptor.IsSeparator)
+                .Select(descriptor => descriptor.Header)
+                .ToArray();
+            _inner.Open(target, descriptors, style);
+            IsOpen = true;
+        }
+
+        public void Open(
+            Control target,
+            IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> descriptors,
+            IGraphEditorCommands commands,
+            ContextMenuStyleOptions style)
+        {
+            CoveredHeaders = descriptors
+                .Where(descriptor => !descriptor.IsSeparator)
+                .Select(descriptor => descriptor.Header)
+                .ToArray();
+            _inner.Open(target, descriptors, commands, style);
+            IsOpen = true;
+        }
+    }
 }
