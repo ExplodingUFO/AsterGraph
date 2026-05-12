@@ -1032,6 +1032,42 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase538EraserBehaviorApiFeasibilityGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 538", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #199", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-a3w", contents, StringComparison.Ordinal);
+            Assert.Contains("eraser behavior/API feasibility gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("selection.delete", contents, StringComparison.Ordinal);
+            Assert.Contains("Delete Selection", contents, StringComparison.Ordinal);
+            Assert.Contains("selection-delete", contents, StringComparison.Ordinal);
+            Assert.Contains("graph-selection deletion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("not an eraser cursor", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no eraser cursor", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no collision trail", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no eraser-specific hit-testing", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no drawing primitives", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no persistence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer rewrite", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no strict pixel baseline", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertPostPhase538Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase538Queue(ExtractIssueWaveTable(chineseParity));
+        AssertPhase538WorktreePlan(ExtractRecommendedWorktreePlan(englishParity));
+        AssertPhase538WorktreePlan(ExtractRecommendedWorktreePlan(chineseParity));
+        AssertWhiteboardLassoEraserFeasibilityAudit(ExtractWhiteboardLassoEraserFeasibilityAudit(englishParity));
+        AssertWhiteboardLassoEraserFeasibilityAudit(ExtractWhiteboardLassoEraserFeasibilityAudit(chineseParity));
+    }
+
+    [Fact]
     public void AuthoringSurfaceRecipeDocs_SurfacePhase537PointerModeToolbarRoute()
     {
         var englishRecipe = ReadRepoFile("docs/en/authoring-surface-recipe.md");
@@ -1145,7 +1181,9 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("TBD", table, StringComparison.Ordinal);
         Assert.Contains("Cookbook screenshot manifest", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("hosted authoring tools", table, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("editor selection/delete commands", table, StringComparison.OrdinalIgnoreCase);
+        Assert.True(
+            table.Contains("editor selection/delete commands", StringComparison.OrdinalIgnoreCase)
+            || table.Contains("graph-selection deletion evidence", StringComparison.OrdinalIgnoreCase));
         Assert.Contains("Core/Editor model contract", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("persistence/schema planning", table, StringComparison.OrdinalIgnoreCase);
         Assert.True(
@@ -1168,10 +1206,45 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("Phase 540: whiteboard persistence and render-layer readiness gate", table, StringComparison.Ordinal);
         Assert.Contains("TBD", table, StringComparison.Ordinal);
         Assert.Contains("hosted authoring tools", table, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("editor selection/delete commands", table, StringComparison.OrdinalIgnoreCase);
+        Assert.True(
+            table.Contains("editor selection/delete commands", StringComparison.OrdinalIgnoreCase)
+            || table.Contains("graph-selection deletion evidence", StringComparison.OrdinalIgnoreCase));
         Assert.Contains("Core/Editor model contract", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("persistence/schema planning", table, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("| TBD | TBD | Phase 537: lasso toolbar UX and public activation ergonomics boundary", table, StringComparison.Ordinal);
+    }
+
+    private static void AssertPostPhase538Queue(string table)
+    {
+        Assert.Contains("| #197 | `avalonia-node-map-w9h` | Phase 537: lasso toolbar UX and public activation ergonomics boundary", table, StringComparison.Ordinal);
+        Assert.Contains("| #199 | `avalonia-node-map-a3w` | Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 540: whiteboard persistence and render-layer readiness gate", table, StringComparison.Ordinal);
+        Assert.Contains("TBD", table, StringComparison.Ordinal);
+        Assert.Contains("graph-selection deletion evidence", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Core/Editor model contract", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("persistence/schema planning", table, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("| TBD | TBD | Phase 537: lasso toolbar UX and public activation ergonomics boundary", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("Current toolbar ergonomics slice", table, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void AssertPhase538WorktreePlan(string plan)
+    {
+        Assert.Contains("feature/phase-537-lasso-toolbar-ergonomics", plan, StringComparison.Ordinal);
+        Assert.Contains("avalonia-node-map-w9h", plan, StringComparison.Ordinal);
+        Assert.True(
+            plan.Contains("merged worktree", StringComparison.OrdinalIgnoreCase)
+            || plan.Contains("已合并", StringComparison.Ordinal),
+            "Expected Phase 537 worktree plan entry to be marked merged.");
+        Assert.Contains("feature/phase-538-eraser-feasibility", plan, StringComparison.Ordinal);
+        Assert.Contains("avalonia-node-map-a3w", plan, StringComparison.Ordinal);
+        Assert.True(
+            plan.Contains("current worktree", StringComparison.OrdinalIgnoreCase)
+            || plan.Contains("当前 worktree", StringComparison.Ordinal),
+            "Expected Phase 538 worktree plan entry to be marked current.");
+        Assert.Contains("graph-selection deletion evidence", plan, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("feature/phase-538-eraser-feasibility`: future candidate", plan, StringComparison.Ordinal);
     }
 
     private static void AssertBuiltInComponentMatrix(string table)
@@ -1304,7 +1377,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("| Rectangle marquee selection | Present / guarded |", table, StringComparison.Ordinal);
         Assert.Contains("| Multi-select and command projection | Present / guarded |", table, StringComparison.Ordinal);
         Assert.Contains("| Lasso/freehand selection | Public Avalonia lasso selection mode with hosted toolbar activation and transient visual feedback / whiteboard gap retained |", table, StringComparison.Ordinal);
-        Assert.Contains("| Eraser tool | Gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("| Eraser tool | Feasibility gate recorded / gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Rectangle/freehand drawing | Gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Whiteboard persistence/render layer | Gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("https://reactflow.dev/learn/advanced-use/whiteboard", table, StringComparison.Ordinal);
@@ -1344,7 +1417,14 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("selection.select-none", table, StringComparison.Ordinal);
         Assert.Contains("selection.invert", table, StringComparison.Ordinal);
         Assert.Contains("selection.delete", table, StringComparison.Ordinal);
+        Assert.Contains("Delete Selection", table, StringComparison.Ordinal);
+        Assert.Contains("selection-delete", table, StringComparison.Ordinal);
         Assert.Contains("selection.transform.move", table, StringComparison.Ordinal);
+        Assert.Contains("graph-selection deletion", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not an eraser cursor", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("no eraser cursor", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("no collision trail", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("no eraser-specific hit-testing", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("public pointer-mode activation route", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("transient visual feedback", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("hosted toolbar", table, StringComparison.OrdinalIgnoreCase);
@@ -1462,6 +1542,26 @@ public sealed class ReactFlowParityRoadmapDocsTests
 
         Assert.True(nextHeading > tableStart, "Expected worktree plan heading after Next Issue Wave table.");
         return contents[tableStart..nextHeading];
+    }
+
+    private static string ExtractRecommendedWorktreePlan(string contents)
+    {
+        var headingStart = contents.IndexOf("\n## Recommended Parallel Worktree Plan", StringComparison.Ordinal);
+        if (headingStart < 0)
+        {
+            headingStart = contents.IndexOf("\n## 推荐并行 Worktree 计划", StringComparison.Ordinal);
+        }
+
+        Assert.True(headingStart >= 0, "Expected recommended worktree plan heading.");
+
+        var nextHeading = contents.IndexOf("\n## UI Verification Policy", headingStart, StringComparison.Ordinal);
+        if (nextHeading < 0)
+        {
+            nextHeading = contents.IndexOf("\n## UI 验证策略", headingStart, StringComparison.Ordinal);
+        }
+
+        Assert.True(nextHeading > headingStart, "Expected UI verification heading after recommended worktree plan.");
+        return contents[headingStart..nextHeading];
     }
 
     private static string ReadRepoFile(string relativePath)
