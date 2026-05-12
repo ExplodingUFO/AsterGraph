@@ -186,6 +186,10 @@ Phase 534 是 GitHub #191 / `avalonia-node-map-lzy`，承接 public lasso pointe
 
 Phase 535 是 GitHub #193 / `avalonia-node-map-8l6`，承接 Phase 534 关闭后的 post-Phase-534 parity queue refresh。本 slice 只修改 docs/tests：记录 Phase 534 已关闭，并把剩余 whiteboard 压力拆成 tracker-backed follow-up candidates，包括 lasso screenshot proof、lasso toolbar UX/public activation ergonomics、eraser behavior/API feasibility、rectangle/freehand drawing primitives，以及 whiteboard persistence/render-layer readiness。不授权 no runtime behavior changes、no public API changes、no UI redesign、no screenshot manifest expansion、no strict pixel baseline enforcement、no retained API removal 或 no whiteboard implementation。
 
+## Phase 536 更新
+
+Phase 536 是 GitHub #195 / `avalonia-node-map-uvd`，承接 lasso screenshot route and Cookbook proof boundary。本实现 slice 新增 scene route `cookbook-interaction-lasso-screenshot-proof` / `interaction-lasso-screenshot-proof-route`，复用现有 `selection-marquee-workbench` fixture，并新增 shell state `shell-cookbook-lasso-screenshot-proof`。该 shell state 目标为 `PART_NodeCanvas`，设置 `NodeCanvasSelectionMode.Lasso`，在 release 前捕获 active transient lasso path，并记录 `full-window-shell-lasso-state` metadata；证据绑定到 `LassoSelectionMode_RendersTransientFeedbackPathOnlyDuringDrag` 与 proof marker `LASSO_SCREENSHOT_PROOF_BOUNDARY_OK`。它不授权 no toolbar UX、no eraser behavior、no drawing primitives、no persistence、no renderer rewrite、no strict pixel baseline enforcement、no retained API removal 或 no full whiteboard parity。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -489,10 +493,12 @@ Phase 533 通过 GitHub #189 / `avalonia-node-map-cxe` 新增 public lasso point
 
 Phase 534 通过 GitHub #191 / `avalonia-node-map-lzy` 新增 lasso visual gesture feedback route。它在 active lasso drag 期间通过 `UpdateLassoFeedback(...)` 把 transient lasso path 渲染到现有 `OverlayLayer`，并在 release 或 capture loss 时通过 `ClearLassoFeedback()` 清理，同时继续把 toolbar UX、lasso screenshot route、eraser tool behavior、drawing primitives、persistence、renderer layer、React Flow-like examples 和 full React Flow whiteboard parity 保留为 gaps。
 
+Phase 536 通过 GitHub #195 / `avalonia-node-map-uvd` 新增 bounded lasso screenshot proof。它加入 `cookbook-interaction-lasso-screenshot-proof`、`interaction-lasso-screenshot-proof-route` 和 `shell-cookbook-lasso-screenshot-proof`，作为 existing transient lasso path 的 visual evidence，同时继续把 toolbar UX、eraser behavior、drawing primitives、persistence、renderer rewrite、strict pixel baseline enforcement、retained API removal 和 full whiteboard parity 保留为 gaps。
+
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
 | #193 | `avalonia-node-map-8l6` | Phase 535: refresh post-lasso visual feedback parity queue | P2 | parity roadmap docs 和 focused docs tests | Current docs/test queue refresh。它用 tracker-backed follow-ups 替换 stale Phase 534 current row，因此会阻塞下一批 implementation wave。 |
-| TBD | TBD | Phase 536: lasso screenshot route and Cookbook proof boundary | P2 | Cookbook screenshot manifest、Demo fixture route、scene/shell screenshot tests 和 parity docs | Phase 535 后 ready。与 lasso toolbar work 顺序推进，因为两者可能触碰同一 lasso route copy 与 visual proof fixture。 |
+| #195 | `avalonia-node-map-uvd` | Phase 536: lasso screenshot route and Cookbook proof boundary | P2 | Cookbook screenshot manifest、Demo fixture route、scene/shell screenshot tests 和 parity docs | Current visual proof slice。它会先稳定 screenshot route 与 Cookbook proof boundary，再进入 lasso toolbar work。 |
 | TBD | TBD | Phase 537: lasso toolbar UX and public activation ergonomics boundary | P2 | hosted authoring tools、`NodeCanvas.SelectionMode` activation surface、Demo/Cookbook route 和 editor/Avalonia tests | Phase 535 后 ready。如果 Phase 536 也需要相同 lasso route text 或 visual proof fixture，不要并行。 |
 | TBD | TBD | Phase 538: eraser behavior/API feasibility gate | P3 | editor selection/delete commands、Avalonia hit-testing route、parity docs 和 focused feasibility tests | Phase 535 后可与 drawing model planning 并行，只要不共享 pointer-mode state edits。 |
 | TBD | TBD | Phase 539: rectangle/freehand drawing primitive model gate | P3 | Core/Editor model contract docs/tests 和 whiteboard primitive API inventory | Phase 535 后可与 eraser feasibility 并行，只要保持 docs/model-only 且不触碰 Avalonia pointer coordinators。 |
@@ -533,7 +539,7 @@ Phase 534 通过 GitHub #191 / `avalonia-node-map-lzy` 新增 lasso visual gestu
 - `docs/phase-527-background-variant-gate`：负责 #177 / `avalonia-node-map-dim`；当前 docs/test worktree，用于 Background variant public surface gate。
 - `docs/phase-528-panel-overlay-boundary`：负责 #179 / `avalonia-node-map-9ow`；当前 docs/test worktree，用于 Panel versus viewport-attached overlay boundary。
 - `docs/phase-535-post-lasso-queue-refresh`：负责 #193 / `avalonia-node-map-8l6`；当前 docs/test queue refresh，承接 transient lasso feedback 后续拆分，不做 runtime/API/UI/screenshot-manifest/whiteboard implementation changes。
-- `visual/phase-536-lasso-screenshot-proof`：future candidate，用于 Phase 535 后第一条 lasso screenshot route 和 Cookbook proof boundary。
+- `visual/phase-536-lasso-screenshot-proof`：负责 #195 / `avalonia-node-map-uvd`；当前 slice，用于 `cookbook-interaction-lasso-screenshot-proof`、`shell-cookbook-lasso-screenshot-proof` 和 bounded lasso screenshot proof boundary。
 - `feature/phase-537-lasso-toolbar-ergonomics`：future candidate，用于 Phase 535 后的 lasso toolbar UX 和 public activation ergonomics。
 - `feature/phase-538-eraser-feasibility`：future candidate，用于 Phase 535 后的 eraser behavior/API feasibility。
 - `docs/phase-539-drawing-primitive-model-gate`：future candidate，用于 Phase 535 后的 rectangle/freehand drawing primitive model decisions。
@@ -591,4 +597,5 @@ Phase 534 通过 GitHub #191 / `avalonia-node-map-lzy` 新增 lasso visual gestu
 - Phase 530 是 GitHub #183 / `avalonia-node-map-8um`；它新增 backend/editor lasso selection query contract，不做 Avalonia gesture capture、pointer-mode state machine、eraser behavior、drawing primitives、persistence、renderer changes、screenshot manifest expansion、strict visual-baseline enforcement、retained API removal 或 full React Flow whiteboard parity claim。
 - Phase 534 是 GitHub #191 / `avalonia-node-map-lzy`；它新增 transient lasso visual gesture feedback，不做 toolbar UX、lasso screenshot route、eraser behavior、drawing primitives、persistence、renderer changes、screenshot manifest expansion、strict visual-baseline enforcement、retained API removal 或 full React Flow whiteboard parity claim。
 - Phase 535 是 GitHub #193 / `avalonia-node-map-8l6`；它刷新 post-Phase-534 parity queue，不做 runtime behavior changes、public API changes、UI redesign、screenshot manifest expansion、strict pixel baseline enforcement、retained API removal 或 whiteboard implementation。
+- Phase 536 是 GitHub #195 / `avalonia-node-map-uvd`；它新增 `cookbook-interaction-lasso-screenshot-proof`、`interaction-lasso-screenshot-proof-route`、`shell-cookbook-lasso-screenshot-proof`、`full-window-shell-lasso-state` 和 `LASSO_SCREENSHOT_PROOF_BOUNDARY_OK`，不做 toolbar UX、eraser behavior、drawing primitives、persistence、renderer rewrite、strict pixel baseline enforcement、retained API removal 或 full whiteboard parity。
 - Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512、Phase 513、Phase 520、Phase 521、Phase 522、Phase 523、Phase 524、Phase 525、Phase 526、Phase 527、Phase 528、Phase 529 和 Phase 535 都不修改产品代码；除非 focused test 证明存在具体 missing contract。

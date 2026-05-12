@@ -60,7 +60,7 @@ public sealed class PostPhase506VisualQueueDocsTests
     private static void AssertCurrentQueue(string table)
     {
         Assert.Contains("| #193 | `avalonia-node-map-8l6` | Phase 535: refresh post-lasso visual feedback parity queue", table, StringComparison.Ordinal);
-        Assert.Contains("Phase 536: lasso screenshot route and Cookbook proof boundary", table, StringComparison.Ordinal);
+        Assert.Contains("| #195 | `avalonia-node-map-uvd` | Phase 536: lasso screenshot route and Cookbook proof boundary", table, StringComparison.Ordinal);
         Assert.Contains("Phase 537: lasso toolbar UX and public activation ergonomics boundary", table, StringComparison.Ordinal);
         Assert.Contains("Phase 538: eraser behavior/API feasibility gate", table, StringComparison.Ordinal);
         Assert.Contains("Phase 539: rectangle/freehand drawing primitive model gate", table, StringComparison.Ordinal);
@@ -76,6 +76,7 @@ public sealed class PostPhase506VisualQueueDocsTests
         Assert.DoesNotContain("Phase 527: Background variant public surface gate", table, StringComparison.Ordinal);
         Assert.DoesNotContain("Phase 528: Panel versus viewport-attached overlay boundary", table, StringComparison.Ordinal);
         Assert.DoesNotContain("Phase 529: whiteboard/lasso/eraser feasibility audit", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 536: lasso screenshot route and Cookbook proof boundary", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #137 | `avalonia-node-map-3tw` | Phase 507: post-Phase-506 visual queue refresh", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh", table, StringComparison.Ordinal);

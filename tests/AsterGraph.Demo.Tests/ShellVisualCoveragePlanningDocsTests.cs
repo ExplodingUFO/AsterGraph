@@ -61,7 +61,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(10, document.RootElement.GetArrayLength());
+        Assert.Equal(11, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -74,7 +74,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(10, document.RootElement.GetArrayLength());
+        Assert.Equal(11, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -102,7 +102,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(10, document.RootElement.GetArrayLength());
+        Assert.Equal(11, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -132,7 +132,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(10, document.RootElement.GetArrayLength());
+        Assert.Equal(11, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -186,6 +186,36 @@ public sealed class ShellVisualCoveragePlanningDocsTests
             Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    [Fact]
+    public void ShellVisualCoveragePlanningDocs_RecordPhase536LassoScreenshotState()
+    {
+        var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
+        using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
+        Assert.Equal(11, document.RootElement.GetArrayLength());
+        Assert.Contains(
+            document.RootElement.EnumerateArray(),
+            state =>
+                string.Equals(state.GetProperty("id").GetString(), "shell-cookbook-lasso-screenshot-proof", StringComparison.Ordinal)
+                && string.Equals(state.GetProperty("routeId").GetString(), "cookbook-interaction-lasso-screenshot-proof", StringComparison.Ordinal)
+                && string.Equals(state.GetProperty("lassoTargetPartName").GetString(), "PART_NodeCanvas", StringComparison.Ordinal));
+
+        var englishCookbook = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chineseCookbook = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+        foreach (var contents in new[] { englishCookbook, chineseCookbook })
+        {
+            Assert.Contains("Phase 536", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #195", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-uvd", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-lasso-screenshot-proof", contents, StringComparison.Ordinal);
+            Assert.Contains("full-window-shell-lasso-state", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_NodeCanvas", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeCanvasSelectionMode.Lasso", contents, StringComparison.Ordinal);
+            Assert.Contains("LassoSelectionMode_RendersTransientFeedbackPathOnlyDuringDrag", contents, StringComparison.Ordinal);
+            Assert.Contains("no strict pixel baseline", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
         }
     }
 

@@ -103,6 +103,24 @@
     "outputFileName": "shell-cookbook-default-canvas-context-menu.png"
   },
   {
+    "id": "shell-cookbook-lasso-screenshot-proof",
+    "routeId": "cookbook-interaction-lasso-screenshot-proof",
+    "hostGroup": "cookbook",
+    "language": "en",
+    "theme": "canonical-dark",
+    "expectedPaneOpen": true,
+    "lassoTargetPartName": "PART_NodeCanvas",
+    "requiredShellParts": [
+      "PART_HostMenu",
+      "PART_HostShellSplitView",
+      "PART_CookbookWorkspaceNavigationPanel",
+      "PART_NodeCanvas",
+      "PART_MainGraphEditorHost",
+      "PART_CookbookWorkspaceRecipeContentPanel"
+    ],
+    "outputFileName": "shell-cookbook-lasso-screenshot-proof.png"
+  },
+  {
     "id": "shell-cookbook-default-closed",
     "routeId": "cookbook-default-starter-host-ai-pipeline",
     "hostGroup": "cookbook",
