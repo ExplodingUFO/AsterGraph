@@ -37,6 +37,39 @@ public sealed class PixelBaselinePolicyDocsTests
         }
     }
 
+    [Fact]
+    public void PixelBaselinePolicyDocs_RecordPhase521ComparatorReadinessGate()
+    {
+        var englishCookbook = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chineseCookbook = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishCookbook, chineseCookbook, englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 521", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #163", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-ayx", contents, StringComparison.Ordinal);
+            Assert.Contains("STRICT_PIXEL_BASELINE_COMPARATOR_READINESS_GATE", contents, StringComparison.Ordinal);
+            Assert.Contains("host-keyed comparator", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("tolerant comparator", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("supported CI hosts", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("repeatability sample count", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("tolerance fields", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("artifact metadata schema", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("comparator version", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("failure review path", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("StrictPixelBaselineEnforced=false", contents, StringComparison.Ordinal);
+            Assert.Contains("Policy=record-only", contents, StringComparison.Ordinal);
+            Assert.Contains("PngHashPurpose=drift-evidence", contents, StringComparison.Ordinal);
+            Assert.Contains("no strict pixel baseline enforcement", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no shell visual manifest additions", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no visual redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API change", contents, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 
