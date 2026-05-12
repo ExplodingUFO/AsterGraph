@@ -152,6 +152,51 @@ public sealed class RetainedRouteComparisonClosureDocsTests
         Assert.Contains("migration evidence", retainedRecipeZh, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void RetainedMigrationRemovalReadinessAudit_PublishesCurrentClassificationAndNoDeletionBoundary()
+    {
+        var publicApiInventoryEn = ReadRepoFile("docs/en/public-api-inventory.md");
+        var publicApiInventoryZh = ReadRepoFile("docs/zh-CN/public-api-inventory.md");
+        var retainedRecipeEn = ReadRepoFile("docs/en/retained-migration-recipe.md");
+        var retainedRecipeZh = ReadRepoFile("docs/zh-CN/retained-migration-recipe.md");
+        var parityAuditEn = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var parityAuditZh = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { publicApiInventoryEn, publicApiInventoryZh, retainedRecipeEn, retainedRecipeZh, parityAuditEn, parityAuditZh })
+        {
+            Assert.Contains("Phase 522", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #164", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-ecx", contents, StringComparison.Ordinal);
+            Assert.Contains("RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT", contents, StringComparison.Ordinal);
+            Assert.Contains("current prerelease support window", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("later API-changing issue", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("eng/public-api-baseline.txt", contents, StringComparison.Ordinal);
+            Assert.Contains("no retained API removal", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API baseline change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI change", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { publicApiInventoryEn, publicApiInventoryZh, retainedRecipeEn, retainedRecipeZh })
+        {
+            Assert.Contains("GraphEditorViewModel", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorView", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorViewModel.Session", contents, StringComparison.Ordinal);
+            Assert.Contains("IGraphContextMenuAugmentor.Augment(GraphEditorViewModel, ...)", contents, StringComparison.Ordinal);
+            Assert.Contains("INodePresentationProvider.GetNodePresentation(NodeViewModel)", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeViewModel.ExpansionState", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeViewModel.IsExpanded", contents, StringComparison.Ordinal);
+            Assert.Contains("TrySetNodeExpansionState(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("TrySetNodeGroupExtraPadding(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphAvaloniaViewFactory.Create(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphAvaloniaViewOptions", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphDocumentSerializer.ImportLegacy(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("blocked until a later API-changing issue", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("kept in the current prerelease support window", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("not ready for deletion", contents, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 

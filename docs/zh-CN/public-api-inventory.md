@@ -63,6 +63,18 @@ Phase 492 是 inventory now, remove later。它记录当前 retained 与 compati
 | Retired compatibility-only shims | `IGraphEditorCommands.BeginConnection(...)`、`IGraphEditorQueries.GetCompatibleTargets(...)`、`CompatiblePortTarget` 和 obsolete `GraphEditorCapabilitySnapshot` positional members | 已从 primary public contracts 移除；继续列在 V1 compatibility removal policy 中，保证 replacement guidance 可发现。 |
 | Retained facade wording in hosted helpers | `AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphAvaloniaViewOptions`，以及提到 retained facade 的 `AsterGraphEditorFactory.Create(...)` 文档 | 继续作为 canonical route 上的 supported hosted helper；除非后续 API-change tracker 同步更新 route docs 与 public API baseline，否则不要重新归类为 compatibility-only。 |
 
+## Phase 522 retained migration removal readiness audit
+
+Phase 522 是 GitHub #164 / `avalonia-node-map-ecx`。本节记录 `RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT`，作为 Phase 492 inventory 和 Phase 498 execution gate 之后的当前 readiness classification。本 audit 只改 docs/tests：no retained API removal、no public API baseline change、no runtime behavior change、no UI change。`eng/public-api-baseline.txt` 仍是已发布 public metadata 的 source of truth；任何删除都仍然 blocked until a later API-changing issue，并且必须先把 exact affected baseline lines 复制到该 issue，再改代码或 baseline。
+
+| Surface family | Exact retained surfaces | Current readiness classification |
+| --- | --- | --- |
+| Retained editor facade | `GraphEditorViewModel`、`GraphEditorView`、`GraphEditorViewModel.Session`，以及 `eng/public-api-baseline.txt` 中可见的 public `GraphEditorSession(GraphEditorViewModel, ...)` bridge | Kept in the current prerelease support window，分类仍是 retained migration。Not ready for deletion；必须等后续 API-changing issue 证明受影响宿主可改用 canonical `CreateSession(...)` 或 hosted factory replacement，并审查 exact baseline diff。 |
+| Retained extension hook overloads | `IGraphContextMenuAugmentor.Augment(GraphEditorViewModel, ...)`、`INodePresentationProvider.GetNodePresentation(NodeViewModel)`、`NodeViewModel.ExpansionState`、`NodeViewModel.IsExpanded`、`TrySetNodeExpansionState(...)` 和 `TrySetNodeGroupExtraPadding(...)` retained helper paths | Kept in the current prerelease support window，用于 migrating hosts 和 adapter internals。Not ready for deletion；必须先有 blocker tests 证明 context-object、session command 和 snapshot replacement routes 覆盖旧用例。 |
+| Hosted helper retained wording | `AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphAvaloniaViewOptions`，以及提到 retained facade composition 的 `AsterGraphEditorFactory.Create(...)` 文档 | 继续作为 canonical route 上的 supported hosted helpers。它们不是 compatibility-only，也 not ready for deletion 或 reclassification，除非后续 API-changing issue 同步更新 route docs 和 `eng/public-api-baseline.txt`。 |
+| Explicit legacy import | `GraphDocumentSerializer.ImportLegacy(...)` | Kept in the current prerelease support window，作为 bounded import/migration entry point。Not ready for deletion；必须等后续 API-changing issue 证明没有受支持迁移流程还需要 direct legacy import，并记录 replacement import/export path。 |
+| Already retired compatibility-only shims | `IGraphEditorCommands.BeginConnection(...)`、`IGraphEditorQueries.GetCompatibleTargets(...)`、`CompatiblePortTarget` 和 obsolete `GraphEditorCapabilitySnapshot` positional members | 已从 primary public contracts 移除。继续保留 v1 policy entries 的可发现性；Phase 522 不重新打开这些 surface，也不授权新增 compatibility-only API。 |
+
 ## Release Handoff
 
 - release handoff：Stable canonical surface 是默认路线，Retained migration surface 只作为迁移桥，obsolete 已退役 compatibility-only surface 必须继续在 v1 removal policy 中带 replacement guidance。
