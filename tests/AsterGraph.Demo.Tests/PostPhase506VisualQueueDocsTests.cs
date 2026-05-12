@@ -59,10 +59,17 @@ public sealed class PostPhase506VisualQueueDocsTests
 
     private static void AssertCurrentQueue(string table)
     {
-        Assert.Contains("| #161 | `avalonia-node-map-rs5` | Phase 519: refresh parity roadmap after dynamic announcement proof", table, StringComparison.Ordinal);
-        Assert.Contains("| #162 | `avalonia-node-map-vdc` | Phase 520: define declarative host composition API gate", table, StringComparison.Ordinal);
-        Assert.Contains("| #163 | `avalonia-node-map-ayx` | Phase 521: define strict pixel-baseline comparator readiness gate", table, StringComparison.Ordinal);
-        Assert.Contains("| #164 | `avalonia-node-map-ecx` | Phase 522: audit retained migration removal readiness", table, StringComparison.Ordinal);
+        Assert.Contains("| #169 | `avalonia-node-map-bp0` | Phase 523: refresh React Flow parity issue wave after retained readiness audit", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 524: built-in component parity matrix for MiniMap, Controls, Background, Panel", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 525: MiniMap interaction and customization parity gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 526: Controls interactivity/custom-button parity gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 527: Background variant public surface gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 528: Panel versus viewport-attached overlay boundary", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 529: whiteboard/lasso/eraser feasibility audit", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #161 | `avalonia-node-map-rs5` | Phase 519: refresh parity roadmap after dynamic announcement proof", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #162 | `avalonia-node-map-vdc` | Phase 520: define declarative host composition API gate", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #163 | `avalonia-node-map-ayx` | Phase 521: define strict pixel-baseline comparator readiness gate", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| #164 | `avalonia-node-map-ecx` | Phase 522: audit retained migration removal readiness", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #137 | `avalonia-node-map-3tw` | Phase 507: post-Phase-506 visual queue refresh", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh", table, StringComparison.Ordinal);

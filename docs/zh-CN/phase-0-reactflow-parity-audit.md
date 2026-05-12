@@ -134,6 +134,10 @@ Phase 521 是 GitHub #163 / `avalonia-node-map-ayx`，承接 post-Phase-518 queu
 
 Phase 522 是 GitHub #164 / `avalonia-node-map-ecx`，承接 post-Phase-518 queue 中的 retained migration removal readiness audit。本 slice 只修改 docs/tests，并新增 `RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT`：`GraphEditorViewModel`、`GraphEditorView`、`GraphEditorViewModel.Session`、retained extension-hook overloads、retained node expansion helpers、hosted-helper retained wording 和 `GraphDocumentSerializer.ImportLegacy(...)` 都 kept in the current prerelease support window。它们 not ready for deletion；任何 removal 仍 blocked until a later API-changing issue 负责 public API deletion、复制 exact `eng/public-api-baseline.txt` metadata lines、证明 replacement routes，并审查 baseline diff。本 slice 不授权 no retained API removal、no public API baseline change、no runtime behavior change、no UI change。
 
+## Phase 523 更新
+
+Phase 523 是 GitHub #169 / `avalonia-node-map-bp0`，在 retained migration removal readiness audit 关闭后刷新 post-Phase-522 parity issue-wave。本 slice 只修改 docs/tests，把已经关闭的 Phase 519-522 queue 替换为下一批 tracker candidates：built-in component parity matrix、MiniMap interaction and customization parity gate、Controls interactivity/custom-button parity gate、Background variant public surface gate、Panel versus viewport-attached overlay boundary，以及 whiteboard/lasso/eraser feasibility audit。不授权 no runtime behavior changes、no public API changes、no UI redesign、no visual-baseline enforcement 或 no retained API removal。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -338,12 +342,17 @@ Phase 521 通过 GitHub #163 / `avalonia-node-map-ayx` 定义 strict pixel-basel
 
 Phase 522 通过 GitHub #164 / `avalonia-node-map-ecx` 审计 retained migration removal readiness。它记录 `RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT`，让 retained migration surfaces 在 current prerelease support window 继续保留，并把删除继续 blocked until a later API-changing issue，且该 issue 必须负责 exact `eng/public-api-baseline.txt` changes。本 slice 不授权 no retained API removal、no public API baseline change、no runtime behavior change、no UI change。
 
+Phase 523 刷新 post-Phase-522 parity issue wave，对应 GitHub #169 / `avalonia-node-map-bp0`。它记录 Phase 519-522 policy queue 已关闭，让下一步继续以 tracker-backed 方式推进，并把当前 React Flow parity 压力拆成 built-in component matrix、MiniMap、Controls、Background、Panel 和 whiteboard feasibility follow-ups；本 slice 不授权产品或 API 修改。
+
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #161 | `avalonia-node-map-rs5` | Phase 519: refresh parity roadmap after dynamic announcement proof | P2 | parity roadmap docs 和 focused docs tests | Closed prerequisite。它记录 Phase 518 关闭证据，并已解除后续 docs/API-policy slices 的阻塞。 |
-| #162 | `avalonia-node-map-vdc` | Phase 520: define declarative host composition API gate | P3 | declarative API docs/tests、quick-start 与 host-composition boundary text | Current docs/API-policy slice。它只处理 API ergonomics planning，可与 visual policy 和 retained migration readiness 并行。 |
-| #163 | `avalonia-node-map-ayx` | Phase 521: define strict pixel-baseline comparator readiness gate | P3 | visual policy docs/tests 和 drift-evidence readiness criteria | Ready after Phase 519。它不新增 shell-state rows，也不启用 strict hashes，可与 declarative API 和 retained migration readiness 并行。 |
-| #164 | `avalonia-node-map-ecx` | Phase 522: audit retained migration removal readiness | P3 | retained migration docs/tests 和 API-policy readiness classification | Ready after Phase 519。除非后续 API-changing issue 明确负责 public API deletion，否则保持 docs/tests-only。 |
+| #169 | `avalonia-node-map-bp0` | Phase 523: refresh React Flow parity issue wave after retained readiness audit | P2 | parity roadmap docs 和 focused docs tests | Current issue。它定义 queue 和 tracker 边界，因此会阻塞下一批 implementation wave。 |
+| TBD | TBD | Phase 524: built-in component parity matrix for MiniMap, Controls, Background, Panel | P2 | feature catalog、public API inventory、Avalonia README 和 docs tests | Phase 523 之后可开始。Docs/tests-only，独立于代码修改。 |
+| TBD | TBD | Phase 525: MiniMap interaction and customization parity gate | P2 | `GraphMiniMap`、MiniMap factory/options、minimap tests 和 docs | Phase 524 之后可开始。不要与其他触碰 `GraphMiniMap` 的工作并行。 |
+| TBD | TBD | Phase 526: Controls interactivity/custom-button parity gate | P2 | `AsterGraphControls`、hosted action button tests 和 docs | 只要写集保持分离，可与 MiniMap work 并行。 |
+| TBD | TBD | Phase 527: Background variant public surface gate | P3 | background/grid control docs/tests 和当前 background support evidence | 只要避免共享 shell docs 编辑，可与 Controls 和 MiniMap 并行。 |
+| TBD | TBD | Phase 528: Panel versus viewport-attached overlay boundary | P3 | `AsterGraphPanel`、host integration docs 和 panel tests | Phase 524 之后可开始；如果同时编辑 broad built-in component docs，需要串行。 |
+| TBD | TBD | Phase 529: whiteboard/lasso/eraser feasibility audit | P4 | advanced editing docs/tests 或 spike document | 更大的可选 parity track；不阻塞 built-in component parity。 |
 
 ## 推荐并行 Worktree 计划
 
@@ -373,6 +382,13 @@ Phase 522 通过 GitHub #164 / `avalonia-node-map-ecx` 审计 retained migration
 - `docs/phase-520-declarative-api-gate`：负责 #162 / `avalonia-node-map-vdc`；当前 worktree，用于 declarative host-composition API gate docs/tests，不修改 public API。
 - `visual/phase-521-pixel-comparator-readiness`：负责 #163 / `avalonia-node-map-ayx`；ready parallel worktree，用于 strict pixel-baseline comparator readiness docs/tests，不启用 strict enforcement。
 - `docs/phase-522-retained-readiness`：负责 #164 / `avalonia-node-map-ecx`；ready parallel worktree，用于 retained migration removal readiness docs/tests，不删除 API。
+- `docs/phase-523-parity-wave-refresh`：负责 #169 / `avalonia-node-map-bp0`；当前 worktree，用于 post-Phase-522 parity issue-wave refresh 和下一批 implementation split。
+- `docs/phase-524-built-in-component-matrix`：未来 docs/test worktree，用于 MiniMap、Controls、Background 和 Panel 的 built-in component parity matrix。
+- `ui/phase-525-minimap-interaction-customization`：未来 MiniMap worktree；写集限制在 `GraphMiniMap`、MiniMap options/factories、focused tests 和直接相关文档。
+- `ui/phase-526-controls-custom-button`：未来 Controls worktree；如果只触碰 `AsterGraphControls`、hosted action buttons、tests 和直接相关文档，可以与 MiniMap 并行。
+- `ui/phase-527-background-variants`：未来 Background worktree；避免共享 shell docs，并且不要修改 MiniMap/Controls。
+- `ui/phase-528-panel-overlay-boundary`：未来 Panel worktree；如果与 Phase 524 同时编辑同一 built-in component inventory，需要串行。
+- `docs/phase-529-whiteboard-feasibility`：未来 feasibility audit，评估 lasso、eraser、rectangle 和 freehand whiteboard-style parity，不直接承诺实现。
 
 ## UI 验证策略
 
@@ -416,4 +432,5 @@ Phase 522 通过 GitHub #164 / `avalonia-node-map-ecx` 审计 retained migration
 - Phase 516 是 GitHub #152 / `avalonia-node-map-821`；它记录 `ACCESSIBILITY_MANUAL_AT_EVIDENCE_PACKAGE`，不声明 unsupported certification claims，并把 headless automation proof 与 live assistive-technology observations 分开；live screen-reader announcement validation 由 GitHub #156 / `avalonia-node-map-1pd` 继续追踪。
 - Phase 521 是 GitHub #163 / `avalonia-node-map-ayx`；它记录 `STRICT_PIXEL_BASELINE_COMPARATOR_READINESS_GATE`，不启用 strict pixel baseline enforcement，不新增 shell visual manifest additions，不做 visual redesign、runtime behavior change、public API change 或 retained API removal。
 - Phase 522 是 GitHub #164 / `avalonia-node-map-ecx`；它记录 `RETAINED_MIGRATION_REMOVAL_READINESS_AUDIT`，不删除 retained API，不修改 public API baseline，不改变 runtime behavior，也不改 UI。
-- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512、Phase 513、Phase 520、Phase 521 和 Phase 522 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
+- Phase 523 是 GitHub #169 / `avalonia-node-map-bp0`；它刷新 post-Phase-522 issue wave，并记录 built-in component、MiniMap、Controls、Background、Panel 和 whiteboard feasibility follow-ups，不做 runtime behavior changes、public API changes、UI redesign、visual-baseline enforcement 或 retained API removal。
+- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512、Phase 513、Phase 520、Phase 521、Phase 522 和 Phase 523 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
