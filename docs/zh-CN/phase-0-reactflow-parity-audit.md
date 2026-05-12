@@ -94,6 +94,10 @@ Phase 511 是 GitHub #142 / `avalonia-node-map-9rq`，承接有界 overlay rows 
 
 Phase 512 是 GitHub #143 / `avalonia-node-map-1j4`，承接有界 shell-state rows 关闭后的 pixel-baseline drift measurement。本 slice 只修改 visual artifact metadata/docs/tests：为 generated scene 与 full-window shell artifacts 新增 record-only `DriftMeasurement` metadata，包含 `Policy=record-only`、`PngHashPurpose=drift-evidence`、`StrictPixelBaselineEnforced=false`、`HostRuntimeDescription`、`OsDescription`、`ProcessArchitecture`，并继续记录已有 `PngSha256`。不授权 no strict pixel baseline enforcement、no visual redesign、no runtime behavior changes、no public API changes、no retained API removal，也不引入 pass/fail hash policy。
 
+## Phase 513 更新
+
+Phase 513 是 GitHub #149 / `avalonia-node-map-d8q`，在 Phase 506 visual queue 已通过 Phases 508-512 全部关闭后刷新 post-Phase-512 roadmap refresh。本 slice 仍是 docs/tests only：把 Phase 512 记录为 closed，替换 current-owned visual queue 为具体 post-Phase-512 follow-ups，并明确 `.planning/` drift，因为这些文件是 local/ignored，不属于 PR worktree 的 tracked artifact。不授权 no runtime behavior changes、no public API changes、no UI redesign、no strict pixel baseline enforcement、no retained API removal 或 broad parity/accessibility certification claims。
+
 ## Phase 489 更新
 
 Phase 489 通过 PR #102 关闭 GitHub #101 / `avalonia-node-map-6sc`，完成 `perf/renderer-virtualization-spike` 分支上的 renderer virtualization design spike。本 slice 只做 docs/tests：先定义未来声明 ItemsRepeater/Skia-style renderer virtualization、background graph index 或扩大 graph-size claim 前必须满足的 proof contract。不做 public API change，也不做 runtime change。当前证据仍只支持 viewport-budgeted scene projection/rendering，不是真正的 renderer virtualization contract；`xlarge` 继续保持 telemetry-only。
@@ -280,16 +284,16 @@ Phase 510 现在通过 GitHub #141 / `avalonia-node-map-8lu` 承接 context-menu
 
 Phase 511 现在通过 GitHub #142 / `avalonia-node-map-9rq` 承接 additional language/theme shell variants。它只新增两条有界 shell-state rows：`shell-cookbook-default-closed-zh-cn` 和 `shell-runtime-diagnostics-open-zh-cn`，两者都记录 `zh-CN` + `canonical-dark` metadata 和 required shell-part evidence；runtime behavior changes、public API changes、styling redesign、strict pixel baselines、light-theme claims、broad visual/language/theme certification 和 retained API removal 仍不在范围内。
 
-Phase 512 现在通过 GitHub #143 / `avalonia-node-map-1j4` 承接 pixel-baseline drift measurement。它只在每个 generated scene 和 shell artifact 的 `PngSha256` 旁边新增 record-only `DriftMeasurement` metadata，包含 host runtime、OS 和 process architecture 字段；strict pixel baselines、pass/fail hash policy、visual redesign、runtime behavior changes、public API changes 和 retained API removal 仍不在范围内。
+Phase 512 已通过 GitHub #143 / `avalonia-node-map-1j4` 关闭 pixel-baseline drift measurement。它只在每个 generated scene 和 shell artifact 的 `PngSha256` 旁边新增 record-only `DriftMeasurement` metadata，包含 host runtime、OS 和 process architecture 字段；strict pixel baselines、pass/fail hash policy、visual redesign、runtime behavior changes、public API changes 和 retained API removal 仍不在范围内。
+
+Phase 513 刷新 post-Phase-512 queue，对应 GitHub #149 / `avalonia-node-map-d8q`。它记录 Phase 506 visual queue 已经通过 Phases 508-512 全部关闭，把 current owned slice 移到本 roadmap refresh，并基于剩余 tracked evidence 选择下一批具体 follow-ups，而不是重新打开已经关闭的 visual rows。
 
 | GitHub | Bead | 标题 | 优先级 | 可能 write set | 并行边界 |
 | --- | --- | --- | --- | --- | --- |
-| #137 | `avalonia-node-map-3tw` | Phase 507: post-Phase-506 visual queue refresh | P3 | parity roadmap docs 和 focused docs tests | Closed slice。只修复 stale tracker wording；不做 runtime UI behavior changes、shell-state manifest rows、strict pixel baselines、public API changes、retained API removal 或 broad visual/language/theme certification。 |
-| #139 | `avalonia-node-map-2nu` | Phase 508: shell flyout visual capture | P3 | shell visual gate harness、manifest/docs/tests、generated artifact metadata | Closed slice。只隔离一条 View menu flyout capture path，并证明 full-window artifact metadata，不声明 broad shell certification。 |
-| #140 | `avalonia-node-map-0ff` | Phase 509: popup visual capture | P3 | shell visual gate harness、manifest/docs/tests、generated artifact metadata | Closed slice。只隔离一条 disabled host-command tooltip popup path，并证明 full-window artifact metadata，不声明 broad popup 或 shell certification。 |
-| #141 | `avalonia-node-map-8lu` | Phase 510: context-menu visual capture | P3 | context-menu visual harness/docs/tests、generated artifact metadata | Closed slice。复用现有 context-menu presenter route 做一条 canvas context-menu capture，不做 public API changes 或 retained hook removal。 |
-| #142 | `avalonia-node-map-9rq` | Phase 511: additional language/theme shell variants | P3 | 有界 language/theme rows 的 shell state manifest/docs/tests | Closed slice。只新增 `shell-cookbook-default-closed-zh-cn` 和 `shell-runtime-diagnostics-open-zh-cn` 两条明确的 `zh-CN` + `canonical-dark` rows；不声明 broad visual/language/theme certification。 |
-| #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement | P3 | drift measurement docs/tests/artifact metadata | Current owned slice。比较记录的 `PngSha256` 和 host metadata 作为 record-only drift-evidence，而不是引入 pass/fail hash policy 或 strict baseline enforcement。 |
+| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh | P2 | parity roadmap docs 和 focused docs tests | Current slice。它是当前唯一 active docs refresh，必须先关闭，后续 implementation/evidence work 才能开始。 |
+| #150 | `avalonia-node-map-ien` | Phase 514: execute renderer virtualization proof harness | P2 | renderer proof harness/tests、scale docs、artifact metadata | Blocked until after Phase 513 closes。queue 被接受后，可与 pixel-baseline 和 manual AT evidence 工作并行。 |
+| #151 | `avalonia-node-map-t44` | Phase 515: decide strict pixel baseline policy from drift evidence | P3 | visual gate metadata/docs/tests、drift artifact analysis | Blocked until after Phase 513 closes。它只处理 visual artifact policy，不碰 renderer internals，可与 Phase 514 并行。 |
+| #152 | `avalonia-node-map-821` | Phase 516: record manual assistive-technology validation evidence | P3 | manual accessibility evidence/docs/tests | Blocked until after Phase 513 closes。如果 human/manual AT evidence 可用，可与 Phase 514 和 Phase 515 并行。 |
 
 ## 推荐并行 Worktree 计划
 
@@ -310,7 +314,11 @@ Phase 512 现在通过 GitHub #143 / `avalonia-node-map-1j4` 承接 pixel-baseli
 - `visual/phase-509-popup-capture`：负责 #140 / `avalonia-node-map-0ff`；popup visual capture 候选 worktree，与 context-menu capture 分离。
 - `visual/phase-510-context-menu-capture`：负责 #141 / `avalonia-node-map-8lu`；通过现有 context-menu presenter route 做有界 context-menu visual capture 的 closed worktree。
 - `visual/phase-511-language-theme-shell-variants`：负责 #142 / `avalonia-node-map-9rq`；overlay capture 形状稳定后，作为有界 `zh-CN` + `canonical-dark` shell-state rows 的 closed worktree。
-- `visual/phase-512-pixel-drift-measurement`：负责 #143 / `avalonia-node-map-1j4`；任何 strict pixel-baseline gate 前，用于 record-only drift measurement 的当前 worktree。
+- `visual/phase-512-pixel-drift-measurement`：已负责 #143 / `avalonia-node-map-1j4`；任何 strict pixel-baseline gate 前，用于 record-only drift measurement 的 closed worktree。
+- `docs/phase-513-roadmap-refresh`：负责 #149 / `avalonia-node-map-d8q`；当前 worktree，用于 post-Phase-512 roadmap refresh 和 next-wave selection。
+- `perf/phase-514-renderer-virtualization-proof`：负责 #150 / `avalonia-node-map-ien`；后续 worktree，用于第一条 executable renderer proof harness 和 artifact metadata。
+- `visual/phase-515-pixel-baseline-policy`：负责 #151 / `avalonia-node-map-t44`；后续 worktree，用 Phase 512 drift metadata 决定 strict pixel-baseline policy。
+- `a11y/phase-516-manual-at-evidence`：负责 #152 / `avalonia-node-map-821`；后续 worktree，用于 manual assistive-technology validation evidence。
 
 ## UI 验证策略
 
@@ -347,5 +355,9 @@ Phase 512 现在通过 GitHub #143 / `avalonia-node-map-1j4` 承接 pixel-baseli
 - Phase 509 现在通过 GitHub #140 / `avalonia-node-map-0ff` 承接 popup visual capture；它只为 `PART_HostCommand_history.undo` 新增 `shell-cookbook-default-host-command-tooltip-popup` 和 `full-window-shell-popup-state` metadata。
 - Phase 510 现在通过 GitHub #141 / `avalonia-node-map-8lu` 承接 context-menu visual capture；它只为 `PART_NodeCanvas` 新增 `shell-cookbook-default-canvas-context-menu` 和 `full-window-shell-context-menu-state` metadata。
 - Phase 511 现在通过 GitHub #142 / `avalonia-node-map-9rq` 承接 additional language/theme shell variants；它只新增 `shell-cookbook-default-closed-zh-cn` 和 `shell-runtime-diagnostics-open-zh-cn` 两条 `zh-CN` + `canonical-dark` metadata rows。
-- Phase 512 现在通过 GitHub #143 / `avalonia-node-map-1j4` 承接 pixel-baseline drift measurement；它把 `DriftMeasurement` metadata 作为 `record-only` 和 `drift-evidence` 记录在 `PngSha256` 旁边，并包含 `HostRuntimeDescription`、`OsDescription` 和 `ProcessArchitecture`。
-- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511 和 Phase 512 都不修改产品代码；除非 focused test 证明存在具体 missing contract。
+- Phase 512 已通过 GitHub #143 / `avalonia-node-map-1j4` 关闭 pixel-baseline drift measurement；它把 `DriftMeasurement` metadata 作为 `record-only` 和 `drift-evidence` 记录在 `PngSha256` 旁边，并包含 `HostRuntimeDescription`、`OsDescription` 和 `ProcessArchitecture`。
+- Phase 513 现在通过 GitHub #149 / `avalonia-node-map-d8q` 承接 post-Phase-512 roadmap refresh；它记录已关闭的 visual queue，并选择下一批真实 follow-ups。
+- Phase 514 是 GitHub #150 / `avalonia-node-map-ien`；它 blocked behind Phase 513，必须先执行 renderer virtualization proof harness，之后才允许扩大 true virtualization claim。
+- Phase 515 是 GitHub #151 / `avalonia-node-map-t44`；它 blocked behind Phase 513，用 Phase 512 drift metadata 决定 strict pixel-baseline policy。
+- Phase 516 是 GitHub #152 / `avalonia-node-map-821`；它 blocked behind Phase 513，记录 manual assistive-technology validation evidence，不声明 unsupported certification claims。
+- Phase 478、Phase 484、Phase 490、Phase 491、Phase 492、Phase 493、Phase 494、Phase 495、Phase 497、Phase 498、Phase 499、Phase 500、Phase 501、Phase 502、Phase 503、Phase 504、Phase 505、Phase 506、Phase 507、Phase 508、Phase 509、Phase 510、Phase 511、Phase 512 和 Phase 513 都不修改产品代码；除非 focused test 证明存在具体 missing contract。

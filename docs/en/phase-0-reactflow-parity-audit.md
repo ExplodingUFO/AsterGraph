@@ -94,6 +94,10 @@ Phase 511 is GitHub #142 / `avalonia-node-map-9rq`, the additional language/them
 
 Phase 512 is GitHub #143 / `avalonia-node-map-1j4`, the pixel-baseline drift measurement slice selected after the bounded shell-state rows closed. This slice is visual artifact metadata/docs/tests only: it adds record-only `DriftMeasurement` metadata to generated scene and full-window shell artifacts with `Policy=record-only`, `PngHashPurpose=drift-evidence`, `StrictPixelBaselineEnforced=false`, `HostRuntimeDescription`, `OsDescription`, `ProcessArchitecture`, and the existing `PngSha256`. It authorizes no strict pixel baseline enforcement, no visual redesign, no runtime behavior changes, no public API changes, no retained API removal, and no pass/fail hash policy.
 
+## Phase 513 Update
+
+Phase 513 is GitHub #149 / `avalonia-node-map-d8q`, the post-Phase-512 roadmap refresh after the Phase 506 visual queue closed through Phases 508-512. This slice is docs/tests only: it records Phase 512 as closed, replaces the current-owned visual queue with concrete post-Phase-512 follow-ups, and keeps `.planning/` drift explicit because those files are local/ignored rather than part of the PR worktree. It authorizes no runtime behavior changes, no public API changes, no UI redesign, no strict pixel baseline enforcement, no retained API removal, and no broad parity or accessibility certification claims.
+
 ## Phase 489 Update
 
 Phase 489 closed GitHub #101 / `avalonia-node-map-6sc` through PR #102 as a renderer virtualization design spike on branch `perf/renderer-virtualization-spike`. This slice was docs/tests only: it defined the proof contract required before any future ItemsRepeater/Skia-style renderer virtualization, background graph index, or graph-size claim expansion. It made no public API change and no runtime change. The current evidence remains viewport-budgeted scene projection/rendering, not a true renderer virtualization contract; `xlarge` stays telemetry-only.
@@ -280,16 +284,16 @@ Phase 510 now owns the context-menu visual capture through GitHub #141 / `avalon
 
 Phase 511 now owns the additional language/theme shell variants through GitHub #142 / `avalonia-node-map-9rq`. It adds two bounded shell-state rows, `shell-cookbook-default-closed-zh-cn` and `shell-runtime-diagnostics-open-zh-cn`, both with `zh-CN` + `canonical-dark` metadata and required shell-part evidence, while keeping runtime behavior changes, public API changes, styling redesign, strict pixel baselines, light-theme claims, broad visual/language/theme certification, and retained API removal out of scope.
 
-Phase 512 now owns pixel-baseline drift measurement through GitHub #143 / `avalonia-node-map-1j4`. It adds record-only `DriftMeasurement` metadata beside each generated scene and shell artifact's `PngSha256`, including host runtime, OS, and process architecture fields; strict pixel baselines, pass/fail hash policy, visual redesign, runtime behavior changes, public API changes, and retained API removal remain out of scope.
+Phase 512 closed pixel-baseline drift measurement through GitHub #143 / `avalonia-node-map-1j4`. It added record-only `DriftMeasurement` metadata beside each generated scene and shell artifact's `PngSha256`, including host runtime, OS, and process architecture fields; strict pixel baselines, pass/fail hash policy, visual redesign, runtime behavior changes, public API changes, and retained API removal remain out of scope.
+
+Phase 513 refreshes the post-Phase-512 queue through GitHub #149 / `avalonia-node-map-d8q`. It records that the Phase 506 visual queue is closed through Phases 508-512, moves the current owned slice to this roadmap refresh, and selects the next concrete follow-ups from remaining tracked evidence rather than reopening closed visual rows.
 
 | GitHub | Bead | Title | Priority | Likely write set | Parallelism |
 | --- | --- | --- | --- | --- | --- |
-| #137 | `avalonia-node-map-3tw` | Phase 507: post-Phase-506 visual queue refresh | P3 | parity roadmap docs and focused docs tests | Closed slice. Repaired stale tracker wording only; no runtime UI behavior changes, shell-state manifest rows, strict pixel baselines, public API changes, retained API removal, or broad visual/language/theme certification. |
-| #139 | `avalonia-node-map-2nu` | Phase 508: shell flyout visual capture | P3 | shell visual gate harness, manifest/docs/tests, generated artifact metadata | Closed slice. Isolates one View menu flyout capture path and proves full-window artifact metadata without claiming broad shell certification. |
-| #140 | `avalonia-node-map-0ff` | Phase 509: popup visual capture | P3 | shell visual gate harness, manifest/docs/tests, generated artifact metadata | Closed slice. Isolates one disabled host-command tooltip popup path and proves full-window artifact metadata without claiming broad popup or shell certification. |
-| #141 | `avalonia-node-map-8lu` | Phase 510: context-menu visual capture | P3 | context-menu visual harness/docs/tests, generated artifact metadata | Closed slice. Uses the existing context-menu presenter route for one canvas context-menu capture and avoids public API changes or retained hook removal. |
-| #142 | `avalonia-node-map-9rq` | Phase 511: additional language/theme shell variants | P3 | shell state manifest/docs/tests for bounded language/theme rows | Closed slice. Adds only `shell-cookbook-default-closed-zh-cn` and `shell-runtime-diagnostics-open-zh-cn` as explicit `zh-CN` + `canonical-dark` rows; no broad visual/language/theme certification. |
-| #143 | `avalonia-node-map-1j4` | Phase 512: pixel-baseline drift measurement | P3 | drift measurement docs/tests/artifact metadata | Current owned slice. Compares recorded `PngSha256` and host metadata as record-only drift-evidence, not pass/fail hash policy or strict baseline enforcement. |
+| #149 | `avalonia-node-map-d8q` | Phase 513: post-Phase-512 roadmap refresh | P2 | parity roadmap docs and focused docs tests | Current slice. It is the only active docs refresh and must close before the follow-up implementation/evidence work starts. |
+| #150 | `avalonia-node-map-ien` | Phase 514: execute renderer virtualization proof harness | P2 | renderer proof harness/tests, scale docs, artifact metadata | Blocked until after Phase 513 closes. Can run independently from pixel-baseline and manual AT evidence work after the queue is accepted. |
+| #151 | `avalonia-node-map-t44` | Phase 515: decide strict pixel baseline policy from drift evidence | P3 | visual gate metadata/docs/tests, drift artifact analysis | Blocked until after Phase 513 closes. Can run in parallel with Phase 514 because it stays on visual artifact policy rather than renderer internals. |
+| #152 | `avalonia-node-map-821` | Phase 516: record manual assistive-technology validation evidence | P3 | manual accessibility evidence/docs/tests | Blocked until after Phase 513 closes. Can run in parallel with Phases 514 and 515 if the human/manual AT evidence is available. |
 
 ## Recommended Parallel Worktree Plan
 
@@ -310,7 +314,11 @@ Phase 512 now owns pixel-baseline drift measurement through GitHub #143 / `avalo
 - `visual/phase-509-popup-capture`: owns #140 / `avalonia-node-map-0ff`; candidate worktree for popup visual capture, separate from context-menu capture.
 - `visual/phase-510-context-menu-capture`: owns #141 / `avalonia-node-map-8lu`; closed worktree for bounded context-menu visual capture through the existing context-menu presenter route.
 - `visual/phase-511-language-theme-shell-variants`: owns #142 / `avalonia-node-map-9rq`; closed worktree for bounded `zh-CN` + `canonical-dark` shell-state rows after overlay capture shape is settled.
-- `visual/phase-512-pixel-drift-measurement`: owns #143 / `avalonia-node-map-1j4`; current worktree for record-only drift measurement before any strict pixel-baseline gate.
+- `visual/phase-512-pixel-drift-measurement`: owned #143 / `avalonia-node-map-1j4`; closed worktree for record-only drift measurement before any strict pixel-baseline gate.
+- `docs/phase-513-roadmap-refresh`: owns #149 / `avalonia-node-map-d8q`; current worktree for this post-Phase-512 roadmap refresh and next-wave selection.
+- `perf/phase-514-renderer-virtualization-proof`: owns #150 / `avalonia-node-map-ien`; future worktree for the first executable renderer proof harness and artifact metadata.
+- `visual/phase-515-pixel-baseline-policy`: owns #151 / `avalonia-node-map-t44`; future worktree for strict pixel-baseline policy decision using Phase 512 drift metadata.
+- `a11y/phase-516-manual-at-evidence`: owns #152 / `avalonia-node-map-821`; future worktree for manual assistive-technology validation evidence.
 
 ## UI Verification Policy
 
@@ -347,5 +355,9 @@ Current coverage includes scene-level route captures plus ten manifest-driven fu
 - Phase 509 now owns the popup visual capture with GitHub #140 / `avalonia-node-map-0ff`; it adds only `shell-cookbook-default-host-command-tooltip-popup` and `full-window-shell-popup-state` metadata for `PART_HostCommand_history.undo`.
 - Phase 510 now owns the context-menu visual capture with GitHub #141 / `avalonia-node-map-8lu`; it adds only `shell-cookbook-default-canvas-context-menu` and `full-window-shell-context-menu-state` metadata for `PART_NodeCanvas`.
 - Phase 511 now owns the additional language/theme shell variants with GitHub #142 / `avalonia-node-map-9rq`; it adds only `shell-cookbook-default-closed-zh-cn` and `shell-runtime-diagnostics-open-zh-cn` as `zh-CN` + `canonical-dark` metadata rows.
-- Phase 512 now owns pixel-baseline drift measurement with GitHub #143 / `avalonia-node-map-1j4`; it records `DriftMeasurement` metadata as `record-only` and `drift-evidence` beside `PngSha256`, with `HostRuntimeDescription`, `OsDescription`, and `ProcessArchitecture`.
-- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, Phase 499, Phase 500, Phase 501, Phase 502, Phase 503, Phase 504, Phase 505, Phase 506, Phase 507, Phase 508, Phase 509, Phase 510, Phase 511, and Phase 512 unless a focused test proves a specific missing contract.
+- Phase 512 closed pixel-baseline drift measurement with GitHub #143 / `avalonia-node-map-1j4`; it records `DriftMeasurement` metadata as `record-only` and `drift-evidence` beside `PngSha256`, with `HostRuntimeDescription`, `OsDescription`, and `ProcessArchitecture`.
+- Phase 513 now owns the post-Phase-512 roadmap refresh with GitHub #149 / `avalonia-node-map-d8q`; it records the closed visual queue and selects the next real follow-ups.
+- Phase 514 is GitHub #150 / `avalonia-node-map-ien`; it is blocked behind Phase 513 and should execute the renderer virtualization proof harness before any true virtualization claim widens.
+- Phase 515 is GitHub #151 / `avalonia-node-map-t44`; it is blocked behind Phase 513 and should decide strict pixel-baseline policy from Phase 512 drift metadata.
+- Phase 516 is GitHub #152 / `avalonia-node-map-821`; it is blocked behind Phase 513 and should record manual assistive-technology validation evidence without unsupported certification claims.
+- Product code remains out of scope for Phase 478, Phase 484, Phase 490, Phase 491, Phase 492, Phase 493, Phase 494, Phase 495, Phase 497, Phase 498, Phase 499, Phase 500, Phase 501, Phase 502, Phase 503, Phase 504, Phase 505, Phase 506, Phase 507, Phase 508, Phase 509, Phase 510, Phase 511, Phase 512, and Phase 513 unless a focused test proves a specific missing contract.
