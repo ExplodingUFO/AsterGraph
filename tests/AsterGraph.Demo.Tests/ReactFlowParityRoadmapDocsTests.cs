@@ -1174,6 +1174,57 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase541PostPhase540WhiteboardWaveSplitInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 541", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #205", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-2z1", contents, StringComparison.Ordinal);
+            Assert.Contains("post-Phase-540 whiteboard implementation wave split", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Phase 542", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #206", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-b31", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard primitive core model contract gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Phase 543", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #207", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-aj8", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard renderer projection and hit-testing proof gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Phase 544", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #208", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-32n", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard primitive persistence schema policy gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Phase 545", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #209", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-7ns", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard Cookbook and screenshot proof route gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("model identity/geometry/style contract", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("renderer projection and hit-testing proof", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("persistence/schema policy", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Cookbook/screenshot proof route", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no model/schema changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer-layer changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 542", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("| TBD | TBD | Phase 543", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("| TBD | TBD | Phase 544", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("| TBD | TBD | Phase 545", contents, StringComparison.Ordinal);
+        }
+
+        AssertPostPhase534Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase534Queue(ExtractIssueWaveTable(chineseParity));
+
+        Assert.Contains("Phase 541 records the post-Phase-540 whiteboard implementation wave split", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 541 记录 post-Phase-540 whiteboard implementation wave split", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -1272,6 +1323,11 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.True(
             table.Contains("TBD", StringComparison.Ordinal)
             || table.Contains("| #203 | `avalonia-node-map-91b` | Phase 540: whiteboard persistence and render-layer readiness gate", StringComparison.Ordinal));
+        Assert.Contains("Phase 541: post-Phase-540 whiteboard implementation wave split", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 542: whiteboard primitive core model contract gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 543: whiteboard renderer projection and hit-testing proof gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 544: whiteboard primitive persistence schema policy gate", table, StringComparison.Ordinal);
+        Assert.Contains("Phase 545: whiteboard Cookbook and screenshot proof route gate", table, StringComparison.Ordinal);
         Assert.Contains("Cookbook screenshot manifest", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("hosted authoring tools", table, StringComparison.OrdinalIgnoreCase);
         Assert.True(
