@@ -1295,6 +1295,46 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase544WhiteboardPrimitivePersistenceSchemaPolicyGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 544", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #208", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-32n", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard primitive persistence schema policy gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("WHITEBOARD_PRIMITIVE_PERSISTENCE_SCHEMA_POLICY_GATE", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphDocumentSerializer", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphDocumentCompatibility", contents, StringComparison.Ordinal);
+            Assert.Contains("CurrentSchemaVersion", contents, StringComparison.Ordinal);
+            Assert.Contains("`GraphDocument` schema", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("separate annotation surface", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("workspace persistence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("clipboard fragments", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("screenshot artifacts", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("schema version", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("migration policy", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("compatibility test", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no schema version changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime UI behavior", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer work", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public drawing API", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no toolbar/tool activation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no eraser behavior", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("whiteboard primitive persistence is implemented", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("GraphDocument schema now stores whiteboard primitives", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("Phase 544 records the whiteboard primitive persistence schema policy gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 544 记录 whiteboard primitive persistence schema policy gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
