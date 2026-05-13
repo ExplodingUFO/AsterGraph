@@ -1471,6 +1471,42 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase550WhiteboardPrimitiveCookbookScreenshotGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 550", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #223", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-wjr", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard primitive Cookbook screenshot implementation gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("WHITEBOARD_PRIMITIVE_COOKBOOK_SCREENSHOT_GATE", contents, StringComparison.Ordinal);
+            Assert.Contains("cookbook-whiteboard-primitive-screenshot-proof", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-whiteboard-primitive-screenshot-proof", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard primitive visual proof", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("route metadata", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("shell state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("non-overlap", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public drawing API", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no pointer coordinator", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no toolbar", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no eraser", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no persisted whiteboard primitive state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no GraphDocument schema change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 550: whiteboard primitive Cookbook screenshot implementation gate", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("whiteboard drawing is fully supported", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertPostPhase545Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase545Queue(ExtractIssueWaveTable(chineseParity));
+        Assert.Contains("Phase 550 records the whiteboard primitive Cookbook screenshot implementation gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 550 记录 whiteboard primitive Cookbook screenshot implementation gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -1679,8 +1715,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("| #217 | `avalonia-node-map-rs0` | Phase 547: whiteboard primitive model skeleton", table, StringComparison.Ordinal);
         Assert.Contains("| #219 | `avalonia-node-map-10p` | Phase 548: whiteboard primitive renderer adapter skeleton", table, StringComparison.Ordinal);
         Assert.Contains("| #221 | `avalonia-node-map-3l6` | Phase 549: whiteboard primitive persistence decision implementation gate", table, StringComparison.Ordinal);
-        Assert.Contains("Phase 550: whiteboard primitive Cookbook screenshot implementation gate", table, StringComparison.Ordinal);
-        Assert.Contains("TBD", table, StringComparison.Ordinal);
+        Assert.Contains("| #223 | `avalonia-node-map-wjr` | Phase 550: whiteboard primitive Cookbook screenshot implementation gate", table, StringComparison.Ordinal);
         Assert.Contains("Core/Editor primitive model tests", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("internal model types", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("renderer-neutral contract docs", table, StringComparison.OrdinalIgnoreCase);
@@ -1688,6 +1723,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("topmost primitive hit-testing evidence", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("persistence decision tests", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Cookbook screenshot implementation gate", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("whiteboard primitive visual proof route", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Stacked after PR #214", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("do not merge before Phase 545", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Stacked after PR #216", table, StringComparison.OrdinalIgnoreCase);
@@ -1696,6 +1732,8 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("do not merge before Phase 547", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Stacked after PR #220", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("do not merge before Phase 548", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Stacked after PR #222", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("do not merge before Phase 549", table, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("| #206 | `avalonia-node-map-b31` | Phase 542: whiteboard primitive core model contract gate | P2 | core/editor model tests, primitive identity/geometry/style contract docs, and API inventory | Future candidate", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #207 | `avalonia-node-map-aj8` | Phase 543: whiteboard renderer projection and hit-testing proof gate | P2 | renderer projection tests, hit-testing proof, and bounded Avalonia/editor evidence | Future candidate", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| #208 | `avalonia-node-map-32n` | Phase 544: whiteboard primitive persistence schema policy gate | P3 | persistence/schema policy docs, migration criteria, and compatibility tests | Future candidate", table, StringComparison.Ordinal);
@@ -1703,6 +1741,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.DoesNotContain("| TBD | TBD | Phase 547: whiteboard primitive model skeleton", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| TBD | TBD | Phase 548: whiteboard primitive renderer adapter skeleton", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| TBD | TBD | Phase 549: whiteboard primitive persistence decision implementation gate", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 550: whiteboard primitive Cookbook screenshot implementation gate", table, StringComparison.Ordinal);
     }
 
     private static void AssertBuiltInComponentMatrix(string table)

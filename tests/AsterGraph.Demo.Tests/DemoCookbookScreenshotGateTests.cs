@@ -292,6 +292,34 @@ public sealed class DemoCookbookScreenshotGateTests
     }
 
     [Fact]
+    public void CookbookScreenshotGate_IncludesPhase550WhiteboardPrimitiveScreenshotProofRoute()
+    {
+        var routes = LoadRoutes(GetRepositoryRoot());
+        var shellStates = LoadShellStates(GetRepositoryRoot());
+
+        var route = Assert.Single(routes, candidate =>
+            string.Equals(candidate.Id, "cookbook-whiteboard-primitive-screenshot-proof", StringComparison.Ordinal));
+        Assert.Equal("whiteboard-primitive-screenshot-proof-route", route.RecipeId);
+        Assert.Equal("selection-marquee-workbench", route.Scenario);
+        Assert.Equal("Selection Rectangle Fixture", route.ExpectedDocumentTitle);
+        Assert.True(route.MinimumNodeCount >= 2);
+        Assert.True(route.MinimumConnectionCount >= 1);
+        Assert.Contains("select-output", route.RequiredNodeIds, StringComparer.Ordinal);
+        Assert.Equal("cookbook-whiteboard-primitive-screenshot-proof.png", route.OutputFileName);
+
+        var shellState = Assert.Single(shellStates, state =>
+            string.Equals(state.Id, "shell-cookbook-whiteboard-primitive-screenshot-proof", StringComparison.Ordinal));
+        Assert.Equal(route.Id, shellState.RouteId);
+        Assert.Equal("cookbook", shellState.HostGroup);
+        Assert.Equal("en", shellState.Language);
+        Assert.Equal("canonical-dark", shellState.Theme);
+        Assert.True(shellState.ExpectedPaneOpen);
+        Assert.Contains("PART_NodeCanvas", shellState.RequiredShellParts, StringComparer.Ordinal);
+        Assert.Contains("PART_CookbookWorkspaceRecipeContentPanel", shellState.RequiredShellParts, StringComparer.Ordinal);
+        Assert.Equal("shell-cookbook-whiteboard-primitive-screenshot-proof.png", shellState.OutputFileName);
+    }
+
+    [Fact]
     public void CookbookScreenshotGate_IncludesLifecycleFixtureBatchRoutes()
     {
         var routes = LoadRoutes(GetRepositoryRoot());
@@ -336,7 +364,7 @@ public sealed class DemoCookbookScreenshotGateTests
             ],
             shellState.RequiredShellParts);
         Assert.Equal("shell-runtime-diagnostics-closed.png", shellState.OutputFileName);
-        Assert.Equal(11, shellStates.Count);
+        Assert.Equal(12, shellStates.Count);
     }
 
     [Fact]
@@ -663,7 +691,7 @@ public sealed class DemoCookbookScreenshotGateTests
             var imageSize = AssertPngArtifact(bytes, ShellMinimumBytes);
             Assert.True(imageSize.Width >= route.ViewportWidth);
             Assert.True(imageSize.Height >= route.ViewportHeight);
-            var pixelInspection = InspectNonBlankPng(imagePath);
+            var pixelInspection = InspectNonBlankPng(bytes, imagePath);
             Assert.True(pixelInspection.NonTransparentPixelCount > imageSize.Width * imageSize.Height / 4);
             Assert.True(pixelInspection.DistinctColorCount > 1);
 
@@ -968,9 +996,9 @@ public sealed class DemoCookbookScreenshotGateTests
         return new PngSize(ReadBigEndianInt32(bytes, 16), ReadBigEndianInt32(bytes, 20));
     }
 
-    private static PngPixelInspection InspectNonBlankPng(string imagePath)
+    private static PngPixelInspection InspectNonBlankPng(byte[] bytes, string imagePath)
     {
-        using var bitmap = SKBitmap.Decode(imagePath);
+        using var bitmap = SKBitmap.Decode(bytes);
         Assert.NotNull(bitmap);
         Assert.True(bitmap.Width > 0);
         Assert.True(bitmap.Height > 0);
