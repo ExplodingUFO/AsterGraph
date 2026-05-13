@@ -1547,6 +1547,58 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase552WhiteboardDrawingToolActivationContractInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+        var englishInventory = ReadRepoFile("docs/en/public-api-inventory.md");
+        var chineseInventory = ReadRepoFile("docs/zh-CN/public-api-inventory.md");
+        var englishRecipe = ReadRepoFile("docs/en/authoring-surface-recipe.md");
+        var chineseRecipe = ReadRepoFile("docs/zh-CN/authoring-surface-recipe.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 552", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #226", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-718", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard drawing tool public activation contract", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("NodeCanvas.WhiteboardDrawingMode", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeCanvasWhiteboardDrawingMode.Rectangle", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeCanvasWhiteboardDrawingMode.Freehand", contents, StringComparison.Ordinal);
+            Assert.Contains("CreateWhiteboardDrawingToolActions", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard-drawing.rectangle", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard-drawing.freehand", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorCommandSourceKind.Host", contents, StringComparison.Ordinal);
+            Assert.Contains("no runtime command id", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no pointer gesture capture", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime drawing creation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no toolbar UI implementation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no eraser behavior", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no persistence/schema changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer rewrite", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("whiteboard drawing parity is supported", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { englishInventory, chineseInventory, englishRecipe, chineseRecipe })
+        {
+            Assert.Contains("CreateWhiteboardDrawingToolActions", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeCanvas.WhiteboardDrawingMode", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeCanvasWhiteboardDrawingMode.Rectangle", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeCanvasWhiteboardDrawingMode.Freehand", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard-drawing.rectangle", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard-drawing.freehand", contents, StringComparison.Ordinal);
+            Assert.Contains("no runtime command id", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertPostPhase551Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase551Queue(ExtractIssueWaveTable(chineseParity));
+        Assert.Contains("Phase 552 records the whiteboard drawing tool public activation contract", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 552 记录 whiteboard drawing tool public activation contract", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -1943,7 +1995,7 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("| Multi-select and command projection | Present / guarded |", table, StringComparison.Ordinal);
         Assert.Contains("| Lasso/freehand selection | Public Avalonia lasso selection mode with hosted toolbar activation and transient visual feedback / whiteboard gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Eraser tool | Feasibility gate recorded / gap retained |", table, StringComparison.Ordinal);
-        Assert.Contains("| Rectangle/freehand drawing | Model gate recorded / gap retained |", table, StringComparison.Ordinal);
+        Assert.Contains("| Rectangle/freehand drawing | Public activation contract only / behavior gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("| Whiteboard persistence/render layer | Readiness gate recorded / gap retained |", table, StringComparison.Ordinal);
         Assert.Contains("https://reactflow.dev/learn/advanced-use/whiteboard", table, StringComparison.Ordinal);
         Assert.Contains("Freehand draw", table, StringComparison.Ordinal);
@@ -1993,6 +2045,15 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.Contains("public pointer-mode activation route", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("transient visual feedback", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("hosted toolbar", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("NodeCanvas.WhiteboardDrawingMode", table, StringComparison.Ordinal);
+        Assert.Contains("NodeCanvasWhiteboardDrawingMode.Rectangle", table, StringComparison.Ordinal);
+        Assert.Contains("NodeCanvasWhiteboardDrawingMode.Freehand", table, StringComparison.Ordinal);
+        Assert.Contains("CreateWhiteboardDrawingToolActions", table, StringComparison.Ordinal);
+        Assert.Contains("whiteboard-drawing.rectangle", table, StringComparison.Ordinal);
+        Assert.Contains("whiteboard-drawing.freehand", table, StringComparison.Ordinal);
+        Assert.Contains("no runtime command id", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("no pointer gesture capture", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("no runtime drawing creation", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("drawing persistence", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("renderer layer", table, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("screenshot manifest expansion", table, StringComparison.OrdinalIgnoreCase);

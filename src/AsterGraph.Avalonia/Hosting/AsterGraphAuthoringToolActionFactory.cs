@@ -26,6 +26,27 @@ public static class AsterGraphAuthoringToolActionFactory
         ];
     }
 
+    public static IReadOnlyList<AsterGraphHostedActionDescriptor> CreateWhiteboardDrawingToolActions(NodeCanvas canvas)
+    {
+        ArgumentNullException.ThrowIfNull(canvas);
+
+        return
+        [
+            CreateWhiteboardDrawingToolAction(
+                canvas,
+                "whiteboard-drawing.rectangle",
+                "Rectangle Drawing Tool",
+                "Activate rectangle whiteboard drawing for a future pointer-capture route.",
+                NodeCanvasWhiteboardDrawingMode.Rectangle),
+            CreateWhiteboardDrawingToolAction(
+                canvas,
+                "whiteboard-drawing.freehand",
+                "Freehand Drawing Tool",
+                "Activate freehand whiteboard drawing for a future pointer-capture route.",
+                NodeCanvasWhiteboardDrawingMode.Freehand),
+        ];
+    }
+
     public static IReadOnlyList<AsterGraphHostedActionDescriptor> CreateSelectionActions(IGraphEditorSession session)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -157,6 +178,28 @@ public static class AsterGraphAuthoringToolActionFactory
             () =>
             {
                 canvas.SelectionMode = mode;
+                return true;
+            });
+
+    private static AsterGraphHostedActionDescriptor CreateWhiteboardDrawingToolAction(
+        NodeCanvas canvas,
+        string id,
+        string title,
+        string recoveryHint,
+        NodeCanvasWhiteboardDrawingMode mode)
+        => AsterGraphHostedActionFactory.CreateHostAction(
+            new GraphEditorCommandDescriptorSnapshot(
+                id,
+                title,
+                "whiteboard-drawing",
+                null,
+                null,
+                GraphEditorCommandSourceKind.Host,
+                isEnabled: true,
+                recoveryHint: recoveryHint),
+            () =>
+            {
+                canvas.WhiteboardDrawingMode = mode;
                 return true;
             });
 }

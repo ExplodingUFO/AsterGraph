@@ -138,6 +138,49 @@ public sealed class GraphEditorActionContributionContractTests
         Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
     }
 
+    [AvaloniaFact]
+    public void HostedActions_WhiteboardDrawingToolActionsSwitchNodeCanvasDrawingModeWithoutRuntimeCommandRoute()
+    {
+        var canvas = new NodeCanvas();
+
+        var actions = AsterGraphAuthoringToolActionFactory.CreateWhiteboardDrawingToolActions(canvas);
+
+        var rectangleAction = Assert.Single(actions, action => action.Id == "whiteboard-drawing.rectangle");
+        var freehandAction = Assert.Single(actions, action => action.Id == "whiteboard-drawing.freehand");
+
+        Assert.Equal("Rectangle Drawing Tool", rectangleAction.Title);
+        Assert.Equal("Freehand Drawing Tool", freehandAction.Title);
+        Assert.Equal(GraphEditorCommandSourceKind.Host, rectangleAction.CommandSource);
+        Assert.Equal(GraphEditorCommandSourceKind.Host, freehandAction.CommandSource);
+        Assert.Null(rectangleAction.CommandId);
+        Assert.Null(freehandAction.CommandId);
+        Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+        Assert.Equal(NodeCanvasWhiteboardDrawingMode.None, canvas.WhiteboardDrawingMode);
+
+        Assert.True(freehandAction.TryExecute());
+
+        Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+        Assert.Equal(NodeCanvasWhiteboardDrawingMode.Freehand, canvas.WhiteboardDrawingMode);
+
+        Assert.True(rectangleAction.TryExecute());
+
+        Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+        Assert.Equal(NodeCanvasWhiteboardDrawingMode.Rectangle, canvas.WhiteboardDrawingMode);
+    }
+
+    [Fact]
+    public void CommandRegistry_DoesNotExposeWhiteboardDrawingToolActivationAsRuntimeSessionCommand()
+    {
+        var session = CreateSession();
+
+        var commandIds = session.Queries.GetCommandRegistry()
+            .Select(entry => entry.CommandId)
+            .ToHashSet(StringComparer.Ordinal);
+
+        Assert.DoesNotContain("whiteboard-drawing.rectangle", commandIds);
+        Assert.DoesNotContain("whiteboard-drawing.freehand", commandIds);
+    }
+
     private static void AssertPlacement(
         GraphEditorCommandRegistryEntrySnapshot entry,
         GraphEditorCommandSurfaceKind surfaceKind,
