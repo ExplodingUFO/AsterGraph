@@ -36,13 +36,13 @@ public static class AsterGraphAuthoringToolActionFactory
                 canvas,
                 "whiteboard-drawing.rectangle",
                 "Rectangle Drawing Tool",
-                "Activate rectangle whiteboard drawing for a future pointer-capture route.",
+                "Activate rectangle whiteboard drawing for canvas pointer capture.",
                 NodeCanvasWhiteboardDrawingMode.Rectangle),
             CreateWhiteboardDrawingToolAction(
                 canvas,
                 "whiteboard-drawing.freehand",
                 "Freehand Drawing Tool",
-                "Activate freehand whiteboard drawing for a future pointer-capture route.",
+                "Activate freehand whiteboard drawing for canvas pointer capture.",
                 NodeCanvasWhiteboardDrawingMode.Freehand),
         ];
     }

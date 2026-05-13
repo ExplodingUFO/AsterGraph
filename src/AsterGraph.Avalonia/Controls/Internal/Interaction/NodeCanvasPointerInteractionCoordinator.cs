@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Input;
+using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
@@ -17,6 +18,8 @@ internal interface INodeCanvasPointerInteractionHost
     bool EnableAltLeftDragPanning { get; }
 
     NodeCanvasSelectionGestureKind SelectionGestureKind { get; }
+
+    NodeCanvasWhiteboardDrawingMode WhiteboardDrawingMode { get; }
 
     NodeCanvasInteractionSession InteractionSession { get; }
 
@@ -110,6 +113,13 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             _host.RenderConnections();
         }
 
+        if (TryBeginWhiteboardPrimitiveDrawing(currentScreenPosition))
+        {
+            _host.HideSelectionAdorner();
+            _host.HideGuideAdorners();
+            return new NodeCanvasPointerPressedResult(Handled: true, CapturePointer: true);
+        }
+
         _host.InteractionSession.BeginCanvasSelection(
             currentScreenPosition,
             modifiers,
@@ -163,6 +173,19 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         if (_host.InteractionSession.GroupResizeSession is NodeCanvasGroupResizeSession groupResizeSession)
         {
             return HandleGroupResizeMove(groupResizeSession, currentScreenPosition);
+        }
+
+        if (_host.InteractionSession.WhiteboardPrimitiveGesture is not null)
+        {
+            if (_host.InteractionSession.TryBeginWhiteboardPrimitiveDrag(currentScreenPosition, selectionDragThreshold))
+            {
+                _host.InteractionSession.UpdateWhiteboardPrimitiveDrawing(
+                    currentScreenPosition,
+                    ScreenToWorld(currentScreenPosition));
+            }
+
+            _host.ClearResizeFeedback();
+            return true;
         }
 
         if (_host.InteractionSession.SelectionStartScreenPosition is not null
@@ -276,6 +299,16 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
     public void HandleReleased(Point currentScreenPosition)
     {
+        if (_host.InteractionSession.WhiteboardPrimitiveGesture is not null && _host.ViewModel is not null)
+        {
+            if (_host.InteractionSession.IsWhiteboardPrimitiveDragActive)
+            {
+                _host.InteractionSession.CommitWhiteboardPrimitiveDrawing(
+                    currentScreenPosition,
+                    ScreenToWorld(currentScreenPosition));
+            }
+        }
+
         if (_host.InteractionSession.DragNode is not null
             && _host.InteractionSession.DragSession is NodeCanvasDragSession dragSession
             && _host.ViewModel is not null)
@@ -434,6 +467,30 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
         return true;
     }
+
+    private bool TryBeginWhiteboardPrimitiveDrawing(Point currentScreenPosition)
+    {
+        var kind = _host.WhiteboardDrawingMode switch
+        {
+            NodeCanvasWhiteboardDrawingMode.Rectangle => GraphWhiteboardPrimitiveKind.Rectangle,
+            NodeCanvasWhiteboardDrawingMode.Freehand => GraphWhiteboardPrimitiveKind.Freehand,
+            _ => (GraphWhiteboardPrimitiveKind?)null,
+        };
+        if (kind is not GraphWhiteboardPrimitiveKind primitiveKind)
+        {
+            return false;
+        }
+
+        _host.InteractionSession.BeginWhiteboardPrimitiveDrawing(
+            primitiveKind,
+            currentScreenPosition,
+            ScreenToWorld(currentScreenPosition));
+        return true;
+    }
+
+    private GraphPoint ScreenToWorld(Point screenPosition)
+        => _host.ViewModel?.ScreenToWorld(new GraphPoint(screenPosition.X, screenPosition.Y))
+           ?? new GraphPoint(screenPosition.X, screenPosition.Y);
 
     private bool HandleGroupResizeMove(NodeCanvasGroupResizeSession resizeSession, Point currentScreenPosition)
     {
@@ -695,5 +752,6 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
            || _host.InteractionSession.DragNode is not null
            || _host.InteractionSession.DragGroupId is not null
            || _host.InteractionSession.NodeResizeSession is not null
-           || _host.InteractionSession.GroupResizeSession is not null;
+           || _host.InteractionSession.GroupResizeSession is not null
+           || _host.InteractionSession.WhiteboardPrimitiveGesture is not null;
 }

@@ -100,6 +100,85 @@ public sealed class NodeCanvasInteractionSessionTests
     }
 
     [Fact]
+    public void BeginWhiteboardPrimitiveDrawing_WithRectangle_CreatesCreatingPreviewAndNormalizesUpdateGeometry()
+    {
+        var session = new NodeCanvasInteractionSession();
+
+        session.BeginWhiteboardPrimitiveDrawing(
+            GraphWhiteboardPrimitiveKind.Rectangle,
+            new Point(60, 80),
+            new GraphPoint(20, 30));
+
+        Assert.NotNull(session.ActiveWhiteboardPrimitive);
+        Assert.Equal(GraphWhiteboardPrimitiveKind.Rectangle, session.ActiveWhiteboardPrimitive.Kind);
+        Assert.Equal(new GraphPoint(20, 30), session.ActiveWhiteboardPrimitive.Geometry.Origin);
+        Assert.Equal(new GraphSize(0, 0), session.ActiveWhiteboardPrimitive.Geometry.Size);
+        Assert.Empty(session.ActiveWhiteboardPrimitive.Geometry.Points);
+        Assert.Equal(GraphWhiteboardPrimitiveEditState.Creating, session.ActiveWhiteboardPrimitive.EditLifecycle.State);
+        Assert.Equal([new Point(60, 80)], session.WhiteboardGestureScreenPoints);
+        Assert.Null(session.SelectionStartScreenPosition);
+
+        session.UpdateWhiteboardPrimitiveDrawing(new Point(20, 40), new GraphPoint(0, 10));
+
+        Assert.NotNull(session.ActiveWhiteboardPrimitive);
+        Assert.Equal(new GraphPoint(0, 10), session.ActiveWhiteboardPrimitive.Geometry.Origin);
+        Assert.Equal(new GraphSize(20, 20), session.ActiveWhiteboardPrimitive.Geometry.Size);
+        Assert.Equal(GraphWhiteboardPrimitiveEditState.Editing, session.ActiveWhiteboardPrimitive.EditLifecycle.State);
+        Assert.Equal([new Point(60, 80), new Point(20, 40)], session.WhiteboardGestureScreenPoints);
+    }
+
+    [Fact]
+    public void CommitWhiteboardPrimitiveDrawing_WithFreehand_StoresCommittedPrimitiveAndClearsActiveGesture()
+    {
+        var session = new NodeCanvasInteractionSession();
+
+        session.BeginWhiteboardPrimitiveDrawing(
+            GraphWhiteboardPrimitiveKind.Freehand,
+            new Point(10, 20),
+            new GraphPoint(4, 8));
+        session.UpdateWhiteboardPrimitiveDrawing(new Point(18, 28), new GraphPoint(8, 12));
+
+        var committed = session.CommitWhiteboardPrimitiveDrawing(new Point(6, 32), new GraphPoint(2, 14));
+
+        Assert.NotNull(committed);
+        Assert.Equal(GraphWhiteboardPrimitiveKind.Freehand, committed.Kind);
+        Assert.Equal(new GraphPoint(2, 8), committed.Geometry.Origin);
+        Assert.Equal(new GraphSize(6, 6), committed.Geometry.Size);
+        Assert.Equal(
+            [new GraphPoint(4, 8), new GraphPoint(8, 12), new GraphPoint(2, 14)],
+            committed.Geometry.Points);
+        Assert.Equal(GraphWhiteboardPrimitiveEditState.Committed, committed.EditLifecycle.State);
+        Assert.Null(session.ActiveWhiteboardPrimitive);
+        Assert.Empty(session.WhiteboardGestureScreenPoints);
+        Assert.Equal([committed], session.WhiteboardPrimitives);
+    }
+
+    [Fact]
+    public void ResetAfterPointerRelease_CancelsActiveWhiteboardPrimitiveWithoutClearingCommittedPrimitives()
+    {
+        var session = new NodeCanvasInteractionSession();
+
+        session.BeginWhiteboardPrimitiveDrawing(
+            GraphWhiteboardPrimitiveKind.Rectangle,
+            new Point(10, 20),
+            new GraphPoint(10, 20));
+        var committed = session.CommitWhiteboardPrimitiveDrawing(new Point(30, 50), new GraphPoint(30, 50));
+        Assert.NotNull(committed);
+
+        session.BeginWhiteboardPrimitiveDrawing(
+            GraphWhiteboardPrimitiveKind.Freehand,
+            new Point(12, 18),
+            new GraphPoint(12, 18));
+        session.UpdateWhiteboardPrimitiveDrawing(new Point(20, 24), new GraphPoint(20, 24));
+
+        session.ResetAfterPointerRelease();
+
+        Assert.Null(session.ActiveWhiteboardPrimitive);
+        Assert.Empty(session.WhiteboardGestureScreenPoints);
+        Assert.Equal([committed], session.WhiteboardPrimitives);
+    }
+
+    [Fact]
     public void BeginPanning_ClearsOtherInteractionModes()
     {
         var session = new NodeCanvasInteractionSession();

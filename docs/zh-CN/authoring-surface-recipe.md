@@ -81,7 +81,7 @@
 4. 写回时继续走 `TrySetSelectedNodeParameterValue(...)` 或 `TrySetNodeParameterValue(...)`，把 validation 保留在共享 session command 路线上，不再引入第二套 editor model。
 5. 宿主命令继续从 `GetCommandDescriptors()` 投影，这样 toolbar、menu、shortcut 和 palette action 都停留在同一条共享 command route 上。
 6. hosted pointer-mode 控件直接把 `AsterGraphAuthoringToolActionFactory.CreatePointerSelectionModeActions(canvas)` 投到同一行 authoring toolbar。它们只把 `NodeCanvas.SelectionMode` 设为 `NodeCanvasSelectionMode.Marquee` 或 `NodeCanvasSelectionMode.Lasso`，不新增 session command、第二套 selection model 或 whiteboard drawing state。
-7. hosted whiteboard drawing-tool activation 控件可以把 `AsterGraphAuthoringToolActionFactory.CreateWhiteboardDrawingToolActions(canvas)` 放到 pointer-mode controls 旁边。这些 action 只把 `NodeCanvas.WhiteboardDrawingMode` 设为 `NodeCanvasWhiteboardDrawingMode.Rectangle` 或 `NodeCanvasWhiteboardDrawingMode.Freehand`；`whiteboard-drawing.rectangle` 和 `whiteboard-drawing.freehand` 没有 runtime command id，也不会启动 pointer capture 或创建 drawing primitives。
+7. hosted whiteboard drawing-tool activation 控件可以把 `AsterGraphAuthoringToolActionFactory.CreateWhiteboardDrawingToolActions(canvas)` 放到 pointer-mode controls 旁边。这些 action 只把 `NodeCanvas.WhiteboardDrawingMode` 设为 `NodeCanvasWhiteboardDrawingMode.Rectangle` 或 `NodeCanvasWhiteboardDrawingMode.Freehand`；`whiteboard-drawing.rectangle` 和 `whiteboard-drawing.freehand` 没有 runtime command id。Stock canvas 会在后续 left-drag pointer gesture 中消费这个 activation，只创建 transient internal whiteboard primitive state。
 8. 最后用 `src/AsterGraph.Demo -- --proof` 收口，并期待看到 `PORT_HANDLE_ID_OK:True`、`PORT_GROUP_AUTHORING_OK:True`、`PORT_CONNECTION_HINT_OK:True`、`PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`、`CUSTOM_EXTENSION_SURFACE_OK:True` 和 `AUTHORING_SURFACE_OK:True`。
 
 ## 复制顺序
@@ -92,7 +92,7 @@
 4. 通过 `INodeParameterEditorRegistry` 替换 editor body。
 5. 通过 `GetConnectionGeometrySnapshots()` 渲染宿主自管 edge overlay。
 6. 宿主需要 toolbar affordance 时，用 `CreatePointerSelectionModeActions(...)` 接入 `NodeCanvasSelectionMode.Lasso`。
-7. 宿主需要 public activation affordance 时，用 `CreateWhiteboardDrawingToolActions(...)` 接入 `NodeCanvas.WhiteboardDrawingMode`、`NodeCanvasWhiteboardDrawingMode.Rectangle` 和 `NodeCanvasWhiteboardDrawingMode.Freehand`。这仍然只是 activation：no runtime command id、no pointer gesture capture、no persistence/schema changes、no renderer changes。
+7. 宿主需要 public activation affordance 时，用 `CreateWhiteboardDrawingToolActions(...)` 接入 `NodeCanvas.WhiteboardDrawingMode`、`NodeCanvasWhiteboardDrawingMode.Rectangle` 和 `NodeCanvasWhiteboardDrawingMode.Freehand`。这仍然只包括 hosted activation 和 internal pointer capture：no runtime command id、no persistence/schema changes、no renderer changes、no toolbar UI implementation，也不声明 full React Flow whiteboard parity。
 8. runtime decoration 保持在 `IGraphRuntimeOverlayProvider` 和 inspector snapshots 上；不要把图执行搬进 editor。
 
 ## 相关文档
