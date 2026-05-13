@@ -75,6 +75,44 @@ public sealed class WhiteboardPrimitiveRendererAdapterContractsTests
     }
 
     [Fact]
+    public void HitTest_FreehandPrimitiveIgnoresPointInsideBoundsButAwayFromStroke()
+    {
+        var freehand = CreateFreehandPrimitive(
+            "freehand-001",
+            zIndex: 2,
+            [
+                new GraphPoint(32d, 42d),
+                new GraphPoint(52d, 64d),
+                new GraphPoint(74d, 48d),
+            ]);
+        var scene = GraphWhiteboardPrimitiveRendererAdapter.Project([freehand]);
+
+        var hit = GraphWhiteboardPrimitiveRendererAdapter.HitTest(scene, new GraphPoint(88d, 78d));
+
+        Assert.Null(hit);
+    }
+
+    [Fact]
+    public void HitTest_FreehandPrimitiveReturnsHitNearStrokeSegment()
+    {
+        var freehand = CreateFreehandPrimitive(
+            "freehand-001",
+            zIndex: 2,
+            [
+                new GraphPoint(32d, 42d),
+                new GraphPoint(52d, 64d),
+                new GraphPoint(74d, 48d),
+            ]);
+        var scene = GraphWhiteboardPrimitiveRendererAdapter.Project([freehand]);
+
+        var hit = GraphWhiteboardPrimitiveRendererAdapter.HitTest(scene, new GraphPoint(53d, 63d));
+
+        Assert.NotNull(hit);
+        Assert.Equal("freehand-001", hit.PrimitiveId);
+        Assert.Equal(GraphWhiteboardPrimitiveKind.Freehand, hit.Kind);
+    }
+
+    [Fact]
     public void RendererAdapter_StaysInternalRendererNeutralAndSeparateFromGraphSceneAndAvaloniaRenderers()
     {
         Assert.False(typeof(GraphWhiteboardPrimitiveRendererAdapter).IsPublic);

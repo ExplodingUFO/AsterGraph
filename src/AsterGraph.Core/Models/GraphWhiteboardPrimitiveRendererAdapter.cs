@@ -5,6 +5,8 @@ namespace AsterGraph.Core.Models;
 /// </summary>
 internal static class GraphWhiteboardPrimitiveRendererAdapter
 {
+    private const double MinimumFreehandHitTolerance = 4d;
+
     /// <summary>
     /// Projects whiteboard primitive model snapshots into renderer-neutral scene data.
     /// </summary>
@@ -58,6 +60,13 @@ internal static class GraphWhiteboardPrimitiveRendererAdapter
     }
 
     private static bool Contains(GraphWhiteboardPrimitiveSceneItem primitive, GraphPoint point)
+        => primitive.Kind switch
+        {
+            GraphWhiteboardPrimitiveKind.Freehand => ContainsFreehandPrimitive(primitive, point),
+            _ => ContainsBounds(primitive, point),
+        };
+
+    private static bool ContainsBounds(GraphWhiteboardPrimitiveSceneItem primitive, GraphPoint point)
     {
         var left = primitive.BoundsOrigin.X;
         var top = primitive.BoundsOrigin.Y;
@@ -68,6 +77,56 @@ internal static class GraphWhiteboardPrimitiveRendererAdapter
                && point.X <= right
                && point.Y >= top
                && point.Y <= bottom;
+    }
+
+    private static bool ContainsFreehandPrimitive(GraphWhiteboardPrimitiveSceneItem primitive, GraphPoint point)
+    {
+        if (!ContainsBounds(primitive, point) || primitive.Points.Count == 0)
+        {
+            return false;
+        }
+
+        var tolerance = Math.Max(MinimumFreehandHitTolerance, primitive.Style.StrokeThickness / 2d);
+        if (primitive.Points.Count == 1)
+        {
+            return DistanceSquared(point, primitive.Points[0]) <= tolerance * tolerance;
+        }
+
+        for (var index = 1; index < primitive.Points.Count; index++)
+        {
+            if (DistanceToSegmentSquared(point, primitive.Points[index - 1], primitive.Points[index]) <= tolerance * tolerance)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static double DistanceToSegmentSquared(GraphPoint point, GraphPoint start, GraphPoint end)
+    {
+        var segmentX = end.X - start.X;
+        var segmentY = end.Y - start.Y;
+        var lengthSquared = (segmentX * segmentX) + (segmentY * segmentY);
+        if (lengthSquared <= double.Epsilon)
+        {
+            return DistanceSquared(point, start);
+        }
+
+        var projected = (((point.X - start.X) * segmentX) + ((point.Y - start.Y) * segmentY)) / lengthSquared;
+        var clamped = Math.Clamp(projected, 0d, 1d);
+        var closest = new GraphPoint(
+            start.X + (clamped * segmentX),
+            start.Y + (clamped * segmentY));
+
+        return DistanceSquared(point, closest);
+    }
+
+    private static double DistanceSquared(GraphPoint first, GraphPoint second)
+    {
+        var deltaX = first.X - second.X;
+        var deltaY = first.Y - second.Y;
+        return (deltaX * deltaX) + (deltaY * deltaY);
     }
 
     private readonly record struct IndexedPrimitive(GraphWhiteboardPrimitiveSceneItem Primitive, int Index);
