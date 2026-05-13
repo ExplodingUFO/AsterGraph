@@ -2102,6 +2102,54 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase563ScreenshotCookbookProofExpansionInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 563", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #245", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-kri", contents, StringComparison.Ordinal);
+            Assert.Contains("WHITEBOARD_ANNOTATION_SCREENSHOT_COOKBOOK_PROOF_EXPANSION", contents, StringComparison.Ordinal);
+            Assert.Contains("Cookbook route expectations", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("screenshot proof metadata", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("non-overlap requirements", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("separation from persistence/serialization implementation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("before screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no new Cookbook route", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no production annotation store", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no file/database I/O", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no GraphDocument schema change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no workspace persistence behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no clipboard/export behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer or pointer behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API exposure", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no saved whiteboard primitive state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("whiteboard annotation screenshot route is implemented", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("Cookbook route now renders whiteboard annotations", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var table in new[] { ExtractIssueWaveTable(englishParity), ExtractIssueWaveTable(chineseParity) })
+        {
+            Assert.Contains("| #245 | `avalonia-node-map-kri` | Phase 563: whiteboard annotation screenshot and Cookbook proof expansion", table, StringComparison.Ordinal);
+            Assert.Contains("Depends on Phase 559", table, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("screenshot/Cookbook proof expansion planning only", table, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("route criteria", table, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("non-overlap evidence requirements", table, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 563", table, StringComparison.Ordinal);
+            Assert.DoesNotContain("screenshot manifest now includes annotations", table, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("Phase 563 records the whiteboard annotation screenshot and Cookbook proof expansion", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 563 记录 whiteboard annotation screenshot and Cookbook proof expansion", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
