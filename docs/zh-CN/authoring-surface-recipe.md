@@ -80,7 +80,8 @@
 3. 然后用 `GetNodeParameterSnapshots(nodeId)` 投影节点旁路状态，让 `NodeParameterEditorHost` 和 `INodeParameterEditorRegistry` 在自定义节点表面上继续复用同一份 metadata 和 validation 合同。
 4. 写回时继续走 `TrySetSelectedNodeParameterValue(...)` 或 `TrySetNodeParameterValue(...)`，把 validation 保留在共享 session command 路线上，不再引入第二套 editor model。
 5. 宿主命令继续从 `GetCommandDescriptors()` 投影，这样 toolbar、menu、shortcut 和 palette action 都停留在同一条共享 command route 上。
-6. 最后用 `src/AsterGraph.Demo -- --proof` 收口，并期待看到 `PORT_HANDLE_ID_OK:True`、`PORT_GROUP_AUTHORING_OK:True`、`PORT_CONNECTION_HINT_OK:True`、`PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`、`CUSTOM_EXTENSION_SURFACE_OK:True` 和 `AUTHORING_SURFACE_OK:True`。
+6. hosted pointer-mode 控件直接把 `AsterGraphAuthoringToolActionFactory.CreatePointerSelectionModeActions(canvas)` 投到同一行 authoring toolbar。它们只把 `NodeCanvas.SelectionMode` 设为 `NodeCanvasSelectionMode.Marquee` 或 `NodeCanvasSelectionMode.Lasso`，不新增 session command、第二套 selection model 或 whiteboard drawing state。
+7. 最后用 `src/AsterGraph.Demo -- --proof` 收口，并期待看到 `PORT_HANDLE_ID_OK:True`、`PORT_GROUP_AUTHORING_OK:True`、`PORT_CONNECTION_HINT_OK:True`、`PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`、`CUSTOM_EXTENSION_SURFACE_OK:True` 和 `AUTHORING_SURFACE_OK:True`。
 
 ## 复制顺序
 
@@ -89,7 +90,8 @@
 3. 通过 `IGraphNodeVisualPresenter` 替换节点可视树。
 4. 通过 `INodeParameterEditorRegistry` 替换 editor body。
 5. 通过 `GetConnectionGeometrySnapshots()` 渲染宿主自管 edge overlay。
-6. runtime decoration 保持在 `IGraphRuntimeOverlayProvider` 和 inspector snapshots 上；不要把图执行搬进 editor。
+6. 宿主需要 toolbar affordance 时，用 `CreatePointerSelectionModeActions(...)` 接入 `NodeCanvasSelectionMode.Lasso`。
+7. runtime decoration 保持在 `IGraphRuntimeOverlayProvider` 和 inspector snapshots 上；不要把图执行搬进 editor。
 
 ## 相关文档
 

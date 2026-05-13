@@ -18,6 +18,7 @@ public partial class GraphEditorView
 {
     private Border? _authoringToolsChrome;
     private TextBlock? _authoringToolsCaptionText;
+    private WrapPanel? _pointerModeToolToolbar;
     private WrapPanel? _selectionToolToolbar;
     private WrapPanel? _nodeToolToolbar;
     private StackPanel? _connectionToolList;
@@ -27,6 +28,7 @@ public partial class GraphEditorView
     {
         _authoringToolsChrome = this.FindControl<Border>("PART_AuthoringToolsChrome");
         _authoringToolsCaptionText = this.FindControl<TextBlock>("PART_AuthoringToolsCaptionText");
+        _pointerModeToolToolbar = this.FindControl<WrapPanel>("PART_PointerModeToolToolbar");
         _selectionToolToolbar = this.FindControl<WrapPanel>("PART_SelectionToolToolbar");
         _nodeToolToolbar = this.FindControl<WrapPanel>("PART_NodeToolToolbar");
         _connectionToolList = this.FindControl<StackPanel>("PART_ConnectionToolList");
@@ -36,6 +38,7 @@ public partial class GraphEditorView
     {
         if (_authoringToolsChrome is null
             || _authoringToolsCaptionText is null
+            || _pointerModeToolToolbar is null
             || _selectionToolToolbar is null
             || _nodeToolToolbar is null
             || _connectionToolList is null)
@@ -43,9 +46,11 @@ public partial class GraphEditorView
             return;
         }
 
+        _pointerModeToolToolbar.Children.Clear();
         _selectionToolToolbar.Children.Clear();
         _nodeToolToolbar.Children.Clear();
         _connectionToolList.Children.Clear();
+        BuildPointerModeToolToolbar();
 
         if (Editor is null)
         {
@@ -87,6 +92,19 @@ public partial class GraphEditorView
         foreach (var action in actions)
         {
             _selectionToolToolbar.Children.Add(CreateHostedToolButton(ResolveSelectionToolButtonName(action), action));
+        }
+    }
+
+    private void BuildPointerModeToolToolbar()
+    {
+        if (_pointerModeToolToolbar is null || _nodeCanvas is null)
+        {
+            return;
+        }
+
+        foreach (var action in AsterGraphAuthoringToolActionFactory.CreatePointerSelectionModeActions(_nodeCanvas))
+        {
+            _pointerModeToolToolbar.Children.Add(CreateHostedToolButton(ResolvePointerModeToolButtonName(action), action));
         }
     }
 
@@ -568,6 +586,14 @@ public partial class GraphEditorView
             "selection-distribute-vertical" => "PART_SelectionToolDistributeVerticalButton",
             "selection-snap-grid" => "PART_SelectionToolSnapGridButton",
             _ => $"PART_SelectionTool_{action.Id}",
+        };
+
+    private static string ResolvePointerModeToolButtonName(AsterGraphHostedActionDescriptor action)
+        => action.Id switch
+        {
+            "pointer-mode.marquee-selection" => "PART_PointerModeMarqueeButton",
+            "pointer-mode.lasso-selection" => "PART_PointerModeLassoButton",
+            _ => $"PART_PointerMode_{action.Id}",
         };
 
     private static string ResolveNodeToolButtonName(AsterGraphHostedActionDescriptor action)

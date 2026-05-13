@@ -1,6 +1,7 @@
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
@@ -8,6 +9,7 @@ using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Runtime;
+using Avalonia.Headless.XUnit;
 using Xunit;
 
 namespace AsterGraph.Editor.Tests;
@@ -109,6 +111,31 @@ public sealed class GraphEditorActionContributionContractTests
         Assert.DoesNotContain(
             session.Queries.CreateDocumentSnapshot().Connections,
             connection => connection.Id == ConnectionId);
+    }
+
+    [AvaloniaFact]
+    public void HostedActions_PointerModeActionsSwitchNodeCanvasSelectionModeWithoutRuntimeCommandRoute()
+    {
+        var canvas = new NodeCanvas();
+
+        var actions = AsterGraphAuthoringToolActionFactory.CreatePointerSelectionModeActions(canvas);
+
+        var lassoAction = Assert.Single(actions, action => action.Id == "pointer-mode.lasso-selection");
+        var marqueeAction = Assert.Single(actions, action => action.Id == "pointer-mode.marquee-selection");
+
+        Assert.Equal("Lasso Selection", lassoAction.Title);
+        Assert.Equal("Marquee Selection", marqueeAction.Title);
+        Assert.Equal(GraphEditorCommandSourceKind.Host, lassoAction.CommandSource);
+        Assert.Null(lassoAction.CommandId);
+        Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+
+        Assert.True(lassoAction.TryExecute());
+
+        Assert.Equal(NodeCanvasSelectionMode.Lasso, canvas.SelectionMode);
+
+        Assert.True(marqueeAction.TryExecute());
+
+        Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
     }
 
     private static void AssertPlacement(
