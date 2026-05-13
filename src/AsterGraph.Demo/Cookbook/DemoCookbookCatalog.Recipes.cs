@@ -1363,6 +1363,91 @@ public static partial class DemoCookbookCatalog
             """
             ),
         new DemoCookbookRecipe(
+            "whiteboard-primitive-screenshot-proof-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Whiteboard primitive screenshot proof route",
+            "Capture a bounded Cookbook and shell visual proof route for future whiteboard primitive examples without enabling whiteboard drawing behavior.",
+            [
+                new DemoCookbookAnchor(
+                    "Whiteboard primitive model skeleton",
+                    "src/AsterGraph.Core/Models/GraphWhiteboardPrimitive.cs",
+                    "GraphWhiteboardPrimitive"),
+                new DemoCookbookAnchor(
+                    "Whiteboard renderer adapter skeleton",
+                    "src/AsterGraph.Core/Models/GraphWhiteboardPrimitiveRendererAdapter.cs",
+                    "GraphWhiteboardPrimitiveRendererAdapter"),
+                new DemoCookbookAnchor(
+                    "Whiteboard persistence decision",
+                    "src/AsterGraph.Core/Models/GraphWhiteboardPrimitivePersistenceDecision.cs",
+                    "GraphWhiteboardPrimitivePersistenceDecision"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Selection marquee graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "selection-marquee-workbench"),
+                new DemoCookbookAnchor(
+                    "Whiteboard scene screenshot route",
+                    "tests/AsterGraph.Demo.Tests/CookbookScreenshotGateRoutes.json",
+                    "cookbook-whiteboard-primitive-screenshot-proof"),
+                new DemoCookbookAnchor(
+                    "Whiteboard shell visual gate state",
+                    "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json",
+                    "shell-cookbook-whiteboard-primitive-screenshot-proof"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Whiteboard primitive screenshot proof cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "WHITEBOARD_PRIMITIVE_SCREENSHOT_GATE_OK"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The route reuses selection-marquee-workbench so visual proof starts from a populated graph scene.",
+                    "selection-marquee-workbench"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "The shell visual gate captures PART_NodeCanvas and the Cookbook recipe panel for non-overlap evidence.",
+                    "shell-cookbook-whiteboard-primitive-screenshot-proof"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "The proof remains anchored to internal model, renderer, and persistence decisions instead of adding a whiteboard tool.",
+                    "WHITEBOARD_PRIMITIVE_SCREENSHOT_GATE_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "The screenshot route reuses existing selection fixture state as the stable visual host scene.",
+                    "selection-marquee-workbench"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "The full-window shell capture keeps the node canvas and Cookbook route text visible for non-overlap review.",
+                    "shell-cookbook-whiteboard-primitive-screenshot-proof"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "The generated metadata records route metadata, shell state, and required shell parts for evidence review.",
+                    "cookbook-whiteboard-primitive-screenshot-proof"),
+            ],
+            [
+                "WHITEBOARD_PRIMITIVE_SCREENSHOT_GATE_OK",
+                "GraphWhiteboardPrimitivePersistenceDecision",
+                "cookbook-whiteboard-primitive-screenshot-proof",
+            ],
+            new DemoCookbookRouteClarity(
+                "Whiteboard primitive screenshot proof route: launch `selection-marquee-workbench` and capture `cookbook-whiteboard-primitive-screenshot-proof` plus `shell-cookbook-whiteboard-primitive-screenshot-proof` metadata.",
+                "Supported seams remain internal `AsterGraph.Core` whiteboard primitive model, renderer adapter, and persistence decision contracts plus existing Demo screenshot gate manifests.",
+                "Demo cookbook provides proof-route plumbing only; Demo does not add a public drawing API, pointer coordinator, toolbar, eraser, persisted whiteboard primitive state, GraphDocument schema change, renderer rewrite, UI redesign, or full whiteboard parity."),
+            "Whiteboard primitive screenshot proof coverage is limited to route metadata, shell state, non-overlap visual proof, and existing internal whiteboard decisions; it does not add public drawing APIs, pointer coordinators, toolbar activation, eraser behavior, persisted whiteboard primitive state, GraphDocument schema changes, strict pixel baselines, retained API removal, or full whiteboard parity.",
+            CodeSample: """
+            // Select the proof-only Cookbook route before capture.
+            const string routeId = "cookbook-whiteboard-primitive-screenshot-proof";
+            const string shellStateId = "shell-cookbook-whiteboard-primitive-screenshot-proof";
+
+            // The route reuses selection-marquee-workbench; no whiteboard drawing tool is activated.
+            """
+            ),
+        new DemoCookbookRecipe(
             "interaction-keyboard-navigation-route",
             DemoCookbookRecipeCategory.Authoring,
             "Interaction keyboard navigation route",
