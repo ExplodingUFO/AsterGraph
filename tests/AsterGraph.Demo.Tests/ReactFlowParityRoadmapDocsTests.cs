@@ -1335,6 +1335,41 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase545WhiteboardCookbookScreenshotProofRouteGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 545", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #209", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-7ns", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard Cookbook and screenshot proof route gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("WHITEBOARD_COOKBOOK_SCREENSHOT_PROOF_ROUTE_GATE", contents, StringComparison.Ordinal);
+            Assert.Contains("Cookbook route", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("shell state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("screenshot metadata", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("before/after visual evidence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("non-overlap requirements", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("model, renderer, and persistence gates", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime UI behavior", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no UI redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no drawing tool implementation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no persistence/schema changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no pointer coordinator edits", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("whiteboard screenshot proof route is implemented", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("Cookbook screenshot manifest now includes whiteboard primitives", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("Phase 545 records the whiteboard Cookbook and screenshot proof route gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 545 记录 whiteboard Cookbook and screenshot proof route gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
