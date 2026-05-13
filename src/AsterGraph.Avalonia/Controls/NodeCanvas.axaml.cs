@@ -67,6 +67,14 @@ public partial class NodeCanvas : UserControl
             NodeCanvasSelectionMode.Marquee);
 
     /// <summary>
+    /// Controls the host-selected whiteboard drawing tool without starting pointer capture.
+    /// </summary>
+    public static readonly StyledProperty<NodeCanvasWhiteboardDrawingMode> WhiteboardDrawingModeProperty =
+        AvaloniaProperty.Register<NodeCanvas, NodeCanvasWhiteboardDrawingMode>(
+            nameof(WhiteboardDrawingMode),
+            NodeCanvasWhiteboardDrawingMode.None);
+
+    /// <summary>
     /// 控制节点可视树替换的展示器。
     /// </summary>
     public static readonly StyledProperty<IGraphNodeVisualPresenter?> NodeVisualPresenterProperty =
@@ -214,6 +222,15 @@ public partial class NodeCanvas : UserControl
     {
         get => GetValue(SelectionModeProperty);
         set => SetValue(SelectionModeProperty, value);
+    }
+
+    /// <summary>
+    /// Host-selected whiteboard drawing tool. This activation state does not create primitives by itself.
+    /// </summary>
+    public NodeCanvasWhiteboardDrawingMode WhiteboardDrawingMode
+    {
+        get => GetValue(WhiteboardDrawingModeProperty);
+        set => SetValue(WhiteboardDrawingModeProperty, value);
     }
 
     internal bool AttachPlatformSeams { get; set; } = true;
