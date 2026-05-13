@@ -1225,6 +1225,42 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase542WhiteboardPrimitiveCoreModelContractGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 542", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #206", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-b31", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard primitive core model contract gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("WHITEBOARD_PRIMITIVE_CORE_MODEL_CONTRACT_GATE", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphDocument, GraphNode, GraphConnection, and GraphNodeGroup remain graph-scene models", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("whiteboard primitives remain separate annotation concepts", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("primitive identity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("primitive kind", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("geometry envelope", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("style/brush state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("edit lifecycle metadata", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("renderer-neutral", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("persistence-neutral", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("pointer-neutral", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no production model type", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime UI behavior", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer work", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no persistence/schema migration", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("Phase 542 records the whiteboard primitive core model contract gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 542 记录 whiteboard primitive core model contract gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
