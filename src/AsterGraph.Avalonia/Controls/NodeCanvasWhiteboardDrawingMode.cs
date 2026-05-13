@@ -19,4 +19,9 @@ public enum NodeCanvasWhiteboardDrawingMode
     /// Freehand whiteboard drawing is selected for the canvas pointer capture route.
     /// </summary>
     Freehand,
+
+    /// <summary>
+    /// Whiteboard primitive erasing is selected for the canvas pointer capture route.
+    /// </summary>
+    Eraser,
 }

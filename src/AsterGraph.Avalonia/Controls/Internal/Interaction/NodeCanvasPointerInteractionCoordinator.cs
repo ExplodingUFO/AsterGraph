@@ -463,6 +463,12 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
     private bool TryBeginWhiteboardPrimitiveDrawing(Point currentScreenPosition)
     {
+        if (_host.WhiteboardDrawingMode is NodeCanvasWhiteboardDrawingMode.Eraser)
+        {
+            _host.InteractionSession.TryEraseWhiteboardPrimitive(ScreenToWorld(currentScreenPosition));
+            return true;
+        }
+
         var kind = _host.WhiteboardDrawingMode switch
         {
             NodeCanvasWhiteboardDrawingMode.Rectangle => GraphWhiteboardPrimitiveKind.Rectangle,

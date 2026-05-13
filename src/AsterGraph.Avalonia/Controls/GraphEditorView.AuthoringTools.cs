@@ -606,6 +606,7 @@ public partial class GraphEditorView
         {
             "whiteboard-drawing.rectangle" => "PART_WhiteboardDrawingRectangleButton",
             "whiteboard-drawing.freehand" => "PART_WhiteboardDrawingFreehandButton",
+            "whiteboard-drawing.eraser" => "PART_WhiteboardEraserButton",
             _ => $"PART_WhiteboardDrawing_{action.Id}",
         };
 

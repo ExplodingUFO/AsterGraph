@@ -347,6 +347,7 @@ public sealed class DemoCookbookScreenshotGateTests
         Assert.Contains("PART_CookbookWorkspaceRecipeContentPanel", shellState.RequiredShellParts, StringComparer.Ordinal);
         Assert.Contains("PART_WhiteboardDrawingRectangleButton", shellState.RequiredShellParts, StringComparer.Ordinal);
         Assert.Contains("PART_WhiteboardDrawingFreehandButton", shellState.RequiredShellParts, StringComparer.Ordinal);
+        Assert.Contains("PART_WhiteboardEraserButton", shellState.RequiredShellParts, StringComparer.Ordinal);
         Assert.Equal("shell-cookbook-whiteboard-authoring-cookbook-route.png", shellState.OutputFileName);
     }
 

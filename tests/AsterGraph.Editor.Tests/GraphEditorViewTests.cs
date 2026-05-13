@@ -1195,6 +1195,7 @@ public sealed class GraphEditorViewTests
         var canvas = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas");
         var rectangleButton = FindRequiredDescendant<Button>(view, "PART_WhiteboardDrawingRectangleButton");
         var freehandButton = FindRequiredDescendant<Button>(view, "PART_WhiteboardDrawingFreehandButton");
+        var eraserButton = FindRequiredDescendant<Button>(view, "PART_WhiteboardEraserButton");
         var lassoButton = FindRequiredDescendant<Button>(view, "PART_PointerModeLassoButton");
 
         try
@@ -1204,8 +1205,10 @@ public sealed class GraphEditorViewTests
             Assert.Equal("Rectangle Drawing Tool", Assert.IsType<string>(rectangleButton.Content));
             Assert.Equal("Rectangle Drawing Tool", AutomationProperties.GetName(rectangleButton));
             Assert.Equal("Freehand Drawing Tool", Assert.IsType<string>(freehandButton.Content));
+            Assert.Equal("Whiteboard Eraser Tool", Assert.IsType<string>(eraserButton.Content));
             Assert.True(rectangleButton.IsEnabled);
             Assert.True(freehandButton.IsEnabled);
+            Assert.True(eraserButton.IsEnabled);
 
             rectangleButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
@@ -1218,6 +1221,12 @@ public sealed class GraphEditorViewTests
 
             Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
             Assert.Equal(NodeCanvasWhiteboardDrawingMode.Freehand, canvas.WhiteboardDrawingMode);
+
+            eraserButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+            Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+            Assert.Equal(NodeCanvasWhiteboardDrawingMode.Eraser, canvas.WhiteboardDrawingMode);
 
             lassoButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);

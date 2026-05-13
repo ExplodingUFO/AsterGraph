@@ -382,6 +382,20 @@ internal sealed class NodeCanvasInteractionSession
         return committed;
     }
 
+    public bool TryEraseWhiteboardPrimitive(GraphPoint worldPosition)
+    {
+        var scene = GraphWhiteboardPrimitiveRendererAdapter.Project(_whiteboardPrimitives);
+        var hit = GraphWhiteboardPrimitiveRendererAdapter.HitTest(scene, worldPosition);
+        if (hit is null)
+        {
+            return false;
+        }
+
+        ClearActiveWhiteboardPrimitive();
+        return _whiteboardPrimitives.RemoveAll(
+            primitive => string.Equals(primitive.Id, hit.PrimitiveId, StringComparison.Ordinal)) > 0;
+    }
+
     public void UpdatePointerPosition(Point currentScreenPosition)
         => PointerScreenPosition = currentScreenPosition;
 

@@ -44,6 +44,12 @@ public static class AsterGraphAuthoringToolActionFactory
                 "Freehand Drawing Tool",
                 "Activate freehand whiteboard drawing for canvas pointer capture.",
                 NodeCanvasWhiteboardDrawingMode.Freehand),
+            CreateWhiteboardDrawingToolAction(
+                canvas,
+                "whiteboard-drawing.eraser",
+                "Whiteboard Eraser Tool",
+                "Activate whiteboard primitive erasing without using graph selection deletion.",
+                NodeCanvasWhiteboardDrawingMode.Eraser),
         ];
     }
 
