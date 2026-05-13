@@ -1261,6 +1261,40 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase543WhiteboardRendererHitTestingProofGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 543", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #207", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-aj8", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard renderer projection and hit-testing proof gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("WHITEBOARD_RENDERER_HIT_TEST_PROOF_GATE", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorSceneSnapshot", contents, StringComparison.Ordinal);
+            Assert.Contains("NodeCanvasConnectionSceneRenderer", contents, StringComparison.Ordinal);
+            Assert.Contains("adapter-neutral scene snapshot", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Avalonia renderer seam", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("primitive projection proof", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("hit-testing proof", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("edit lifecycle proof", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("without a renderer rewrite", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer rewrite", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no new persistence/schema behavior", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public drawing API", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no toolbar/tool activation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no eraser behavior", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("Phase 543 records the whiteboard renderer projection and hit-testing proof gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 543 记录 whiteboard renderer projection and hit-testing proof gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
