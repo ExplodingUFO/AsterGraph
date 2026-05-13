@@ -80,6 +80,8 @@ internal sealed class NodeCanvasInteractionSession
 
     public NodeCanvasWhiteboardPrimitiveGesture? WhiteboardPrimitiveGesture { get; private set; }
 
+    public bool IsWhiteboardPrimitiveDragActive { get; private set; }
+
     public Point? DragStartScreenPosition { get; private set; }
 
     public NodeCanvasDragSession? DragSession { get; private set; }
@@ -333,6 +335,7 @@ internal sealed class NodeCanvasInteractionSession
         NodeResizePreview = null;
         GroupResizePreview = null;
         WhiteboardPrimitiveGesture = new NodeCanvasWhiteboardPrimitiveGesture(kind, startWorldPosition);
+        IsWhiteboardPrimitiveDragActive = false;
         _whiteboardGestureScreenPoints.Clear();
         _whiteboardGestureWorldPoints.Clear();
         _whiteboardGestureScreenPoints.Add(startScreenPosition);
@@ -343,6 +346,30 @@ internal sealed class NodeCanvasInteractionSession
             startWorldPosition,
             [startWorldPosition],
             GraphWhiteboardPrimitiveEditState.Creating);
+    }
+
+    public bool TryBeginWhiteboardPrimitiveDrag(Point currentScreenPosition, double threshold)
+    {
+        if (WhiteboardPrimitiveGesture is null)
+        {
+            return false;
+        }
+
+        if (IsWhiteboardPrimitiveDragActive)
+        {
+            return true;
+        }
+
+        var startScreenPosition = _whiteboardGestureScreenPoints.Count == 0
+            ? currentScreenPosition
+            : _whiteboardGestureScreenPoints[0];
+        var delta = currentScreenPosition - startScreenPosition;
+        if (Math.Abs(delta.X) >= threshold || Math.Abs(delta.Y) >= threshold)
+        {
+            IsWhiteboardPrimitiveDragActive = true;
+        }
+
+        return IsWhiteboardPrimitiveDragActive;
     }
 
     public void UpdateWhiteboardPrimitiveDrawing(Point currentScreenPosition, GraphPoint currentWorldPosition)
@@ -596,6 +623,7 @@ internal sealed class NodeCanvasInteractionSession
     {
         ActiveWhiteboardPrimitive = null;
         WhiteboardPrimitiveGesture = null;
+        IsWhiteboardPrimitiveDragActive = false;
         _whiteboardGestureScreenPoints.Clear();
         _whiteboardGestureWorldPoints.Clear();
     }

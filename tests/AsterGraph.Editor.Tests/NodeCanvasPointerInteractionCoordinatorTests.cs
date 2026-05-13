@@ -147,6 +147,30 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
     }
 
     [Fact]
+    public void HandleReleased_WithRectangleWhiteboardModeWithoutDrag_CancelsPreviewWithoutCommit()
+    {
+        var editor = CreateEditor();
+        var host = new TestPointerInteractionHost(editor)
+        {
+            WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Rectangle,
+        };
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(40, 64),
+            isLeftButtonPressed: true,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.None);
+
+        coordinator.HandleReleased(new Point(40, 64));
+
+        Assert.Empty(host.InteractionSession.WhiteboardPrimitives);
+        Assert.Null(host.InteractionSession.ActiveWhiteboardPrimitive);
+        Assert.Empty(host.InteractionSession.WhiteboardGestureScreenPoints);
+    }
+
+    [Fact]
     public void HandleMoved_AndReleased_WithFreehandWhiteboardMode_CommitsCollectedWorldPoints()
     {
         var editor = CreateEditor();
@@ -186,6 +210,31 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         Assert.Equal(expectedOrigin, primitive.Geometry.Origin);
         Assert.Equal(expectedSize, primitive.Geometry.Size);
         Assert.Equal(GraphWhiteboardPrimitiveEditState.Committed, primitive.EditLifecycle.State);
+    }
+
+    [Fact]
+    public void HandleMoved_AndReleased_WithFreehandWhiteboardModeBelowDragThreshold_CancelsPreviewWithoutCommit()
+    {
+        var editor = CreateEditor();
+        var host = new TestPointerInteractionHost(editor)
+        {
+            WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Freehand,
+        };
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(10, 20),
+            isLeftButtonPressed: true,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.None);
+
+        Assert.True(coordinator.HandleMoved(new Point(14, 23), selectionDragThreshold: 6));
+        coordinator.HandleReleased(new Point(14, 23));
+
+        Assert.Empty(host.InteractionSession.WhiteboardPrimitives);
+        Assert.Null(host.InteractionSession.ActiveWhiteboardPrimitive);
+        Assert.Empty(host.InteractionSession.WhiteboardGestureScreenPoints);
     }
 
     [Fact]

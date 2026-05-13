@@ -177,9 +177,13 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
         if (_host.InteractionSession.WhiteboardPrimitiveGesture is not null)
         {
-            _host.InteractionSession.UpdateWhiteboardPrimitiveDrawing(
-                currentScreenPosition,
-                ScreenToWorld(currentScreenPosition));
+            if (_host.InteractionSession.TryBeginWhiteboardPrimitiveDrag(currentScreenPosition, selectionDragThreshold))
+            {
+                _host.InteractionSession.UpdateWhiteboardPrimitiveDrawing(
+                    currentScreenPosition,
+                    ScreenToWorld(currentScreenPosition));
+            }
+
             _host.ClearResizeFeedback();
             return true;
         }
@@ -297,9 +301,12 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
     {
         if (_host.InteractionSession.WhiteboardPrimitiveGesture is not null && _host.ViewModel is not null)
         {
-            _host.InteractionSession.CommitWhiteboardPrimitiveDrawing(
-                currentScreenPosition,
-                ScreenToWorld(currentScreenPosition));
+            if (_host.InteractionSession.IsWhiteboardPrimitiveDragActive)
+            {
+                _host.InteractionSession.CommitWhiteboardPrimitiveDrawing(
+                    currentScreenPosition,
+                    ScreenToWorld(currentScreenPosition));
+            }
         }
 
         if (_host.InteractionSession.DragNode is not null
