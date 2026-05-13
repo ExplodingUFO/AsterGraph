@@ -61,7 +61,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(12, document.RootElement.GetArrayLength());
+        Assert.Equal(13, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -74,7 +74,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(12, document.RootElement.GetArrayLength());
+        Assert.Equal(13, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -102,7 +102,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(12, document.RootElement.GetArrayLength());
+        Assert.Equal(13, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -132,7 +132,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(12, document.RootElement.GetArrayLength());
+        Assert.Equal(13, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>
@@ -194,7 +194,7 @@ public sealed class ShellVisualCoveragePlanningDocsTests
     {
         var manifestPath = Path.Combine(GetRepositoryRoot(), "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json");
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        Assert.Equal(12, document.RootElement.GetArrayLength());
+        Assert.Equal(13, document.RootElement.GetArrayLength());
         Assert.Contains(
             document.RootElement.EnumerateArray(),
             state =>

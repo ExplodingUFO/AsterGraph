@@ -320,6 +320,37 @@ public sealed class DemoCookbookScreenshotGateTests
     }
 
     [Fact]
+    public void CookbookScreenshotGate_IncludesPhase554WhiteboardAuthoringCookbookRoute()
+    {
+        var routes = LoadRoutes(GetRepositoryRoot());
+        var shellStates = LoadShellStates(GetRepositoryRoot());
+
+        var route = Assert.Single(routes, candidate =>
+            string.Equals(candidate.Id, "cookbook-whiteboard-authoring-cookbook-route", StringComparison.Ordinal));
+        Assert.Equal("whiteboard-authoring-cookbook-route", route.RecipeId);
+        Assert.Equal("selection-marquee-workbench", route.Scenario);
+        Assert.Equal("Selection Rectangle Fixture", route.ExpectedDocumentTitle);
+        Assert.True(route.MinimumNodeCount >= 2);
+        Assert.True(route.MinimumConnectionCount >= 1);
+        Assert.Contains("select-clock", route.RequiredNodeIds, StringComparer.Ordinal);
+        Assert.Contains("select-output", route.RequiredNodeIds, StringComparer.Ordinal);
+        Assert.Equal("cookbook-whiteboard-authoring-cookbook-route.png", route.OutputFileName);
+
+        var shellState = Assert.Single(shellStates, state =>
+            string.Equals(state.Id, "shell-cookbook-whiteboard-authoring-cookbook-route", StringComparison.Ordinal));
+        Assert.Equal(route.Id, shellState.RouteId);
+        Assert.Equal("cookbook", shellState.HostGroup);
+        Assert.Equal("en", shellState.Language);
+        Assert.Equal("canonical-dark", shellState.Theme);
+        Assert.True(shellState.ExpectedPaneOpen);
+        Assert.Contains("PART_NodeCanvas", shellState.RequiredShellParts, StringComparer.Ordinal);
+        Assert.Contains("PART_CookbookWorkspaceRecipeContentPanel", shellState.RequiredShellParts, StringComparer.Ordinal);
+        Assert.Contains("PART_WhiteboardDrawingRectangleButton", shellState.RequiredShellParts, StringComparer.Ordinal);
+        Assert.Contains("PART_WhiteboardDrawingFreehandButton", shellState.RequiredShellParts, StringComparer.Ordinal);
+        Assert.Equal("shell-cookbook-whiteboard-authoring-cookbook-route.png", shellState.OutputFileName);
+    }
+
+    [Fact]
     public void CookbookScreenshotGate_IncludesLifecycleFixtureBatchRoutes()
     {
         var routes = LoadRoutes(GetRepositoryRoot());
@@ -364,7 +395,7 @@ public sealed class DemoCookbookScreenshotGateTests
             ],
             shellState.RequiredShellParts);
         Assert.Equal("shell-runtime-diagnostics-closed.png", shellState.OutputFileName);
-        Assert.Equal(12, shellStates.Count);
+        Assert.Equal(13, shellStates.Count);
     }
 
     [Fact]
@@ -646,6 +677,11 @@ public sealed class DemoCookbookScreenshotGateTests
         viewModel.SelectLanguage(shellState.Language);
         viewModel.SelectedCookbookRecipe = viewModel.CookbookRecipes.Single(recipe =>
             string.Equals(recipe.Id, route.RecipeId, StringComparison.Ordinal));
+        if (string.Equals(route.RecipeId, "whiteboard-authoring-cookbook-route", StringComparison.Ordinal))
+        {
+            viewModel.IsInspectorChromeVisible = true;
+        }
+
         viewModel.Session.Commands.UpdateViewportSize(route.ViewportWidth, route.ViewportHeight);
         viewModel.Session.Commands.FitToViewport(updateStatus: false);
         viewModel.PreferredWindowWidth = route.ViewportWidth;

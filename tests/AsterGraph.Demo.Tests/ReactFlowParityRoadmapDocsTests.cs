@@ -1654,6 +1654,53 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase554WhiteboardAuthoringCookbookUxRouteInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+        var englishCookbook = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chineseCookbook = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity, englishCookbook, chineseCookbook })
+        {
+            Assert.Contains("Phase 554", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #228", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-kpy", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard authoring toolbar and Cookbook UX route", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("whiteboard-authoring-cookbook-route", contents, StringComparison.Ordinal);
+            Assert.Contains("WHITEBOARD_AUTHORING_COOKBOOK_UX_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("CreateWhiteboardDrawingToolActions", contents, StringComparison.Ordinal);
+            Assert.Contains("AuthoringToolsChrome_ProjectsWhiteboardDrawingActionsThroughNodeCanvasDrawingMode", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_WhiteboardDrawingRectangleButton", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_WhiteboardDrawingFreehandButton", contents, StringComparison.Ordinal);
+            Assert.Contains("cookbook-whiteboard-authoring-cookbook-route", contents, StringComparison.Ordinal);
+            Assert.Contains("shell-cookbook-whiteboard-authoring-cookbook-route", contents, StringComparison.Ordinal);
+            Assert.Contains("no new core model design", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no pointer coordinator redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no eraser behavior", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no persisted whiteboard primitive", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no GraphDocument schema", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer rewrite", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { englishCookbook, chineseCookbook })
+        {
+            Assert.Contains("no full whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertPostPhase551Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase551Queue(ExtractIssueWaveTable(chineseParity));
+        Assert.Contains("Phase 554 records the whiteboard authoring toolbar and Cookbook UX route", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 554 记录 whiteboard authoring toolbar and Cookbook UX route", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");

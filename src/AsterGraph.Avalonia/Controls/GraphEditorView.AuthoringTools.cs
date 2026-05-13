@@ -106,6 +106,11 @@ public partial class GraphEditorView
         {
             _pointerModeToolToolbar.Children.Add(CreateHostedToolButton(ResolvePointerModeToolButtonName(action), action));
         }
+
+        foreach (var action in AsterGraphAuthoringToolActionFactory.CreateWhiteboardDrawingToolActions(_nodeCanvas))
+        {
+            _pointerModeToolToolbar.Children.Add(CreateHostedToolButton(ResolveWhiteboardDrawingToolButtonName(action), action));
+        }
     }
 
     private void BuildNodeToolToolbar(IReadOnlyList<AsterGraphHostedActionDescriptor> actions)
@@ -594,6 +599,14 @@ public partial class GraphEditorView
             "pointer-mode.marquee-selection" => "PART_PointerModeMarqueeButton",
             "pointer-mode.lasso-selection" => "PART_PointerModeLassoButton",
             _ => $"PART_PointerMode_{action.Id}",
+        };
+
+    private static string ResolveWhiteboardDrawingToolButtonName(AsterGraphHostedActionDescriptor action)
+        => action.Id switch
+        {
+            "whiteboard-drawing.rectangle" => "PART_WhiteboardDrawingRectangleButton",
+            "whiteboard-drawing.freehand" => "PART_WhiteboardDrawingFreehandButton",
+            _ => $"PART_WhiteboardDrawing_{action.Id}",
         };
 
     private static string ResolveNodeToolButtonName(AsterGraphHostedActionDescriptor action)

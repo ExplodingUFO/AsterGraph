@@ -57,6 +57,29 @@ public sealed class DemoCookbookBuiltInBatchTests
             "NodeResizer");
     }
 
+    [Fact]
+    public void CookbookCatalog_AddsWhiteboardAuthoringCookbookRoute()
+    {
+        var recipe = Assert.Single(DemoCookbookCatalog.Recipes, candidate =>
+            string.Equals(candidate.Id, "whiteboard-authoring-cookbook-route", StringComparison.Ordinal));
+
+        Assert.Equal(DemoCookbookRecipeCategory.Authoring, recipe.Category);
+        Assert.Contains(recipe.CodeAnchors, anchor =>
+            anchor.Path == "src/AsterGraph.Avalonia/Hosting/AsterGraphAuthoringToolActionFactory.cs"
+            && anchor.Evidence == "CreateWhiteboardDrawingToolActions");
+        Assert.Contains(recipe.DemoAnchors, anchor =>
+            anchor.Path == "tests/AsterGraph.Editor.Tests/GraphEditorViewTests.cs"
+            && anchor.Evidence == "AuthoringToolsChrome_ProjectsWhiteboardDrawingActionsThroughNodeCanvasDrawingMode");
+        Assert.Contains(recipe.DemoAnchors, anchor =>
+            anchor.Path == "src/AsterGraph.Demo/DemoGraphFactory.cs"
+            && anchor.Evidence == "selection-marquee-workbench");
+        Assert.Contains("WHITEBOARD_AUTHORING_COOKBOOK_UX_OK", recipe.ProofMarkers);
+        Assert.Contains("PART_WhiteboardDrawingRectangleButton", recipe.RouteClarity.SupportedRoute, StringComparison.Ordinal);
+        Assert.Contains("PART_WhiteboardDrawingFreehandButton", recipe.RouteClarity.SupportedRoute, StringComparison.Ordinal);
+        Assert.DoesNotContain("GraphDocument schema", recipe.Summary, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("full React Flow whiteboard parity", recipe.RouteClarity.SupportedRoute, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static void AssertBuiltInRecipe(
         string id,
         DemoCookbookRecipeCategory category,

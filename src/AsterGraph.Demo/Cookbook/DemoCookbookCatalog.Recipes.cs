@@ -1448,6 +1448,116 @@ public static partial class DemoCookbookCatalog
             """
             ),
         new DemoCookbookRecipe(
+            "whiteboard-authoring-cookbook-route",
+            DemoCookbookRecipeCategory.Authoring,
+            "Whiteboard authoring toolbar and Cookbook UX route",
+            "Expose rectangle/freehand whiteboard drawing actions in the hosted authoring toolbar and capture the bounded Cookbook UX route.",
+            [
+                new DemoCookbookAnchor(
+                    "Whiteboard drawing action factory",
+                    "src/AsterGraph.Avalonia/Hosting/AsterGraphAuthoringToolActionFactory.cs",
+                    "CreateWhiteboardDrawingToolActions"),
+                new DemoCookbookAnchor(
+                    "Hosted rectangle drawing button",
+                    "src/AsterGraph.Avalonia/Controls/GraphEditorView.AuthoringTools.cs",
+                    "PART_WhiteboardDrawingRectangleButton"),
+                new DemoCookbookAnchor(
+                    "Hosted freehand drawing button",
+                    "src/AsterGraph.Avalonia/Controls/GraphEditorView.AuthoringTools.cs",
+                    "PART_WhiteboardDrawingFreehandButton"),
+                new DemoCookbookAnchor(
+                    "Canvas drawing activation property",
+                    "src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs",
+                    "WhiteboardDrawingModeProperty"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Selection marquee graph fixture",
+                    "src/AsterGraph.Demo/DemoGraphFactory.cs",
+                    "selection-marquee-workbench"),
+                new DemoCookbookAnchor(
+                    "Hosted toolbar projection proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorViewTests.cs",
+                    "AuthoringToolsChrome_ProjectsWhiteboardDrawingActionsThroughNodeCanvasDrawingMode"),
+                new DemoCookbookAnchor(
+                    "Whiteboard authoring scene screenshot route",
+                    "tests/AsterGraph.Demo.Tests/CookbookScreenshotGateRoutes.json",
+                    "cookbook-whiteboard-authoring-cookbook-route"),
+                new DemoCookbookAnchor(
+                    "Whiteboard authoring shell visual gate state",
+                    "tests/AsterGraph.Demo.Tests/CookbookShellVisualGateStates.json",
+                    "shell-cookbook-whiteboard-authoring-cookbook-route"),
+            ],
+            [
+                new DemoCookbookAnchor(
+                    "Whiteboard authoring cookbook docs",
+                    "docs/en/demo-cookbook.md",
+                    "WHITEBOARD_AUTHORING_COOKBOOK_UX_OK"),
+                new DemoCookbookAnchor(
+                    "Phase 554 parity roadmap record",
+                    "docs/en/phase-0-reactflow-parity-audit.md",
+                    "Phase 554"),
+            ],
+            [
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.HostCodeExample,
+                    "Hosts use CreateWhiteboardDrawingToolActions to surface rectangle/freehand activation without runtime command ids.",
+                    "CreateWhiteboardDrawingToolActions"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "The route reuses selection-marquee-workbench so authored whiteboard activation is demonstrated over a populated graph scene.",
+                    "selection-marquee-workbench"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.ValidationRuntimeOverlay,
+                    "The shell visual gate keeps the node canvas, Cookbook route panel, and whiteboard drawing buttons visible together.",
+                    "shell-cookbook-whiteboard-authoring-cookbook-route"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.SupportEvidence,
+                    "The proof marker binds hosted toolbar projection, route metadata, and non-overlap evidence to Phase 554.",
+                    "WHITEBOARD_AUTHORING_COOKBOOK_UX_OK"),
+            ],
+            [
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Whiteboard activation stays beside existing pointer-mode controls and writes only the canvas whiteboard drawing mode property.",
+                    "WhiteboardDrawingModeProperty"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.LayoutReadability,
+                    "The full-window shell capture verifies the toolbar buttons and Cookbook panel do not overlap the graph scene.",
+                    "shell-cookbook-whiteboard-authoring-cookbook-route"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Inspection,
+                    "The generated route metadata records the authored route and required shell parts for review.",
+                    "cookbook-whiteboard-authoring-cookbook-route"),
+                new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.ValidationRuntimeFeedback,
+                    "The editor proof clicks rectangle/freehand buttons and verifies the canvas drawing mode transition.",
+                    "AuthoringToolsChrome_ProjectsWhiteboardDrawingActionsThroughNodeCanvasDrawingMode"),
+            ],
+            [
+                "WHITEBOARD_AUTHORING_COOKBOOK_UX_OK",
+                "CreateWhiteboardDrawingToolActions",
+                "AuthoringToolsChrome_ProjectsWhiteboardDrawingActionsThroughNodeCanvasDrawingMode",
+            ],
+            new DemoCookbookRouteClarity(
+                "Whiteboard authoring toolbar and Cookbook UX route: hosted Authoring Tools projects CreateWhiteboardDrawingToolActions into PART_WhiteboardDrawingRectangleButton and PART_WhiteboardDrawingFreehandButton, then captures cookbook-whiteboard-authoring-cookbook-route on selection-marquee-workbench.",
+                "Supported seams live in `AsterGraph.Avalonia` action factory, `GraphEditorView` hosted chrome, and `WhiteboardDrawingModeProperty`; `AsterGraph.Editor` and `AsterGraph.Core` ownership stays unchanged.",
+                "Demo cookbook supplies route metadata and shell part proof only; no new core model design, no pointer coordinator redesign, no eraser behavior, no persisted whiteboard primitive state, no GraphDocument schema changes, no renderer rewrite, and no full whiteboard parity."),
+            "Whiteboard authoring UX coverage is limited to hosted action projection, visible toolbar parts, route/shell metadata, and non-overlap proof; it adds no new core model design, no pointer coordinator redesign, no eraser behavior, no persisted whiteboard primitive state, no GraphDocument schema changes, no renderer rewrite, and no full whiteboard parity.",
+            CodeSample: """
+            // Project the hosted drawing actions beside the pointer-mode controls.
+            var actions = AsterGraphAuthoringToolActionFactory.CreateWhiteboardDrawingToolActions(canvas);
+
+            // The stock hosted toolbar exposes these as visible proof parts.
+            const string rectangleButton = "PART_WhiteboardDrawingRectangleButton";
+            const string freehandButton = "PART_WhiteboardDrawingFreehandButton";
+
+            // Cookbook proof uses selection-marquee-workbench and shell metadata only.
+            const string routeId = "cookbook-whiteboard-authoring-cookbook-route";
+            const string shellStateId = "shell-cookbook-whiteboard-authoring-cookbook-route";
+            """
+            ),
+        new DemoCookbookRecipe(
             "interaction-keyboard-navigation-route",
             DemoCookbookRecipeCategory.Authoring,
             "Interaction keyboard navigation route",

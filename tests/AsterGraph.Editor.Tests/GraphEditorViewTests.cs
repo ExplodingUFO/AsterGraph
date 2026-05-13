@@ -1184,6 +1184,54 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void AuthoringToolsChrome_ProjectsWhiteboardDrawingActionsThroughNodeCanvasDrawingMode()
+    {
+        var editor = CreateSelectionEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var canvas = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas");
+        var rectangleButton = FindRequiredDescendant<Button>(view, "PART_WhiteboardDrawingRectangleButton");
+        var freehandButton = FindRequiredDescendant<Button>(view, "PART_WhiteboardDrawingFreehandButton");
+        var lassoButton = FindRequiredDescendant<Button>(view, "PART_PointerModeLassoButton");
+
+        try
+        {
+            Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+            Assert.Equal(NodeCanvasWhiteboardDrawingMode.None, canvas.WhiteboardDrawingMode);
+            Assert.Equal("Rectangle Drawing Tool", Assert.IsType<string>(rectangleButton.Content));
+            Assert.Equal("Rectangle Drawing Tool", AutomationProperties.GetName(rectangleButton));
+            Assert.Equal("Freehand Drawing Tool", Assert.IsType<string>(freehandButton.Content));
+            Assert.True(rectangleButton.IsEnabled);
+            Assert.True(freehandButton.IsEnabled);
+
+            rectangleButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+            Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+            Assert.Equal(NodeCanvasWhiteboardDrawingMode.Rectangle, canvas.WhiteboardDrawingMode);
+
+            freehandButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+            Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+            Assert.Equal(NodeCanvasWhiteboardDrawingMode.Freehand, canvas.WhiteboardDrawingMode);
+
+            lassoButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+            Assert.Equal(NodeCanvasSelectionMode.Lasso, canvas.SelectionMode);
+            Assert.Equal(NodeCanvasWhiteboardDrawingMode.Freehand, canvas.WhiteboardDrawingMode);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void AuthoringToolsChrome_SelectionLayoutActionRestoresCanvasFocusAndKeyboardRouting()
     {
         var editor = CreateSelectionEditor();
