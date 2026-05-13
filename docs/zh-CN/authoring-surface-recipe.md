@@ -92,7 +92,7 @@
 4. 通过 `INodeParameterEditorRegistry` 替换 editor body。
 5. 通过 `GetConnectionGeometrySnapshots()` 渲染宿主自管 edge overlay。
 6. 宿主需要 toolbar affordance 时，用 `CreatePointerSelectionModeActions(...)` 接入 `NodeCanvasSelectionMode.Lasso`。
-7. 宿主需要 public activation affordance 时，用 `CreateWhiteboardDrawingToolActions(...)` 接入 `NodeCanvas.WhiteboardDrawingMode`、`NodeCanvasWhiteboardDrawingMode.Rectangle` 和 `NodeCanvasWhiteboardDrawingMode.Freehand`。这仍然只包括 hosted activation 和 internal pointer capture：no runtime command id、no persistence/schema changes、no renderer changes、no toolbar UI implementation，也不声明 full React Flow whiteboard parity。
+7. 宿主需要 public activation affordance 时，用 `CreateWhiteboardDrawingToolActions(...)` 接入 `NodeCanvas.WhiteboardDrawingMode`、`NodeCanvasWhiteboardDrawingMode.Rectangle` 和 `NodeCanvasWhiteboardDrawingMode.Freehand`。Stock hosted Authoring Tools toolbar 现在会把这些 actions 投影成 `PART_WhiteboardDrawingRectangleButton` 和 `PART_WhiteboardDrawingFreehandButton`；自定义宿主也可以把同一批 descriptors 放到自己的 chrome 中。这仍然只包括 hosted activation 和 internal pointer capture：no runtime command id、no eraser behavior、no persistence/schema changes、no renderer changes，也不声明 full React Flow whiteboard parity。
 8. runtime decoration 保持在 `IGraphRuntimeOverlayProvider` 和 inspector snapshots 上；不要把图执行搬进 editor。
 
 ## 相关文档

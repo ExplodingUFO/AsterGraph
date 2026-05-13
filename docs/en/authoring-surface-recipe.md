@@ -92,7 +92,7 @@ Use one hosted handoff from definitions to proof instead of stitching together s
 4. Replace editor bodies through `INodeParameterEditorRegistry`.
 5. Render any host-owned edge overlay from `GetConnectionGeometrySnapshots()`.
 6. Add lasso activation through `CreatePointerSelectionModeActions(...)` when the host needs a toolbar affordance for `NodeCanvasSelectionMode.Lasso`.
-7. Add rectangle/freehand whiteboard activation through `CreateWhiteboardDrawingToolActions(...)` when the host needs a public activation affordance for `NodeCanvas.WhiteboardDrawingMode`, `NodeCanvasWhiteboardDrawingMode.Rectangle`, and `NodeCanvasWhiteboardDrawingMode.Freehand`. This remains hosted activation plus internal pointer capture only: no runtime command id, no persistence/schema changes, no renderer changes, no toolbar UI implementation, and no full React Flow whiteboard parity.
+7. Add rectangle/freehand whiteboard activation through `CreateWhiteboardDrawingToolActions(...)` when the host needs a public activation affordance for `NodeCanvas.WhiteboardDrawingMode`, `NodeCanvasWhiteboardDrawingMode.Rectangle`, and `NodeCanvasWhiteboardDrawingMode.Freehand`. The stock hosted Authoring Tools toolbar now projects those actions as `PART_WhiteboardDrawingRectangleButton` and `PART_WhiteboardDrawingFreehandButton`; custom hosts can project the same descriptors in their own chrome. This remains hosted activation plus internal pointer capture only: no runtime command id, no eraser behavior, no persistence/schema changes, no renderer changes, and no full React Flow whiteboard parity.
 8. Keep runtime decorations on `IGraphRuntimeOverlayProvider` and inspector snapshots; do not move graph execution into the editor.
 
 ## Related docs

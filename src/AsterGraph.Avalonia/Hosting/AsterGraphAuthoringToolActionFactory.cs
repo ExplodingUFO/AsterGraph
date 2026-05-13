@@ -178,6 +178,7 @@ public static class AsterGraphAuthoringToolActionFactory
             () =>
             {
                 canvas.SelectionMode = mode;
+                canvas.WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.None;
                 return true;
             });
 
@@ -199,6 +200,7 @@ public static class AsterGraphAuthoringToolActionFactory
                 recoveryHint: recoveryHint),
             () =>
             {
+                canvas.SelectionMode = NodeCanvasSelectionMode.Marquee;
                 canvas.WhiteboardDrawingMode = mode;
                 return true;
             });
