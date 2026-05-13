@@ -2008,6 +2008,53 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase561WorkspaceSidecarPersistencePolicyInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 561", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #243", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-xd8", contents, StringComparison.Ordinal);
+            Assert.Contains("WHITEBOARD_ANNOTATION_WORKSPACE_SIDECAR_PERSISTENCE_POLICY", contents, StringComparison.Ordinal);
+            Assert.Contains("workspace sidecar ownership", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("workspace-scoped lifetime", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sidecar file naming", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("migration metadata", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("compatibility requirements", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("verification requirements before workspace save/load behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no production persistence implementation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no file/database I/O", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no GraphDocument schema change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no schema version bump", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no workspace persistence behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no clipboard/export serialization behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer or pointer behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API exposure", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no saved whiteboard primitive state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("whiteboard annotations are persisted", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("workspace save/load now writes annotations", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("GraphDocument schema now stores whiteboard annotations", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var table in new[] { ExtractIssueWaveTable(englishParity), ExtractIssueWaveTable(chineseParity) })
+        {
+            Assert.Contains("| #243 | `avalonia-node-map-xd8` | Phase 561: whiteboard annotation workspace sidecar persistence policy", table, StringComparison.Ordinal);
+            Assert.Contains("Depends on Phase 559", table, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("policy gate only", table, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 561", table, StringComparison.Ordinal);
+            Assert.DoesNotContain("annotation persistence is implemented", table, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("Phase 561 records the whiteboard annotation workspace sidecar persistence policy", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 561 记录 whiteboard annotation workspace sidecar persistence policy", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
