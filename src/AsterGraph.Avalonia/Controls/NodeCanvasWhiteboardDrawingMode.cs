@@ -11,12 +11,12 @@ public enum NodeCanvasWhiteboardDrawingMode
     None,
 
     /// <summary>
-    /// Rectangle whiteboard drawing is selected for future pointer capture.
+    /// Rectangle whiteboard drawing is selected for the canvas pointer capture route.
     /// </summary>
     Rectangle,
 
     /// <summary>
-    /// Freehand whiteboard drawing is selected for future pointer capture.
+    /// Freehand whiteboard drawing is selected for the canvas pointer capture route.
     /// </summary>
     Freehand,
 }

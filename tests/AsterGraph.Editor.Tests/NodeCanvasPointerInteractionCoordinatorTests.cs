@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Input;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
@@ -65,6 +66,179 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         Assert.Null(host.InteractionSession.SelectionStartScreenPosition);
         Assert.Equal(1, host.HideSelectionAdornerCalls);
         Assert.Equal(1, host.HideGuideAdornerCalls);
+    }
+
+    [Fact]
+    public void HandlePressed_WithRectangleWhiteboardMode_BeginsPrimitiveDrawingWithoutCanvasSelection()
+    {
+        var editor = CreateEditor();
+        var host = new TestPointerInteractionHost(editor)
+        {
+            WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Rectangle,
+        };
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var result = coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(32, 48),
+            isLeftButtonPressed: true,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.None);
+
+        Assert.True(result.Handled);
+        Assert.True(result.CapturePointer);
+        Assert.Null(host.InteractionSession.SelectionStartScreenPosition);
+        Assert.False(host.InteractionSession.IsMarqueeSelecting);
+        Assert.NotNull(host.InteractionSession.ActiveWhiteboardPrimitive);
+        Assert.Equal(GraphWhiteboardPrimitiveKind.Rectangle, host.InteractionSession.ActiveWhiteboardPrimitive.Kind);
+        Assert.Equal(editor.ScreenToWorld(new GraphPoint(32, 48)), host.InteractionSession.ActiveWhiteboardPrimitive.Geometry.Origin);
+        Assert.Equal(GraphWhiteboardPrimitiveEditState.Creating, host.InteractionSession.ActiveWhiteboardPrimitive.EditLifecycle.State);
+        Assert.Equal(1, host.HideSelectionAdornerCalls);
+        Assert.Equal(1, host.HideGuideAdornerCalls);
+    }
+
+    [Fact]
+    public void HandleMoved_AndReleased_WithRectangleWhiteboardMode_CommitsWorldSpacePrimitive()
+    {
+        var editor = CreateEditor();
+        editor.PanBy(20, 30);
+        editor.ZoomAt(2, new GraphPoint(20, 30));
+        var host = new TestPointerInteractionHost(editor)
+        {
+            WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Rectangle,
+        };
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(60, 80),
+            isLeftButtonPressed: true,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.None);
+
+        var handled = coordinator.HandleMoved(new Point(100, 140), selectionDragThreshold: 6);
+
+        Assert.True(handled);
+        Assert.NotNull(host.InteractionSession.ActiveWhiteboardPrimitive);
+        var expectedStartWorld = editor.ScreenToWorld(new GraphPoint(60, 80));
+        var expectedEndWorld = editor.ScreenToWorld(new GraphPoint(100, 140));
+        var expectedOrigin = new GraphPoint(
+            Math.Min(expectedStartWorld.X, expectedEndWorld.X),
+            Math.Min(expectedStartWorld.Y, expectedEndWorld.Y));
+        var expectedSize = new GraphSize(
+            Math.Abs(expectedEndWorld.X - expectedStartWorld.X),
+            Math.Abs(expectedEndWorld.Y - expectedStartWorld.Y));
+        Assert.Equal(
+            expectedOrigin,
+            host.InteractionSession.ActiveWhiteboardPrimitive.Geometry.Origin);
+        Assert.Equal(expectedSize, host.InteractionSession.ActiveWhiteboardPrimitive.Geometry.Size);
+        Assert.Equal(0, host.UpdateMarqueeSelectionCalls);
+        Assert.Equal(0, host.UpdateLassoSelectionCalls);
+
+        coordinator.HandleReleased(new Point(100, 140));
+
+        var primitive = Assert.Single(host.InteractionSession.WhiteboardPrimitives);
+        Assert.Equal(GraphWhiteboardPrimitiveKind.Rectangle, primitive.Kind);
+        Assert.Equal(GraphWhiteboardPrimitiveEditState.Committed, primitive.EditLifecycle.State);
+        Assert.Equal(expectedSize, primitive.Geometry.Size);
+        Assert.Null(host.InteractionSession.ActiveWhiteboardPrimitive);
+        Assert.Equal(1, host.ClearLassoFeedbackCalls);
+        Assert.Equal(3, host.ClearResizeFeedbackCalls);
+    }
+
+    [Fact]
+    public void HandleMoved_AndReleased_WithFreehandWhiteboardMode_CommitsCollectedWorldPoints()
+    {
+        var editor = CreateEditor();
+        var host = new TestPointerInteractionHost(editor)
+        {
+            WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Freehand,
+        };
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(10, 20),
+            isLeftButtonPressed: true,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.None);
+        Assert.True(coordinator.HandleMoved(new Point(16, 28), selectionDragThreshold: 6));
+        Assert.True(coordinator.HandleMoved(new Point(22, 24), selectionDragThreshold: 6));
+
+        coordinator.HandleReleased(new Point(30, 34));
+
+        var expectedPoints = new[]
+        {
+            editor.ScreenToWorld(new GraphPoint(10, 20)),
+            editor.ScreenToWorld(new GraphPoint(16, 28)),
+            editor.ScreenToWorld(new GraphPoint(22, 24)),
+            editor.ScreenToWorld(new GraphPoint(30, 34)),
+        };
+        var expectedOrigin = new GraphPoint(
+            expectedPoints.Min(point => point.X),
+            expectedPoints.Min(point => point.Y));
+        var expectedSize = new GraphSize(
+            expectedPoints.Max(point => point.X) - expectedOrigin.X,
+            expectedPoints.Max(point => point.Y) - expectedOrigin.Y);
+        var primitive = Assert.Single(host.InteractionSession.WhiteboardPrimitives);
+        Assert.Equal(GraphWhiteboardPrimitiveKind.Freehand, primitive.Kind);
+        Assert.Equal(expectedPoints, primitive.Geometry.Points);
+        Assert.Equal(expectedOrigin, primitive.Geometry.Origin);
+        Assert.Equal(expectedSize, primitive.Geometry.Size);
+        Assert.Equal(GraphWhiteboardPrimitiveEditState.Committed, primitive.EditLifecycle.State);
+    }
+
+    [Fact]
+    public void HandlePointerCaptureLost_WithActiveWhiteboardPrimitive_CancelsPreviewWithoutCommit()
+    {
+        var editor = CreateEditor();
+        var host = new TestPointerInteractionHost(editor)
+        {
+            WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Freehand,
+        };
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(10, 20),
+            isLeftButtonPressed: true,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.None);
+        coordinator.HandleMoved(new Point(18, 28), selectionDragThreshold: 6);
+
+        var reset = coordinator.HandlePointerCaptureLost();
+
+        Assert.True(reset);
+        Assert.Null(host.InteractionSession.ActiveWhiteboardPrimitive);
+        Assert.Empty(host.InteractionSession.WhiteboardGestureScreenPoints);
+        Assert.Empty(host.InteractionSession.WhiteboardPrimitives);
+        Assert.Equal(2, host.HideGuideAdornerCalls);
+        Assert.Equal(1, host.ClearLassoFeedbackCalls);
+        Assert.Equal(3, host.ClearResizeFeedbackCalls);
+    }
+
+    [Fact]
+    public void HandlePressed_WithWhiteboardModeAndAltLeftDragPanning_StartsPanningInsteadOfDrawing()
+    {
+        var editor = CreateEditor();
+        var host = new TestPointerInteractionHost(editor)
+        {
+            WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Rectangle,
+        };
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var result = coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(40, 64),
+            isLeftButtonPressed: true,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.Alt);
+
+        Assert.True(result.Handled);
+        Assert.True(result.CapturePointer);
+        Assert.True(host.InteractionSession.IsPanning);
+        Assert.Null(host.InteractionSession.ActiveWhiteboardPrimitive);
+        Assert.Empty(host.InteractionSession.WhiteboardPrimitives);
     }
 
     [Fact]
@@ -670,6 +844,8 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         public bool EnableAltLeftDragPanning { get; init; } = true;
 
         public NodeCanvasSelectionGestureKind SelectionGestureKind { get; init; } = NodeCanvasSelectionGestureKind.Marquee;
+
+        public NodeCanvasWhiteboardDrawingMode WhiteboardDrawingMode { get; init; } = NodeCanvasWhiteboardDrawingMode.None;
 
         public NodeCanvasInteractionSession InteractionSession { get; } = new();
 

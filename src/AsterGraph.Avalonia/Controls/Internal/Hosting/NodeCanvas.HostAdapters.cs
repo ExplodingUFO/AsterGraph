@@ -292,6 +292,8 @@ public partial class NodeCanvas
                 ? NodeCanvasSelectionGestureKind.Lasso
                 : NodeCanvasSelectionGestureKind.Marquee;
 
+        public NodeCanvasWhiteboardDrawingMode WhiteboardDrawingMode => _owner.WhiteboardDrawingMode;
+
         public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
 
         public void FocusCanvas()

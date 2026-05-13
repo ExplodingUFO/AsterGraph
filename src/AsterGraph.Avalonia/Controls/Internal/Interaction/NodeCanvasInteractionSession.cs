@@ -34,6 +34,10 @@ internal readonly record struct NodeCanvasGroupResizePreview(
     GraphPoint Position,
     GraphSize Size);
 
+internal readonly record struct NodeCanvasWhiteboardPrimitiveGesture(
+    GraphWhiteboardPrimitiveKind Kind,
+    GraphPoint StartWorldPosition);
+
 internal enum NodeCanvasSelectionGestureKind
 {
     Marquee,
@@ -68,6 +72,14 @@ internal sealed class NodeCanvasInteractionSession
 
     public IReadOnlyList<Point> LassoScreenPoints => _lassoScreenPoints;
 
+    public IReadOnlyList<Point> WhiteboardGestureScreenPoints => _whiteboardGestureScreenPoints;
+
+    public IReadOnlyList<GraphWhiteboardPrimitive> WhiteboardPrimitives => _whiteboardPrimitives;
+
+    public GraphWhiteboardPrimitive? ActiveWhiteboardPrimitive { get; private set; }
+
+    public NodeCanvasWhiteboardPrimitiveGesture? WhiteboardPrimitiveGesture { get; private set; }
+
     public Point? DragStartScreenPosition { get; private set; }
 
     public NodeCanvasDragSession? DragSession { get; private set; }
@@ -91,6 +103,10 @@ internal sealed class NodeCanvasInteractionSession
     public NodeCanvasGroupResizePreview? GroupResizePreview { get; private set; }
 
     private readonly List<Point> _lassoScreenPoints = [];
+    private readonly List<Point> _whiteboardGestureScreenPoints = [];
+    private readonly List<GraphPoint> _whiteboardGestureWorldPoints = [];
+    private readonly List<GraphWhiteboardPrimitive> _whiteboardPrimitives = [];
+    private int _nextWhiteboardPrimitiveSequence;
 
     public void BeginCanvasSelection(
         Point startScreenPosition,
@@ -113,6 +129,7 @@ internal sealed class NodeCanvasInteractionSession
         GroupResizeSession = null;
         NodeResizePreview = null;
         GroupResizePreview = null;
+        ClearActiveWhiteboardPrimitive();
         SelectionStartScreenPosition = startScreenPosition;
         IsMarqueeSelecting = false;
         IsLassoSelecting = false;
@@ -151,6 +168,7 @@ internal sealed class NodeCanvasInteractionSession
         GroupResizeSession = null;
         NodeResizePreview = null;
         GroupResizePreview = null;
+        ClearActiveWhiteboardPrimitive();
     }
 
     public void BeginPanning(Point startScreenPosition)
@@ -170,6 +188,7 @@ internal sealed class NodeCanvasInteractionSession
         GroupResizeSession = null;
         NodeResizePreview = null;
         GroupResizePreview = null;
+        ClearActiveWhiteboardPrimitive();
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
         IsLassoSelecting = false;
@@ -210,6 +229,7 @@ internal sealed class NodeCanvasInteractionSession
         GroupResizeSession = null;
         NodeResizePreview = null;
         GroupResizePreview = null;
+        ClearActiveWhiteboardPrimitive();
     }
 
     public void BeginNodeResize(NodeViewModel node, GraphNodeResizeHandleKind handleKind, Point startScreenPosition)
@@ -240,6 +260,7 @@ internal sealed class NodeCanvasInteractionSession
         GroupResizeSession = null;
         NodeResizePreview = new NodeCanvasNodeResizePreview(node.Id, new GraphSize(node.Width, node.Height));
         GroupResizePreview = null;
+        ClearActiveWhiteboardPrimitive();
     }
 
     public void BeginGroupResize(
@@ -279,6 +300,86 @@ internal sealed class NodeCanvasInteractionSession
             groupOriginSize);
         NodeResizePreview = null;
         GroupResizePreview = new NodeCanvasGroupResizePreview(groupId, groupOriginPosition, groupOriginSize);
+        ClearActiveWhiteboardPrimitive();
+    }
+
+    public void BeginWhiteboardPrimitiveDrawing(
+        GraphWhiteboardPrimitiveKind kind,
+        Point startScreenPosition,
+        GraphPoint startWorldPosition)
+    {
+        DragNode = null;
+        DragGroupId = null;
+        DragGroupTitle = null;
+        DragGroupOriginPosition = null;
+        DragGroupPreviewPosition = null;
+        DragGroupMovesMemberNodes = true;
+        IsPanning = false;
+        SelectionStartScreenPosition = null;
+        IsMarqueeSelecting = false;
+        IsLassoSelecting = false;
+        SelectionGestureKind = NodeCanvasSelectionGestureKind.Marquee;
+        SelectionModifiers = KeyModifiers.None;
+        SelectionBaselineNodes = [];
+        _lassoScreenPoints.Clear();
+        DragStartScreenPosition = null;
+        LastPointerPosition = startScreenPosition;
+        PointerScreenPosition = startScreenPosition;
+        DragSession = null;
+        DragGroupDropZones = [];
+        HoveredDropGroupId = null;
+        NodeResizeSession = null;
+        GroupResizeSession = null;
+        NodeResizePreview = null;
+        GroupResizePreview = null;
+        WhiteboardPrimitiveGesture = new NodeCanvasWhiteboardPrimitiveGesture(kind, startWorldPosition);
+        _whiteboardGestureScreenPoints.Clear();
+        _whiteboardGestureWorldPoints.Clear();
+        _whiteboardGestureScreenPoints.Add(startScreenPosition);
+        _whiteboardGestureWorldPoints.Add(startWorldPosition);
+        ActiveWhiteboardPrimitive = CreateWhiteboardPrimitive(
+            kind,
+            CreateNextWhiteboardPrimitiveId(),
+            startWorldPosition,
+            [startWorldPosition],
+            GraphWhiteboardPrimitiveEditState.Creating);
+    }
+
+    public void UpdateWhiteboardPrimitiveDrawing(Point currentScreenPosition, GraphPoint currentWorldPosition)
+    {
+        if (WhiteboardPrimitiveGesture is not NodeCanvasWhiteboardPrimitiveGesture gesture)
+        {
+            return;
+        }
+
+        LastPointerPosition = currentScreenPosition;
+        PointerScreenPosition = currentScreenPosition;
+        AddWhiteboardGesturePoint(currentScreenPosition, currentWorldPosition);
+        ActiveWhiteboardPrimitive = CreateWhiteboardPrimitive(
+            gesture.Kind,
+            ActiveWhiteboardPrimitive?.Id ?? CreateNextWhiteboardPrimitiveId(),
+            gesture.StartWorldPosition,
+            _whiteboardGestureWorldPoints,
+            GraphWhiteboardPrimitiveEditState.Editing);
+    }
+
+    public GraphWhiteboardPrimitive? CommitWhiteboardPrimitiveDrawing(Point currentScreenPosition, GraphPoint currentWorldPosition)
+    {
+        if (WhiteboardPrimitiveGesture is not NodeCanvasWhiteboardPrimitiveGesture gesture)
+        {
+            return null;
+        }
+
+        AddWhiteboardGesturePoint(currentScreenPosition, currentWorldPosition);
+        var committed = CreateWhiteboardPrimitive(
+            gesture.Kind,
+            ActiveWhiteboardPrimitive?.Id ?? CreateNextWhiteboardPrimitiveId(),
+            gesture.StartWorldPosition,
+            _whiteboardGestureWorldPoints,
+            GraphWhiteboardPrimitiveEditState.Committed);
+        _whiteboardPrimitives.Add(committed);
+        ClearActiveWhiteboardPrimitive();
+        return committed;
     }
 
     public void UpdatePointerPosition(Point currentScreenPosition)
@@ -428,5 +529,74 @@ internal sealed class NodeCanvasInteractionSession
         GroupResizeSession = null;
         NodeResizePreview = null;
         GroupResizePreview = null;
+        ClearActiveWhiteboardPrimitive();
+    }
+
+    private void AddWhiteboardGesturePoint(Point screenPoint, GraphPoint worldPoint)
+    {
+        if (_whiteboardGestureScreenPoints.Count == 0 || _whiteboardGestureScreenPoints[^1] != screenPoint)
+        {
+            _whiteboardGestureScreenPoints.Add(screenPoint);
+        }
+
+        if (_whiteboardGestureWorldPoints.Count == 0 || _whiteboardGestureWorldPoints[^1] != worldPoint)
+        {
+            _whiteboardGestureWorldPoints.Add(worldPoint);
+        }
+    }
+
+    private string CreateNextWhiteboardPrimitiveId()
+        => $"whiteboard-primitive-{++_nextWhiteboardPrimitiveSequence:000000}";
+
+    private static GraphWhiteboardPrimitive CreateWhiteboardPrimitive(
+        GraphWhiteboardPrimitiveKind kind,
+        string id,
+        GraphPoint startWorldPosition,
+        IReadOnlyList<GraphPoint> worldPoints,
+        GraphWhiteboardPrimitiveEditState state)
+    {
+        var geometry = kind is GraphWhiteboardPrimitiveKind.Rectangle
+            ? CreateRectangleGeometry(startWorldPosition, worldPoints[^1])
+            : CreateFreehandGeometry(worldPoints);
+        return new GraphWhiteboardPrimitive(
+            id,
+            kind,
+            geometry,
+            GraphWhiteboardPrimitiveStyle.Default,
+            ZIndex: 0,
+            new GraphWhiteboardPrimitiveEditLifecycle(state, ActiveHandleKey: "pointer"));
+    }
+
+    private static GraphWhiteboardPrimitiveGeometry CreateRectangleGeometry(
+        GraphPoint startWorldPosition,
+        GraphPoint currentWorldPosition)
+    {
+        var left = Math.Min(startWorldPosition.X, currentWorldPosition.X);
+        var top = Math.Min(startWorldPosition.Y, currentWorldPosition.Y);
+        var right = Math.Max(startWorldPosition.X, currentWorldPosition.X);
+        var bottom = Math.Max(startWorldPosition.Y, currentWorldPosition.Y);
+        return new GraphWhiteboardPrimitiveGeometry(
+            new GraphPoint(left, top),
+            new GraphSize(right - left, bottom - top));
+    }
+
+    private static GraphWhiteboardPrimitiveGeometry CreateFreehandGeometry(IReadOnlyList<GraphPoint> worldPoints)
+    {
+        var minX = worldPoints.Min(point => point.X);
+        var minY = worldPoints.Min(point => point.Y);
+        var maxX = worldPoints.Max(point => point.X);
+        var maxY = worldPoints.Max(point => point.Y);
+        return new GraphWhiteboardPrimitiveGeometry(
+            new GraphPoint(minX, minY),
+            new GraphSize(maxX - minX, maxY - minY),
+            worldPoints);
+    }
+
+    private void ClearActiveWhiteboardPrimitive()
+    {
+        ActiveWhiteboardPrimitive = null;
+        WhiteboardPrimitiveGesture = null;
+        _whiteboardGestureScreenPoints.Clear();
+        _whiteboardGestureWorldPoints.Clear();
     }
 }

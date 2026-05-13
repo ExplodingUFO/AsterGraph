@@ -67,7 +67,7 @@ public partial class NodeCanvas : UserControl
             NodeCanvasSelectionMode.Marquee);
 
     /// <summary>
-    /// Controls the host-selected whiteboard drawing tool without starting pointer capture.
+    /// Controls the host-selected whiteboard drawing tool consumed by the canvas pointer capture route.
     /// </summary>
     public static readonly StyledProperty<NodeCanvasWhiteboardDrawingMode> WhiteboardDrawingModeProperty =
         AvaloniaProperty.Register<NodeCanvas, NodeCanvasWhiteboardDrawingMode>(
@@ -225,7 +225,7 @@ public partial class NodeCanvas : UserControl
     }
 
     /// <summary>
-    /// Host-selected whiteboard drawing tool. This activation state does not create primitives by itself.
+    /// Host-selected whiteboard drawing tool. The property records activation; pointer gestures create transient internal primitives.
     /// </summary>
     public NodeCanvasWhiteboardDrawingMode WhiteboardDrawingMode
     {
