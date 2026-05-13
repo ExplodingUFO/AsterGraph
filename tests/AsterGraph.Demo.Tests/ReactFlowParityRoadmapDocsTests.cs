@@ -1507,6 +1507,46 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase551WhiteboardAuthoringQueueRefreshInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 551", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #225", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-3c9", contents, StringComparison.Ordinal);
+            Assert.Contains("post-Phase-550 whiteboard authoring interaction queue refresh", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("WHITEBOARD_AUTHORING_INTERACTION_QUEUE_REFRESH", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 552", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 553", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 554", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 555", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 556", contents, StringComparison.Ordinal);
+            Assert.Contains("public drawing tool activation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("pointer gesture capture", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("authoring toolbar/Cookbook UX", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("eraser-on-primitive behavior", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("persistence implementation decision", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no runtime behavior changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no pointer coordinator edits", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no toolbar implementation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no eraser implementation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no persistence/schema changes", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 552", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("full React Flow whiteboard parity is supported", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertPostPhase551Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase551Queue(ExtractIssueWaveTable(chineseParity));
+        Assert.Contains("Phase 551 records the post-Phase-550 whiteboard authoring interaction queue refresh", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 551 记录 post-Phase-550 whiteboard authoring interaction queue refresh", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
@@ -1742,6 +1782,34 @@ public sealed class ReactFlowParityRoadmapDocsTests
         Assert.DoesNotContain("| TBD | TBD | Phase 548: whiteboard primitive renderer adapter skeleton", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| TBD | TBD | Phase 549: whiteboard primitive persistence decision implementation gate", table, StringComparison.Ordinal);
         Assert.DoesNotContain("| TBD | TBD | Phase 550: whiteboard primitive Cookbook screenshot implementation gate", table, StringComparison.Ordinal);
+    }
+
+    private static void AssertPostPhase551Queue(string table)
+    {
+        AssertPostPhase545Queue(table);
+        Assert.Contains("| #225 | `avalonia-node-map-3c9` | Phase 551: post-Phase-550 whiteboard authoring interaction queue refresh", table, StringComparison.Ordinal);
+        Assert.Contains("| #226 | `avalonia-node-map-718` | Phase 552: whiteboard drawing tool public activation contract", table, StringComparison.Ordinal);
+        Assert.Contains("| #227 | `avalonia-node-map-9f0` | Phase 553: whiteboard primitive pointer gesture capture", table, StringComparison.Ordinal);
+        Assert.Contains("| #228 | `avalonia-node-map-kpy` | Phase 554: whiteboard authoring toolbar and Cookbook UX route", table, StringComparison.Ordinal);
+        Assert.Contains("| #229 | `avalonia-node-map-71c` | Phase 555: whiteboard primitive eraser behavior route", table, StringComparison.Ordinal);
+        Assert.Contains("| #230 | `avalonia-node-map-bck` | Phase 556: whiteboard primitive persistence implementation decision", table, StringComparison.Ordinal);
+        Assert.Contains("public drawing tool activation", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("pointer gesture capture", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("hosted authoring actions", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("eraser-on-primitive behavior", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("persistence implementation decision", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Stacked after PR #224", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("do not merge before Phase 550", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Depends on Phase 552", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Depends on Phase 553", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Depends on Phase 554", table, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Depends on Phase 555", table, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("| TBD | TBD | Phase 551", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 552", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 553", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 554", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 555", table, StringComparison.Ordinal);
+        Assert.DoesNotContain("| TBD | TBD | Phase 556", table, StringComparison.Ordinal);
     }
 
     private static void AssertBuiltInComponentMatrix(string table)
