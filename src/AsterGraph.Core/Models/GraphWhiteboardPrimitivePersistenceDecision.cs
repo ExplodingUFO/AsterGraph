@@ -6,10 +6,12 @@ namespace AsterGraph.Core.Models;
 internal sealed record GraphWhiteboardPrimitivePersistenceDecision(
     GraphWhiteboardPrimitivePersistenceOwner Owner,
     GraphWhiteboardPrimitiveGraphDocumentSchemaPolicy GraphDocumentSchemaPolicy,
-    GraphWhiteboardPrimitivePersistenceRequirement RequirementsBeforeGraphDocumentSchemaChange)
+    GraphWhiteboardPrimitivePersistenceRequirement RequirementsBeforeGraphDocumentSchemaChange,
+    GraphWhiteboardPrimitivePersistenceOutcome CurrentSliceOutcome,
+    GraphWhiteboardPrimitivePersistenceBoundary CoveredBoundaries)
 {
     /// <summary>
-    /// Current Phase 549 decision: whiteboard primitives are not part of the current graph document schema.
+    /// Current Phase 556 decision: saved whiteboard state is deferred until a separate annotation store contract exists.
     /// </summary>
     public static GraphWhiteboardPrimitivePersistenceDecision Current { get; } = new(
         GraphWhiteboardPrimitivePersistenceOwner.SeparateAnnotationSurface,
@@ -18,7 +20,13 @@ internal sealed record GraphWhiteboardPrimitivePersistenceDecision(
             | GraphWhiteboardPrimitivePersistenceRequirement.GraphDocumentCompatibilityTests
             | GraphWhiteboardPrimitivePersistenceRequirement.WorkspacePersistenceBoundaryTests
             | GraphWhiteboardPrimitivePersistenceRequirement.ClipboardFragmentBoundaryTests
-            | GraphWhiteboardPrimitivePersistenceRequirement.ScreenshotArtifactBoundaryTests);
+            | GraphWhiteboardPrimitivePersistenceRequirement.ScreenshotArtifactBoundaryTests,
+        GraphWhiteboardPrimitivePersistenceOutcome.DeferredUntilSeparateAnnotationStoreContract,
+        GraphWhiteboardPrimitivePersistenceBoundary.GraphDocumentCompatibility
+            | GraphWhiteboardPrimitivePersistenceBoundary.WorkspacePersistence
+            | GraphWhiteboardPrimitivePersistenceBoundary.ClipboardFragment
+            | GraphWhiteboardPrimitivePersistenceBoundary.ScreenshotArtifact
+            | GraphWhiteboardPrimitivePersistenceBoundary.SceneExportArtifact);
 
     /// <summary>
     /// Whether the active decision stores whiteboard primitives inside GraphDocument payloads.
@@ -43,6 +51,24 @@ internal enum GraphWhiteboardPrimitiveGraphDocumentSchemaPolicy
 {
     ExcludedFromCurrentGraphDocumentSchema,
     IncludedInGraphDocumentSchema,
+}
+
+internal enum GraphWhiteboardPrimitivePersistenceOutcome
+{
+    DeferredUntilSeparateAnnotationStoreContract,
+    ImplementedInSeparateAnnotationStore,
+    ImplementedInGraphDocumentSchema,
+}
+
+[Flags]
+internal enum GraphWhiteboardPrimitivePersistenceBoundary
+{
+    None = 0,
+    GraphDocumentCompatibility = 1 << 0,
+    WorkspacePersistence = 1 << 1,
+    ClipboardFragment = 1 << 2,
+    ScreenshotArtifact = 1 << 3,
+    SceneExportArtifact = 1 << 4,
 }
 
 [Flags]
