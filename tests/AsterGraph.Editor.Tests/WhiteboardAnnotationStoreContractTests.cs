@@ -166,6 +166,78 @@ public sealed class WhiteboardAnnotationStoreContractTests
         AssertNoAnnotationStoreMember(pointerCoordinator);
     }
 
+    [Fact]
+    public void InMemoryAnnotationStoreBoundary_StartsEmptyAndRoundTripsCreatedSnapshot()
+    {
+        var store = new InMemoryGraphWhiteboardAnnotationStoreBoundary();
+        var created = CreateSnapshot(
+            "whiteboard-annotation-store-001",
+            [
+                CreateRecord("annotation-001", "whiteboard-primitive-001", GraphWhiteboardPrimitiveKind.Freehand),
+            ]);
+
+        var initial = store.ReadSnapshot();
+        store.WriteSnapshot(created);
+        var read = store.ReadSnapshot();
+
+        Assert.Equal(GraphWhiteboardAnnotationStoreContract.Current.Owner, initial.Metadata.Owner);
+        Assert.Equal(GraphWhiteboardAnnotationStoreContract.Current.Lifetime, initial.Metadata.Lifetime);
+        Assert.Equal(GraphWhiteboardAnnotationMigrationMetadata.Current, initial.Metadata.Migration);
+        Assert.Empty(initial.Records);
+        Assert.Equal("whiteboard-annotation-store-001", read.Metadata.StoreId);
+        var record = Assert.Single(read.Records);
+        Assert.Equal("annotation-001", record.Identity.AnnotationId);
+        Assert.Equal("whiteboard-primitive-001", record.PrimitiveReference.PrimitiveId);
+        Assert.Equal(GraphWhiteboardPrimitiveKind.Freehand, record.Payload.Kind);
+    }
+
+    [Fact]
+    public void InMemoryAnnotationStoreBoundary_ReplacesSnapshotsForUpdateAndDeleteBehavior()
+    {
+        var store = new InMemoryGraphWhiteboardAnnotationStoreBoundary();
+        var initial = CreateSnapshot(
+            "whiteboard-annotation-store-001",
+            [
+                CreateRecord("annotation-001", "whiteboard-primitive-001", GraphWhiteboardPrimitiveKind.Rectangle),
+                CreateRecord("annotation-002", "whiteboard-primitive-002", GraphWhiteboardPrimitiveKind.Freehand),
+            ]);
+        var updated = CreateSnapshot(
+            "whiteboard-annotation-store-001",
+            [
+                CreateRecord("annotation-001", "whiteboard-primitive-001", GraphWhiteboardPrimitiveKind.Freehand),
+            ]);
+
+        store.WriteSnapshot(initial);
+        store.WriteSnapshot(updated);
+        var read = store.ReadSnapshot();
+
+        var record = Assert.Single(read.Records);
+        Assert.Equal("annotation-001", record.Identity.AnnotationId);
+        Assert.Equal(GraphWhiteboardPrimitiveKind.Freehand, record.Payload.Kind);
+        Assert.DoesNotContain(read.Records, annotation => annotation.Identity.AnnotationId == "annotation-002");
+    }
+
+    [Fact]
+    public void InMemoryAnnotationStoreBoundary_ReadsDefensiveSnapshotsAndKeepsInstancesSessionScoped()
+    {
+        var records = new List<GraphWhiteboardAnnotationRecord>
+        {
+            CreateRecord("annotation-001", "whiteboard-primitive-001", GraphWhiteboardPrimitiveKind.Rectangle),
+        };
+        var firstStore = new InMemoryGraphWhiteboardAnnotationStoreBoundary();
+        var secondStore = new InMemoryGraphWhiteboardAnnotationStoreBoundary();
+
+        firstStore.WriteSnapshot(CreateSnapshot("whiteboard-annotation-store-001", records));
+        var firstRead = firstStore.ReadSnapshot();
+        records.Add(CreateRecord("annotation-002", "whiteboard-primitive-002", GraphWhiteboardPrimitiveKind.Freehand));
+        var secondRead = firstStore.ReadSnapshot();
+
+        Assert.NotSame(firstRead, secondRead);
+        Assert.Single(firstRead.Records);
+        Assert.Single(secondRead.Records);
+        Assert.Empty(secondStore.ReadSnapshot().Records);
+    }
+
     private static GraphNode CreateNode(string id)
         => new(
             id,
@@ -185,6 +257,43 @@ public sealed class WhiteboardAnnotationStoreContractTests
                     "#6AD5C4"),
             ],
             "#6AD5C4");
+
+    private static GraphWhiteboardAnnotationStoreSnapshot CreateSnapshot(
+        string storeId,
+        IReadOnlyList<GraphWhiteboardAnnotationRecord> records)
+        => new(
+            new GraphWhiteboardAnnotationStoreMetadata(
+                storeId,
+                GraphWhiteboardAnnotationStoreContract.Current.Owner,
+                GraphWhiteboardAnnotationStoreContract.Current.Lifetime,
+                GraphWhiteboardAnnotationMigrationMetadata.Current),
+            records);
+
+    private static GraphWhiteboardAnnotationRecord CreateRecord(
+        string annotationId,
+        string primitiveId,
+        GraphWhiteboardPrimitiveKind kind)
+        => new(
+            new GraphWhiteboardAnnotationIdentity(annotationId),
+            new GraphWhiteboardPrimitiveReference(primitiveId, kind),
+            new GraphWhiteboardAnnotationPrimitivePayload(
+                kind,
+                new GraphWhiteboardPrimitiveGeometry(
+                    new GraphPoint(12d, 18d),
+                    new GraphSize(120d, 64d),
+                    [
+                        new GraphPoint(12d, 18d),
+                        new GraphPoint(24d, 32d),
+                    ]),
+                new GraphWhiteboardPrimitiveStyle(
+                    FillHex: "#6AD5C4",
+                    StrokeHex: "#1A1F2E",
+                    StrokeThickness: 2.5d,
+                    Opacity: 0.72d),
+                ZIndex: 12,
+                new GraphWhiteboardPrimitiveEditLifecycle(
+                    GraphWhiteboardPrimitiveEditState.Committed,
+                    ActiveHandleKey: "freehand-finalized")));
 
     private static void AssertBoundaryPayload(string name, string payload)
     {
