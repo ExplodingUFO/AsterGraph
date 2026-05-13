@@ -1223,7 +1223,7 @@ public sealed class GraphEditorViewTests
             Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
 
             Assert.Equal(NodeCanvasSelectionMode.Lasso, canvas.SelectionMode);
-            Assert.Equal(NodeCanvasWhiteboardDrawingMode.Freehand, canvas.WhiteboardDrawingMode);
+            Assert.Equal(NodeCanvasWhiteboardDrawingMode.None, canvas.WhiteboardDrawingMode);
         }
         finally
         {

@@ -132,10 +132,19 @@ public sealed class GraphEditorActionContributionContractTests
         Assert.True(lassoAction.TryExecute());
 
         Assert.Equal(NodeCanvasSelectionMode.Lasso, canvas.SelectionMode);
+        Assert.Equal(NodeCanvasWhiteboardDrawingMode.None, canvas.WhiteboardDrawingMode);
+
+        canvas.WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Freehand;
+
+        Assert.True(lassoAction.TryExecute());
+
+        Assert.Equal(NodeCanvasSelectionMode.Lasso, canvas.SelectionMode);
+        Assert.Equal(NodeCanvasWhiteboardDrawingMode.None, canvas.WhiteboardDrawingMode);
 
         Assert.True(marqueeAction.TryExecute());
 
         Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+        Assert.Equal(NodeCanvasWhiteboardDrawingMode.None, canvas.WhiteboardDrawingMode);
     }
 
     [AvaloniaFact]
@@ -161,6 +170,8 @@ public sealed class GraphEditorActionContributionContractTests
 
         Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
         Assert.Equal(NodeCanvasWhiteboardDrawingMode.Freehand, canvas.WhiteboardDrawingMode);
+
+        canvas.SelectionMode = NodeCanvasSelectionMode.Lasso;
 
         Assert.True(rectangleAction.TryExecute());
 
