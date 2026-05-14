@@ -1747,6 +1747,55 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase556WhiteboardPersistenceDeferredDecisionInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+        var englishCookbook = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chineseCookbook = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+        var englishInventory = ReadRepoFile("docs/en/public-api-inventory.md");
+        var chineseInventory = ReadRepoFile("docs/zh-CN/public-api-inventory.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 556", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #230", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-bck", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard primitive persistence implementation decision", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("DeferredUntilSeparateAnnotationStoreContract", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphWhiteboardPrimitivePersistenceOutcome", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphWhiteboardPrimitivePersistenceBoundary", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphDocumentCompatibility", contents, StringComparison.Ordinal);
+            Assert.Contains("WorkspacePersistence", contents, StringComparison.Ordinal);
+            Assert.Contains("ClipboardFragment", contents, StringComparison.Ordinal);
+            Assert.Contains("ScreenshotArtifact", contents, StringComparison.Ordinal);
+            Assert.Contains("SceneExportArtifact", contents, StringComparison.Ordinal);
+            Assert.Contains("no GraphDocument schema change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no schema version bump", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no workspace persistence behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no saved whiteboard primitive state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { englishCookbook, chineseCookbook, englishInventory, chineseInventory })
+        {
+            Assert.Contains("GraphWhiteboardPrimitivePersistenceOutcome", contents, StringComparison.Ordinal);
+            Assert.Contains("DeferredUntilSeparateAnnotationStoreContract", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphDocumentCompatibility", contents, StringComparison.Ordinal);
+            Assert.Contains("WorkspacePersistence", contents, StringComparison.Ordinal);
+            Assert.Contains("ClipboardFragment", contents, StringComparison.Ordinal);
+            Assert.Contains("ScreenshotArtifact", contents, StringComparison.Ordinal);
+            Assert.Contains("SceneExportArtifact", contents, StringComparison.Ordinal);
+            Assert.Contains("no saved whiteboard primitive state", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertPostPhase551Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase551Queue(ExtractIssueWaveTable(chineseParity));
+        Assert.Contains("Phase 556 records the whiteboard primitive persistence deferred decision", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 556 记录 whiteboard primitive persistence deferred decision", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
