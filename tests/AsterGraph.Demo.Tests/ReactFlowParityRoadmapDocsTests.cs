@@ -1677,7 +1677,6 @@ public sealed class ReactFlowParityRoadmapDocsTests
             Assert.Contains("shell-cookbook-whiteboard-authoring-cookbook-route", contents, StringComparison.Ordinal);
             Assert.Contains("no new core model design", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("no pointer coordinator redesign", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("no eraser behavior", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("no persisted whiteboard primitive", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("no GraphDocument schema", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("no renderer rewrite", contents, StringComparison.OrdinalIgnoreCase);
@@ -1698,6 +1697,53 @@ public sealed class ReactFlowParityRoadmapDocsTests
         AssertPostPhase551Queue(ExtractIssueWaveTable(chineseParity));
         Assert.Contains("Phase 554 records the whiteboard authoring toolbar and Cookbook UX route", englishParity, StringComparison.Ordinal);
         Assert.Contains("Phase 554 记录 whiteboard authoring toolbar and Cookbook UX route", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParityRoadmapDocs_RecordPhase555WhiteboardPrimitiveEraserBehaviorRouteInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+        var englishCookbook = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chineseCookbook = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+        var englishInventory = ReadRepoFile("docs/en/public-api-inventory.md");
+        var chineseInventory = ReadRepoFile("docs/zh-CN/public-api-inventory.md");
+        var englishRecipe = ReadRepoFile("docs/en/authoring-surface-recipe.md");
+        var chineseRecipe = ReadRepoFile("docs/zh-CN/authoring-surface-recipe.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 555", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #229", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-71c", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard primitive eraser behavior route", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("NodeCanvasWhiteboardDrawingMode.Eraser", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard-drawing.eraser", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_WhiteboardEraserButton", contents, StringComparison.Ordinal);
+            Assert.Contains("TryEraseWhiteboardPrimitive_RemovesTopmostHitPrimitiveWithoutClearingOthers", contents, StringComparison.Ordinal);
+            Assert.Contains("HandlePressed_WithWhiteboardEraserMode_RemovesHitPrimitiveWithoutDeletingGraphSelection", contents, StringComparison.Ordinal);
+            Assert.Contains("selection.delete", contents, StringComparison.Ordinal);
+            Assert.Contains("graph-selection delete remains separate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no broad eraser cursor redesign", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no persisted whiteboard primitive state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no GraphDocument schema", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer rewrite", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { englishCookbook, chineseCookbook, englishInventory, chineseInventory, englishRecipe, chineseRecipe })
+        {
+            Assert.Contains("NodeCanvasWhiteboardDrawingMode.Eraser", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard-drawing.eraser", contents, StringComparison.Ordinal);
+            Assert.Contains("PART_WhiteboardEraserButton", contents, StringComparison.Ordinal);
+            Assert.Contains("selection.delete", contents, StringComparison.Ordinal);
+            Assert.Contains("no runtime command id", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        AssertPostPhase551Queue(ExtractIssueWaveTable(englishParity));
+        AssertPostPhase551Queue(ExtractIssueWaveTable(chineseParity));
+        Assert.Contains("Phase 555 records the whiteboard primitive eraser behavior route", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 555 记录 whiteboard primitive eraser behavior route", chineseParity, StringComparison.Ordinal);
     }
 
     [Fact]

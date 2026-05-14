@@ -218,6 +218,76 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
     }
 
     [Fact]
+    public void HandlePressed_WithWhiteboardEraserMode_RemovesHitPrimitiveWithoutDeletingGraphSelection()
+    {
+        var editor = CreateEditor();
+        var selectedNodeId = editor.Nodes[0].Id;
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var initialNodeCount = editor.Nodes.Count;
+        var host = new TestPointerInteractionHost(editor)
+        {
+            WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Rectangle,
+        };
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(40, 40),
+            isLeftButtonPressed: true,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.None);
+        coordinator.HandleMoved(new Point(120, 100), selectionDragThreshold: 6);
+        coordinator.HandleReleased(new Point(120, 100));
+        var primitive = Assert.Single(host.InteractionSession.WhiteboardPrimitives);
+
+        host.WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Eraser;
+        var result = coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(80, 60),
+            isLeftButtonPressed: true,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.None);
+
+        Assert.True(result.Handled);
+        Assert.True(result.CapturePointer);
+        Assert.Empty(host.InteractionSession.WhiteboardPrimitives);
+        Assert.DoesNotContain(host.InteractionSession.WhiteboardPrimitives, candidate => candidate.Id == primitive.Id);
+        Assert.Equal(initialNodeCount, editor.Nodes.Count);
+        Assert.Contains(editor.SelectedNodes, node => node.Id == selectedNodeId);
+        Assert.Equal(0, host.UpdateMarqueeSelectionCalls);
+        Assert.Equal(0, host.UpdateLassoSelectionCalls);
+    }
+
+    [Fact]
+    public void HandlePressed_WithWhiteboardEraserModeAndNoHit_HandlesWithoutStartingGraphSelection()
+    {
+        var editor = CreateEditor();
+        var selectedNodeId = editor.Nodes[0].Id;
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var initialNodeCount = editor.Nodes.Count;
+        var host = new TestPointerInteractionHost(editor)
+        {
+            WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Eraser,
+        };
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var result = coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(800, 600),
+            isLeftButtonPressed: true,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.None);
+
+        Assert.True(result.Handled);
+        Assert.True(result.CapturePointer);
+        Assert.Empty(host.InteractionSession.WhiteboardPrimitives);
+        Assert.Equal(initialNodeCount, editor.Nodes.Count);
+        Assert.Contains(editor.SelectedNodes, node => node.Id == selectedNodeId);
+        Assert.Equal(0, host.UpdateMarqueeSelectionCalls);
+        Assert.Equal(0, host.UpdateLassoSelectionCalls);
+    }
+
+    [Fact]
     public void HandlePressed_WithWhiteboardModeAndAltLeftDragPanning_StartsPanningInsteadOfDrawing()
     {
         var editor = CreateEditor();
@@ -845,7 +915,7 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
 
         public NodeCanvasSelectionGestureKind SelectionGestureKind { get; init; } = NodeCanvasSelectionGestureKind.Marquee;
 
-        public NodeCanvasWhiteboardDrawingMode WhiteboardDrawingMode { get; init; } = NodeCanvasWhiteboardDrawingMode.None;
+        public NodeCanvasWhiteboardDrawingMode WhiteboardDrawingMode { get; set; } = NodeCanvasWhiteboardDrawingMode.None;
 
         public NodeCanvasInteractionSession InteractionSession { get; } = new();
 

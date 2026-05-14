@@ -179,6 +179,35 @@ public sealed class NodeCanvasInteractionSessionTests
     }
 
     [Fact]
+    public void TryEraseWhiteboardPrimitive_RemovesTopmostHitPrimitiveWithoutClearingOthers()
+    {
+        var session = new NodeCanvasInteractionSession();
+
+        session.BeginWhiteboardPrimitiveDrawing(
+            GraphWhiteboardPrimitiveKind.Rectangle,
+            new Point(10, 20),
+            new GraphPoint(10, 20));
+        var lower = session.CommitWhiteboardPrimitiveDrawing(new Point(90, 68), new GraphPoint(90, 68));
+        Assert.NotNull(lower);
+
+        session.BeginWhiteboardPrimitiveDrawing(
+            GraphWhiteboardPrimitiveKind.Rectangle,
+            new Point(24, 28),
+            new GraphPoint(24, 28));
+        var upper = session.CommitWhiteboardPrimitiveDrawing(new Point(60, 52), new GraphPoint(60, 52));
+        Assert.NotNull(upper);
+
+        var erased = session.TryEraseWhiteboardPrimitive(new GraphPoint(30, 34));
+
+        Assert.True(erased);
+        Assert.Equal([lower], session.WhiteboardPrimitives);
+        Assert.Null(session.ActiveWhiteboardPrimitive);
+        Assert.Null(session.WhiteboardPrimitiveGesture);
+        Assert.False(session.TryEraseWhiteboardPrimitive(new GraphPoint(500, 500)));
+        Assert.Equal([lower], session.WhiteboardPrimitives);
+    }
+
+    [Fact]
     public void BeginPanning_ClearsOtherInteractionModes()
     {
         var session = new NodeCanvasInteractionSession();

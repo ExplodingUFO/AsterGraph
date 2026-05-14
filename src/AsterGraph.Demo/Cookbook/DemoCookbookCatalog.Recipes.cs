@@ -1451,7 +1451,7 @@ public static partial class DemoCookbookCatalog
             "whiteboard-authoring-cookbook-route",
             DemoCookbookRecipeCategory.Authoring,
             "Whiteboard authoring toolbar and Cookbook UX route",
-            "Expose rectangle/freehand whiteboard drawing actions in the hosted authoring toolbar and capture the bounded Cookbook UX route.",
+            "Expose rectangle/freehand whiteboard drawing actions and the bounded primitive eraser in the hosted authoring toolbar.",
             [
                 new DemoCookbookAnchor(
                     "Whiteboard drawing action factory",
@@ -1465,6 +1465,10 @@ public static partial class DemoCookbookCatalog
                     "Hosted freehand drawing button",
                     "src/AsterGraph.Avalonia/Controls/GraphEditorView.AuthoringTools.cs",
                     "PART_WhiteboardDrawingFreehandButton"),
+                new DemoCookbookAnchor(
+                    "Hosted whiteboard eraser button",
+                    "src/AsterGraph.Avalonia/Controls/GraphEditorView.AuthoringTools.cs",
+                    "PART_WhiteboardEraserButton"),
                 new DemoCookbookAnchor(
                     "Canvas drawing activation property",
                     "src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs",
@@ -1501,7 +1505,7 @@ public static partial class DemoCookbookCatalog
             [
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.HostCodeExample,
-                    "Hosts use CreateWhiteboardDrawingToolActions to surface rectangle/freehand activation without runtime command ids.",
+                    "Hosts use CreateWhiteboardDrawingToolActions to surface rectangle/freehand/eraser activation without runtime command ids.",
                     "CreateWhiteboardDrawingToolActions"),
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.GraphOperations,
@@ -1509,17 +1513,17 @@ public static partial class DemoCookbookCatalog
                     "selection-marquee-workbench"),
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.ValidationRuntimeOverlay,
-                    "The shell visual gate keeps the node canvas, Cookbook route panel, and whiteboard drawing buttons visible together.",
+                    "The shell visual gate keeps the node canvas, Cookbook route panel, and whiteboard drawing/eraser buttons visible together.",
                     "shell-cookbook-whiteboard-authoring-cookbook-route"),
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.SupportEvidence,
-                    "The proof marker binds hosted toolbar projection, route metadata, and non-overlap evidence to Phase 554.",
+                    "The proof marker binds hosted toolbar projection, route metadata, and non-overlap evidence to the Phase 554/555 whiteboard authoring route.",
                     "WHITEBOARD_AUTHORING_COOKBOOK_UX_OK"),
             ],
             [
                 new DemoCookbookInteractionFacet(
                     DemoCookbookInteractionKind.Selection,
-                    "Whiteboard activation stays beside existing pointer-mode controls and writes only the canvas whiteboard drawing mode property.",
+                    "Whiteboard activation stays beside existing pointer-mode controls, writes only the canvas whiteboard drawing mode property, and keeps erasing separate from graph selection deletion.",
                     "WhiteboardDrawingModeProperty"),
                 new DemoCookbookInteractionFacet(
                     DemoCookbookInteractionKind.LayoutReadability,
@@ -1531,7 +1535,7 @@ public static partial class DemoCookbookCatalog
                     "cookbook-whiteboard-authoring-cookbook-route"),
                 new DemoCookbookInteractionFacet(
                     DemoCookbookInteractionKind.ValidationRuntimeFeedback,
-                    "The editor proof clicks rectangle/freehand buttons and verifies the canvas drawing mode transition.",
+                    "The editor proof clicks rectangle/freehand/eraser buttons and verifies the canvas drawing mode transition.",
                     "AuthoringToolsChrome_ProjectsWhiteboardDrawingActionsThroughNodeCanvasDrawingMode"),
             ],
             [
@@ -1540,10 +1544,10 @@ public static partial class DemoCookbookCatalog
                 "AuthoringToolsChrome_ProjectsWhiteboardDrawingActionsThroughNodeCanvasDrawingMode",
             ],
             new DemoCookbookRouteClarity(
-                "Whiteboard authoring toolbar and Cookbook UX route: hosted Authoring Tools projects CreateWhiteboardDrawingToolActions into PART_WhiteboardDrawingRectangleButton and PART_WhiteboardDrawingFreehandButton, then captures cookbook-whiteboard-authoring-cookbook-route on selection-marquee-workbench.",
-                "Supported seams live in `AsterGraph.Avalonia` action factory, `GraphEditorView` hosted chrome, and `WhiteboardDrawingModeProperty`; `AsterGraph.Editor` and `AsterGraph.Core` ownership stays unchanged.",
-                "Demo cookbook supplies route metadata and shell part proof only; no new core model design, no pointer coordinator redesign, no eraser behavior, no persisted whiteboard primitive state, no GraphDocument schema changes, no renderer rewrite, and no full whiteboard parity."),
-            "Whiteboard authoring UX coverage is limited to hosted action projection, visible toolbar parts, route/shell metadata, and non-overlap proof; it adds no new core model design, no pointer coordinator redesign, no eraser behavior, no persisted whiteboard primitive state, no GraphDocument schema changes, no renderer rewrite, and no full whiteboard parity.",
+                "Whiteboard authoring toolbar and Cookbook UX route: hosted Authoring Tools projects CreateWhiteboardDrawingToolActions into PART_WhiteboardDrawingRectangleButton, PART_WhiteboardDrawingFreehandButton, and PART_WhiteboardEraserButton, then captures cookbook-whiteboard-authoring-cookbook-route on selection-marquee-workbench.",
+                "Supported seams live in `AsterGraph.Avalonia` action factory, `GraphEditorView` hosted chrome, `WhiteboardDrawingModeProperty`, and the existing internal whiteboard primitive interaction path; `AsterGraph.Editor` and `AsterGraph.Core` ownership stays unchanged.",
+                "Demo cookbook supplies route metadata and shell part proof only; primitive erasing remains bounded to transient whiteboard primitives, with no pointer coordinator redesign, no broad eraser cursor redesign, no persisted whiteboard primitive state, no GraphDocument schema changes, no renderer rewrite, and no full whiteboard parity."),
+            "Whiteboard authoring UX coverage is limited to hosted action projection, visible toolbar parts, route/shell metadata, non-overlap proof, and bounded primitive erasing; it adds no new core model design, no pointer coordinator redesign, no broad eraser cursor redesign, no persisted whiteboard primitive state, no GraphDocument schema changes, no renderer rewrite, and no full whiteboard parity.",
             CodeSample: """
             // Project the hosted drawing actions beside the pointer-mode controls.
             var actions = AsterGraphAuthoringToolActionFactory.CreateWhiteboardDrawingToolActions(canvas);
@@ -1551,8 +1555,9 @@ public static partial class DemoCookbookCatalog
             // The stock hosted toolbar exposes these as visible proof parts.
             const string rectangleButton = "PART_WhiteboardDrawingRectangleButton";
             const string freehandButton = "PART_WhiteboardDrawingFreehandButton";
+            const string eraserButton = "PART_WhiteboardEraserButton";
 
-            // Cookbook proof uses selection-marquee-workbench and shell metadata only.
+            // Eraser mode removes transient whiteboard primitives without invoking selection.delete.
             const string routeId = "cookbook-whiteboard-authoring-cookbook-route";
             const string shellStateId = "shell-cookbook-whiteboard-authoring-cookbook-route";
             """

@@ -151,6 +151,7 @@
       "PART_NodeCanvas",
       "PART_WhiteboardDrawingRectangleButton",
       "PART_WhiteboardDrawingFreehandButton",
+      "PART_WhiteboardEraserButton",
       "PART_MainGraphEditorHost",
       "PART_CookbookWorkspaceRecipeContentPanel"
     ],

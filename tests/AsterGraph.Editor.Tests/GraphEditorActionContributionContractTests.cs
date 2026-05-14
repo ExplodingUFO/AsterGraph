@@ -134,7 +134,7 @@ public sealed class GraphEditorActionContributionContractTests
         Assert.Equal(NodeCanvasSelectionMode.Lasso, canvas.SelectionMode);
         Assert.Equal(NodeCanvasWhiteboardDrawingMode.None, canvas.WhiteboardDrawingMode);
 
-        canvas.WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Freehand;
+        canvas.WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Eraser;
 
         Assert.True(lassoAction.TryExecute());
 
@@ -156,13 +156,17 @@ public sealed class GraphEditorActionContributionContractTests
 
         var rectangleAction = Assert.Single(actions, action => action.Id == "whiteboard-drawing.rectangle");
         var freehandAction = Assert.Single(actions, action => action.Id == "whiteboard-drawing.freehand");
+        var eraserAction = Assert.Single(actions, action => action.Id == "whiteboard-drawing.eraser");
 
         Assert.Equal("Rectangle Drawing Tool", rectangleAction.Title);
         Assert.Equal("Freehand Drawing Tool", freehandAction.Title);
+        Assert.Equal("Whiteboard Eraser Tool", eraserAction.Title);
         Assert.Equal(GraphEditorCommandSourceKind.Host, rectangleAction.CommandSource);
         Assert.Equal(GraphEditorCommandSourceKind.Host, freehandAction.CommandSource);
+        Assert.Equal(GraphEditorCommandSourceKind.Host, eraserAction.CommandSource);
         Assert.Null(rectangleAction.CommandId);
         Assert.Null(freehandAction.CommandId);
+        Assert.Null(eraserAction.CommandId);
         Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
         Assert.Equal(NodeCanvasWhiteboardDrawingMode.None, canvas.WhiteboardDrawingMode);
 
@@ -177,6 +181,13 @@ public sealed class GraphEditorActionContributionContractTests
 
         Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
         Assert.Equal(NodeCanvasWhiteboardDrawingMode.Rectangle, canvas.WhiteboardDrawingMode);
+
+        canvas.SelectionMode = NodeCanvasSelectionMode.Lasso;
+
+        Assert.True(eraserAction.TryExecute());
+
+        Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
+        Assert.Equal(NodeCanvasWhiteboardDrawingMode.Eraser, canvas.WhiteboardDrawingMode);
     }
 
     [Fact]
@@ -190,6 +201,7 @@ public sealed class GraphEditorActionContributionContractTests
 
         Assert.DoesNotContain("whiteboard-drawing.rectangle", commandIds);
         Assert.DoesNotContain("whiteboard-drawing.freehand", commandIds);
+        Assert.DoesNotContain("whiteboard-drawing.eraser", commandIds);
     }
 
     private static void AssertPlacement(

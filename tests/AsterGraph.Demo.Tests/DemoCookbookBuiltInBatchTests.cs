@@ -76,6 +76,7 @@ public sealed class DemoCookbookBuiltInBatchTests
         Assert.Contains("WHITEBOARD_AUTHORING_COOKBOOK_UX_OK", recipe.ProofMarkers);
         Assert.Contains("PART_WhiteboardDrawingRectangleButton", recipe.RouteClarity.SupportedRoute, StringComparison.Ordinal);
         Assert.Contains("PART_WhiteboardDrawingFreehandButton", recipe.RouteClarity.SupportedRoute, StringComparison.Ordinal);
+        Assert.Contains("PART_WhiteboardEraserButton", recipe.RouteClarity.SupportedRoute, StringComparison.Ordinal);
         Assert.DoesNotContain("GraphDocument schema", recipe.Summary, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("full React Flow whiteboard parity", recipe.RouteClarity.SupportedRoute, StringComparison.OrdinalIgnoreCase);
     }
