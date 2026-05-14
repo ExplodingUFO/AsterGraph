@@ -190,6 +190,12 @@ internal sealed record GraphWhiteboardAnnotationRecord
         this.Identity = Identity ?? throw new ArgumentNullException(nameof(Identity));
         this.PrimitiveReference = PrimitiveReference ?? throw new ArgumentNullException(nameof(PrimitiveReference));
         this.Payload = Payload ?? throw new ArgumentNullException(nameof(Payload));
+        if (this.PrimitiveReference.Kind != this.Payload.Kind)
+        {
+            throw new ArgumentException(
+                "Primitive reference kind must match payload kind.",
+                nameof(PrimitiveReference));
+        }
     }
 
     public GraphWhiteboardAnnotationIdentity Identity { get; init; }

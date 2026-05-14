@@ -83,6 +83,38 @@ public sealed class WhiteboardAnnotationStoreContractTests
     }
 
     [Fact]
+    public void AnnotationRecord_RejectsPrimitiveReferencePayloadKindMismatch()
+    {
+        var payload = new GraphWhiteboardAnnotationPrimitivePayload(
+            GraphWhiteboardPrimitiveKind.Freehand,
+            new GraphWhiteboardPrimitiveGeometry(
+                new GraphPoint(12d, 18d),
+                new GraphSize(120d, 64d),
+                [
+                    new GraphPoint(12d, 18d),
+                    new GraphPoint(24d, 32d),
+                ]),
+            new GraphWhiteboardPrimitiveStyle(
+                FillHex: "#6AD5C4",
+                StrokeHex: "#1A1F2E",
+                StrokeThickness: 2.5d,
+                Opacity: 0.72d),
+            ZIndex: 12,
+            new GraphWhiteboardPrimitiveEditLifecycle(
+                GraphWhiteboardPrimitiveEditState.Committed,
+                ActiveHandleKey: "freehand-finalized"));
+
+        var exception = Assert.Throws<ArgumentException>(() =>
+            new GraphWhiteboardAnnotationRecord(
+                new GraphWhiteboardAnnotationIdentity("annotation-001"),
+                new GraphWhiteboardPrimitiveReference("whiteboard-primitive-001", GraphWhiteboardPrimitiveKind.Rectangle),
+                payload));
+
+        Assert.Equal("PrimitiveReference", exception.ParamName);
+        Assert.Contains("must match payload kind", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void AnnotationStoreContract_StaysInternalAndDoesNotChangeGraphPersistenceRendererPointerOrArtifacts()
     {
         Assert.False(typeof(GraphWhiteboardAnnotationStoreContract).IsPublic);
