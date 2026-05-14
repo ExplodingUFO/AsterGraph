@@ -8,7 +8,7 @@
 - `GraphWorkspaceService` 的实现直接调用：
   - `GraphDocumentSerializer.Save(document, WorkspacePath)`
   - `GraphDocumentSerializer.Load(WorkspacePath)`
-- `GraphDocumentSerializer` 的写入 payload 的版本为 `SchemaVersion = 5`，由 `GraphDocumentCompatibility.CurrentSchemaVersion` 固定。
+- `GraphDocumentSerializer` 的写入 payload 的版本为 `SchemaVersion = 6`，由 `GraphDocumentCompatibility.CurrentSchemaVersion` 固定。
 
 ## 工作区文档写入 envelope（canonical）
 
@@ -24,10 +24,10 @@
 
 - 读取时：
   - 若 JSON 中没有 `SchemaVersion`，按旧版无版本 payload 兼容路径反序列化。
-  - 若有 `SchemaVersion`，只接受 `1` 到 `5` 的版本号。
-    - `5`：按当前 schema payload 解析。
-    - `1`-`4`：按旧版 schema payload 解析并归一化。
-  - 版本号 `< 1` 或 `> 5` 时抛出 `InvalidOperationException`，即视为不支持。
+  - 若有 `SchemaVersion`，只接受 `1` 到 `6` 的版本号。
+    - `6`：按当前 schema payload 解析。
+    - `1`-`5`：按旧版 schema payload 解析并归一化。
+  - 版本号 `< 1` 或 `> 6` 时抛出 `InvalidOperationException`，即视为不支持。
 
 ## 片段/剪贴板序列化边界（独立于工作区）
 
