@@ -134,7 +134,7 @@ public sealed class GraphEditorActionContributionContractTests
         Assert.Equal(NodeCanvasSelectionMode.Lasso, canvas.SelectionMode);
         Assert.Equal(NodeCanvasWhiteboardDrawingMode.None, canvas.WhiteboardDrawingMode);
 
-        canvas.WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Freehand;
+        canvas.WhiteboardDrawingMode = NodeCanvasWhiteboardDrawingMode.Eraser;
 
         Assert.True(lassoAction.TryExecute());
 
@@ -181,6 +181,8 @@ public sealed class GraphEditorActionContributionContractTests
 
         Assert.Equal(NodeCanvasSelectionMode.Marquee, canvas.SelectionMode);
         Assert.Equal(NodeCanvasWhiteboardDrawingMode.Rectangle, canvas.WhiteboardDrawingMode);
+
+        canvas.SelectionMode = NodeCanvasSelectionMode.Lasso;
 
         Assert.True(eraserAction.TryExecute());
 
