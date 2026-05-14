@@ -37,6 +37,10 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("[Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)", readme, StringComparison.Ordinal);
         Assert.Contains("[Stabilization Support Matrix](./stabilization-support-matrix.md)", quickStart, StringComparison.Ordinal);
         Assert.Contains("[Stabilization Support Matrix](./stabilization-support-matrix.md)", projectStatus, StringComparison.Ordinal);
+        Assert.Contains(
+            "- frozen support boundary: [Stabilization Support Matrix](./stabilization-support-matrix.md)",
+            ExtractSection(projectStatus, "## Current Status", "## What Is Already Stable Enough To Evaluate"),
+            StringComparison.Ordinal);
         Assert.Contains("[Stabilization Support Matrix](./stabilization-support-matrix.md)", versioning, StringComparison.Ordinal);
 
         foreach (var contents in new[] { readme, quickStart, projectStatus, versioning, supportMatrix, architecture, adoptionFeedback, pluginRecipe })
@@ -80,6 +84,10 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("[稳定化支持矩阵](./docs/zh-CN/stabilization-support-matrix.md)", readme, StringComparison.Ordinal);
         Assert.Contains("[稳定化支持矩阵](./stabilization-support-matrix.md)", quickStart, StringComparison.Ordinal);
         Assert.Contains("[稳定化支持矩阵](./stabilization-support-matrix.md)", projectStatus, StringComparison.Ordinal);
+        Assert.Contains(
+            "- 冻结的支持边界：[稳定化支持矩阵](./stabilization-support-matrix.md)",
+            ExtractSection(projectStatus, "## 当前状态", "## 已经足够对外评估的部分"),
+            StringComparison.Ordinal);
         Assert.Contains("[稳定化支持矩阵](./stabilization-support-matrix.md)", versioning, StringComparison.Ordinal);
 
         foreach (var contents in new[] { readme, quickStart, projectStatus, versioning, supportMatrix, architecture, adoptionFeedback, pluginRecipe })
@@ -172,6 +180,17 @@ public sealed class StabilizationSupportDocsTests
         Assert.True(textIndex >= 0, $"Expected to find '{requiredText}'.");
         Assert.True(headingIndex >= 0, $"Expected to find '{requiredHeading}'.");
         Assert.True(textIndex < headingIndex, $"Expected '{requiredText}' to appear before '{requiredHeading}'.");
+    }
+
+    private static string ExtractSection(string contents, string heading, string nextHeading)
+    {
+        var headingIndex = contents.IndexOf(heading, StringComparison.Ordinal);
+        var nextHeadingIndex = contents.IndexOf(nextHeading, StringComparison.Ordinal);
+
+        Assert.True(headingIndex >= 0, $"Expected to find '{heading}'.");
+        Assert.True(nextHeadingIndex > headingIndex, $"Expected to find '{nextHeading}' after '{heading}'.");
+
+        return contents[headingIndex..nextHeadingIndex];
     }
 
     private static bool HasLineWithAll(string contents, params string[] requiredTerms)
