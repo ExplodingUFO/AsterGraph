@@ -2199,6 +2199,80 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase565PostAnnotationProofQueueRefreshInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 565", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #253", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-wml", contents, StringComparison.Ordinal);
+            Assert.Contains("WHITEBOARD_ANNOTATION_POST_PROOF_IMPLEMENTATION_QUEUE_REFRESH", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 566", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 567", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 568", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 569", contents, StringComparison.Ordinal);
+            Assert.Contains("Phase 570", contents, StringComparison.Ordinal);
+            Assert.Contains("sidecar serializer contract", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("workspace sidecar save/load integration", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("clipboard/export eligibility proof", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Cookbook screenshot implementation gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("public API readiness gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no production annotation persistence", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no file/database I/O", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no GraphDocument schema change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no schema version bump", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no workspace save/load behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no clipboard/export serialization behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no new Cookbook route", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer or pointer behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no toolbar or eraser change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API exposure", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no saved whiteboard primitive state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("whiteboard annotations are persisted", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("workspace save/load now writes annotations", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("public annotation API is exposed", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var table in new[] { ExtractIssueWaveTable(englishParity), ExtractIssueWaveTable(chineseParity) })
+        {
+            Assert.Contains("| #253 | `avalonia-node-map-wml` | Phase 565: refresh post-annotation proof implementation queue", table, StringComparison.Ordinal);
+            Assert.Contains("| #254 | `avalonia-node-map-47v` | Phase 566: whiteboard annotation sidecar serializer contract", table, StringComparison.Ordinal);
+            Assert.Contains("| #255 | `avalonia-node-map-40h` | Phase 567: whiteboard annotation workspace sidecar save/load integration", table, StringComparison.Ordinal);
+            Assert.Contains("| #256 | `avalonia-node-map-ctd` | Phase 568: whiteboard annotation clipboard/export eligibility proof", table, StringComparison.Ordinal);
+            Assert.Contains("| #257 | `avalonia-node-map-79a` | Phase 569: whiteboard annotation Cookbook screenshot implementation gate", table, StringComparison.Ordinal);
+            Assert.Contains("| #258 | `avalonia-node-map-k0d` | Phase 570: whiteboard annotation public API readiness gate", table, StringComparison.Ordinal);
+            Assert.Contains("Depends on Phase 564", table, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("docs/test queue refresh only", table, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Depends on Phase 565", table, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("follow Phase 566", table, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 565", table, StringComparison.Ordinal);
+            Assert.DoesNotContain("| TBD | TBD | Phase 566", table, StringComparison.Ordinal);
+            Assert.DoesNotContain("| TBD | TBD | Phase 570", table, StringComparison.Ordinal);
+            Assert.DoesNotContain("production annotation persistence is implemented", table, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("public API exposure is complete", table, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var plan in new[] { ExtractRecommendedWorktreePlan(englishParity), ExtractRecommendedWorktreePlan(chineseParity) })
+        {
+            Assert.Contains("docs/phase-565-post-annotation-proof-queue-refresh", plan, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-wml", plan, StringComparison.Ordinal);
+            Assert.Contains("feature/phase-566-whiteboard-annotation-sidecar-serializer", plan, StringComparison.Ordinal);
+            Assert.Contains("feature/phase-567-whiteboard-annotation-workspace-sidecar", plan, StringComparison.Ordinal);
+            Assert.Contains("docs/phase-568-whiteboard-annotation-clipboard-export-eligibility", plan, StringComparison.Ordinal);
+            Assert.Contains("visual/phase-569-whiteboard-annotation-cookbook-screenshot-gate", plan, StringComparison.Ordinal);
+            Assert.Contains("docs/phase-570-whiteboard-annotation-public-api-readiness", plan, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Phase 565 is GitHub #253 / `avalonia-node-map-wml`", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 565 是 GitHub #253 / `avalonia-node-map-wml`", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
