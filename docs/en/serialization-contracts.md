@@ -11,10 +11,10 @@ This is the pre-1.0 serialization contract. It is explicit and intentionally nar
   - `Description`
   - `RootGraphId`
   - `GraphScopes`
-- Current workspace/document schema version is `5`.
+- Current workspace/document schema version is `6`.
 - Read behavior accepts:
   - unversioned legacy payloads (best-effort compatibility path), and
-  - `SchemaVersion` values from `1` through `5`.
+  - `SchemaVersion` values from `1` through `6`.
 - Read behavior rejects unknown/future schema versions.
 
 ## Fragment and clipboard payloads
