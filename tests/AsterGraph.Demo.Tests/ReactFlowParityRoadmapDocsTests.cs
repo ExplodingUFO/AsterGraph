@@ -1796,6 +1796,59 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase557WhiteboardAnnotationStoreContractGateInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 557", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #237", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-zfe", contents, StringComparison.Ordinal);
+            Assert.Contains("whiteboard annotation store contract gate", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("WHITEBOARD_ANNOTATION_STORE_CONTRACT_GATE", contents, StringComparison.Ordinal);
+            Assert.Contains("separate annotation-store contract", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("store ownership", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("store lifetime", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("annotation identity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("primitive reference", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("style/geometry serialization", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("edit lifecycle", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("migration metadata", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("read/write API boundary", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("GraphDocumentCompatibility", contents, StringComparison.Ordinal);
+            Assert.Contains("WorkspacePersistence", contents, StringComparison.Ordinal);
+            Assert.Contains("ClipboardFragment", contents, StringComparison.Ordinal);
+            Assert.Contains("SceneExportArtifact", contents, StringComparison.Ordinal);
+            Assert.Contains("ScreenshotArtifact", contents, StringComparison.Ordinal);
+            Assert.Contains("no production annotation store", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no GraphDocument schema change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no schema version bump", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no workspace persistence behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no clipboard/export serialization change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no saved whiteboard primitive state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("whiteboard annotations are persisted", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("saved whiteboard primitive state is implemented", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        var englishIssueWave = ExtractIssueWaveTable(englishParity);
+        var chineseIssueWave = ExtractIssueWaveTable(chineseParity);
+        foreach (var table in new[] { englishIssueWave, chineseIssueWave })
+        {
+            Assert.Contains("| #237 | `avalonia-node-map-zfe` | Phase 557: whiteboard annotation store contract gate", table, StringComparison.Ordinal);
+            Assert.Contains("Depends on Phase 556", table, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no production annotation store", table, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 557", table, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Phase 557 records the whiteboard annotation store contract gate", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 557 记录 whiteboard annotation store contract gate", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
