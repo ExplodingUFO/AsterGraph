@@ -237,6 +237,29 @@ internal interface IGraphWhiteboardAnnotationStoreBoundary
     void WriteSnapshot(GraphWhiteboardAnnotationStoreSnapshot snapshot);
 }
 
+internal sealed class InMemoryGraphWhiteboardAnnotationStoreBoundary : IGraphWhiteboardAnnotationStoreBoundary
+{
+    private const string DefaultStoreId = "whiteboard-annotation-store-session";
+    private GraphWhiteboardAnnotationStoreSnapshot _snapshot = CreateEmptySnapshot();
+
+    public GraphWhiteboardAnnotationStoreSnapshot ReadSnapshot()
+        => CloneSnapshot(_snapshot);
+
+    public void WriteSnapshot(GraphWhiteboardAnnotationStoreSnapshot snapshot)
+        => _snapshot = CloneSnapshot(snapshot ?? throw new ArgumentNullException(nameof(snapshot)));
+
+    private static GraphWhiteboardAnnotationStoreSnapshot CreateEmptySnapshot()
+        => new(
+            new GraphWhiteboardAnnotationStoreMetadata(
+                DefaultStoreId,
+                GraphWhiteboardAnnotationStoreContract.Current.Owner,
+                GraphWhiteboardAnnotationStoreContract.Current.Lifetime,
+                GraphWhiteboardAnnotationMigrationMetadata.Current));
+
+    private static GraphWhiteboardAnnotationStoreSnapshot CloneSnapshot(GraphWhiteboardAnnotationStoreSnapshot snapshot)
+        => new(snapshot.Metadata, snapshot.Records);
+}
+
 internal enum GraphWhiteboardAnnotationStoreOwner
 {
     SeparateAnnotationSurface,
