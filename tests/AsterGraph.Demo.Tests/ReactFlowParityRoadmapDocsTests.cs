@@ -2150,6 +2150,55 @@ public sealed class ReactFlowParityRoadmapDocsTests
     }
 
     [Fact]
+    public void ParityRoadmapDocs_RecordPhase564MigrationCompatibilityProofInBothLocales()
+    {
+        var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
+        var chineseParity = ReadRepoFile("docs/zh-CN/phase-0-reactflow-parity-audit.md");
+
+        foreach (var contents in new[] { englishParity, chineseParity })
+        {
+            Assert.Contains("Phase 564", contents, StringComparison.Ordinal);
+            Assert.Contains("GitHub #246", contents, StringComparison.Ordinal);
+            Assert.Contains("avalonia-node-map-vyg", contents, StringComparison.Ordinal);
+            Assert.Contains("WHITEBOARD_ANNOTATION_MIGRATION_COMPATIBILITY_PROOF", contents, StringComparison.Ordinal);
+            Assert.Contains("annotation-store versions", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("primitive references", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("style/geometry payloads", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("migration metadata validation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("coverage required before persistence, clipboard/export, or screenshot proof expands", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("depends on Phase 560, Phase 561, and Phase 562", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no production migration implementation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no persisted annotation state", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no file/database I/O", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no GraphDocument schema change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no schema version bump", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no workspace persistence behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no clipboard/export serialization behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no screenshot manifest expansion", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no renderer or pointer behavior change", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no public API exposure", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("no full React Flow whiteboard parity", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("whiteboard annotation migration is implemented", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("GraphDocument schema now stores annotation migrations", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("workspace persistence now migrates whiteboard annotations", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var table in new[] { ExtractIssueWaveTable(englishParity), ExtractIssueWaveTable(chineseParity) })
+        {
+            Assert.Contains("| #246 | `avalonia-node-map-vyg` | Phase 564: whiteboard annotation migration and compatibility proof", table, StringComparison.Ordinal);
+            Assert.Contains("Depends on Phase 559 plus Phase 560, Phase 561, and Phase 562", table, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("migration/compatibility proof planning only", table, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("schema policy criteria", table, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("compatibility test plan", table, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("| TBD | TBD | Phase 564", table, StringComparison.Ordinal);
+            Assert.DoesNotContain("migration implementation is complete", table, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("Phase 564 records the whiteboard annotation migration and compatibility proof", englishParity, StringComparison.Ordinal);
+        Assert.Contains("Phase 564 记录 whiteboard annotation migration and compatibility proof", chineseParity, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParityRoadmapDocs_RecordPhase501PostPhase500QueueRefreshInBothLocales()
     {
         var englishParity = ReadRepoFile("docs/en/phase-0-reactflow-parity-audit.md");
