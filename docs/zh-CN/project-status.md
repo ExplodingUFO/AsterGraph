@@ -32,6 +32,7 @@
   - `AsterGraph.Core`
   - `AsterGraph.Editor`
   - `AsterGraph.Avalonia`
+- 冻结的支持边界：[稳定化支持矩阵](./stabilization-support-matrix.md)
 - 示例与验证工具：
   - `src/AsterGraph.Demo -- --proof`：最快的 runtime-only 第一跑样例
   - `templates/astergraph-avalonia`：shipped 的 Avalonia starter scaffold
